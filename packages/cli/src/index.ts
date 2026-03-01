@@ -9,7 +9,17 @@ import { registerSearchCommand } from './commands/search.js';
 import { registerInfoCommand } from './commands/info.js';
 import { registerListCommand } from './commands/list.js';
 import { registerInstallCommand } from './commands/install.js';
+import { registerUninstallCommand } from './commands/uninstall.js';
+import { registerUpdateCommand } from './commands/update.js';
 import { registerAgentsCommand } from './commands/agents.js';
+import { registerInitCommand } from './commands/init.js';
+import { registerTestCommand } from './commands/test.js';
+import { registerPackCommand } from './commands/pack.js';
+import { registerVersionCommand } from './commands/version.js';
+import { registerPublishCommand } from './commands/publish.js';
+import { registerYankCommand } from './commands/yank.js';
+import { registerDeprecateCommand } from './commands/deprecate.js';
+import { registerReportCommand } from './commands/report.js';
 
 const program = new Command();
 
@@ -39,20 +49,20 @@ registerListCommand(program);
 
 // -- Package management commands --
 registerInstallCommand(program);
+registerUninstallCommand(program);
+registerUpdateCommand(program);
 
-// -- Stub commands (not yet implemented) --
-program
-  .command('uninstall')
-  .description('Uninstall a skill')
-  .action(() => {
-    console.log('  uninstall: not yet implemented');
-  });
-program
-  .command('update')
-  .description('Update installed skills')
-  .action(() => {
-    console.log('  update: not yet implemented');
-  });
+// -- Authoring commands --
+registerInitCommand(program);
+registerTestCommand(program);
+registerPackCommand(program);
+registerVersionCommand(program);
+
+// -- Publishing commands --
+registerPublishCommand(program);
+registerYankCommand(program);
+registerDeprecateCommand(program);
+registerReportCommand(program);
 
 // -- Agent commands --
 registerAgentsCommand(program);

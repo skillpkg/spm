@@ -1,4 +1,4 @@
-import type { SearchParams, ResolveRequest, ApiError } from '@spm/shared';
+import type { SearchParams, ResolveRequest, ApiError, Manifest } from '@spm/shared';
 import { loadConfig } from './config.js';
 
 export class ApiClientError extends Error {
@@ -116,6 +116,35 @@ export interface ResolveResponse {
   }>;
 }
 
+export interface PublishResponse {
+  name: string;
+  version: string;
+  url: string;
+  trust_tier: string;
+  signed: boolean;
+}
+
+export interface ClassifyResponse {
+  detected_category: string;
+  confidence: number;
+}
+
+export interface YankResponse {
+  ok: boolean;
+  name: string;
+  version: string;
+}
+
+export interface UpdateSkillResponse {
+  ok: boolean;
+  name: string;
+}
+
+export interface ReportResponse {
+  ok: boolean;
+  report_id: string;
+}
+
 const isApiError = (body: unknown): body is ApiError => {
   return typeof body === 'object' && body !== null && 'error' in body && 'message' in body;
 };
@@ -228,6 +257,63 @@ export const createApiClient = (config?: ApiClientConfig) => {
 
       return res.arrayBuffer();
     },
+
+    // -- Publish --
+    publishSkill: async (sklBuffer: ArrayBuffer, manifest: Manifest): Promise<PublishResponse> => {
+      const url = `${registry}/skills`;
+      const formData = new FormData();
+      formData.append('package', new Blob([sklBuffer]), 'skill.skl');
+      formData.append('manifest', JSON.stringify(manifest));
+
+      const h: Record<string, string> = {
+        'User-Agent': 'spm-cli/0.0.1',
+      };
+      if (token) {
+        h['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: h,
+        body: formData,
+      });
+
+      if (!res.ok) {
+        let errorBody: unknown;
+        try {
+          errorBody = await res.json();
+        } catch {
+          errorBody = { error: 'unknown', message: res.statusText };
+        }
+
+        if (isApiError(errorBody)) {
+          throw new ApiClientError(res.status, errorBody);
+        }
+
+        throw new ApiClientError(res.status, {
+          error: 'unknown',
+          message: res.statusText,
+        });
+      }
+
+      return (await res.json()) as PublishResponse;
+    },
+
+    yankVersion: (name: string, version: string, reason?: string) =>
+      request<YankResponse>(
+        'DELETE',
+        `/skills/${encodeURIComponent(name)}/${encodeURIComponent(version)}`,
+        reason ? { reason } : undefined,
+      ),
+
+    updateSkill: (name: string, body: Record<string, unknown>) =>
+      request<UpdateSkillResponse>('PATCH', `/skills/${encodeURIComponent(name)}`, body),
+
+    classifySkill: (manifest: Record<string, unknown>) =>
+      request<ClassifyResponse>('POST', '/categories/classify', manifest),
+
+    reportSkill: (name: string, body: { reason: string; detail?: string }) =>
+      request<ReportResponse>('POST', `/skills/${encodeURIComponent(name)}/report`, body),
 
     // -- Resolution --
     resolve: (skills: ResolveRequest['skills'], platform?: string) =>
