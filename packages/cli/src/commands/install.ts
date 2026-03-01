@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import {
@@ -8,6 +8,7 @@ import {
   log,
   logVerbose,
   logJson,
+  logError,
   withSpinner,
   setOutputMode,
   getOutputMode,
@@ -24,6 +25,7 @@ import {
   getGlobalSkillsDir,
 } from '../services/skills-json.js';
 import { runPreflightChecks, ensureSpmDirs } from '../services/preflight.js';
+import { verifyPackage } from '../services/verifier.js';
 
 interface InstallOpts {
   global?: boolean;
@@ -184,6 +186,38 @@ const installNamed = async (names: string[], opts: InstallOpts): Promise<void> =
     const skillDir = await withSpinner(`Extracting ${skill.name}@${skill.version}...`, () =>
       extractSkill(sklPath, skill.name, skill.version),
     );
+
+    // Verify signature (if bundle exists alongside the .skl)
+    const bundlePath = path.join(path.dirname(sklPath), 'signature.sigstore');
+    try {
+      const bundleJson = await readFile(bundlePath, 'utf-8');
+      const verifyResult = await withSpinner(`Verifying ${skill.name}...`, () =>
+        verifyPackage(sklPath, bundleJson),
+      );
+
+      if (verifyResult.verified) {
+        log(
+          `  ${icons.success} Signed by ${c.trust(verifyResult.signerIdentity ?? 'unknown')} (Sigstore)`,
+        );
+      } else {
+        log(`  ${icons.error} ${c.err('Signature verification failed')}`);
+        if (verifyResult.error) {
+          logVerbose(`    ${verifyResult.error}`);
+        }
+        if (!opts.force) {
+          logError(
+            'Signature verification failed',
+            `The signature for ${skill.name}@${skill.version} could not be verified.`,
+            `Run with ${c.cmd('--force')} to install anyway.`,
+          );
+          process.exitCode = 1;
+          return;
+        }
+      }
+    } catch {
+      // No signature bundle — unsigned package
+      log(`  ${icons.warning} ${c.warn('Unsigned package')}`);
+    }
 
     // Link to agents
     const linkResult = await withSpinner(`Linking ${skill.name}...`, () =>

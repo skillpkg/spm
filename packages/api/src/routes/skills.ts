@@ -19,6 +19,8 @@ import {
 import { validateSkillName, checkNameSimilarity } from '../services/names.js';
 import { uploadPackage, uploadBundle } from '../services/r2.js';
 import { buildSearchCondition, buildRankExpression } from '../services/search.js';
+import { runSecurityPipeline } from '../services/scanner.js';
+import { extractTextFiles } from '../security/extract.js';
 
 export const skillsRoutes = new Hono<AppEnv>();
 
@@ -133,6 +135,48 @@ skillsRoutes.post('/skills', authed, async (c) => {
     );
   }
 
+  // ── Security scan ──
+  const packageDataForScan = await packageFile.arrayBuffer();
+  let textFiles: Array<{ name: string; content: string }>;
+  try {
+    textFiles = await extractTextFiles(packageDataForScan, description);
+  } catch {
+    textFiles = [{ name: 'manifest:description', content: description }];
+  }
+
+  const scanResult = await runSecurityPipeline(textFiles);
+
+  if (!scanResult.passed) {
+    await db.insert(publishAttempts).values({
+      userId,
+      skillName: name,
+      version,
+      status: 'blocked',
+      blockReasons: scanResult.findings
+        .filter((f) => f.severity === 'block')
+        .map((f) => `${f.patternName}: ${f.match} (${f.file}:${f.line})`),
+    });
+    return c.json(
+      createApiError('PUBLISH_BLOCKED', {
+        details: {
+          findings: scanResult.findings.map((f) => ({
+            category: f.category,
+            severity: f.severity,
+            pattern: f.patternName,
+            match: f.match,
+            file: f.file,
+            line: f.line,
+            context: f.context,
+            suggestion: f.suggestion,
+          })),
+          blocked: scanResult.blocked,
+          warnings: scanResult.warnings,
+        },
+      }),
+      ERROR_CODES.PUBLISH_BLOCKED.status,
+    );
+  }
+
   // Check if skill exists or create new
   const [existingSkill] = await db.select().from(skills).where(eq(skills.name, name)).limit(1);
 
@@ -192,8 +236,8 @@ skillsRoutes.post('/skills', authed, async (c) => {
     return c.json(createApiError('VERSION_EXISTS'), ERROR_CODES.VERSION_EXISTS.status);
   }
 
-  // Upload package to R2
-  const packageData = await packageFile.arrayBuffer();
+  // Upload package to R2 (reuse buffer from security scan)
+  const packageData = packageDataForScan;
   const checksum = await computeSha256(packageData);
   const storageKey = await uploadPackage(c.env.R2_BUCKET, name, version, packageData);
 
@@ -258,7 +302,20 @@ skillsRoutes.post('/skills', authed, async (c) => {
       version,
       url: `/api/v1/skills/${name}/${version}`,
       checksum_sha256: checksum,
-      scans: [],
+      scans: scanResult.layers.map((l) => ({
+        layer: l.name,
+        passed: l.passed,
+        warnings: l.warnings,
+      })),
+      warnings: scanResult.findings
+        .filter((f) => f.severity === 'warn')
+        .map((f) => ({
+          category: f.category,
+          pattern: f.patternName,
+          file: f.file,
+          line: f.line,
+          suggestion: f.suggestion,
+        })),
     },
     201,
   );

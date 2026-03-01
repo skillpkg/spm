@@ -20,6 +20,7 @@ import { registerPublishCommand } from './commands/publish.js';
 import { registerYankCommand } from './commands/yank.js';
 import { registerDeprecateCommand } from './commands/deprecate.js';
 import { registerReportCommand } from './commands/report.js';
+import { registerVerifyCommand } from './commands/verify.js';
 
 const program = new Command();
 
@@ -63,6 +64,9 @@ registerPublishCommand(program);
 registerYankCommand(program);
 registerDeprecateCommand(program);
 registerReportCommand(program);
+
+// -- Security commands --
+registerVerifyCommand(program);
 
 // -- Agent commands --
 registerAgentsCommand(program);

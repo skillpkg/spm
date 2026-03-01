@@ -10,6 +10,7 @@ import type { Manifest } from '@spm/shared';
 import { icons, c, log, logJson, logError, withSpinner, getCurrentMode } from '../lib/output.js';
 import { loadConfig } from '../lib/config.js';
 import { createApiClient, ApiClientError } from '../lib/api-client.js';
+import { signPackage } from '../services/signer.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -188,11 +189,33 @@ export const registerPublishCommand = (program: Command): void => {
         return;
       }
 
-      // 7. Upload
+      // 7. Sign the package (optional — graceful degradation)
+      let signatureBundle: string | null = null;
+      let signerIdentity: string | null = null;
+      try {
+        log(`${icons.lock} Signing...`);
+        const signResult = await withSpinner('Signing with Sigstore...', () =>
+          signPackage(packResult.sklPath),
+        );
+
+        if (signResult) {
+          signatureBundle = signResult.bundle;
+          signerIdentity = signResult.signerIdentity;
+          log(`${icons.success} Signed by ${c.trust(signResult.signerIdentity)} (Sigstore)`);
+        } else {
+          log(`${icons.warning} ${c.warn('Signing unavailable, publishing unsigned')}`);
+        }
+      } catch {
+        log(`${icons.warning} ${c.warn('Signing unavailable, publishing unsigned')}`);
+      }
+
+      log('');
+
+      // 8. Upload
       try {
         const sklBuffer = await readFile(packResult.sklPath);
         const result = await withSpinner('Publishing to registry...', () =>
-          api.publishSkill(sklBuffer.buffer as ArrayBuffer, manifest),
+          api.publishSkill(sklBuffer.buffer as ArrayBuffer, manifest, signatureBundle),
         );
 
         log(`${icons.success} Published ${c.name(manifest.name)}@${c.version(manifest.version)}`);
@@ -207,7 +230,8 @@ export const registerPublishCommand = (program: Command): void => {
             version: manifest.version,
             url: result.url,
             trust_tier: result.trust_tier,
-            signed: result.signed,
+            signed: result.signed || signatureBundle !== null,
+            signer: signerIdentity,
           });
         }
       } catch (err) {

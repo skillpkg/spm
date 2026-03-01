@@ -259,11 +259,18 @@ export const createApiClient = (config?: ApiClientConfig) => {
     },
 
     // -- Publish --
-    publishSkill: async (sklBuffer: ArrayBuffer, manifest: Manifest): Promise<PublishResponse> => {
+    publishSkill: async (
+      sklBuffer: ArrayBuffer,
+      manifest: Manifest,
+      signature?: string | null,
+    ): Promise<PublishResponse> => {
       const url = `${registry}/skills`;
       const formData = new FormData();
       formData.append('package', new Blob([sklBuffer]), 'skill.skl');
       formData.append('manifest', JSON.stringify(manifest));
+      if (signature) {
+        formData.append('signature', signature);
+      }
 
       const h: Record<string, string> = {
         'User-Agent': 'spm-cli/0.0.1',

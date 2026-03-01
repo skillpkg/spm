@@ -132,8 +132,7 @@ const SECURITY_PATTERNS: SecurityPattern[] = [
 
   // Hidden Content
   {
-    regex:
-      /[\u200B\u200C\u200D\u200E\u200F\uFEFF\u00AD\u2060\u2061\u2062\u2063\u2064]{3,}/i, // eslint-disable-line no-misleading-character-class
+    regex: /[\u200B\u200C\u200D\u200E\u200F\uFEFF\u00AD\u2060\u2061\u2062\u2063\u2064]{3,}/i, // eslint-disable-line no-misleading-character-class
     category: 'hidden-content',
     severity: 'block',
   },
