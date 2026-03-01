@@ -3,7 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, or, ilike, desc, sql, count } from 'drizzle-orm';
 import { compareTwoStrings } from 'string-similarity';
-import { ManifestSchema, ERROR_CODES, createApiError } from '@spm/shared';
+import { ManifestSchema, ERROR_CODES, createApiError, TRUST_TIERS } from '@spm/shared';
 import type { Manifest } from '@spm/shared';
 import type { AppEnv } from '../types.js';
 import { authed } from '../middleware/auth.js';
@@ -18,6 +18,7 @@ import {
 } from '../db/schema.js';
 import { validateSkillName, checkNameSimilarity } from '../services/names.js';
 import { uploadPackage, uploadBundle } from '../services/r2.js';
+import { buildSearchCondition, buildRankExpression } from '../services/search.js';
 
 export const skillsRoutes = new Hono<AppEnv>();
 
@@ -281,14 +282,21 @@ const SearchQuerySchema = z.object({
 skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) => {
   const db = c.get('db');
   const params = c.req.valid('query');
-  const { q, category, platform, sort, page, per_page } = params;
+  const { q, category, trust, platform, sort, page, per_page } = params;
   const offset = (page - 1) * per_page;
 
   // Build WHERE conditions
   const conditions = [];
 
   if (q) {
-    conditions.push(or(ilike(skills.name, `%${q}%`), ilike(skills.description, `%${q}%`)));
+    // Use GIN full-text search with tag matching fallback
+    const searchCondition = buildSearchCondition(q);
+    if (searchCondition) {
+      conditions.push(searchCondition);
+    } else {
+      // Fallback to ILIKE if the query can't be parsed into tsquery
+      conditions.push(or(ilike(skills.name, `%${q}%`), ilike(skills.description, `%${q}%`)));
+    }
   }
 
   if (category) {
@@ -302,6 +310,23 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
         WHERE ${skillPlatforms.platform} = ${platform} OR ${skillPlatforms.platform} = '*'
       )`,
     );
+  }
+
+  // Trust tier filtering: filter by owner's trust tier >= requested tier
+  if (trust) {
+    const tierIndex = TRUST_TIERS.indexOf(trust as (typeof TRUST_TIERS)[number]);
+    if (tierIndex >= 0) {
+      const allowedTiers = TRUST_TIERS.slice(tierIndex);
+      conditions.push(
+        sql`${skills.ownerId} IN (
+          SELECT ${users.id} FROM ${users}
+          WHERE ${users.trustTier} IN (${sql.join(
+            allowedTiers.map((t) => sql`${t}`),
+            sql`, `,
+          )})
+        )`,
+      );
+    }
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -332,7 +357,15 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
     case 'relevance':
     default:
       if (q) {
-        orderBy = desc(sql`CASE WHEN ${skills.name} ILIKE ${`%${q}%`} THEN 1 ELSE 0 END`);
+        const rankExpr = buildRankExpression(q);
+        if (rankExpr) {
+          // Use ts_rank for proper relevance scoring, with name exact-match boost
+          orderBy = desc(
+            sql`(${rankExpr} + CASE WHEN ${skills.name} ILIKE ${`%${q}%`} THEN 1.0 ELSE 0 END)`,
+          );
+        } else {
+          orderBy = desc(sql`CASE WHEN ${skills.name} ILIKE ${`%${q}%`} THEN 1 ELSE 0 END`);
+        }
       } else {
         orderBy = desc(skills.updatedAt);
       }
