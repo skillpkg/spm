@@ -536,13 +536,13 @@ Spawn 3 teammates:
 
 **Test tooling summary:**
 
-| Layer | Tool | What it tests |
-|---|---|---|
-| Unit | vitest | Individual functions, Zod schemas, services |
-| Component | vitest + msw | CLI commands with mocked API, React components |
-| Integration | vitest + test DB | API routes with real Neon (branch), full request lifecycle |
-| Browser E2E | Playwright | Web UI, admin panel — user flows, responsive, a11y |
-| CLI E2E | vitest + staging API | Full spm workflow end-to-end against live registry |
+| Layer       | Tool                 | What it tests                                              |
+| ----------- | -------------------- | ---------------------------------------------------------- |
+| Unit        | vitest               | Individual functions, Zod schemas, services                |
+| Component   | vitest + msw         | CLI commands with mocked API, React components             |
+| Integration | vitest + test DB     | API routes with real Neon (branch), full request lifecycle |
+| Browser E2E | Playwright           | Web UI, admin panel — user flows, responsive, a11y         |
+| CLI E2E     | vitest + staging API | Full spm workflow end-to-end against live registry         |
 
 ---
 
@@ -577,6 +577,7 @@ ci: add lint + typecheck to PR workflow
 ### Definition of Done
 
 A task is done when:
+
 1. `/ship` passes — lint, format, test, commit, push all succeed
 2. No type errors when imported by other packages
 3. Conventional commit message with correct scope

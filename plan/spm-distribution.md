@@ -32,7 +32,7 @@ class Spm < Formula
   def install
     # Install the CLI binary
     bin.install "spm"
-    
+
     # Install shell completions
     bash_completion.install "completions/spm.bash" => "spm"
     zsh_completion.install "completions/_spm"
@@ -47,7 +47,7 @@ class Spm < Formula
   def caveats
     <<~EOS
       SPM has been installed and configured automatically.
-      
+
       Your agents will now respect project-level skills.json files,
       with project skills overriding global ones.
 
@@ -159,7 +159,7 @@ def main():
         from spm.bootstrap import install
         install(silent=False)
         print()
-    
+
     # Normal CLI dispatch
     command = sys.argv[1] if len(sys.argv) > 1 else "help"
     # ... route to command handlers
@@ -268,6 +268,7 @@ For agent platform users, SPM can detect the environment and self-bootstrap. Exa
 ## 2. The `spm bootstrap` Command
 
 All installation methods converge on this single command. It does four things:
+
 1. Creates the `~/.spm/` directory structure
 2. Initializes global `skills.json`, `skills-lock.json`, and `config.toml` (if they don't exist)
 3. Stores and links the spm-runtime meta-skill to all detected agents
@@ -285,9 +286,15 @@ export const bootstrapCommand = new Command('bootstrap')
   .option('--silent', 'Minimal output (for post-install hooks)', false)
   .action(async (action: string, opts: { silent: boolean }) => {
     switch (action) {
-      case 'install':  await installRuntime(opts); break;
-      case 'check':    await checkRuntime(); break;
-      case 'uninstall': await uninstallRuntime(); break;
+      case 'install':
+        await installRuntime(opts);
+        break;
+      case 'check':
+        await checkRuntime();
+        break;
+      case 'uninstall':
+        await uninstallRuntime();
+        break;
     }
   });
 ```
@@ -303,7 +310,7 @@ import { execSync } from 'child_process';
 const SPM_HOME = path.join(os.homedir(), '.spm');
 const RUNTIME_SKILL = 'spm-runtime';
 const RUNTIME_META = path.join(SPM_HOME, 'spm-runtime.meta.json');
-const SKILLS_CLI_VERSION = '0.3.14';  // pinned, tested
+const SKILLS_CLI_VERSION = '0.3.14'; // pinned, tested
 
 // Bundled with the CLI binary — not downloaded from registry
 const SKILL_MD_PATH = path.join(__dirname, '..', 'assets', 'spm-runtime-SKILL.md');
@@ -312,11 +319,7 @@ export async function installRuntime({ silent = false } = {}) {
   const log = silent ? (..._: any[]) => {} : console.log;
 
   // ── Step 1: Create ~/.spm/ directory structure ──
-  const dirs = [
-    SPM_HOME,
-    path.join(SPM_HOME, 'skills'),
-    path.join(SPM_HOME, 'cache'),
-  ];
+  const dirs = [SPM_HOME, path.join(SPM_HOME, 'skills'), path.join(SPM_HOME, 'cache')];
   for (const dir of dirs) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -329,13 +332,13 @@ export async function installRuntime({ silent = false } = {}) {
 
   if (!fs.existsSync(globalSkillsJson)) {
     const initialSkillsJson = {
-      "$schema": "https://spm.dev/schemas/skills-v1.json",
-      "name": "global",
-      "description": "Globally installed skills for this machine",
-      "skills": {},
-      "resolution": {
-        "strategy": "project-first"
-      }
+      $schema: 'https://spm.dev/schemas/skills-v1.json',
+      name: 'global',
+      description: 'Globally installed skills for this machine',
+      skills: {},
+      resolution: {
+        strategy: 'project-first',
+      },
     };
     fs.writeFileSync(globalSkillsJson, JSON.stringify(initialSkillsJson, null, 2) + '\n');
     log('  ✓ Created ~/.spm/skills.json');
@@ -343,8 +346,8 @@ export async function installRuntime({ silent = false } = {}) {
 
   if (!fs.existsSync(globalLockJson)) {
     const initialLock = {
-      "lockfileVersion": 1,
-      "skills": {}
+      lockfileVersion: 1,
+      skills: {},
     };
     fs.writeFileSync(globalLockJson, JSON.stringify(initialLock, null, 2) + '\n');
     log('  ✓ Created ~/.spm/skills-lock.json');
@@ -387,10 +390,11 @@ export async function installRuntime({ silent = false } = {}) {
   let linkTarget: string | null = null;
 
   try {
-    execSync(
-      `npx skills@${SKILLS_CLI_VERSION} add "${storePath}" -a '*' -y`,
-      { encoding: 'utf-8', timeout: 30000, stdio: 'pipe' }
-    );
+    execSync(`npx skills@${SKILLS_CLI_VERSION} add "${storePath}" -a '*' -y`, {
+      encoding: 'utf-8',
+      timeout: 30000,
+      stdio: 'pipe',
+    });
     linked = true;
     linkTarget = 'vercel-skills-cli';
     log('  ✓ Linked to all detected agents (via Vercel skills CLI)');
@@ -425,10 +429,7 @@ export async function installRuntime({ silent = false } = {}) {
       // detects hash mismatch and re-copies automatically.
       try {
         fs.mkdirSync(canonicalDir, { recursive: true });
-        fs.copyFileSync(
-          path.join(storePath, 'SKILL.md'),
-          path.join(canonicalDir, 'SKILL.md')
-        );
+        fs.copyFileSync(path.join(storePath, 'SKILL.md'), path.join(canonicalDir, 'SKILL.md'));
         linked = true;
         linkTarget = canonicalDir;
         log('  ✓ Copied to: ~/.agents/skills/ (direct copy)');
@@ -450,8 +451,10 @@ export async function installRuntime({ silent = false } = {}) {
     skill_md_hash: hashFile(path.join(storePath, 'SKILL.md')),
     linked,
     link_method: linkTarget,
-    is_copy: linked && linkTarget !== 'vercel-skills-cli'
-      && !isSymlink(path.join(linkTarget!, 'SKILL.md')),
+    is_copy:
+      linked &&
+      linkTarget !== 'vercel-skills-cli' &&
+      !isSymlink(path.join(linkTarget!, 'SKILL.md')),
   };
   fs.writeFileSync(RUNTIME_META, JSON.stringify(meta, null, 2) + '\n');
 
@@ -486,7 +489,7 @@ export async function checkRuntime() {
     console.log(`  ${check.ok ? '✓' : '✗'} ${check.name}`);
   }
 
-  const allOk = checks.every(c => c.ok);
+  const allOk = checks.every((c) => c.ok);
   if (allOk) {
     console.log('\n✅ SPM is healthy');
   } else {
@@ -502,7 +505,8 @@ export async function uninstallRuntime() {
   // Try to unlink via Vercel CLI
   try {
     execSync(`npx skills@${SKILLS_CLI_VERSION} remove ${RUNTIME_SKILL}`, {
-      stdio: 'pipe', timeout: 15000
+      stdio: 'pipe',
+      timeout: 15000,
     });
   } catch {
     // Manual cleanup
@@ -618,6 +622,7 @@ program.parse();
 ```
 
 This means:
+
 - **Fresh install** → bootstrap runs as post-install hook
 - **User deleted `~/.spm`** → next `spm` command auto-repairs
 - **SPM updated** → spm-runtime SKILL.md auto-updates on next run
@@ -643,19 +648,19 @@ Supported agents (auto-detected by npx skills):
 
 import { execSync } from 'child_process';
 
-const SKILLS_CLI_VERSION = '0.3.14';  // pinned, bumped deliberately after testing
+const SKILLS_CLI_VERSION = '0.3.14'; // pinned, bumped deliberately after testing
 
 /**
  * After SPM downloads and unpacks a .skl to its cache,
  * Vercel's skills CLI handles all agent detection and symlinking.
  */
 export function linkToAgents(skillCachePath: string, options: { agents?: string } = {}) {
-  const agents = options.agents || '*';  // '*' = all detected agents
+  const agents = options.agents || '*'; // '*' = all detected agents
 
   try {
     const result = execSync(
       `npx skills@${SKILLS_CLI_VERSION} add "${skillCachePath}" -a '${agents}' -y`,
-      { encoding: 'utf-8', timeout: 30000, stdio: 'pipe' }
+      { encoding: 'utf-8', timeout: 30000, stdio: 'pipe' },
     );
 
     return parseLinkerOutput(result);
@@ -667,10 +672,10 @@ export function linkToAgents(skillCachePath: string, options: { agents?: string 
 
 export function unlinkFromAgents(skillName: string) {
   try {
-    execSync(
-      `npx skills@${SKILLS_CLI_VERSION} remove ${skillName} -y`,
-      { encoding: 'utf-8', stdio: 'pipe' }
-    );
+    execSync(`npx skills@${SKILLS_CLI_VERSION} remove ${skillName} -y`, {
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
   } catch {
     // Manual cleanup if needed
   }
@@ -731,6 +736,7 @@ end
 ```
 
 Or for npm:
+
 ```json
 {
   "scripts": {
@@ -803,13 +809,13 @@ Or for npm:
 
 ## 7. Summary: Zero Friction Installation
 
-| Method | Command | Post-Install Hook | Auto-Bootstrap |
-|--------|---------|-------------------|----------------|
-| Homebrew | `brew install spm` | `spm bootstrap --silent` | ✓ |
-| npm | `npm i -g spm-cli` | `postinstall` script | ✓ |
-| pip | `pip install spm-cli` | First-run detection | ✓ |
-| curl | `curl ... \| sh` | Inline in install script | ✓ |
-| Agent MCP | Config in settings | `postStart` hook | ✓ |
-| Manual | Download binary | Preflight on first `spm` run | ✓ |
+| Method    | Command               | Post-Install Hook            | Auto-Bootstrap |
+| --------- | --------------------- | ---------------------------- | -------------- |
+| Homebrew  | `brew install spm`    | `spm bootstrap --silent`     | ✓              |
+| npm       | `npm i -g spm-cli`    | `postinstall` script         | ✓              |
+| pip       | `pip install spm-cli` | First-run detection          | ✓              |
+| curl      | `curl ... \| sh`      | Inline in install script     | ✓              |
+| Agent MCP | Config in settings    | `postStart` hook             | ✓              |
+| Manual    | Download binary       | Preflight on first `spm` run | ✓              |
 
 **Every path leads to the same result**: `~/.spm` exists, `spm-runtime` is linked into agent skill directories (via Vercel's skills CLI), and the resolution hierarchy is active. The user never thinks about it.

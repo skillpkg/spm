@@ -27,16 +27,16 @@ Works with Claude Code, Cursor, Copilot, Codex, and 30+ agent platforms that sup
 
 ## Stack
 
-| Component | Tech |
-|-----------|------|
-| Monorepo | pnpm workspaces + Turborepo |
-| API | Hono (Cloudflare Workers) |
-| Database | Neon Postgres + Drizzle ORM |
-| Storage | Cloudflare R2 |
-| CLI | TypeScript + Commander.js |
-| Web | React + Vite + Tailwind |
-| Auth | GitHub OAuth device flow |
-| Signing | Sigstore keyless |
+| Component | Tech                        |
+| --------- | --------------------------- |
+| Monorepo  | pnpm workspaces + Turborepo |
+| API       | Hono (Cloudflare Workers)   |
+| Database  | Neon Postgres + Drizzle ORM |
+| Storage   | Cloudflare R2               |
+| CLI       | TypeScript + Commander.js   |
+| Web       | React + Vite + Tailwind     |
+| Auth      | GitHub OAuth device flow    |
+| Signing   | Sigstore keyless            |
 
 ## Project Structure
 

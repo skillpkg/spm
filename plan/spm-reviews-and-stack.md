@@ -49,22 +49,22 @@ def calculate_display_rating(skill_name: str) -> float:
     from ranking above skills with 100 four-star ratings.
     """
     ratings = db.fetch("SELECT rating FROM reviews WHERE skill_name=$1", skill_name)
-    
+
     if not ratings:
         return 0.0
-    
+
     # Bayesian average
     # C = average rating across ALL skills (global prior)
     # m = minimum ratings to be considered (confidence threshold)
     C = 3.5   # Global average across all skills
     m = 5     # Need at least 5 ratings before score stabilizes
-    
+
     n = len(ratings)
     avg = sum(r["rating"] for r in ratings) / n
-    
+
     # Weighted: pulls toward global average when few ratings
     bayesian = (n * avg + m * C) / (n + m)
-    
+
     return round(bayesian, 1)
 
 # Examples:
@@ -106,19 +106,19 @@ Why allow ratings without install? Because users might evaluate a skill by readi
 ```
 ATTACK 1: Rating Bombing
   Competitor creates 50 accounts, gives you 1-star ratings.
-  
+
 ATTACK 2: Self-Promotion
   Author creates fake accounts, gives themselves 5 stars.
-  
+
 ATTACK 3: Review Spam
   Bot accounts posting promotional or irrelevant text reviews.
-  
+
 ATTACK 4: Coordinated Campaigns
   Discord/Slack group organizes mass 1-star or 5-star reviews.
-  
+
 ATTACK 5: Revenge Reviews
   Author A reviews Author B's competing skill with 1 star.
-  
+
 ATTACK 6: Review Manipulation by Author
   Author bullies or incentivizes users to leave good reviews.
 ```
@@ -170,40 +170,40 @@ ATTACK 6: Review Manipulation by Author
 ```python
 class ReviewAnomalyDetector:
     """Detect suspicious review patterns."""
-    
+
     async def check_review(self, review: Review) -> AnomalyResult:
         """Run all checks on a new review before publishing."""
-        
+
         flags = []
-        
+
         # 1. Velocity check: too many reviews on this skill recently?
         recent_count = await db.fetchval("""
-            SELECT COUNT(*) FROM reviews 
+            SELECT COUNT(*) FROM reviews
             WHERE skill_name = $1 AND created_at > NOW() - INTERVAL '1 hour'
         """, review.skill_name)
-        
+
         if recent_count > 10:
             flags.append(AnomalyFlag(
                 type="velocity_spike",
                 severity="hold",
                 detail=f"{recent_count} reviews in last hour"
             ))
-        
+
         # 2. IP cluster check
         same_ip_reviews = await db.fetchval("""
-            SELECT COUNT(DISTINCT user_id) FROM reviews 
-            WHERE skill_name = $1 
+            SELECT COUNT(DISTINCT user_id) FROM reviews
+            WHERE skill_name = $1
             AND ip_prefix = $2
             AND created_at > NOW() - INTERVAL '7 days'
         """, review.skill_name, review.ip_prefix)  # /24 prefix
-        
+
         if same_ip_reviews >= 3:
             flags.append(AnomalyFlag(
                 type="ip_cluster",
                 severity="block",
                 detail=f"{same_ip_reviews} users from same IP range"
             ))
-        
+
         # 3. Rating distribution check
         distribution = await db.fetch("""
             SELECT rating, COUNT(*) as cnt FROM reviews
@@ -211,7 +211,7 @@ class ReviewAnomalyDetector:
             AND created_at > NOW() - INTERVAL '24 hours'
             GROUP BY rating
         """, review.skill_name)
-        
+
         if len(distribution) > 5:
             ratings = [r["rating"] for r in distribution for _ in range(r["cnt"])]
             # If all recent ratings are extreme (1 or 5), flag
@@ -222,28 +222,28 @@ class ReviewAnomalyDetector:
                     severity="hold",
                     detail=f"{extreme_pct:.0%} of recent ratings are 1 or 5 stars"
                 ))
-        
+
         # 4. Author conflict check
         is_competing_author = await db.fetchval("""
             SELECT EXISTS(
-                SELECT 1 FROM skills 
-                WHERE author_id = $1 
+                SELECT 1 FROM skills
+                WHERE author_id = $1
                 AND category = (SELECT category FROM skills WHERE name = $2)
                 AND name != $2
             )
         """, review.user_id, review.skill_name)
-        
+
         if is_competing_author and review.rating <= 2:
             flags.append(AnomalyFlag(
                 type="competing_author",
                 severity="hold",
                 detail="Low rating from author of competing skill in same category"
             ))
-        
+
         # Decision
         blocks = [f for f in flags if f.severity == "block"]
         holds = [f for f in flags if f.severity == "hold"]
-        
+
         if blocks:
             return AnomalyResult("blocked", flags)
         elif holds:
@@ -258,9 +258,9 @@ Users can vote reviews as "helpful" or "not helpful" (like Amazon).
 
 ```
 Review:
-  ★★☆☆☆  "Breaks when CSV has more than 10k rows. 
+  ★★☆☆☆  "Breaks when CSV has more than 10k rows.
            Tested with Python 3.11 on Claude Code."  - @dev3
-  
+
   👍 12 people found this helpful  |  🚩 Report
 
 Sort by "Most helpful" surfaces quality reviews.
@@ -279,25 +279,25 @@ CREATE TABLE reviews (
     user_id      UUID NOT NULL REFERENCES users(id),
     rating       SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     body         TEXT CHECK (char_length(body) <= 2000),
-    
+
     -- Abuse prevention
     ip_prefix    VARCHAR(15),          -- /24 prefix, for cluster detection
-    status       VARCHAR(20) DEFAULT 'published',  
+    status       VARCHAR(20) DEFAULT 'published',
                  -- 'published', 'held', 'removed', 'flagged'
     anomaly_flags JSONB DEFAULT '[]',
-    
+
     -- Author response
     author_reply TEXT CHECK (char_length(author_reply) <= 1000),
     author_reply_at TIMESTAMPTZ,
-    
+
     -- Helpfulness
     helpful_count    INT DEFAULT 0,
     unhelpful_count  INT DEFAULT 0,
-    
+
     -- Timestamps
     created_at   TIMESTAMPTZ DEFAULT NOW(),
     updated_at   TIMESTAMPTZ DEFAULT NOW(),
-    
+
     -- One review per user per skill
     UNIQUE(skill_name, user_id)
 );
@@ -491,7 +491,7 @@ Option D: TypeScript CLI + Python API
 
 DECISION: TypeScript everywhere (Option A).
   The shared types/validation/schemas between CLI and API
-  is the decisive factor. CLI speed is acceptable — npm 
+  is the decisive factor. CLI speed is acceptable — npm
   itself is written in JavaScript and nobody complains.
 ```
 
@@ -657,15 +657,15 @@ export interface ScanResult {
 }
 
 export function scanSkillContent(
-  skillMd: string, 
+  skillMd: string,
   scripts: Map<string, string>,
-  patterns: ScanPattern[]
+  patterns: ScanPattern[],
 ): ScanResult {
   const issues: ScanIssue[] = [];
-  
+
   // Normalize content for evasion resistance
   const normalizedMd = normalize(skillMd);
-  
+
   // Run all patterns against SKILL.md
   for (const pattern of patterns) {
     const matches = pattern.regex.exec(normalizedMd);
@@ -679,7 +679,7 @@ export function scanSkillContent(
       });
     }
   }
-  
+
   // Run patterns against all scripts too
   for (const [filename, content] of scripts) {
     const normalizedScript = normalize(content);
@@ -698,11 +698,11 @@ export function scanSkillContent(
       }
     }
   }
-  
+
   return {
-    passed: issues.filter(i => i.severity === 'block').length === 0,
-    blocks: issues.filter(i => i.severity === 'block'),
-    flags: issues.filter(i => i.severity === 'flag'),
+    passed: issues.filter((i) => i.severity === 'block').length === 0,
+    blocks: issues.filter((i) => i.severity === 'block'),
+    flags: issues.filter((i) => i.severity === 'flag'),
   };
 }
 
@@ -722,49 +722,49 @@ import { Hono } from 'hono';
 const app = new Hono();
 
 // ── Skills ──────────────────────────────────
-app.get('/api/v1/skills',                    searchSkills);
-app.get('/api/v1/skills/:name',              getSkill);
-app.get('/api/v1/skills/:name/:version',     getSkillVersion);
+app.get('/api/v1/skills', searchSkills);
+app.get('/api/v1/skills/:name', getSkill);
+app.get('/api/v1/skills/:name/:version', getSkillVersion);
 app.get('/api/v1/skills/:name/:version/download', downloadSkill);
-app.post('/api/v1/skills',                   publishSkill);        // auth
-app.delete('/api/v1/skills/:name/:version',  yankVersion);         // auth
+app.post('/api/v1/skills', publishSkill); // auth
+app.delete('/api/v1/skills/:name/:version', yankVersion); // auth
 
 // ── Reviews ─────────────────────────────────
-app.get('/api/v1/skills/:name/reviews',      getReviews);
-app.post('/api/v1/skills/:name/reviews',     createReview);        // auth
-app.put('/api/v1/skills/:name/reviews/:id',  updateReview);        // auth
-app.post('/api/v1/reviews/:id/reply',        authorReply);         // auth
-app.post('/api/v1/reviews/:id/vote',         voteReview);          // auth
-app.post('/api/v1/reviews/:id/report',       reportReview);        // auth
+app.get('/api/v1/skills/:name/reviews', getReviews);
+app.post('/api/v1/skills/:name/reviews', createReview); // auth
+app.put('/api/v1/skills/:name/reviews/:id', updateReview); // auth
+app.post('/api/v1/reviews/:id/reply', authorReply); // auth
+app.post('/api/v1/reviews/:id/vote', voteReview); // auth
+app.post('/api/v1/reviews/:id/report', reportReview); // auth
 
 // ── Auth ────────────────────────────────────
-app.get('/api/v1/auth/github',               githubOAuth);
-app.get('/api/v1/auth/github/callback',      githubCallback);
-app.post('/api/v1/auth/2fa/setup',           setup2FA);            // auth
-app.post('/api/v1/auth/2fa/verify',          verify2FA);           // auth
+app.get('/api/v1/auth/github', githubOAuth);
+app.get('/api/v1/auth/github/callback', githubCallback);
+app.post('/api/v1/auth/2fa/setup', setup2FA); // auth
+app.post('/api/v1/auth/2fa/verify', verify2FA); // auth
 
 // ── User / Author ───────────────────────────
-app.get('/api/v1/users/me',                  getProfile);          // auth
-app.get('/api/v1/users/:username',           getPublicProfile);
-app.get('/api/v1/users/:username/skills',    getUserSkills);
+app.get('/api/v1/users/me', getProfile); // auth
+app.get('/api/v1/users/:username', getPublicProfile);
+app.get('/api/v1/users/:username/skills', getUserSkills);
 
 // ── Analytics ───────────────────────────────
-app.post('/api/v1/analytics/events',         ingestEvents);        // auth
-app.get('/api/v1/analytics/:name',           getSkillAnalytics);   // auth
+app.post('/api/v1/analytics/events', ingestEvents); // auth
+app.get('/api/v1/analytics/:name', getSkillAnalytics); // auth
 
 // ── Bulk Import ─────────────────────────────
-app.post('/api/v1/bulk/request-token',       requestBulkToken);    // auth
-app.post('/api/v1/bulk/validate',            bulkValidate);        // bulk-auth
-app.put('/api/v1/bulk/upload/:name/:version', bulkUpload);         // bulk-auth
+app.post('/api/v1/bulk/request-token', requestBulkToken); // auth
+app.post('/api/v1/bulk/validate', bulkValidate); // bulk-auth
+app.put('/api/v1/bulk/upload/:name/:version', bulkUpload); // bulk-auth
 
 // ── Federation ──────────────────────────────
-app.get('/api/v1/federation/catalog',        federationCatalog);
-app.get('/api/v1/federation/changes',        federationChanges);
-app.get('/api/v1/federation/health',         federationHealth);
+app.get('/api/v1/federation/catalog', federationCatalog);
+app.get('/api/v1/federation/changes', federationChanges);
+app.get('/api/v1/federation/health', federationHealth);
 
 // ── MCP ─────────────────────────────────────
-app.get('/api/v1/mcp/search',               mcpSearch);
-app.get('/api/v1/mcp/suggest',              mcpSuggest);
+app.get('/api/v1/mcp/search', mcpSearch);
+app.get('/api/v1/mcp/suggest', mcpSuggest);
 ```
 
 ---
@@ -774,43 +774,43 @@ app.get('/api/v1/mcp/suggest',              mcpSuggest);
 ```
 PHASE 1 — MVP (3-4 weeks, was 2 months):
   Stack: CLI + API + DB + Storage + Vercel skills CLI
-  
+
   CLI commands:
-    spm init, validate, pack, publish, install, 
+    spm init, validate, pack, publish, install,
     search, list, update, uninstall
-  
+
   Agent Linking (BORROWED — Vercel skills CLI):
     SPM calls: npx skills add <path> -a '*' -y
     Supports: 37+ agents (Claude, Cursor, Copilot, Codex, etc.)
     spm agents — show detected agents and linked skills
-  
+
   Security Pipeline (3 layers, mostly borrowed):
     Layer 1: Regex patterns (built — JSON file + scanner)
     Layer 2: ProtectAI DeBERTa v2 (borrowed — ONNX runtime)
     Layer 3: Lakera Guard (borrowed — Phase 2, free API)
-  
+
   Package Signing (BORROWED — sigstore-js):
     @sigstore/sign on publish, @sigstore/verify on install
     Keyless via GitHub OIDC, recorded on Rekor transparency log
     Same infrastructure npm uses for provenance
-  
+
   API:
     Skills CRUD, search, download, publish
     GitHub OAuth, basic auth
     Content scanning (all 3 layers server-side)
     Analytics event ingestion
     Sigstore bundle storage alongside .skl packages
-  
+
   npm Bridge:
     spm import --from npm <package-name>
     Import existing agent-skill packages from npmjs.org
     Seed registry with 90+ existing npm skills
-  
+
   DB: Neon (skills, versions, users, analytics_events)
   Storage: R2 (packages + sigstore bundles)
   Hosting: Fly.io (1 machine)
   Domain: spm.dev
-  
+
   NOT yet: reviews, web UI, federation, bulk import tool
 
 PHASE 2 — Growth (Months 2-3):

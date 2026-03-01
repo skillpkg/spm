@@ -8,9 +8,9 @@ GitHub Actions workflows for installing and publishing skills in CI pipelines.
 
 Two official GitHub Actions:
 
-| Action | Purpose | When |
-|---|---|---|
-| `spm-registry/setup-spm` | Install SPM CLI + restore cache | Every CI run |
+| Action                     | Purpose                         | When                  |
+| -------------------------- | ------------------------------- | --------------------- |
+| `spm-registry/setup-spm`   | Install SPM CLI + restore cache | Every CI run          |
 | `spm-registry/publish-spm` | Publish a skill to the registry | On release / tag push |
 
 Plus reusable workflow patterns for testing, security scanning, and automated version bumps.
@@ -38,6 +38,7 @@ Installs the SPM CLI and optionally authenticates + restores the skill cache.
 ```
 
 **What it does:**
+
 1. Installs `spm` globally via npm
 2. Creates `~/.spm/config.toml` with registry URL
 3. If `token` provided: writes auth token to config
@@ -73,14 +74,14 @@ jobs:
 ### With skill-specific tests
 
 ```yaml
-      - name: Install skills
-        run: spm install
+- name: Install skills
+  run: spm install
 
-      - name: Test skills work
-        run: spm test --all
+- name: Test skills work
+  run: spm test --all
 
-      - name: Security scan installed skills
-        run: spm audit
+- name: Security scan installed skills
+  run: spm audit
 ```
 
 `spm test --all` runs eval.json test cases for every installed skill. `spm audit` checks all installed skills against the latest security scan results from the registry.
@@ -88,24 +89,25 @@ jobs:
 ### Cache strategy
 
 The setup action caches `~/.spm/skills/` keyed on the hash of `skills-lock.json`. This means:
+
 - Same lock file → cache hit → instant install (no downloads)
 - Lock file changed → cache miss → fresh download + new cache stored
 
 ```yaml
-      - uses: spm-registry/setup-spm@v1
-        with:
-          cache: true  # default, uses skills-lock.json hash as key
+- uses: spm-registry/setup-spm@v1
+  with:
+    cache: true # default, uses skills-lock.json hash as key
 ```
 
 For monorepos with multiple `skills.json` files:
 
 ```yaml
-      - uses: spm-registry/setup-spm@v1
-        with:
-          cache: true
-          cache-dependency-path: |
-            apps/web/skills-lock.json
-            apps/api/skills-lock.json
+- uses: spm-registry/setup-spm@v1
+  with:
+    cache: true
+    cache-dependency-path: |
+      apps/web/skills-lock.json
+      apps/api/skills-lock.json
 ```
 
 ---
@@ -133,6 +135,7 @@ Publishes a skill to the SPM registry. Handles packing, scanning, signing, and u
 ```
 
 **What it does:**
+
 1. Reads `manifest.json` from the working directory
 2. Runs `spm pack` to create the `.skl` archive
 3. Runs local Layer 1 security scan (fast, catches obvious issues before upload)
@@ -156,7 +159,7 @@ on:
     types: [published]
 
 permissions:
-  id-token: write    # Required for Sigstore OIDC signing
+  id-token: write # Required for Sigstore OIDC signing
   contents: read
 
 jobs:
@@ -268,7 +271,7 @@ on:
 
 permissions:
   id-token: write
-  contents: write  # needed for git push
+  contents: write # needed for git push
 
 jobs:
   version-and-publish:
@@ -357,7 +360,7 @@ Weekly re-scan of your published skills against the latest threat patterns.
 name: Weekly Security Audit
 on:
   schedule:
-    - cron: '0 9 * * 1'  # Monday 9am UTC
+    - cron: '0 9 * * 1' # Monday 9am UTC
 
 jobs:
   audit:
@@ -388,16 +391,17 @@ jobs:
 
 The SPM CLI respects these environment variables in CI:
 
-| Variable | Purpose | Example |
-|---|---|---|
-| `SPM_TOKEN` | Auth token (alternative to `--token` flag) | `spm_eyJhbG...` |
-| `SPM_REGISTRY` | Custom registry URL | `https://registry.spm.dev/api/v1` |
-| `SPM_CACHE_DIR` | Custom cache directory | `/tmp/spm-cache` |
-| `CI` | Auto-detected; enables non-interactive mode | `true` (set by GitHub Actions) |
-| `NO_COLOR` | Disable colored output | `1` |
-| `SPM_LOG_LEVEL` | Verbosity: `silent`, `error`, `warn`, `info`, `debug` | `info` |
+| Variable        | Purpose                                               | Example                           |
+| --------------- | ----------------------------------------------------- | --------------------------------- |
+| `SPM_TOKEN`     | Auth token (alternative to `--token` flag)            | `spm_eyJhbG...`                   |
+| `SPM_REGISTRY`  | Custom registry URL                                   | `https://registry.spm.dev/api/v1` |
+| `SPM_CACHE_DIR` | Custom cache directory                                | `/tmp/spm-cache`                  |
+| `CI`            | Auto-detected; enables non-interactive mode           | `true` (set by GitHub Actions)    |
+| `NO_COLOR`      | Disable colored output                                | `1`                               |
+| `SPM_LOG_LEVEL` | Verbosity: `silent`, `error`, `warn`, `info`, `debug` | `info`                            |
 
 When `CI=true` (auto-set by GitHub Actions), SPM:
+
 - Never prompts for input (auto-accepts defaults)
 - Uses `--json` output format for structured logs
 - Skips spinner animations
@@ -410,6 +414,7 @@ When `CI=true` (auto-set by GitHub Actions), SPM:
 GitHub Actions has native OIDC support, which makes Sigstore signing seamless.
 
 **How it works:**
+
 1. Workflow declares `permissions: id-token: write`
 2. GitHub Actions provides an OIDC token scoped to the repo
 3. SPM exchanges this token with Fulcio (Sigstore CA) for an ephemeral signing certificate
@@ -417,12 +422,14 @@ GitHub Actions has native OIDC support, which makes Sigstore signing seamless.
 5. Package hash is signed and recorded on Rekor transparency log
 
 **Why this is better than personal signing:**
+
 - No key management
-- Identity is the *repo + workflow*, not an individual — survives team changes
+- Identity is the _repo + workflow_, not an individual — survives team changes
 - Verifiable: anyone can confirm "this package was built by this CI workflow from this repo"
 - Tamper-evident: Rekor provides an immutable public log
 
 **Verification on install:**
+
 ```
 spm install data-viz
 
@@ -438,28 +445,28 @@ spm install data-viz
 The publish action exports outputs for use in subsequent steps:
 
 ```yaml
-      - uses: spm-registry/publish-spm@v1
-        id: publish
-        with:
-          token: ${{ secrets.SPM_TOKEN }}
+- uses: spm-registry/publish-spm@v1
+  id: publish
+  with:
+    token: ${{ secrets.SPM_TOKEN }}
 
-      - name: Post-publish
-        run: |
-          echo "Published: ${{ steps.publish.outputs.name }}@${{ steps.publish.outputs.version }}"
-          echo "Status: ${{ steps.publish.outputs.status }}"
-          echo "URL: ${{ steps.publish.outputs.url }}"
-          echo "Checksum: ${{ steps.publish.outputs.checksum }}"
+- name: Post-publish
+  run: |
+    echo "Published: ${{ steps.publish.outputs.name }}@${{ steps.publish.outputs.version }}"
+    echo "Status: ${{ steps.publish.outputs.status }}"
+    echo "URL: ${{ steps.publish.outputs.url }}"
+    echo "Checksum: ${{ steps.publish.outputs.checksum }}"
 ```
 
-| Output | Description | Example |
-|---|---|---|
-| `name` | Skill name | `data-viz` |
-| `version` | Published version | `1.2.3` |
-| `status` | `published`, `held`, `blocked` | `published` |
-| `url` | Registry URL | `https://spm.dev/skills/data-viz` |
-| `checksum` | SHA256 of .skl | `a1b2c3d4...` |
-| `signer` | Sigstore signer identity | `github.com/almog/data-viz/...` |
-| `rekor_url` | Rekor transparency log entry | `https://rekor.sigstore.dev/...` |
+| Output      | Description                    | Example                           |
+| ----------- | ------------------------------ | --------------------------------- |
+| `name`      | Skill name                     | `data-viz`                        |
+| `version`   | Published version              | `1.2.3`                           |
+| `status`    | `published`, `held`, `blocked` | `published`                       |
+| `url`       | Registry URL                   | `https://spm.dev/skills/data-viz` |
+| `checksum`  | SHA256 of .skl                 | `a1b2c3d4...`                     |
+| `signer`    | Sigstore signer identity       | `github.com/almog/data-viz/...`   |
+| `rekor_url` | Rekor transparency log entry   | `https://rekor.sigstore.dev/...`  |
 
 ---
 
@@ -485,6 +492,7 @@ my-skill/
 ```
 
 **ci.yml:**
+
 ```yaml
 name: CI
 on:
@@ -504,6 +512,7 @@ jobs:
 ```
 
 **publish.yml:**
+
 ```yaml
 name: Publish
 on:

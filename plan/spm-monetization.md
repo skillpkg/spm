@@ -177,17 +177,17 @@ $ spm purchase enterprise-report-builder
 # At install time:
 async def check_license(skill_name, user_id):
     """Verify the user has a valid license for this skill."""
-    
+
     license = await db.query("""
         SELECT l.*, sv.version
         FROM licenses l
         JOIN skill_versions sv ON l.skill_version_id = sv.id
-        WHERE l.user_id = $1 
+        WHERE l.user_id = $1
           AND l.skill_name = $2
           AND l.status = 'active'
           AND (l.expires_at IS NULL OR l.expires_at > NOW())
     """, user_id, skill_name)
-    
+
     if not license:
         # Check for active trial
         trial = await db.query("""
@@ -195,12 +195,12 @@ async def check_license(skill_name, user_id):
             WHERE user_id = $1 AND skill_name = $2
               AND expires_at > NOW() AND status = 'active'
         """, user_id, skill_name)
-        
+
         if trial:
             return {"valid": True, "type": "trial", "expires": trial.expires_at}
-        
+
         return {"valid": False, "reason": "no_license"}
-    
+
     return {"valid": True, "type": license.type, "key": license.license_key}
 
 # License is stored locally after purchase:
@@ -221,13 +221,13 @@ What we DO:
   ✓ License key verified at install time
   ✓ Periodic check (weekly) that license is still valid
   ✓ Skill removed if subscription lapses + grace period ends
-  
+
 What we DON'T do:
   ✗ No runtime license checking (skill works offline)
   ✗ No code obfuscation (SKILL.md is always readable)
   ✗ No phone-home on every use
   ✗ No hardware fingerprinting
-  
+
 Why light touch:
   - Skills are text files — heavy DRM is impossible anyway
   - Trust-based system works better for this audience
@@ -270,14 +270,14 @@ Why light touch:
 
 Comparison with other platforms:
 
-| Platform | Creator Cut | Platform Fee |
-|----------|-------------|--------------|
-| **SPM** | **80-95%** | **0-15%** |
-| Apple App Store | 70-85% | 15-30% |
-| Google Play | 70-85% | 15-30% |
-| Gumroad | 90% | 10% |
-| npm (no paid) | — | — |
-| VS Code (free) | — | — |
+| Platform        | Creator Cut | Platform Fee |
+| --------------- | ----------- | ------------ |
+| **SPM**         | **80-95%**  | **0-15%**    |
+| Apple App Store | 70-85%      | 15-30%       |
+| Google Play     | 70-85%      | 15-30%       |
+| Gumroad         | 90%         | 10%          |
+| npm (no paid)   | —           | —            |
+| VS Code (free)  | —           | —            |
 
 ### 4.2 Author Payouts
 
@@ -307,16 +307,18 @@ $ spm earnings
   └────────────────────────────────────────────┘
 
   Lifetime earnings: $12,847.30
-  
+
   Payout settings: spm earnings settings
 ```
 
 Payout methods:
+
 - **Stripe Connect** (primary) — direct to bank account
 - **GitHub Sponsors** passthrough — for authors who prefer GitHub's infra
 - **PayPal** — fallback option
 
 Payout schedule:
+
 - Monthly, on the 1st
 - Minimum payout: $50 (below that, rolls over)
 - Payout in USD, EUR, or GBP (author's choice)
@@ -328,15 +330,15 @@ $ spm earnings settings
 
   ? Payout method:
     ❯ Bank account (via Stripe Connect)
-  
+
   ? Tax information:
-    SPM uses Stripe Connect for payouts. Stripe handles 
+    SPM uses Stripe Connect for payouts. Stripe handles
     tax form generation (1099-K for US, equivalent for other regions).
-    
+
     Please complete tax information in your Stripe dashboard:
     https://connect.stripe.com/setup/...
-  
-  ⚠️  SPM does not provide tax advice. Consult a tax professional 
+
+  ⚠️  SPM does not provide tax advice. Consult a tax professional
      about reporting income from skill sales.
 ```
 
@@ -634,25 +636,25 @@ CREATE TABLE licenses (
     user_id         UUID NOT NULL REFERENCES authors(id),
     skill_name      VARCHAR(64) NOT NULL,
     skill_version_id UUID REFERENCES skill_versions(id),
-    
+
     type            VARCHAR(16) NOT NULL,
         -- 'perpetual', 'subscription', 'trial'
     status          VARCHAR(16) DEFAULT 'active',
         -- 'active', 'expired', 'revoked', 'refunded'
-    
+
     license_key     VARCHAR(128) UNIQUE NOT NULL,
-    
+
     -- Payment info
     stripe_payment_id   VARCHAR(128),
     stripe_subscription_id VARCHAR(128),
     amount_paid     DECIMAL(10,2),
     currency        VARCHAR(3) DEFAULT 'USD',
-    
+
     -- Validity
     purchased_at    TIMESTAMPTZ DEFAULT NOW(),
     expires_at      TIMESTAMPTZ,  -- NULL = perpetual
     version_range   VARCHAR(16),  -- e.g., "2.x"
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -661,12 +663,12 @@ CREATE TABLE trials (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL REFERENCES authors(id),
     skill_name      VARCHAR(64) NOT NULL,
-    
+
     status          VARCHAR(16) DEFAULT 'active',
     started_at      TIMESTAMPTZ DEFAULT NOW(),
     expires_at      TIMESTAMPTZ NOT NULL,
     converted       BOOLEAN DEFAULT FALSE,  -- Did they purchase after trial?
-    
+
     UNIQUE (user_id, skill_name)  -- One trial per user per skill
 );
 
@@ -674,15 +676,15 @@ CREATE TABLE trials (
 CREATE TABLE author_payment_accounts (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     author_id       UUID UNIQUE NOT NULL REFERENCES authors(id),
-    
+
     stripe_connect_id VARCHAR(128),
     payout_method   VARCHAR(16),  -- 'stripe', 'paypal', 'github_sponsors'
     payout_currency VARCHAR(3) DEFAULT 'USD',
-    
+
     -- Tax info
     tax_info_provided BOOLEAN DEFAULT FALSE,
     tax_country     VARCHAR(2),
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -690,26 +692,26 @@ CREATE TABLE author_payment_accounts (
 CREATE TABLE transactions (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     license_id      UUID REFERENCES licenses(id),
-    
+
     type            VARCHAR(16) NOT NULL,
         -- 'purchase', 'subscription_renewal', 'refund',
         -- 'payout', 'sponsorship', 'tip'
-    
+
     -- Parties
     buyer_id        UUID REFERENCES authors(id),
     seller_id       UUID REFERENCES authors(id),
-    
+
     -- Amounts
     gross_amount    DECIMAL(10,2) NOT NULL,
     platform_fee    DECIMAL(10,2),
     processing_fee  DECIMAL(10,2),
     author_amount   DECIMAL(10,2),
     currency        VARCHAR(3) DEFAULT 'USD',
-    
+
     -- Stripe reference
     stripe_payment_intent VARCHAR(128),
     stripe_transfer_id    VARCHAR(128),
-    
+
     status          VARCHAR(16) DEFAULT 'completed',
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
@@ -720,18 +722,18 @@ CREATE TABLE sponsorships (
     sponsor_id      UUID NOT NULL REFERENCES authors(id),
     author_id       UUID NOT NULL REFERENCES authors(id),
     skill_name      VARCHAR(64),  -- NULL = sponsor the author generally
-    
+
     tier            VARCHAR(32),
     amount          DECIMAL(10,2) NOT NULL,
     currency        VARCHAR(3) DEFAULT 'USD',
     frequency       VARCHAR(16) DEFAULT 'monthly',
-    
+
     stripe_subscription_id VARCHAR(128),
-    
+
     status          VARCHAR(16) DEFAULT 'active',
     started_at      TIMESTAMPTZ DEFAULT NOW(),
     cancelled_at    TIMESTAMPTZ,
-    
+
     UNIQUE (sponsor_id, author_id, skill_name)
 );
 
@@ -739,25 +741,25 @@ CREATE TABLE sponsorships (
 CREATE TABLE payouts (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     author_id       UUID NOT NULL REFERENCES authors(id),
-    
+
     amount          DECIMAL(10,2) NOT NULL,
     currency        VARCHAR(3) DEFAULT 'USD',
-    
+
     period_start    DATE NOT NULL,
     period_end      DATE NOT NULL,
-    
+
     stripe_transfer_id VARCHAR(128),
-    
+
     status          VARCHAR(16) DEFAULT 'pending',
         -- 'pending', 'processing', 'completed', 'failed'
-    
+
     paid_at         TIMESTAMPTZ,
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX idx_licenses_user ON licenses (user_id, skill_name);
 CREATE INDEX idx_transactions_seller ON transactions (seller_id, created_at);
-CREATE INDEX idx_sponsorships_author ON sponsorships (author_id) 
+CREATE INDEX idx_sponsorships_author ON sponsorships (author_id)
     WHERE status = 'active';
 CREATE INDEX idx_payouts_author ON payouts (author_id, period_start);
 ```
@@ -804,7 +806,7 @@ FRAUD_SIGNALS = {
         "signals": ["same IP", "same payment method", "account created same day"],
         "action": "block_transaction + flag_accounts"
     },
-    
+
     # Review manipulation
     "fake_reviews": {
         "detection": "Multiple positive reviews from new/related accounts",
@@ -812,7 +814,7 @@ FRAUD_SIGNALS = {
                      "same IP range", "identical review text"],
         "action": "remove_reviews + warn_author"
     },
-    
+
     # Download inflation
     "download_farming": {
         "detection": "Automated downloads to inflate stats",
@@ -821,14 +823,14 @@ FRAUD_SIGNALS = {
                      "burst pattern (100 downloads in 1 minute)"],
         "action": "exclude_from_counts + warn_author"
     },
-    
+
     # Refund abuse
     "refund_cycling": {
         "detection": "Buy, use, refund pattern",
         "signals": [">3 refunds in 30 days", "refund after extensive use"],
         "action": "deny_refund + restrict_purchases"
     },
-    
+
     # Price manipulation
     "price_bait_switch": {
         "detection": "List skill cheap, then raise price after reviews accumulate",

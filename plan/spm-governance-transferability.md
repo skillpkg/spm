@@ -14,6 +14,7 @@ Phase 4: Smooth handoff or shared governance — no rewrites needed
 ```
 
 This means every decision from Day 1 must optimize for:
+
 - **Clean IP ownership** — no ambiguity about who owns what
 - **Modular architecture** — components can be adopted independently
 - **Standard tooling** — nothing proprietary, everything replaceable
@@ -31,22 +32,22 @@ This is the most important decision for transferability.
 ```
 Why Apache 2.0 (not MIT, not AGPL):
 
-✓ Explicitly grants patent rights — protects Anthropic (or anyone)  
+✓ Explicitly grants patent rights — protects Anthropic (or anyone)
   from patent claims if they adopt it
 ✓ Requires attribution — your name stays on it
 ✓ Allows commercial use — no friction for corporate adoption
-✓ Allows proprietary extensions — a company can build on top  
+✓ Allows proprietary extensions — a company can build on top
   without open-sourcing their additions
-✓ CLA-compatible — standard for projects that may transfer  
+✓ CLA-compatible — standard for projects that may transfer
   to a foundation or company
-✗ Does NOT require derivative works to be open source  
+✗ Does NOT require derivative works to be open source
   (that's fine — you want adoption, not control)
 
 Why NOT MIT:
   - No patent grant (risky for corporate adopters)
 
 Why NOT AGPL:
-  - Forces anyone running the registry server to open-source  
+  - Forces anyone running the registry server to open-source
     their modifications — kills corporate/enterprise adoption
 
 Why NOT BSL/SSPL:
@@ -95,17 +96,17 @@ This is critical for transferability. A CLA ensures you (and later, any adopting
 
 By contributing to this project, you agree that:
 
-1. You grant the project maintainers a perpetual, worldwide, 
-   non-exclusive, royalty-free license to use, modify, and 
+1. You grant the project maintainers a perpetual, worldwide,
+   non-exclusive, royalty-free license to use, modify, and
    distribute your contributions under the project's license.
 
-2. You have the right to make your contributions (they're your 
+2. You have the right to make your contributions (they're your
    original work, or you have permission).
 
-3. Your contributions may be relicensed under a compatible 
+3. Your contributions may be relicensed under a compatible
    open-source license if the project governance changes.
 
-4. You understand that your contributions are public and that 
+4. You understand that your contributions are public and that
    a record of the contribution is maintained indefinitely.
 ```
 
@@ -197,14 +198,14 @@ spm/
 
 ### 4.2 Why This Structure Matters for Handoff
 
-| Decision | Reason |
-|----------|--------|
-| **Monorepo** | Everything in one place — easy to fork, easy to transfer ownership |
-| **Independent packages** | A company can adopt just the CLI, or just the registry, or just the scanner |
-| **Specs separate from code** | The protocol/format specs can live on even if the code is rewritten |
-| **IaC included** | New maintainer can deploy without reverse-engineering your setup |
-| **Docker Compose** | Anyone can run the full stack locally in 5 minutes |
-| **Comprehensive tests** | New maintainers can refactor with confidence |
+| Decision                     | Reason                                                                      |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| **Monorepo**                 | Everything in one place — easy to fork, easy to transfer ownership          |
+| **Independent packages**     | A company can adopt just the CLI, or just the registry, or just the scanner |
+| **Specs separate from code** | The protocol/format specs can live on even if the code is rewritten         |
+| **IaC included**             | New maintainer can deploy without reverse-engineering your setup            |
+| **Docker Compose**           | Anyone can run the full stack locally in 5 minutes                          |
+| **Comprehensive tests**      | New maintainers can refactor with confidence                                |
 
 ### 4.3 Technology Choices for Transferability
 
@@ -351,6 +352,7 @@ input from community contributors.
 Contributors who demonstrate sustained, high-quality contributions
 may be invited to become core maintainers. The lead maintainer
 makes this decision based on:
+
 - Quality and consistency of contributions
 - Understanding of project goals and architecture
 - Ability to review others' code constructively
@@ -543,15 +545,15 @@ What would make Anthropic (or a similar company) want to adopt/support SPM:
 
 ### 8.1 Things to Build
 
-| Feature | Why It Matters to Anthropic |
-|---------|---------------------------|
-| **Clean, well-tested codebase** | Low cost to adopt and maintain |
-| **Comprehensive specs** | Can reimplement in their preferred stack |
-| **Security scanning** | They care deeply about safety |
-| **Self-hosting support** | Enterprise customers need private registries |
-| **MCP integration** | Native to their ecosystem |
-| **Active community** | Proves demand, provides free QA |
-| **Usage metrics** | Shows the ecosystem is real and growing |
+| Feature                         | Why It Matters to Anthropic                  |
+| ------------------------------- | -------------------------------------------- |
+| **Clean, well-tested codebase** | Low cost to adopt and maintain               |
+| **Comprehensive specs**         | Can reimplement in their preferred stack     |
+| **Security scanning**           | They care deeply about safety                |
+| **Self-hosting support**        | Enterprise customers need private registries |
+| **MCP integration**             | Native to their ecosystem                    |
+| **Active community**            | Proves demand, provides free QA              |
+| **Usage metrics**               | Shows the ecosystem is real and growing      |
 
 ### 8.2 Community Building
 
@@ -577,12 +579,13 @@ Traction metrics that matter:
 
 When the time comes, you want to be able to say:
 
-> "SPM has X published skills, Y monthly active users, and Z 
-> companies running private registries. The codebase is Apache 2.0 
-> with a CLA, specs are fully documented, and the registry can be 
-> deployed on your infrastructure with `docker-compose up`. 
-> 
+> "SPM has X published skills, Y monthly active users, and Z
+> companies running private registries. The codebase is Apache 2.0
+> with a CLA, specs are fully documented, and the registry can be
+> deployed on your infrastructure with `docker-compose up`.
+>
 > Here's how we could work together:
+>
 > - You host the public registry (better infrastructure, trust signal)
 > - I continue as lead maintainer
 > - We integrate natively into major agent platforms (Claude Code, Cursor, Copilot, etc.)
@@ -592,17 +595,17 @@ When the time comes, you want to be able to say:
 
 ## 9. What NOT to Do
 
-| Anti-Pattern | Why It Kills Transferability |
-|--------------|----------------------------|
-| **Proprietary format** | No one will adopt a format only your code can read |
-| **Vendor-locked infra** | "Only works on AWS" limits who can run it |
-| **No specs, just code** | Forces adopter to reverse-engineer everything |
-| **GPL/AGPL license** | Corporate legal teams will reject it |
-| **No CLA** | Can't transfer IP cleanly |
-| **Hardcoded assumptions** | Config should be env vars, not code |
-| **Single-person bus factor** | Document everything, grow contributors |
-| **No tests** | New maintainers can't refactor safely |
-| **Mixing concerns** | CLI depending on registry internals = can't adopt separately |
+| Anti-Pattern                 | Why It Kills Transferability                                 |
+| ---------------------------- | ------------------------------------------------------------ |
+| **Proprietary format**       | No one will adopt a format only your code can read           |
+| **Vendor-locked infra**      | "Only works on AWS" limits who can run it                    |
+| **No specs, just code**      | Forces adopter to reverse-engineer everything                |
+| **GPL/AGPL license**         | Corporate legal teams will reject it                         |
+| **No CLA**                   | Can't transfer IP cleanly                                    |
+| **Hardcoded assumptions**    | Config should be env vars, not code                          |
+| **Single-person bus factor** | Document everything, grow contributors                       |
+| **No tests**                 | New maintainers can't refactor safely                        |
+| **Mixing concerns**          | CLI depending on registry internals = can't adopt separately |
 
 ---
 

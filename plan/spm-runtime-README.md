@@ -32,6 +32,7 @@ The SKILL.md file ships **bundled with the CLI binary** at `assets/spm-runtime-S
 ## When agents read it
 
 Agents only read spm-runtime when:
+
 1. The user asks about installed skills, the skill registry, or SPM
 2. The user wants to search for, install, update, or remove skills
 3. The agent can't find an installed skill matching the user's request
@@ -41,16 +42,16 @@ It is NOT read for normal task execution — the trigger description explicitly 
 
 ## Files
 
-| File | Purpose | Audience |
-|------|---------|----------|
-| `SKILL.md` | Instructions for agents about SPM ecosystem | Agents |
+| File            | Purpose                                               | Audience    |
+| --------------- | ----------------------------------------------------- | ----------- |
+| `SKILL.md`      | Instructions for agents about SPM ecosystem           | Agents      |
 | `manifest.json` | Package metadata (category: system, type: meta-skill) | SPM tooling |
-| `README.md` | This file — developer documentation | Humans |
+| `README.md`     | This file — developer documentation                   | Humans      |
 
 ## Key design decisions
 
 **Why a skill and not just MCP tools?**
-MCP tools let agents call `spm_search` and `spm_install`, but they don't explain *when* to use them, *how* to present results, or *what trust tiers mean*. The SKILL.md provides behavioral guidance that MCP tool descriptions can't.
+MCP tools let agents call `spm_search` and `spm_install`, but they don't explain _when_ to use them, _how_ to present results, or _what trust tiers mean_. The SKILL.md provides behavioral guidance that MCP tool descriptions can't.
 
 **Why bundled with the CLI, not in the registry?**
 Chicken-and-egg: the user needs spm-runtime to discover registry skills, but they can't download spm-runtime from the registry without having SPM set up. Bundling solves this.
@@ -64,6 +65,7 @@ Skills compete for context window space. If spm-runtime triggered on every reque
 ## Security considerations
 
 spm-runtime itself is safe:
+
 - Does not execute code
 - Does not access the network
 - Does not modify files
@@ -71,6 +73,7 @@ spm-runtime itself is safe:
 - Only provides instructions about how to interact with SPM
 
 The rules section (Section 7) explicitly instructs agents to:
+
 - Never install skills without user confirmation
 - Warn about unverified/low-trust skills
 - Never recommend bypassing security warnings

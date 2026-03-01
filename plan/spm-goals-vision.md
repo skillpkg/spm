@@ -16,7 +16,7 @@ The standard defines what a skill IS. But sharing skills is broken.
 Today, if you build a great skill:
 
   1. You put it in a GitHub repo, or ZIP it up
-  2. You... share the link on Discord? Post it on Reddit? 
+  2. You... share the link on Discord? Post it on Reddit?
      Email it? Upload it to a Slack channel?
   3. Someone clones/downloads it
   4. They manually place it in their skills directory
@@ -40,6 +40,7 @@ The Agent Skills spec (agentskills.io) defines the format. SPM solves distributi
 That's the whole pitch. One sentence.
 
 It should feel as natural as:
+
 - `npm install express` → `spm install data-viz`
 - `pip install pandas` → `spm install pdf-tools`
 - `brew install ffmpeg` → `spm install chart-maker`
@@ -71,12 +72,14 @@ $ spm publish
 **SPM is the package manager for Agent Skills.**
 
 It lets you:
+
 - **Find** skills that extend what your AI agents can do
 - **Install** them with one command, linked to all your agents
 - **Share** skills you've built with the community
 - **Manage** which skills are active, what version, and what depends on what
 
 It handles:
+
 - Packaging (SKILL.md + scripts + manifest → `.skl` file)
 - Versioning (semver, updates, changelogs)
 - Discovery (search, categories, keywords)
@@ -156,7 +159,7 @@ For Anthropic:
    standard, with built-in security and trust."
 
 For platform teams (Cursor, Codex, etc.):
-  "The missing distribution layer for the Agent Skills 
+  "The missing distribution layer for the Agent Skills
    standard your platform already supports."
 
 For the README:
@@ -204,11 +207,11 @@ SPM adds what the spec doesn't cover:
 
 ```
 1. ONE COMMAND TO VALUE
-   spm install X → all your agents can now do X. 
+   spm install X → all your agents can now do X.
    No config files, no setup, no restart.
 
 2. ZERO CONFIGURATION
-   Works out of the box. SPM auto-detects which agents 
+   Works out of the box. SPM auto-detects which agents
    you have (Claude Code, Cursor, VS Code, Codex) and links
    skills to all of them.
 
@@ -355,7 +358,7 @@ SKILL CONSUMERS (80% of users):
 SKILL AUTHORS (15% of users):
   Developers who build skills and want to share them.
   They publish, version, monitor analytics.
-  They care about: "can people find my skill?", "how many 
+  They care about: "can people find my skill?", "how many
   platforms can use it?", "how is it performing?"
 
 COMPANIES (5% of users):
@@ -392,7 +395,7 @@ DIRECT COMPETITORS:
     → No private registry support
     → Good: validated the market, fast to adopt
     → Weak: can't add security, trust, or analytics on top of npm
-    
+
     SPM's advantages over skillpm:
       ✓ Content security scanning (prompt injection detection)
       ✓ Trust tiers and publisher verification
@@ -400,7 +403,7 @@ DIRECT COMPETITORS:
       ✓ Agent-native discovery (AI suggests skills via MCP)
       ✓ Private registries for companies (federation)
       ✓ Bulk import tools for enterprise migration
-    
+
     SPM can ALSO import from npm:
       Skills published via skillpm on npm can be indexed/imported
       into SPM, adding security scanning and trust on top.
@@ -453,20 +456,20 @@ ADJACENT / ECOSYSTEM:
    for skill authors across all platforms.
 
 2. CONTENT SECURITY SCANNING
-   npm/pip scan for malware in code. SPM scans for prompt 
-   injection in natural language. This problem is new and 
+   npm/pip scan for malware in code. SPM scans for prompt
+   injection in natural language. This problem is new and
    SPM is the first to solve it systematically for skills.
 
 3. AI-NATIVE DISCOVERY
    Agents themselves can search and suggest skills via MCP.
-   "I don't have a skill for that, but there's one on SPM — 
-   want me to install it?" No other package manager has the 
+   "I don't have a skill for that, but there's one on SPM —
+   want me to install it?" No other package manager has the
    runtime actively discovering and recommending packages.
 
 4. THE DESCRIPTION IS THE INTERFACE
    In npm, the description is marketing. In SPM, the description
    is the trigger mechanism — it's literally how agents decide
-   whether to activate your skill. This changes how authors 
+   whether to activate your skill. This changes how authors
    think about metadata.
 
 5. CROSS-AGENT BY DEFAULT
@@ -475,7 +478,7 @@ ADJACENT / ECOSYSTEM:
 
 6. PURPOSE-BUILT REGISTRY
    Unlike tools that piggyback on npm, SPM's registry is
-   designed for skills: content scanning, trust tiers, 
+   designed for skills: content scanning, trust tiers,
    skill-specific search, federation for private registries.
    npm wasn't designed for AI instructions — SPM is.
 ```
@@ -487,7 +490,7 @@ ADJACENT / ECOSYSTEM:
 ```
 RISK: A major platform builds their own skill distribution
   MITIGATION: SPM is standards-aligned (agentskills.io) and
-  open source (Apache 2.0). Being cross-platform means no 
+  open source (Apache 2.0). Being cross-platform means no
   single platform's native solution replaces SPM.
   Even if Anthropic builds distribution for Claude, SPM serves
   users who use multiple agents.

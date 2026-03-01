@@ -101,11 +101,11 @@ $ spm init --from-conversation
     - Reads CSV files
     - Generates charts using plotly
     - Exports as HTML or PNG
-  
+
   ✓ Generated SKILL.md from conversation patterns
   ✓ Extracted scripts from code blocks
   ✓ Created test cases from conversation examples
-  
+
   Review generated files? (Y/n)
 ```
 
@@ -173,7 +173,7 @@ data-viz/
 ```markdown
 ---
 name: data-viz
-description: "Create publication-quality charts and dashboards from data files. Triggers on: charts, visualization, dashboard, plots, graphs, data display, histogram, scatter plot, bar chart."
+description: 'Create publication-quality charts and dashboards from data files. Triggers on: charts, visualization, dashboard, plots, graphs, data display, histogram, scatter plot, bar chart.'
 allowed-tools: bash_tool, create_file, view
 ---
 
@@ -185,8 +185,8 @@ allowed-tools: bash_tool, create_file, view
 
 ## Quick Reference
 
-| Task | Approach |
-|------|----------|
+| Task            | Approach           |
+| --------------- | ------------------ |
 | [Common task 1] | [How to handle it] |
 | [Common task 2] | [How to handle it] |
 
@@ -325,7 +325,7 @@ Test cases (from tests/eval.json):
 
   2/3 "Make a dashboard showing Q1-Q4 revenue trends"
       ✓ Skill triggered
-      ✓ SKILL.md read successfully  
+      ✓ SKILL.md read successfully
       ✓ scripts/main.py executed (exit 0)
       ✓ Output file generated: dashboard.html
       ⏱ 6.8s
@@ -364,9 +364,7 @@ Results: 3/3 passed (14.1s total)
     },
     {
       "prompt": "What is 2+2?",
-      "assertions": [
-        { "type": "skill_triggered", "expected": false }
-      ]
+      "assertions": [{ "type": "skill_triggered", "expected": false }]
     }
   ]
 }
@@ -421,7 +419,7 @@ Packing...
     references/chart-types.md (4.2 KB)
     LICENSE (1.1 KB)
     CHANGELOG.md (0.4 KB)
-  
+
   Excluding (.spmignore):
     __pycache__/
     tests/
@@ -539,7 +537,7 @@ Pre-flight checks...
     + scripts/heatmap.py (new file)
     ~ SKILL.md (12 lines changed)
     ~ manifest.json (added seaborn dependency)
-    
+
   No new permissions requested ✓
 
 ...rest of publish flow...
@@ -576,18 +574,18 @@ Categories are a **controlled vocabulary** — authors pick from a fixed list, n
 
 **Canonical category list:**
 
-| Category      | Description                                          |
-|---------------|------------------------------------------------------|
-| documents     | PDF, DOCX, PPTX, XLSX, text processing               |
-| data-viz      | Charts, dashboards, CSV/JSON, analytics              |
-| frontend      | UI, React, HTML/CSS, design systems                  |
-| backend       | API, GraphQL, REST, database, migrations             |
-| infra         | Docker, CI/CD, deploy, cloud, IaC                    |
-| testing       | Test generation, coverage, benchmarks                |
-| code-quality  | Linting, standards, review, refactoring              |
-| security      | Auth, encryption, vulnerability scanning             |
-| productivity  | Git, terminal, workflow automation                   |
-| other         | Doesn't fit above categories                         |
+| Category     | Description                              |
+| ------------ | ---------------------------------------- |
+| documents    | PDF, DOCX, PPTX, XLSX, text processing   |
+| data-viz     | Charts, dashboards, CSV/JSON, analytics  |
+| frontend     | UI, React, HTML/CSS, design systems      |
+| backend      | API, GraphQL, REST, database, migrations |
+| infra        | Docker, CI/CD, deploy, cloud, IaC        |
+| testing      | Test generation, coverage, benchmarks    |
+| code-quality | Linting, standards, review, refactoring  |
+| security     | Auth, encryption, vulnerability scanning |
+| productivity | Git, terminal, workflow automation       |
+| other        | Doesn't fit above categories             |
 
 **How it works:**
 
@@ -695,14 +693,14 @@ $ spm publish --org my-company
 
 ```bash
 $ spm token create --name "github-actions" --scope publish
-  
+
   Token: spm_tok_abc123def456...
-  
+
   ⚠️  This token is shown only once. Save it now.
-  
+
   For GitHub Actions, add as a secret:
     gh secret set SPM_TOKEN --body "spm_tok_abc123def456..."
-  
+
   Then in your workflow:
     - run: spm publish
       env:

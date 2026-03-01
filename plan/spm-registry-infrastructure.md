@@ -121,18 +121,18 @@ CREATE TABLE authors (
     bio             TEXT,
     website         VARCHAR(512),
     github_id       VARCHAR(64),
-    
+
     -- Trust & verification
     verified        BOOLEAN DEFAULT FALSE,
     verified_at     TIMESTAMPTZ,
     verified_method VARCHAR(32),  -- 'github', 'email', 'manual'
     trust_level     VARCHAR(16) DEFAULT 'unverified',
         -- 'official', 'verified', 'scanned', 'unverified'
-    
+
     -- Signing
     public_key      TEXT,         -- Sigstore identity (OIDC subject)
     key_registered  TIMESTAMPTZ,
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
@@ -141,10 +141,10 @@ CREATE TABLE skills (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name            VARCHAR(64) UNIQUE NOT NULL,
     author_id       UUID NOT NULL REFERENCES authors(id),
-    
+
     -- Latest version cache (denormalized for fast listing)
     latest_version  VARCHAR(32),
-    
+
     -- Discovery
     description     TEXT NOT NULL,
     category        VARCHAR(32),
@@ -152,21 +152,21 @@ CREATE TABLE skills (
     repository_url  TEXT,
     homepage_url    TEXT,
     license         VARCHAR(32),
-    
+
     -- Stats (denormalized, updated by background job)
     total_downloads BIGINT DEFAULT 0,
     weekly_downloads BIGINT DEFAULT 0,
     rating_avg      DECIMAL(3,2) DEFAULT 0,
     rating_count    INTEGER DEFAULT 0,
-    
+
     -- Trust
     is_official     BOOLEAN DEFAULT FALSE,
-    
+
     -- Status
     status          VARCHAR(16) DEFAULT 'active',
         -- 'active', 'deprecated', 'yanked', 'suspended'
     deprecated_by   VARCHAR(64),  -- replacement skill name
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
@@ -175,49 +175,49 @@ CREATE TABLE skill_versions (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     skill_id        UUID NOT NULL REFERENCES skills(id),
     version         VARCHAR(32) NOT NULL,
-    
+
     -- Package
     package_url     TEXT NOT NULL,      -- S3 URL to .skl file
     package_size    INTEGER NOT NULL,   -- bytes
     checksum        VARCHAR(128) NOT NULL,
-    
+
     -- Signature
     signature_url   TEXT,               -- S3 URL to .sig file
     signed          BOOLEAN DEFAULT FALSE,
     signer_identity VARCHAR(255),
     signed_at       TIMESTAMPTZ,
     rekor_log_id    VARCHAR(128),       -- Sigstore transparency log
-    
+
     -- Metadata (from manifest.json)
     manifest        JSONB NOT NULL,     -- full manifest.json
-    
+
     -- Compatibility
     min_context     VARCHAR(16),
     requires_tools  TEXT[],
     requires_network BOOLEAN DEFAULT FALSE,
     platforms       TEXT[],
-    
+
     -- Dependencies
     skill_deps      JSONB DEFAULT '{}',  -- { "skill-name": "version-range" }
     system_deps     JSONB DEFAULT '{}',  -- { "python": ">=3.10", ... }
-    
+
     -- Security
     scan_status     VARCHAR(16) DEFAULT 'pending',
         -- 'pending', 'passed', 'failed', 'warning'
     scan_report     JSONB,
     scanned_at      TIMESTAMPTZ,
-    
+
     -- Status
     status          VARCHAR(16) DEFAULT 'active',
         -- 'active', 'yanked', 'deprecated'
     yanked_reason   TEXT,
-    
+
     -- Files listing (for browsing without download)
     file_list       JSONB,  -- [{ "path": "...", "size": 123 }]
     readme_html     TEXT,   -- Pre-rendered SKILL.md for web UI
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW(),
-    
+
     UNIQUE (skill_id, version)
 );
 
@@ -225,18 +225,18 @@ CREATE TABLE reviews (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     skill_id        UUID NOT NULL REFERENCES skills(id),
     author_id       UUID NOT NULL REFERENCES authors(id),
-    
+
     rating          INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
     title           VARCHAR(128),
     body            TEXT,
-    
+
     -- Moderation
     flagged         BOOLEAN DEFAULT FALSE,
     hidden          BOOLEAN DEFAULT FALSE,
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     updated_at      TIMESTAMPTZ DEFAULT NOW(),
-    
+
     UNIQUE (skill_id, author_id)  -- One review per user per skill
 );
 
@@ -244,12 +244,12 @@ CREATE TABLE downloads (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     skill_id        UUID NOT NULL REFERENCES skills(id),
     version_id      UUID NOT NULL REFERENCES skill_versions(id),
-    
+
     -- Anonymous download tracking
     source          VARCHAR(16),  -- 'cli', 'mcp', 'web', 'ci'
     platform        VARCHAR(16),  -- 'claude-code', 'cursor', 'copilot', etc.
     region          VARCHAR(8),   -- rough geo for CDN optimization
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -260,11 +260,11 @@ CREATE TABLE downloads (
 CREATE TABLE security_scans (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     version_id      UUID NOT NULL REFERENCES skill_versions(id),
-    
+
     -- Overall result
     status          VARCHAR(16) NOT NULL, -- 'passed', 'failed', 'warning'
     scanner_version VARCHAR(16),          -- SPM scanner pipeline version
-    
+
     -- Per-layer results (vendor-agnostic — each layer is a pluggable provider)
     -- Stored as JSONB so we can add/swap layers without schema migrations.
     --
@@ -282,22 +282,22 @@ CREATE TABLE security_scans (
     layer_1_result  JSONB,    -- Regex pattern matching (built-in, fast)
     layer_2_result  JSONB,    -- ML classification (ProtectAI DeBERTa or successor)
     layer_3_result  JSONB,    -- Commercial API (Lakera Guard or successor)
-    
+
     -- Legacy flat fields (kept for backward compat, derived from layers)
     static_analysis JSONB,    -- { issues: [...] }
     injection_scan  JSONB,    -- { issues: [...] }
     permission_audit JSONB,   -- { declared: {...}, detected: {...} }
     sandbox_result  JSONB,    -- { network_calls: [], file_access: [] }
-    
+
     -- For updates: diff against previous version
     diff_review     JSONB,    -- { new_permissions: [], changes: [] }
     previous_version_id UUID REFERENCES skill_versions(id),
-    
+
     -- Human review
     human_reviewed  BOOLEAN DEFAULT FALSE,
     reviewer_id     UUID REFERENCES authors(id),
     reviewer_notes  TEXT,
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -311,14 +311,14 @@ CREATE TABLE audit_log (
     target_id       UUID,
     details         JSONB,
     ip_address      INET,
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================
 -- Publish attempts (every publish, success or failure)
 -- =============================================
--- 
+--
 -- Records EVERY publish attempt, not just successes.
 -- Used for:
 --   1. Publisher feedback: "You had 3 blocked attempts before this succeeded"
@@ -334,24 +334,24 @@ CREATE TABLE publish_attempts (
     author_id       UUID NOT NULL REFERENCES authors(id),
     skill_name      VARCHAR(64) NOT NULL,  -- may not exist in skills table yet
     version         VARCHAR(32) NOT NULL,
-    
+
     -- Outcome
     status          VARCHAR(16) NOT NULL,
         -- 'passed'           — all layers passed, skill published
         -- 'blocked'          — rejected by a security layer
         -- 'held_for_review'  — borderline, queued for human review
         -- 'validation_error' — manifest/structure issues (pre-scan)
-    
+
     blocked_by_layer INTEGER,              -- 1, 2, or 3 (NULL if passed)
     issues          JSONB,                 -- full issue details + fix suggestions
-    
+
     -- Context
     cli_version     VARCHAR(16),           -- which CLI version submitted this
     ip_address      INET,
-    
+
     -- Timing
     scan_duration_ms INTEGER,              -- how long all layers took
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -367,13 +367,13 @@ CREATE TABLE api_tokens (
     author_id       UUID NOT NULL REFERENCES authors(id),
     token_hash      VARCHAR(128) NOT NULL,  -- bcrypt hash of token
     name            VARCHAR(64),
-    
+
     scopes          TEXT[] DEFAULT ARRAY['publish'],
-    
+
     last_used_at    TIMESTAMPTZ,
     expires_at      TIMESTAMPTZ,
     revoked         BOOLEAN DEFAULT FALSE,
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -467,17 +467,17 @@ The API never serves the file directly — it generates a **pre-signed URL** wit
 // API: generate download URL
 async function handleDownload(req, res) {
   const { name, version } = req.params;
-  
+
   // 1. Verify skill+version exists
   const skill = await db.query(
     'SELECT sv.package_url, sv.checksum FROM skill_versions sv ' +
-    'JOIN skills s ON sv.skill_id = s.id ' +
-    'WHERE s.name = $1 AND sv.version = $2 AND sv.status = $3',
-    [name, version, 'active']
+      'JOIN skills s ON sv.skill_id = s.id ' +
+      'WHERE s.name = $1 AND sv.version = $2 AND sv.status = $3',
+    [name, version, 'active'],
   );
-  
+
   if (!skill.rows.length) return res.status(404).json({ error: 'Not found' });
-  
+
   // 2. Log download (async, don't block response)
   downloadQueue.add({
     skill_name: name,
@@ -485,14 +485,14 @@ async function handleDownload(req, res) {
     source: req.headers['x-spm-source'] || 'unknown',
     platform: req.headers['x-spm-platform'] || 'unknown',
   });
-  
+
   // 3. Generate pre-signed URL (expires in 5 minutes)
   const url = await s3.getSignedUrl('getObject', {
     Bucket: 'spm-registry',
     Key: `packages/${name}/${name}-${version}.skl`,
     Expires: 300,
   });
-  
+
   // 4. Redirect (CDN will cache this)
   res.setHeader('X-Checksum', skill.rows[0].checksum);
   res.redirect(302, url);
@@ -519,22 +519,27 @@ const s3 = new S3Client({ region: process.env.AWS_REGION });
 // ── Search ──────────────────────────────────────────────
 
 fastify.get('/api/v1/skills', async (req, res) => {
-  const { 
-    q, category, verified, signed, 
-    sort = 'downloads', order = 'desc',
-    page = 1, limit = 20 
+  const {
+    q,
+    category,
+    verified,
+    signed,
+    sort = 'downloads',
+    order = 'desc',
+    page = 1,
+    limit = 20,
   } = req.query;
-  
+
   // Check cache first
   const cacheKey = `search:${JSON.stringify(req.query)}`;
   const cached = await redis.get(cacheKey);
   if (cached) return JSON.parse(cached);
-  
+
   // Build query
   let where = ['s.status = $1'];
   let params = ['active'];
   let paramIdx = 2;
-  
+
   if (q) {
     where.push(`(
       s.name ILIKE $${paramIdx} OR
@@ -544,27 +549,29 @@ fastify.get('/api/v1/skills', async (req, res) => {
     params.push(`%${q}%`, q, q.toLowerCase());
     paramIdx += 3;
   }
-  
+
   if (category) {
     where.push(`s.category = $${paramIdx}`);
     params.push(category);
     paramIdx++;
   }
-  
+
   if (verified === 'true') {
     where.push(`a.verified = true`);
   }
-  
-  const sortColumn = {
-    downloads: 's.total_downloads',
-    rating: 's.rating_avg',
-    recent: 's.updated_at',
-    name: 's.name',
-  }[sort] || 's.total_downloads';
-  
+
+  const sortColumn =
+    {
+      downloads: 's.total_downloads',
+      rating: 's.rating_avg',
+      recent: 's.updated_at',
+      name: 's.name',
+    }[sort] || 's.total_downloads';
+
   const offset = (page - 1) * limit;
-  
-  const result = await db.query(`
+
+  const result = await db.query(
+    `
     SELECT 
       s.name, s.latest_version as version, s.description,
       s.category, s.keywords, s.total_downloads as downloads,
@@ -580,143 +587,176 @@ fastify.get('/api/v1/skills', async (req, res) => {
     WHERE ${where.join(' AND ')}
     ORDER BY ${sortColumn} ${order === 'asc' ? 'ASC' : 'DESC'}
     LIMIT $${paramIdx} OFFSET $${paramIdx + 1}
-  `, [...params, limit, offset]);
-  
-  const countResult = await db.query(`
+  `,
+    [...params, limit, offset],
+  );
+
+  const countResult = await db.query(
+    `
     SELECT COUNT(*) FROM skills s 
     JOIN authors a ON s.author_id = a.id
     WHERE ${where.join(' AND ')}
-  `, params);
-  
+  `,
+    params,
+  );
+
   const response = {
     results: result.rows.map(formatSkillResult),
     total: parseInt(countResult.rows[0].count),
     page,
-    pages: Math.ceil(countResult.rows[0].count / limit)
+    pages: Math.ceil(countResult.rows[0].count / limit),
   };
-  
+
   // Cache for 60 seconds
   await redis.setex(cacheKey, 60, JSON.stringify(response));
-  
+
   return response;
 });
 
 // ── Publish ─────────────────────────────────────────────
 
-fastify.post('/api/v1/skills', {
-  preHandler: [authenticate, rateLimit('publish', 10, '1h')]
-}, async (req, res) => {
-  const author = req.user;
-  const file = req.body.package;  // multipart .skl upload
-  
-  // 1. Extract and validate manifest
-  const tempDir = await extractSkl(file);
-  const manifest = await readManifest(tempDir);
-  validateManifest(manifest);
-  
-  // 2. Check ownership (only original author or collaborators)
-  const existing = await db.query(
-    'SELECT id, author_id FROM skills WHERE name = $1', 
-    [manifest.name]
-  );
-  if (existing.rows.length && existing.rows[0].author_id !== author.id) {
-    return res.status(403).json({ error: 'Skill name is owned by another author' });
-  }
-  
-  // 3. Check version doesn't already exist
-  if (existing.rows.length) {
-    const versionExists = await db.query(
-      'SELECT id FROM skill_versions WHERE skill_id = $1 AND version = $2',
-      [existing.rows[0].id, manifest.version]
-    );
-    if (versionExists.rows.length) {
-      return res.status(409).json({ error: `Version ${manifest.version} already exists` });
+fastify.post(
+  '/api/v1/skills',
+  {
+    preHandler: [authenticate, rateLimit('publish', 10, '1h')],
+  },
+  async (req, res) => {
+    const author = req.user;
+    const file = req.body.package; // multipart .skl upload
+
+    // 1. Extract and validate manifest
+    const tempDir = await extractSkl(file);
+    const manifest = await readManifest(tempDir);
+    validateManifest(manifest);
+
+    // 2. Check ownership (only original author or collaborators)
+    const existing = await db.query('SELECT id, author_id FROM skills WHERE name = $1', [
+      manifest.name,
+    ]);
+    if (existing.rows.length && existing.rows[0].author_id !== author.id) {
+      return res.status(403).json({ error: 'Skill name is owned by another author' });
     }
-  }
-  
-  // 4. Upload .skl to S3
-  const packageKey = `packages/${manifest.name}/${manifest.name}-${manifest.version}.skl`;
-  const checksum = computeChecksum(file);
-  await uploadToS3(packageKey, file);
-  
-  // 5. Upload signature if present
-  let signatureInfo = {};
-  if (req.body.signature) {
-    const sigKey = `${packageKey}.sig`;
-    await uploadToS3(sigKey, req.body.signature);
-    signatureInfo = await verifySignature(file, req.body.signature, author);
-  }
-  
-  // 6. Insert into database (transaction)
-  const client = await db.connect();
-  try {
-    await client.query('BEGIN');
-    
-    let skillId;
-    if (!existing.rows.length) {
-      // New skill
-      const result = await client.query(`
+
+    // 3. Check version doesn't already exist
+    if (existing.rows.length) {
+      const versionExists = await db.query(
+        'SELECT id FROM skill_versions WHERE skill_id = $1 AND version = $2',
+        [existing.rows[0].id, manifest.version],
+      );
+      if (versionExists.rows.length) {
+        return res.status(409).json({ error: `Version ${manifest.version} already exists` });
+      }
+    }
+
+    // 4. Upload .skl to S3
+    const packageKey = `packages/${manifest.name}/${manifest.name}-${manifest.version}.skl`;
+    const checksum = computeChecksum(file);
+    await uploadToS3(packageKey, file);
+
+    // 5. Upload signature if present
+    let signatureInfo = {};
+    if (req.body.signature) {
+      const sigKey = `${packageKey}.sig`;
+      await uploadToS3(sigKey, req.body.signature);
+      signatureInfo = await verifySignature(file, req.body.signature, author);
+    }
+
+    // 6. Insert into database (transaction)
+    const client = await db.connect();
+    try {
+      await client.query('BEGIN');
+
+      let skillId;
+      if (!existing.rows.length) {
+        // New skill
+        const result = await client.query(
+          `
         INSERT INTO skills (name, author_id, latest_version, description, 
           category, keywords, repository_url, license)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING id
-      `, [manifest.name, author.id, manifest.version, manifest.description,
-          manifest.category, manifest.keywords, manifest.repository, manifest.license]);
-      skillId = result.rows[0].id;
-    } else {
-      skillId = existing.rows[0].id;
+      `,
+          [
+            manifest.name,
+            author.id,
+            manifest.version,
+            manifest.description,
+            manifest.category,
+            manifest.keywords,
+            manifest.repository,
+            manifest.license,
+          ],
+        );
+        skillId = result.rows[0].id;
+      } else {
+        skillId = existing.rows[0].id;
+        await client.query(
+          'UPDATE skills SET latest_version = $1, updated_at = NOW() WHERE id = $2',
+          [manifest.version, skillId],
+        );
+      }
+
       await client.query(
-        'UPDATE skills SET latest_version = $1, updated_at = NOW() WHERE id = $2',
-        [manifest.version, skillId]
-      );
-    }
-    
-    await client.query(`
+        `
       INSERT INTO skill_versions (skill_id, version, package_url, package_size,
         checksum, signed, signer_identity, signed_at, manifest,
         requires_tools, requires_network, platforms, skill_deps, system_deps)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-    `, [skillId, manifest.version, packageKey, file.length,
-        checksum, !!signatureInfo.verified, signatureInfo.signer,
-        signatureInfo.timestamp, JSON.stringify(manifest),
-        manifest.agents?.requires_tools,
-        manifest.agents?.requires_network,
-        manifest.agents?.platforms,
-        JSON.stringify(manifest.dependencies?.skills || {}),
-        JSON.stringify(manifest.dependencies?.system || {})]);
-    
-    // Audit log
-    await client.query(`
+    `,
+        [
+          skillId,
+          manifest.version,
+          packageKey,
+          file.length,
+          checksum,
+          !!signatureInfo.verified,
+          signatureInfo.signer,
+          signatureInfo.timestamp,
+          JSON.stringify(manifest),
+          manifest.agents?.requires_tools,
+          manifest.agents?.requires_network,
+          manifest.agents?.platforms,
+          JSON.stringify(manifest.dependencies?.skills || {}),
+          JSON.stringify(manifest.dependencies?.system || {}),
+        ],
+      );
+
+      // Audit log
+      await client.query(
+        `
       INSERT INTO audit_log (actor_id, action, target_type, target_id, details)
       VALUES ($1, 'publish', 'skill', $2, $3)
-    `, [author.id, skillId, JSON.stringify({ version: manifest.version })]);
-    
-    await client.query('COMMIT');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
-  
-  // 7. Queue security scan (async)
-  await scanQueue.add('scan', {
-    skillId,
-    version: manifest.version,
-    packageKey,
-  });
-  
-  // 8. Invalidate search cache
-  await redis.del('search:*');
-  
-  return res.status(201).json({
-    published: true,
-    name: manifest.name,
-    version: manifest.version,
-    url: `https://spm.dev/skills/${manifest.name}`,
-    scan_status: 'pending'
-  });
-});
+    `,
+        [author.id, skillId, JSON.stringify({ version: manifest.version })],
+      );
+
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+
+    // 7. Queue security scan (async)
+    await scanQueue.add('scan', {
+      skillId,
+      version: manifest.version,
+      packageKey,
+    });
+
+    // 8. Invalidate search cache
+    await redis.del('search:*');
+
+    return res.status(201).json({
+      published: true,
+      name: manifest.name,
+      version: manifest.version,
+      url: `https://spm.dev/skills/${manifest.name}`,
+      scan_status: 'pending',
+    });
+  },
+);
 
 // ── Download ────────────────────────────────────────────
 
@@ -728,31 +768,37 @@ fastify.get('/api/v1/skills/:name/:version/download', async (req, res) => {
 
 fastify.get('/api/v1/skills/:name', async (req, res) => {
   const { name } = req.params;
-  
+
   const cacheKey = `skill:${name}`;
   const cached = await redis.get(cacheKey);
   if (cached) return JSON.parse(cached);
-  
-  const skill = await db.query(`
+
+  const skill = await db.query(
+    `
     SELECT s.*, a.username as author_name, a.verified as author_verified,
            a.avatar_url as author_avatar
     FROM skills s JOIN authors a ON s.author_id = a.id
     WHERE s.name = $1
-  `, [name]);
-  
+  `,
+    [name],
+  );
+
   if (!skill.rows.length) return res.status(404).json({ error: 'Not found' });
-  
-  const versions = await db.query(`
+
+  const versions = await db.query(
+    `
     SELECT version, created_at, signed, scan_status, package_size, platforms
     FROM skill_versions WHERE skill_id = $1
     ORDER BY created_at DESC
-  `, [skill.rows[0].id]);
-  
+  `,
+    [skill.rows[0].id],
+  );
+
   const response = {
     ...formatSkillDetail(skill.rows[0]),
-    versions: versions.rows
+    versions: versions.rows,
   };
-  
+
   await redis.setex(cacheKey, 300, JSON.stringify(response));
   return response;
 });
@@ -762,8 +808,9 @@ fastify.get('/api/v1/skills/:name', async (req, res) => {
 fastify.get('/api/v1/skills/:name/resolve', async (req, res) => {
   const { name } = req.params;
   const { range = 'latest' } = req.query;
-  
-  const versions = await db.query(`
+
+  const versions = await db.query(
+    `
     SELECT sv.version, sv.checksum, sv.signed, sv.signer_identity,
            sv.scan_status, sv.package_size, sv.skill_deps, sv.system_deps,
            sv.manifest
@@ -771,30 +818,32 @@ fastify.get('/api/v1/skills/:name/resolve', async (req, res) => {
     JOIN skills s ON sv.skill_id = s.id
     WHERE s.name = $1 AND sv.status = 'active'
     ORDER BY sv.created_at DESC
-  `, [name]);
-  
+  `,
+    [name],
+  );
+
   if (!versions.rows.length) {
     return res.status(404).json({ error: `Skill '${name}' not found` });
   }
-  
+
   // Resolve version range
-  const allVersions = versions.rows.map(v => v.version);
+  const allVersions = versions.rows.map((v) => v.version);
   let resolved;
-  
+
   if (range === 'latest') {
     resolved = versions.rows[0];
   } else {
     const semver = require('semver');
     const match = semver.maxSatisfying(allVersions, range);
     if (!match) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         error: `No version of '${name}' satisfies ${range}`,
-        available: allVersions 
+        available: allVersions,
       });
     }
-    resolved = versions.rows.find(v => v.version === match);
+    resolved = versions.rows.find((v) => v.version === match);
   }
-  
+
   return {
     name,
     requested: range,
@@ -807,9 +856,9 @@ fastify.get('/api/v1/skills/:name/resolve', async (req, res) => {
     scan_status: resolved.scan_status,
     dependencies: {
       skills: resolved.skill_deps,
-      system: resolved.system_deps
+      system: resolved.system_deps,
     },
-    size_bytes: resolved.package_size
+    size_bytes: resolved.package_size,
   };
 });
 
@@ -830,11 +879,11 @@ Redis serves three purposes:
    Value: JSON search results
    Invalidated on: new publish, yank
 
-2. RATE LIMITING  
+2. RATE LIMITING
    Key: ratelimit:{action}:{author-id}
    TTL: varies by action
    Value: counter
-   
+
    Limits:
      publish:   10/hour per author
      download:  1000/hour per IP
@@ -845,7 +894,7 @@ Redis serves three purposes:
    Key: downloads:{skill}:{date}
    TTL: 90 days
    Value: counter (INCR)
-   
+
    Aggregated nightly into PostgreSQL
    Enables weekly_downloads without counting rows
 
@@ -970,7 +1019,7 @@ services:
   api:
     image: ghcr.io/spm-dev/spm-registry:latest
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       DATABASE_URL: postgres://spm:password@postgres:5432/spm
       REDIS_URL: redis://redis:6379
@@ -1015,7 +1064,7 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "443:443"
+      - '443:443'
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./certs:/etc/ssl/certs
@@ -1053,9 +1102,9 @@ $ spm config set registry https://spm.yourcompany.com/api/v1
 // skills.json
 {
   "skills": {
-    "data-viz": "^1.2.0",                      // → default registry
-    "@mycompany/internal-report": "^2.0.0",     // → company registry
-    "@partner/special-tool": "^1.0.0"           // → partner registry
+    "data-viz": "^1.2.0", // → default registry
+    "@mycompany/internal-report": "^2.0.0", // → company registry
+    "@partner/special-tool": "^1.0.0" // → partner registry
   }
 }
 ```

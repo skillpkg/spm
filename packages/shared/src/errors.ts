@@ -6,17 +6,29 @@ export const ERROR_CODES = {
   // Skills
   SKILL_NOT_FOUND: { code: 'skill_not_found', status: 404, message: 'Skill not found' },
   VERSION_NOT_FOUND: { code: 'version_not_found', status: 404, message: 'Version not found' },
-  VERSION_EXISTS: { code: 'version_exists', status: 409, message: 'Version already published. Version numbers are immutable.' },
+  VERSION_EXISTS: {
+    code: 'version_exists',
+    status: 409,
+    message: 'Version already published. Version numbers are immutable.',
+  },
 
   // Validation
   VALIDATION_ERROR: { code: 'validation_error', status: 422, message: 'Invalid request data' },
-  PUBLISH_BLOCKED: { code: 'publish_blocked', status: 422, message: 'Security scan blocked publication' },
+  PUBLISH_BLOCKED: {
+    code: 'publish_blocked',
+    status: 422,
+    message: 'Security scan blocked publication',
+  },
 
   // Name
   NAME_TAKEN: { code: 'name_taken', status: 409, message: 'Skill name already registered' },
   NAME_INVALID: { code: 'name_invalid', status: 422, message: 'Invalid skill name' },
   NAME_RESERVED: { code: 'name_reserved', status: 422, message: 'This name is reserved' },
-  NAME_SIMILAR: { code: 'name_similar', status: 422, message: 'Name too similar to existing skill' },
+  NAME_SIMILAR: {
+    code: 'name_similar',
+    status: 422,
+    message: 'Name too similar to existing skill',
+  },
 
   // Rate limiting
   RATE_LIMITED: { code: 'rate_limited', status: 429, message: 'Too many requests' },

@@ -41,11 +41,11 @@ RESERVED_NAMES = {
     "pdf", "docx", "xlsx", "pptx", "csv",
     "frontend-design", "product-self-knowledge",
     "skill-creator", "mcp-builder",
-    
+
     # SPM internal names
     "spm", "spm-runtime", "spm-core", "spm-cli",
     "spm-registry", "spm-scanner", "spm-sdk",
-    
+
     # Platform names (all 37+ supported agent platforms)
     "claude", "anthropic", "claude-code", "cowork",
     "chatgpt", "openai", "codex", "copilot",
@@ -54,19 +54,20 @@ RESERVED_NAMES = {
     "microsoft", "meta", "llama",
     "goose", "amp", "kiro", "roo-code",
     "vercel", "skills-sh",
-    
+
     # Generic high-value names
     "core", "base", "common", "utils", "helpers",
     "standard", "default", "official", "admin",
     "test", "debug", "example", "template",
     "config", "settings", "preferences",
-    
+
     # Offensive/misleading
     # (loaded from a maintained blocklist)
 }
 ```
 
 Reserved names can only be published by:
+
 - SPM team (Tier 4: Official)
 - Explicit approval from SPM admin
 
@@ -159,7 +160,7 @@ interface NameCheckResult {
 }
 
 class NameSquatDetector {
-    
+
     # Prefixes/suffixes that imply authority or fake relationship
     SUSPICIOUS_PREFIXES = [
         "the-", "real-", "official-", "true-", "original-",
@@ -170,13 +171,13 @@ class NameSquatDetector {
         "-secure", "-plus", "-pro", "-better",
         "-improved", "-v2", "-new", "-latest",
     ]
-    
+
     def __init__(self, existing_names: set[str]):
         self.existing = existing_names
         self.normalized_map = {
             self._normalize(n): n for n in existing_names
         }
-    
+
     def check(self, proposed: str) -> dict:
         """
         Returns:
@@ -188,7 +189,7 @@ class NameSquatDetector {
           }
         """
         issues = []
-        
+
         # 1. Reserved name check
         if proposed in RESERVED_NAMES:
             issues.append({
@@ -197,7 +198,7 @@ class NameSquatDetector {
                 "details": f"'{proposed}' is a reserved name"
             })
             return {"allowed": False, "issues": issues}
-        
+
         # 2. Exact duplicate (case-insensitive)
         if proposed.lower() in {n.lower() for n in self.existing}:
             issues.append({
@@ -206,7 +207,7 @@ class NameSquatDetector {
                 "details": f"'{proposed}' is already taken"
             })
             return {"allowed": False, "issues": issues}
-        
+
         # 3. Normalized collision (remove hyphens, lowercase)
         normalized = self._normalize(proposed)
         if normalized in self.normalized_map:
@@ -217,7 +218,7 @@ class NameSquatDetector {
                 "details": f"'{proposed}' is too similar to existing '{existing_name}' "
                            f"(both normalize to '{normalized}')"
             })
-        
+
         # 4. Unicode homograph detection
         if self._has_homoglyphs(proposed):
             issues.append({
@@ -226,17 +227,17 @@ class NameSquatDetector {
                 "details": f"'{proposed}' contains characters that visually mimic ASCII "
                            f"(possible homograph attack)"
             })
-        
+
         # 5. Levenshtein distance check (typosquatting)
         for existing_name in self.existing:
             dist = levenshtein_distance(proposed, existing_name)
-            
+
             # Scale threshold by name length
             # Short names (3-5 chars): distance 1 = block
             # Medium names (6-12 chars): distance 1 = flag, distance 2 = warn
             # Long names (13+): distance 1-2 = flag
             name_len = max(len(proposed), len(existing_name))
-            
+
             if dist == 1 and name_len <= 8:
                 issues.append({
                     "type": "typosquat",
@@ -257,7 +258,7 @@ class NameSquatDetector {
                     "details": f"'{proposed}' is similar to '{existing_name}' "
                                f"(edit distance: {dist})"
                 })
-        
+
         # 6. Suspicious prefix/suffix
         for prefix in self.SUSPICIOUS_PREFIXES:
             if proposed.startswith(prefix):
@@ -269,7 +270,7 @@ class NameSquatDetector {
                         "details": f"'{proposed}' uses prefix '{prefix}' on existing "
                                    f"skill '{base}' — implies false authority"
                     })
-        
+
         for suffix in self.SUSPICIOUS_SUFFIXES:
             if proposed.endswith(suffix):
                 base = proposed[:-len(suffix)]
@@ -280,7 +281,7 @@ class NameSquatDetector {
                         "details": f"'{proposed}' uses suffix '{suffix}' on existing "
                                    f"skill '{base}' — implies false authority"
                     })
-        
+
         # 7. Pluralization
         for variant in self._plural_variants(proposed):
             if variant in self.existing:
@@ -290,19 +291,19 @@ class NameSquatDetector {
                     "details": f"'{proposed}' is a plural/singular variant of "
                                f"existing '{variant}'"
                 })
-        
+
         # Determine outcome
         has_block = any(i["severity"] == "block" for i in issues)
         has_flag = any(i["severity"] == "flag" for i in issues)
-        
+
         allowed = not has_block and not has_flag
-        
+
         return {"allowed": allowed, "issues": issues}
-    
+
     def _normalize(self, name: str) -> str:
         """Remove hyphens and lowercase for collision detection."""
         return name.lower().replace("-", "").replace("_", "")
-    
+
     _hasHomoglyphs(name: string): boolean {
         /**
          * Uses the `confusables` npm package (UAX #39 standard).
@@ -313,7 +314,7 @@ class NameSquatDetector {
         const result = isConfusable(name);
         return result !== false;
     }
-    
+
     _pluralVariants(name: string): string[] {
         const variants: string[] = [];
         if (name.endsWith('s') && !name.endsWith('ss')) {
@@ -360,7 +361,7 @@ Names are not permanently owned just by registering. You must publish meaningful
 Rules:
   - First publish must happen within 30 days of name registration
   - If no version exists after 30 days, name is released
-  - If a skill has 0 downloads for 12 months AND hasn't been 
+  - If a skill has 0 downloads for 12 months AND hasn't been
     updated in 12 months, it enters "dormant" status
   - Dormant skills get a 90-day warning before name is released
   - Skills with >100 total downloads are never auto-released
@@ -373,15 +374,15 @@ Subject: Your SPM skill "cool-charts" may lose its name
 
 Hi @almog,
 
-Your skill "cool-charts" has had 0 downloads and no updates 
-for 12 months. Under SPM's namespace policy, dormant skills 
+Your skill "cool-charts" has had 0 downloads and no updates
+for 12 months. Under SPM's namespace policy, dormant skills
 may have their names released for reuse.
 
 Actions:
   - Publish an update to keep the name (even a minor version bump)
   - Or reply to this email to request an extension
 
-If no action is taken, the name "cool-charts" will be released 
+If no action is taken, the name "cool-charts" will be released
 on 2027-06-15.
 
 Questions? names@spm.dev
@@ -395,10 +396,10 @@ For legitimate upcoming skills:
 $ spm reserve my-upcoming-skill
 
   Reserving name "my-upcoming-skill" for @almog...
-  
+
   ✓ Name reserved for 30 days
   ✓ Reservation expires: 2026-03-29
-  
+
   You must publish the first version before the reservation expires.
   Extend once (30 more days): spm reserve my-upcoming-skill --extend
 
@@ -423,17 +424,17 @@ $ spm dispute data-viz --reason trademark
   ? Evidence URL (trademark certificate, website, etc.):
     > https://acme.com/trademarks/data-viz
   ? Description of your claim:
-    > We hold the registered trademark "DataViz" for software 
+    > We hold the registered trademark "DataViz" for software
     > tools in the US and EU.
 
   ✓ Dispute filed: #DISPUTE-2026-0042
-  
+
   What happens next:
   1. SPM team reviews within 5 business days
   2. Current owner is notified and can respond
   3. SPM team makes a decision
   4. Either the name transfers, or the dispute is denied
-  
+
   Track status: spm dispute status DISPUTE-2026-0042
 ```
 
@@ -460,7 +461,7 @@ Dispute resolution process:
                     │               │
                     └── Coexist ───► Both keep their names
                                     (if scoped differently)
-                    
+
 ```
 
 ---
@@ -475,7 +476,7 @@ $ spm publish
   ...validation passes...
 
   Checking name availability: "data-viz"
-  
+
   ┌─ Name Analysis ──────────────────────────────────────┐
   │                                                      │
   │  Proposed: data-viz                                  │
@@ -569,7 +570,7 @@ def get_protection_radius(skill):
     More variants are blocked/flagged for popular skills.
     """
     downloads = skill.total_downloads
-    
+
     if downloads > 100_000:
         return {
             "levenshtein_block": 2,     # Block names within edit distance 2
@@ -610,31 +611,31 @@ def detect_batch_squatting(author_id):
     Flag authors who seem to be hoarding names.
     """
     reservations = db.query("""
-        SELECT COUNT(*) as count 
-        FROM name_reservations 
+        SELECT COUNT(*) as count
+        FROM name_reservations
         WHERE author_id = %s AND status = 'active'
     """, author_id)
-    
+
     published = db.query("""
-        SELECT COUNT(*) as count 
-        FROM skills 
+        SELECT COUNT(*) as count
+        FROM skills
         WHERE author_id = %s AND status = 'active'
     """, author_id)
-    
+
     # Red flag: many reservations, few publishes
     if reservations.count > 3 and published.count == 0:
-        flag_for_review(author_id, "batch_squatting", 
+        flag_for_review(author_id, "batch_squatting",
             f"{reservations.count} reservations, {published.count} published")
-    
+
     # Red flag: published many empty/placeholder skills
     placeholder_skills = db.query("""
         SELECT COUNT(*) as count
         FROM skills s
         JOIN skill_versions sv ON s.id = sv.skill_id
-        WHERE s.author_id = %s 
+        WHERE s.author_id = %s
           AND sv.package_size < 500    -- Less than 500 bytes
     """, author_id)
-    
+
     if placeholder_skills.count > 2:
         flag_for_review(author_id, "placeholder_publishing",
             f"{placeholder_skills.count} skills under 500 bytes")
@@ -656,16 +657,16 @@ def validate_not_placeholder(skill_dir):
     """Reject placeholder/empty skills."""
     skill_md = Path(skill_dir) / "SKILL.md"
     content = skill_md.read_text()
-    
+
     # Strip frontmatter
     body = content.split("---", 2)[-1].strip() if "---" in content else content
-    
+
     if len(body) < MINIMUM_REQUIREMENTS["skill_md_min_bytes"]:
         return False, "SKILL.md body is too short (needs actual instructions)"
-    
+
     if body.count("\n") < MINIMUM_REQUIREMENTS["skill_md_min_lines"]:
         return False, "SKILL.md needs at least 10 lines of instructions"
-    
+
     # Check for placeholder patterns
     placeholder_patterns = [
         r"^#\s*TODO",
@@ -677,7 +678,7 @@ def validate_not_placeholder(skill_dir):
     for pattern in placeholder_patterns:
         if re.search(pattern, body, re.IGNORECASE | re.MULTILINE):
             return False, f"SKILL.md appears to be a placeholder ({pattern})"
-    
+
     return True, "Content check passed"
 ```
 
@@ -702,9 +703,9 @@ CREATE TABLE name_reservations (
 CREATE TABLE name_disputes (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     dispute_id      VARCHAR(32) UNIQUE NOT NULL,  -- e.g. DISPUTE-2026-0042
-    
+
     skill_name      VARCHAR(64) NOT NULL,
-    
+
     -- Claimant
     claimant_id     UUID REFERENCES authors(id),
     claimant_name   VARCHAR(128),
@@ -713,20 +714,20 @@ CREATE TABLE name_disputes (
         -- 'trademark', 'legitimate', 'typosquat_victim', 'impersonation'
     claim_evidence  TEXT,
     trademark_number VARCHAR(64),
-    
+
     -- Current owner
     current_owner_id UUID REFERENCES authors(id),
     owner_response   TEXT,
     owner_responded_at TIMESTAMPTZ,
-    
+
     -- Resolution
     status          VARCHAR(16) DEFAULT 'pending',
-        -- 'pending', 'owner_notified', 'under_review', 
+        -- 'pending', 'owner_notified', 'under_review',
         -- 'transferred', 'denied', 'withdrawn'
     resolved_by     UUID REFERENCES authors(id),  -- SPM team member
     resolution_notes TEXT,
     resolved_at     TIMESTAMPTZ,
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -735,14 +736,14 @@ CREATE TABLE name_reviews (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     proposed_name   VARCHAR(64) NOT NULL,
     author_id       UUID NOT NULL REFERENCES authors(id),
-    
+
     flag_reasons    JSONB NOT NULL,  -- Array of issues from detector
-    
+
     status          VARCHAR(16) DEFAULT 'pending',
         -- 'pending', 'approved', 'denied'
     reviewed_by     UUID REFERENCES authors(id),
     review_notes    TEXT,
-    
+
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     reviewed_at     TIMESTAMPTZ
 );
@@ -760,9 +761,9 @@ CREATE TABLE name_transfers (
 
 -- Index for fast similarity checks
 CREATE INDEX idx_skills_name_trgm ON skills USING gin (name gin_trgm_ops);
-CREATE INDEX idx_reservations_active ON name_reservations (name) 
+CREATE INDEX idx_reservations_active ON name_reservations (name)
     WHERE status = 'active';
-CREATE INDEX idx_reservations_expires ON name_reservations (expires_at) 
+CREATE INDEX idx_reservations_expires ON name_reservations (expires_at)
     WHERE status = 'active';
 ```
 
@@ -775,7 +776,7 @@ CREATE INDEX idx_reservations_expires ON name_reservations (expires_at)
 
 async def cleanup_names():
     """Release expired reservations and dormant names."""
-    
+
     # 1. Expire old reservations
     expired = await db.execute("""
         UPDATE name_reservations
@@ -785,9 +786,9 @@ async def cleanup_names():
     """)
     for row in expired:
         log.info(f"Released reservation: {row.name} (author: {row.author_id})")
-        await notify_author(row.author_id, 
+        await notify_author(row.author_id,
             f"Your reservation for '{row.name}' has expired.")
-    
+
     # 2. Warn dormant skills (12 months no downloads, no updates)
     dormant = await db.fetch("""
         SELECT s.id, s.name, s.author_id, s.updated_at, s.total_downloads
@@ -796,8 +797,8 @@ async def cleanup_names():
           AND s.total_downloads < 100
           AND s.updated_at < NOW() - INTERVAL '12 months'
           AND NOT EXISTS (
-              SELECT 1 FROM downloads d 
-              WHERE d.skill_id = s.id 
+              SELECT 1 FROM downloads d
+              WHERE d.skill_id = s.id
                 AND d.created_at > NOW() - INTERVAL '12 months'
           )
           AND NOT EXISTS (
@@ -806,14 +807,14 @@ async def cleanup_names():
                 AND w.created_at > NOW() - INTERVAL '90 days'
           )
     """)
-    
+
     for skill in dormant:
         await send_dormancy_warning(skill)
         await db.execute("""
             INSERT INTO name_dormancy_warnings (skill_id, expires_at)
             VALUES ($1, NOW() + INTERVAL '90 days')
         """, skill.id)
-    
+
     # 3. Release names from skills that didn't respond to dormancy warning
     releases = await db.fetch("""
         SELECT w.skill_id, s.name, s.author_id
@@ -824,7 +825,7 @@ async def cleanup_names():
           AND s.status = 'active'
           AND s.updated_at < w.created_at  -- No activity since warning
     """)
-    
+
     for skill in releases:
         await db.execute("""
             UPDATE skills SET status = 'dormant' WHERE id = $1

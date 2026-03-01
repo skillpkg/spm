@@ -59,9 +59,7 @@ export const users = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
-    index('idx_users_github').on(table.githubId),
-  ]
+  (table) => [index('idx_users_github').on(table.githubId)],
 );
 
 // ── Skills ──
@@ -89,7 +87,7 @@ export const skills = pgTable(
     index('idx_skills_name').on(table.name),
     index('idx_skills_category').on(table.category),
     index('idx_skills_owner').on(table.ownerId),
-  ]
+  ],
 );
 
 // ── Versions ──
@@ -120,7 +118,7 @@ export const versions = pgTable(
     uniqueIndex('idx_versions_skill_version').on(table.skillId, table.version),
     index('idx_versions_skill').on(table.skillId),
     index('idx_versions_published').on(table.publishedAt),
-  ]
+  ],
 );
 
 // ── Tags ──
@@ -136,7 +134,7 @@ export const skillTags = pgTable(
   (table) => [
     primaryKey({ columns: [table.skillId, table.tag] }),
     index('idx_tags_tag').on(table.tag),
-  ]
+  ],
 );
 
 // ── Platform support ──
@@ -149,9 +147,7 @@ export const skillPlatforms = pgTable(
       .references(() => skills.id, { onDelete: 'cascade' }),
     platform: text('platform').notNull(),
   },
-  (table) => [
-    primaryKey({ columns: [table.skillId, table.platform] }),
-  ]
+  (table) => [primaryKey({ columns: [table.skillId, table.platform] })],
 );
 
 // ── Security scans ──
@@ -169,9 +165,7 @@ export const scans = pgTable(
     details: jsonb('details'),
     scannedAt: timestamp('scanned_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
-    uniqueIndex('idx_scans_version_layer').on(table.versionId, table.layer),
-  ]
+  (table) => [uniqueIndex('idx_scans_version_layer').on(table.versionId, table.layer)],
 );
 
 // ── Download tracking ──
@@ -190,7 +184,7 @@ export const downloads = pgTable(
   (table) => [
     index('idx_downloads_version').on(table.versionId),
     index('idx_downloads_time').on(table.downloadedAt),
-  ]
+  ],
 );
 
 // ── Reviews ──
@@ -210,9 +204,7 @@ export const reviews = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
-    uniqueIndex('idx_reviews_skill_user').on(table.skillId, table.userId),
-  ]
+  (table) => [uniqueIndex('idx_reviews_skill_user').on(table.skillId, table.userId)],
 );
 
 // ── Audit log ──
@@ -231,7 +223,7 @@ export const auditLog = pgTable(
   (table) => [
     index('idx_audit_skill').on(table.skillId),
     index('idx_audit_time').on(table.createdAt),
-  ]
+  ],
 );
 
 // ── Publish attempts ──
@@ -249,30 +241,25 @@ export const publishAttempts = pgTable(
     blockReasons: jsonb('block_reasons'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
-    index('idx_publish_user').on(table.userId),
-  ]
+  (table) => [index('idx_publish_user').on(table.userId)],
 );
 
 // ── Reports ──
 
-export const reports = pgTable(
-  'reports',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    skillId: uuid('skill_id')
-      .notNull()
-      .references(() => skills.id),
-    reporterId: uuid('reporter_id').references(() => users.id),
-    reason: text('reason').notNull(),
-    priority: text('priority').notNull().default('medium'),
-    status: text('status').notNull().default('open'),
-    resolution: text('resolution'),
-    actionTaken: text('action_taken'),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  }
-);
+export const reports = pgTable('reports', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  skillId: uuid('skill_id')
+    .notNull()
+    .references(() => skills.id),
+  reporterId: uuid('reporter_id').references(() => users.id),
+  reason: text('reason').notNull(),
+  priority: text('priority').notNull().default('medium'),
+  status: text('status').notNull().default('open'),
+  resolution: text('resolution'),
+  actionTaken: text('action_taken'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
 // ── Bridge skills ──
 
@@ -298,5 +285,5 @@ export const bridgeSkills = pgTable(
   (table) => [
     index('idx_bridge_source').on(table.sourceRepo),
     index('idx_bridge_skill').on(table.skillId),
-  ]
+  ],
 );

@@ -171,15 +171,11 @@ describe('ManifestSchema', () => {
   });
 
   it('rejects manifest with invalid semver', () => {
-    expect(() =>
-      ManifestSchema.parse({ ...minimalManifest, version: 'not-semver' })
-    ).toThrow();
+    expect(() => ManifestSchema.parse({ ...minimalManifest, version: 'not-semver' })).toThrow();
   });
 
   it('rejects manifest with short description', () => {
-    expect(() =>
-      ManifestSchema.parse({ ...minimalManifest, description: 'Too short' })
-    ).toThrow();
+    expect(() => ManifestSchema.parse({ ...minimalManifest, description: 'Too short' })).toThrow();
   });
 
   it('rejects manifest with missing description', () => {
@@ -188,9 +184,7 @@ describe('ManifestSchema', () => {
   });
 
   it('rejects manifest with invalid category', () => {
-    expect(() =>
-      ManifestSchema.parse({ ...minimalManifest, category: 'nonexistent' })
-    ).toThrow();
+    expect(() => ManifestSchema.parse({ ...minimalManifest, category: 'nonexistent' })).toThrow();
   });
 
   it('applies default category when not provided', () => {
@@ -200,8 +194,16 @@ describe('ManifestSchema', () => {
 
   it('accepts all valid categories', () => {
     const categories = [
-      'documents', 'data-viz', 'frontend', 'backend', 'infra',
-      'testing', 'code-quality', 'security', 'productivity', 'other',
+      'documents',
+      'data-viz',
+      'frontend',
+      'backend',
+      'infra',
+      'testing',
+      'code-quality',
+      'security',
+      'productivity',
+      'other',
     ] as const;
 
     for (const category of categories) {
@@ -212,16 +214,12 @@ describe('ManifestSchema', () => {
 
   it('rejects too many keywords', () => {
     const keywords = Array.from({ length: 21 }, (_, i) => `keyword-${i}`);
-    expect(() =>
-      ManifestSchema.parse({ ...minimalManifest, keywords })
-    ).toThrow();
+    expect(() => ManifestSchema.parse({ ...minimalManifest, keywords })).toThrow();
   });
 
   it('rejects a keyword that is too long', () => {
     const keywords = ['a'.repeat(51)];
-    expect(() =>
-      ManifestSchema.parse({ ...minimalManifest, keywords })
-    ).toThrow();
+    expect(() => ManifestSchema.parse({ ...minimalManifest, keywords })).toThrow();
   });
 });
 
@@ -259,9 +257,7 @@ describe('PersonSchema', () => {
   });
 
   it('rejects invalid url', () => {
-    expect(() =>
-      PersonSchema.parse({ name: 'Alice', url: 'not-a-url' })
-    ).toThrow();
+    expect(() => PersonSchema.parse({ name: 'Alice', url: 'not-a-url' })).toThrow();
   });
 });
 
@@ -293,21 +289,15 @@ describe('SearchParamsSchema', () => {
   });
 
   it('validates category against allowed values', () => {
-    expect(() =>
-      SearchParamsSchema.parse({ category: 'invalid-category' })
-    ).toThrow();
+    expect(() => SearchParamsSchema.parse({ category: 'invalid-category' })).toThrow();
   });
 
   it('validates trust against allowed values', () => {
-    expect(() =>
-      SearchParamsSchema.parse({ trust: 'invalid-trust' })
-    ).toThrow();
+    expect(() => SearchParamsSchema.parse({ trust: 'invalid-trust' })).toThrow();
   });
 
   it('validates sort against allowed values', () => {
-    expect(() =>
-      SearchParamsSchema.parse({ sort: 'invalid-sort' })
-    ).toThrow();
+    expect(() => SearchParamsSchema.parse({ sort: 'invalid-sort' })).toThrow();
   });
 
   it('coerces string page/per_page to numbers', () => {
@@ -317,15 +307,11 @@ describe('SearchParamsSchema', () => {
   });
 
   it('rejects per_page > 100', () => {
-    expect(() =>
-      SearchParamsSchema.parse({ per_page: 101 })
-    ).toThrow();
+    expect(() => SearchParamsSchema.parse({ per_page: 101 })).toThrow();
   });
 
   it('rejects page < 1', () => {
-    expect(() =>
-      SearchParamsSchema.parse({ page: 0 })
-    ).toThrow();
+    expect(() => SearchParamsSchema.parse({ page: 0 })).toThrow();
   });
 });
 
@@ -348,27 +334,19 @@ describe('ReviewRequestSchema', () => {
   });
 
   it('rejects rating > 5', () => {
-    expect(() =>
-      ReviewRequestSchema.parse({ rating: 6 })
-    ).toThrow();
+    expect(() => ReviewRequestSchema.parse({ rating: 6 })).toThrow();
   });
 
   it('rejects rating < 1', () => {
-    expect(() =>
-      ReviewRequestSchema.parse({ rating: 0 })
-    ).toThrow();
+    expect(() => ReviewRequestSchema.parse({ rating: 0 })).toThrow();
   });
 
   it('rejects non-integer rating', () => {
-    expect(() =>
-      ReviewRequestSchema.parse({ rating: 3.5 })
-    ).toThrow();
+    expect(() => ReviewRequestSchema.parse({ rating: 3.5 })).toThrow();
   });
 
   it('rejects comment longer than 2000 chars', () => {
-    expect(() =>
-      ReviewRequestSchema.parse({ rating: 4, comment: 'x'.repeat(2001) })
-    ).toThrow();
+    expect(() => ReviewRequestSchema.parse({ rating: 4, comment: 'x'.repeat(2001) })).toThrow();
   });
 });
 
@@ -427,7 +405,7 @@ describe('SkillsJsonSchema', () => {
       SkillsJsonSchema.parse({
         skills: {},
         resolution: { strategy: 'invalid-strategy' },
-      })
+      }),
     ).toThrow();
   });
 
@@ -436,7 +414,7 @@ describe('SkillsJsonSchema', () => {
       SkillsJsonSchema.parse({
         skills: {},
         settings: { trust_level: 'nonexistent' },
-      })
+      }),
     ).toThrow();
   });
 });

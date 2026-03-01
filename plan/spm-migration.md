@@ -73,20 +73,18 @@ Real examples from Anthropic's skills:
 name: skill-creator
 description: Create new skills, modify and improve...
 ---
-
 # Typical (pdf — 3 fields)
 ---
 name: pdf
 description: Use this skill whenever the user wants...
 license: Proprietary. LICENSE.txt has complete terms
 ---
-
 # Maximal (pptx — 3 fields, description is the heavy lifter)
 ---
 name: pptx
-description: "Use this skill any time a .pptx file is involved
+description: 'Use this skill any time a .pptx file is involved
   in any way — as input, output, or both. This includes: creating
-  slide decks, pitch decks..."
+  slide decks, pitch decks...'
 license: Proprietary. LICENSE.txt has complete terms
 ---
 ```
@@ -174,51 +172,63 @@ KEYWORDS/CATEGORY:      None                For search/discovery
 
 {
   // ── Identity (frontmatter has name + description, nothing else) ──
-  "version": "1.2.0",                    // NEW: semver
-  "authors": [                            // NEW: who made this (array!)
+  "version": "1.2.0", // NEW: semver
+  "authors": [
+    // NEW: who made this (array!)
     { "name": "Almog", "email": "almog@example.com" },
-    { "name": "Dana",  "email": "dana@example.com" }
+    { "name": "Dana", "email": "dana@example.com" },
   ],
-  "maintainers": [                        // NEW: current maintainer
-    { "name": "Charlie" }
+  "maintainers": [
+    // NEW: current maintainer
+    { "name": "Charlie" },
   ],
   "keywords": ["chart", "visualization"], // NEW: search discovery
-  "category": "data",                     // NEW: browsing/filtering
-  "private": false,                       // NEW: prevent accidental publish
+  "category": "data", // NEW: browsing/filtering
+  "private": false, // NEW: prevent accidental publish
 
   // ── Links (frontmatter has nothing) ──
-  "urls": {                               // NEW: all links in one place
+  "urls": {
+    // NEW: all links in one place
     "repository": "https://github.com/...",
-    "issues":     "https://github.com/.../issues",
-    "funding":    "https://github.com/sponsors/almog"
+    "issues": "https://github.com/.../issues",
+    "funding": "https://github.com/sponsors/almog",
   },
 
   // ── Dependencies (frontmatter has zero concept of this) ──
   "dependencies": {
-    "skills": {                           // NEW: skill depends on other skills
-      "frontend-design": "^1.0.0"
+    "skills": {
+      // NEW: skill depends on other skills
+      "frontend-design": "^1.0.0",
     },
-    "pip": ["plotly>=5.0", "pandas>=2.0"],// NEW: pip packages needed
-    "npm": ["d3@^7.0.0"],                 // NEW: npm packages needed
-    "system": ["ffmpeg"]                  // NEW: system binaries (documented)
+    "pip": ["plotly>=5.0", "pandas>=2.0"], // NEW: pip packages needed
+    "npm": ["d3@^7.0.0"], // NEW: npm packages needed
+    "system": ["ffmpeg"], // NEW: system binaries (documented)
   },
 
   // ── Platform (frontmatter has unused "compatibility" field) ──
   "agents": {
-    "requires_tools": [                   // NEW: which tools the agent needs
-      "bash", "file_write", "file_read"
+    "requires_tools": [
+      // NEW: which tools the agent needs
+      "bash",
+      "file_write",
+      "file_read",
     ],
-    "requires_network": false,            // NEW: needs egress?
-    "platforms": [                        // NEW: where does it work?
-      "claude-code", "cursor", "copilot", "codex", "*"
-    ]
+    "requires_network": false, // NEW: needs egress?
+    "platforms": [
+      // NEW: where does it work?
+      "claude-code",
+      "cursor",
+      "copilot",
+      "codex",
+      "*",
+    ],
   },
 
   // ── Security (frontmatter has nothing) ──
   "security": {
-    "sandboxed": true,                    // NEW: does it stay in sandbox?
-    "network_access": false               // NEW: does it call external URLs?
-  }
+    "sandboxed": true, // NEW: does it stay in sandbox?
+    "network_access": false, // NEW: does it call external URLs?
+  },
 }
 
 // IMPORTANT: Only "name", "version", "description" are REQUIRED.
@@ -292,7 +302,7 @@ See `spm-manifest-spec.md` for the full field specification, required vs optiona
 
 SKILL.md is still how agents learn what to do. The frontmatter is still there. The scripts still work. The directory structure is identical. Agents read SKILL.md the same way whether it came from a `.skill` or `.skl` file.
 
-The migration is non-breaking because **agents don't read manifest.json**. Agents read SKILL.md. The manifest is for SPM (the package manager), not for agents (the AI). It's metadata *about* the skill, not instructions *for* agents.
+The migration is non-breaking because **agents don't read manifest.json**. Agents read SKILL.md. The manifest is for SPM (the package manager), not for agents (the AI). It's metadata _about_ the skill, not instructions _for_ agents.
 
 ```
 Who reads what:
@@ -329,26 +339,26 @@ How SPM handles `.skill` files:
 ```python
 def load_skill_package(filepath: Path):
     """Load either .skill or .skl format."""
-    
+
     if filepath.suffix == '.skl':
         return load_skl(filepath)
-    
+
     if filepath.suffix == '.skill':
         return load_legacy_skill(filepath)
-    
+
     raise UnsupportedFormat(f"Unknown format: {filepath.suffix}")
 
 def load_legacy_skill(filepath: Path) -> SkillPackage:
     """Load .skill format, treating it as a .skl without manifest.json."""
-    
+
     with zipfile.ZipFile(filepath) as z:
         # Find SKILL.md
         skill_md_path = find_skill_md(z)
         content = z.read(skill_md_path).decode('utf-8')
-        
+
         # Parse frontmatter
         frontmatter = parse_frontmatter(content)
-        
+
         # Synthesize a manifest from frontmatter
         manifest = {
             "name": frontmatter.get("name", filepath.stem),
@@ -363,7 +373,7 @@ def load_legacy_skill(filepath: Path) -> SkillPackage:
             "_migrated_from": "skill",
             "_migration_note": "Auto-generated manifest. Run 'spm migrate' for full .skl format."
         }
-        
+
         return SkillPackage(
             format="legacy-skill",
             manifest=manifest,
@@ -382,13 +392,13 @@ def load_legacy_skill(filepath: Path) -> SkillPackage:
 $ spm migrate ./my-skill.skill
 
   Reading my-skill.skill...
-  
+
   Detected:
     Name: my-skill
     Description: "Does something useful..."
     Files: SKILL.md, LICENSE.txt, scripts/main.py
     Format: .skill (legacy)
-  
+
   Generating manifest.json...
     ✓ Name: my-skill
     ✓ Description: from frontmatter
@@ -397,19 +407,19 @@ $ spm migrate ./my-skill.skill
     ? Version (no version found, default 1.0.0): 1.0.0
     ✓ Scripts detected: scripts/main.py (Python)
     ✓ Auto-detected dependency: pandas (imported in main.py)
-  
+
   Security scan...
     ✓ Content scan passed
     ✓ No permission issues
-  
+
   Output:
     ✓ my-skill/manifest.json (created)
     ✓ my-skill/SKILL.md (unchanged)
     ✓ my-skill/scripts/main.py (unchanged)
     ✓ my-skill/LICENSE.txt (unchanged)
-  
+
   ✓ Migration complete!
-  
+
   Next steps:
     1. Review manifest.json — fill in any missing fields
     2. Test: spm validate ./my-skill/
@@ -429,7 +439,7 @@ $ spm migrate --batch ./skills/
     3/5 chart-maker.skill ──── ✓ migrated
     4/5 report-gen.skill ───── ⚠ needs manual review (no description)
     5/5 bad-skill.skill ────── ❌ content scan failed
-  
+
   Results: 3 migrated, 1 needs review, 1 blocked
 ```
 
@@ -444,14 +454,14 @@ $ ls my-skill/
 $ spm migrate --dir ./my-skill/
 
   Analyzing my-skill/...
-  
+
   ✓ SKILL.md found, frontmatter valid
   ✓ 2 scripts detected
   ✓ 1 reference file detected
-  
+
   Generating manifest.json...
   ✓ Written to my-skill/manifest.json
-  
+
   Review and then run:
     spm pack ./my-skill/
 ```
@@ -465,12 +475,12 @@ The migration tool auto-detects as much as possible from the existing `.skill` c
 ```python
 class ManifestGenerator:
     """Generate manifest.json from a .skill file's contents."""
-    
+
     def generate(self, skill_dir: Path) -> dict:
         skill_md = skill_dir / "SKILL.md"
         content = skill_md.read_text()
         frontmatter = parse_frontmatter(content)
-        
+
         manifest = {
             "$schema": "https://spm.dev/schemas/manifest-v1.json",
             "name": frontmatter.get("name", skill_dir.name),
@@ -496,28 +506,28 @@ class ManifestGenerator:
                 "filesystem_scope": ["$WORKDIR", "$OUTPUTS"],
             },
         }
-        
+
         return manifest
-    
+
     def _parse_tools(self, frontmatter: dict) -> list:
         """Convert 'allowed-tools' string to list."""
         tools_str = frontmatter.get("allowed-tools", "")
         if not tools_str:
             return []
         return [t.strip() for t in tools_str.split(",")]
-    
+
     def _detect_system_deps(self, skill_dir: Path) -> dict:
         """Scan scripts for import statements to detect dependencies."""
         deps = {"python": None, "pip_packages": [], "npm_packages": []}
-        
+
         for py_file in skill_dir.rglob("*.py"):
             content = py_file.read_text()
-            
+
             # Detect Python imports
             imports = re.findall(
                 r'^(?:import|from)\s+(\w+)', content, re.MULTILINE
             )
-            
+
             # Map common imports to pip packages
             IMPORT_TO_PIP = {
                 "pandas": "pandas",
@@ -535,13 +545,13 @@ class ManifestGenerator:
                 "openpyxl": "openpyxl",
                 "pypdf": "pypdf",
             }
-            
+
             for imp in imports:
                 if imp in IMPORT_TO_PIP:
                     pkg = IMPORT_TO_PIP[imp]
                     if pkg not in deps["pip_packages"]:
                         deps["pip_packages"].append(pkg)
-        
+
         for js_file in skill_dir.rglob("*.js"):
             content = js_file.read_text()
             requires = re.findall(
@@ -550,12 +560,12 @@ class ManifestGenerator:
             for req in requires:
                 if req not in deps["npm_packages"]:
                     deps["npm_packages"].append(req)
-        
+
         if deps["pip_packages"]:
             deps["python"] = ">=3.10"
-        
+
         return deps
-    
+
     def _detect_network(self, skill_dir: Path) -> bool:
         """Detect if any scripts make network calls."""
         network_patterns = [
@@ -569,7 +579,7 @@ class ManifestGenerator:
             r"wget",
             r"socket\.",
         ]
-        
+
         for script in skill_dir.rglob("*"):
             if script.suffix in ('.py', '.js', '.sh'):
                 content = script.read_text()
@@ -577,29 +587,29 @@ class ManifestGenerator:
                     if re.search(pattern, content):
                         return True
         return False
-    
+
     def _extract_keywords(self, frontmatter: dict) -> list:
         """Extract keywords from description."""
         description = frontmatter.get("description", "")
-        
+
         # Pull trigger words from description
         # "Use this skill for X, Y, and Z" → [X, Y, Z]
         triggers = re.findall(
             r"(?:triggers?\s+(?:on|include|for)|use\s+(?:for|when))[\s:]+(.+?)(?:\.|$)",
             description, re.IGNORECASE
         )
-        
+
         keywords = []
         for trigger_group in triggers:
             words = re.split(r"[,;]|\band\b|\bor\b", trigger_group)
             keywords.extend(w.strip().lower() for w in words if w.strip())
-        
+
         return keywords[:10]  # Max 10 keywords
-    
+
     def _guess_category(self, frontmatter: dict) -> str:
         """Guess category from description."""
         description = frontmatter.get("description", "").lower()
-        
+
         CATEGORY_SIGNALS = {
             "data": ["chart", "data", "csv", "visualization", "dashboard", "plot", "graph"],
             "code": ["code", "script", "debug", "programming", "refactor", "lint"],
@@ -608,11 +618,11 @@ class ManifestGenerator:
             "devops": ["deploy", "docker", "ci/cd", "pipeline", "infrastructure", "aws"],
             "productivity": ["task", "schedule", "organize", "workflow", "automate"],
         }
-        
+
         scores = {}
         for category, signals in CATEGORY_SIGNALS.items():
             scores[category] = sum(1 for s in signals if s in description)
-        
+
         best = max(scores, key=scores.get)
         return best if scores[best] > 0 else "other"
 
@@ -693,7 +703,7 @@ Before SPM:
 
 After SPM (backward compatible):
   skill-creator → SKILL.md + scripts/ → spm pack → .skl
-  
+
   OR (old way still works):
   skill-creator → SKILL.md + scripts/ → package_skill.py → .skill
   Then: spm migrate my-skill.skill → .skl
@@ -762,7 +772,7 @@ $ spm pack
   ⚠ Description mismatch:
      manifest.json: "Create charts and dashboards from data"
      SKILL.md frontmatter: "Create charts from CSV files"
-     
+
      Using manifest.json description (source of truth).
      Update SKILL.md frontmatter to match? (Y/n): Y
      ✓ Frontmatter updated
@@ -804,7 +814,7 @@ Large (100-100k+ skills): spm-onboard
   Requires bulk import token for 100+ skills.
   $ npm install -g spm-onboard
   $ spm-onboard run --from ./skills/ --org @bigco
-  
+
   See spm-bulk-import-scale.md for the full architecture
   of handling 100k+ skill migrations.
 ```
@@ -813,14 +823,14 @@ Large (100-100k+ skills): spm-onboard
 
 ```
 "You already have 500 skills. They work great internally.
- 
+
  Publish them to SPM and:
    - Your skills get discovered by 100k+ agent users
    - You get download analytics and trigger data for free
    - Community submits bug reports and improvements
    - Your brand shows as a Verified Publisher
    - It takes 10 minutes, not 10 days.
- 
+
  Small library?  spm import --from skills/ --org @vercel
  Large library?  spm-onboard run --from skills/ --org @vercel"
 ```
@@ -835,12 +845,12 @@ $ spm import --from ./skills/ --org @myteam
 
   Phase 1: Analysis
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% (34/34)
-  
+
   Results:
     ✓ 30 skills can be auto-migrated
     ⚠   3 skills need minor fixes (missing descriptions, etc.)
     ❌   1 skill blocked (content security issue)
-  
+
   Phase 2: Generate manifests
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% (30/30)
 
@@ -855,7 +865,7 @@ $ spm import --from ./skills/ --org @myteam
 
   Phase 3: Pack & publish
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% (30/30)
-  
+
     ✓ 30 skills published as @myteam/skill-name
     ✓ Import report saved: ./spm-import-report.json
 
@@ -871,14 +881,14 @@ $ spm import --from ./skills/ --org @myteam
 $ spm import --from ./skills/ --org @bigco
 
   Found 487 skills.
-  
+
   ⚠ For imports over 100 skills, use spm-onboard:
     npm install -g spm-onboard
     spm-onboard run --from ./skills/ --org @bigco
-  
+
   spm-onboard handles parallel scanning, batch uploads,
   resumable state, and bulk import tokens.
-  
+
   See: https://spm.dev/docs/bulk-import
 ```
 
@@ -922,16 +932,16 @@ For companies whose skills are spread across repos (`spm-onboard` only):
 ```python
 class GitHubImporter:
     """Scan a GitHub org for skill-compatible repos."""
-    
+
     def __init__(self, org: str, token: str):
         self.org = org
         self.github = GitHub(token)
-    
+
     async def scan(self) -> list[SkillCandidate]:
         candidates = []
-        
+
         repos = await self.github.list_repos(self.org)
-        
+
         for repo in repos:
             # Check for SKILL.md at root
             skill_md = await self.github.get_file(repo, "SKILL.md")
@@ -943,7 +953,7 @@ class GitHubImporter:
                     files=await self.github.list_files(repo),
                 ))
                 continue
-            
+
             # Check for skills/ directory with multiple skills
             skills_dir = await self.github.list_dir(repo, "skills/")
             if skills_dir:
@@ -958,7 +968,7 @@ class GitHubImporter:
                             skill_md=skill_md,
                             files=await self.github.list_files(repo, f"skills/{subdir}/"),
                         ))
-            
+
             # Check for .skill files
             for file in await self.github.list_files(repo):
                 if file.endswith('.skill'):
@@ -967,7 +977,7 @@ class GitHubImporter:
                         name=Path(file).stem,
                         is_packaged=True,
                     ))
-        
+
         return candidates
 ```
 
@@ -986,7 +996,7 @@ $ spm-onboard run --from github:vercel --org @vercel --dry-run
     vercel/internal-tools        →  2 .skill files
 
   Total: 88 skills found across 6 repositories
-  
+
   --dry-run: no changes made. Remove --dry-run to import.
 ```
 
@@ -1002,7 +1012,7 @@ Every bulk import generates a detailed report for review:
   "source": "./skills/",
   "org": "@vercel",
   "total_scanned": 487,
-  
+
   "published": [
     {
       "name": "@vercel/edge-deploy",
@@ -1015,14 +1025,14 @@ Every bulk import generates a detailed report for review:
       "url": "https://spm.dev/@vercel/edge-deploy"
     }
   ],
-  
+
   "needs_fix": [
     {
       "name": "unnamed-skill-42",
       "source_path": "./skills/tool42/",
       "issues": [
-        {"type": "missing_description", "message": "No description in frontmatter"},
-        {"type": "name_invalid", "message": "Name contains underscores, needs kebab-case"}
+        { "type": "missing_description", "message": "No description in frontmatter" },
+        { "type": "name_invalid", "message": "Name contains underscores, needs kebab-case" }
       ],
       "suggested_fixes": {
         "name": "tool-42",
@@ -1030,14 +1040,17 @@ Every bulk import generates a detailed report for review:
       }
     }
   ],
-  
+
   "blocked": [
     {
       "name": "internal-auth-tool",
       "source_path": "./skills/auth-tool/",
       "issues": [
-        {"type": "content_security", "severity": "block",
-         "message": "SKILL.md contains credential harvesting patterns"}
+        {
+          "type": "content_security",
+          "severity": "block",
+          "message": "SKILL.md contains credential harvesting patterns"
+        }
       ]
     }
   ]
@@ -1055,20 +1068,20 @@ $ spm import --fix ./spm-import-report.json
     Issues:
       - No description in frontmatter
       - Name contains underscores
-    
+
     Suggested fixes:
       Name: tool-42
       Description: (auto-extracted) "Generates deployment configs for edge functions"
-    
+
     ? Accept suggestions? (Y/edit/skip)
       ❯ Yes
-    
+
     ✓ Fixed and published as @vercel/tool-42
 
   2/29: data_processor
     Issues:
       - Name contains underscores
-    
+
     ? New name (suggestion: data-processor): data-processor
     ✓ Fixed and published as @vercel/data-processor
 
@@ -1096,10 +1109,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install SPM
         run: npm install -g spm-cli
-      
+
       - name: Detect changed skills
         id: changes
         run: |
@@ -1107,7 +1120,7 @@ jobs:
           changed=$(git diff --name-only HEAD~1 HEAD -- skills/ | \
                     cut -d'/' -f2 | sort -u)
           echo "skills=$changed" >> $GITHUB_OUTPUT
-      
+
       - name: Publish changed skills
         env:
           SPM_TOKEN: ${{ secrets.SPM_TOKEN }}
@@ -1187,7 +1200,7 @@ Tier 2 — Open invitation:
 Tier 3 — Automated discovery:
   - GitHub crawler: find public repos with SKILL.md
   - Offer to import for authors (with their permission)
-  - "Claim your skill" feature: 
+  - "Claim your skill" feature:
     "We found 'cool-tool' on GitHub. Is this yours? Claim it."
 ```
 
@@ -1235,7 +1248,7 @@ Phase 3 — Soft Deprecation:
   .skill still works but no longer the recommended format
   Documentation focuses on .skl
   skill-creator outputs .skl by default
-  
+
 Phase 4 — Full Migration (12+ months):
   .skill still loads (backward compatibility forever)
   Registry no longer accepts NEW .skill uploads

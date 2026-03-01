@@ -9,6 +9,7 @@
 The Agent Skills ecosystem today is powerful but fragmented. Skills live as local directories, are shared manually as `.skill` files, and have no discovery, versioning, trust, or dependency mechanisms across the 37+ agent platforms that support them. SPM bridges this gap — turning skills from local files into a managed ecosystem.
 
 **Core goals:**
+
 - Any developer can create, publish, and share skills
 - Any agent user can discover, install, and update skills with confidence
 - Skills are versioned, signed, and scanned for security
@@ -41,17 +42,17 @@ The Agent Skills ecosystem today is powerful but fragmented. Skills live as loca
 
 ### Component Map
 
-| Component | Role | Tech Stack |
-|-----------|------|------------|
-| **CLI (`spm`)** | Install, publish, search, update skills | TypeScript, Commander.js |
-| **Registry API** | Central catalog, storage, auth | Hono + Neon Postgres + Cloudflare R2 |
-| **MCP Server** | Lets agents search/install skills in-conversation | MCP protocol over SSE/stdio |
-| **Security Pipeline** | 3-layer content scanning + code analysis | Regex patterns, ProtectAI DeBERTa, Lakera Guard API |
-| **Package Signing** | Keyless signing & verification | sigstore-js (@sigstore/sign, @sigstore/verify) |
-| **Agent Linking** | Link skills to 37+ agent platforms | Vercel `skills` CLI (npx skills add) |
-| **Web UI** | Browse, rate, review skills | Astro or Next.js |
-| **Local Store** | Installed skills on disk | `~/.spm/` directory structure |
-| **Name Protection** | Anti-squatting detection | string-similarity, confusables npm packages |
+| Component             | Role                                              | Tech Stack                                          |
+| --------------------- | ------------------------------------------------- | --------------------------------------------------- |
+| **CLI (`spm`)**       | Install, publish, search, update skills           | TypeScript, Commander.js                            |
+| **Registry API**      | Central catalog, storage, auth                    | Hono + Neon Postgres + Cloudflare R2                |
+| **MCP Server**        | Lets agents search/install skills in-conversation | MCP protocol over SSE/stdio                         |
+| **Security Pipeline** | 3-layer content scanning + code analysis          | Regex patterns, ProtectAI DeBERTa, Lakera Guard API |
+| **Package Signing**   | Keyless signing & verification                    | sigstore-js (@sigstore/sign, @sigstore/verify)      |
+| **Agent Linking**     | Link skills to 37+ agent platforms                | Vercel `skills` CLI (npx skills add)                |
+| **Web UI**            | Browse, rate, review skills                       | Astro or Next.js                                    |
+| **Local Store**       | Installed skills on disk                          | `~/.spm/` directory structure                       |
+| **Name Protection**   | Anti-squatting detection                          | string-similarity, confusables npm packages         |
 
 ---
 
@@ -148,6 +149,7 @@ SPM uses **Semantic Versioning (semver)**:
 - **PATCH** (1.2.1) — Bug fixes, prompt improvements, typo corrections
 
 Version resolution rules:
+
 - `"frontend-design": ">=1.0.0"` — Any version 1.0.0 or higher
 - `"frontend-design": "~1.2.0"` — Patch-level changes only (1.2.x)
 - `"frontend-design": "^1.2.0"` — Minor-level changes (1.x.x)
@@ -249,6 +251,7 @@ Response:
 ```
 
 Search supports:
+
 - **Full-text** on name, description, tags (Postgres GIN index)
 - **Category filtering** — closed list of 10 categories
 - **Trust filters** — minimum trust tier
@@ -506,18 +509,18 @@ Categories are a **controlled vocabulary** — 10 values, managed as a Postgres 
 
 Authors choose a category at `spm init`, then LLM verifies/suggests at `spm publish` (hybrid approach — see Authoring Flow doc for details). Tags remain free-form for search.
 
-| Category | Display Name | What it covers |
-|---|---|---|
-| `documents` | Documents | PDF, DOCX, PPTX, XLSX, text processing |
-| `data-viz` | Data & Visualization | Charts, dashboards, CSV/JSON, analytics |
-| `frontend` | Frontend | UI, React, HTML/CSS, design systems |
-| `backend` | Backend | API, GraphQL, REST, database, migrations |
-| `infra` | Infrastructure | Docker, CI/CD, deploy, cloud, IaC |
-| `testing` | Testing | Test generation, coverage, benchmarks |
-| `code-quality` | Code Quality | Linting, standards, review, refactoring |
-| `security` | Security | Auth, encryption, vulnerability scanning |
-| `productivity` | Productivity | Git, terminal, workflow automation |
-| `other` | Other | Doesn't fit above categories |
+| Category       | Display Name         | What it covers                           |
+| -------------- | -------------------- | ---------------------------------------- |
+| `documents`    | Documents            | PDF, DOCX, PPTX, XLSX, text processing   |
+| `data-viz`     | Data & Visualization | Charts, dashboards, CSV/JSON, analytics  |
+| `frontend`     | Frontend             | UI, React, HTML/CSS, design systems      |
+| `backend`      | Backend              | API, GraphQL, REST, database, migrations |
+| `infra`        | Infrastructure       | Docker, CI/CD, deploy, cloud, IaC        |
+| `testing`      | Testing              | Test generation, coverage, benchmarks    |
+| `code-quality` | Code Quality         | Linting, standards, review, refactoring  |
+| `security`     | Security             | Auth, encryption, vulnerability scanning |
+| `productivity` | Productivity         | Git, terminal, workflow automation       |
+| `other`        | Other                | Doesn't fit above categories             |
 
 ---
 
@@ -621,52 +624,52 @@ This is where it gets exciting. An MCP server lets **agents themselves** search 
 {
   tools: [
     {
-      name: "spm_search",
-      description: "Search the SPM registry for skills that match a task",
+      name: 'spm_search',
+      description: 'Search the SPM registry for skills that match a task',
       inputSchema: {
-        type: "object",
+        type: 'object',
         properties: {
-          query: { type: "string", description: "Natural language or keywords" },
-          category: { type: "string", enum: [...categories] },
-          verified_only: { type: "boolean", default: true },
-          limit: { type: "number", default: 5 }
+          query: { type: 'string', description: 'Natural language or keywords' },
+          category: { type: 'string', enum: [...categories] },
+          verified_only: { type: 'boolean', default: true },
+          limit: { type: 'number', default: 5 },
         },
-        required: ["query"]
-      }
+        required: ['query'],
+      },
     },
     {
-      name: "spm_info",
-      description: "Get detailed info about a specific skill package",
+      name: 'spm_info',
+      description: 'Get detailed info about a specific skill package',
       inputSchema: {
-        type: "object",
+        type: 'object',
         properties: {
-          name: { type: "string" },
-          version: { type: "string" }
+          name: { type: 'string' },
+          version: { type: 'string' },
         },
-        required: ["name"]
-      }
+        required: ['name'],
+      },
     },
     {
-      name: "spm_install",
-      description: "Install a skill from the registry (requires user confirmation)",
+      name: 'spm_install',
+      description: 'Install a skill from the registry (requires user confirmation)',
       inputSchema: {
-        type: "object",
+        type: 'object',
         properties: {
-          name: { type: "string" },
-          version: { type: "string" }
+          name: { type: 'string' },
+          version: { type: 'string' },
         },
-        required: ["name"]
-      }
+        required: ['name'],
+      },
     },
     {
-      name: "spm_installed",
-      description: "List currently installed skills",
+      name: 'spm_installed',
+      description: 'List currently installed skills',
       inputSchema: {
-        type: "object",
-        properties: {}
-      }
-    }
-  ]
+        type: 'object',
+        properties: {},
+      },
+    },
+  ];
 }
 ```
 
@@ -679,7 +682,7 @@ Agent's thinking:
   1. No installed skill matches "Gantt chart" specifically
   2. → Call spm_search({ query: "gantt chart project management" })
   3. ← Results: "project-gantt v2.1.0" (verified, 4.8★, 3.2k downloads)
-  4. → Suggest to user: "I found a skill called project-gantt that 
+  4. → Suggest to user: "I found a skill called project-gantt that
        specializes in this. Want me to install it?"
   5. User: "Yes"
   6. → Call spm_install({ name: "project-gantt" })
@@ -699,23 +702,23 @@ app = Server("spm-registry")
 REGISTRY_URL = "https://registry.spm.dev/api/v1"
 
 @app.tool()
-async def spm_search(query: str, category: str = None, 
+async def spm_search(query: str, category: str = None,
                      verified_only: bool = True, limit: int = 5):
     """Search the SPM registry for skills"""
     params = {"q": query, "limit": limit, "verified": verified_only}
     if category:
         params["category"] = category
-    
+
     async with httpx.AsyncClient() as client:
         resp = await client.get(f"{REGISTRY_URL}/skills", params=params)
         results = resp.json()["results"]
-    
+
     formatted = []
     for skill in results:
         trust = []
         if skill["verified"]: trust.append("✓ verified")
         if skill["signed"]: trust.append("✓ signed")
-        
+
         formatted.append(
             f"**{skill['name']}** v{skill['version']} "
             f"({skill['rating']}★, {skill['downloads']} downloads)\n"
@@ -723,8 +726,8 @@ async def spm_search(query: str, category: str = None,
             f"  Trust: {', '.join(trust)}\n"
             f"  Author: {skill['author']}"
         )
-    
-    return TextContent(text="\n\n".join(formatted) if formatted 
+
+    return TextContent(text="\n\n".join(formatted) if formatted
                        else "No skills found matching your query.")
 
 @app.tool()
@@ -741,16 +744,17 @@ async def spm_install(name: str, version: str = "latest"):
 
 ### 7.1 Core Pages
 
-| Page | Purpose |
-|------|---------|
-| **Home / Explore** | Featured skills, trending, categories, curated collections |
-| **Search Results** | Filtered, sorted list with trust badges |
-| **Skill Detail** | README, version history, reviews, install instructions, trust info |
-| **Author Profile** | Published skills, verification status, contributor stats |
-| **Dashboard** | (For publishers) Analytics, downloads, reviews, manage versions |
-| **Admin** | (For SPM team) Moderation, flagged skills, security alerts |
+| Page               | Purpose                                                            |
+| ------------------ | ------------------------------------------------------------------ |
+| **Home / Explore** | Featured skills, trending, categories, curated collections         |
+| **Search Results** | Filtered, sorted list with trust badges                            |
+| **Skill Detail**   | README, version history, reviews, install instructions, trust info |
+| **Author Profile** | Published skills, verification status, contributor stats           |
+| **Dashboard**      | (For publishers) Analytics, downloads, reviews, manage versions    |
+| **Admin**          | (For SPM team) Moderation, flagged skills, security alerts         |
 
 **Admin panel access model:**
+
 - Runs on **separate domain**: `admin.spm.dev` (independent Cloudflare Pages deploy)
 - Public site shows "Admin" nav link only when `GET /auth/whoami` returns `role: "admin"`
 - Link opens `admin.spm.dev` in same tab — shared auth (same JWT works on both origins)
@@ -877,15 +881,15 @@ Skill script execution:
 
 Skills contain instructions and code that agents will execute. This creates attack vectors:
 
-| Threat | Example | Mitigation |
-|--------|---------|------------|
-| **Prompt injection** | SKILL.md contains "ignore previous instructions" | 3-layer detection: regex + ProtectAI ML + Lakera API |
-| **Malicious code** | Script exfiltrates data via `curl` | Static analysis + network policy |
-| **Supply chain** | Popular skill gets compromised in update | Sigstore signing + diff review |
-| **Data exfiltration** | Skill reads sensitive files and encodes in output | Filesystem scope enforcement |
-| **Dependency confusion** | Skill claims false dependency to inject code | Dependency resolution with checksums |
-| **Name squatting** | Typosquat or homoglyph of popular skill | string-similarity + confusables detection |
-| **Social engineering** | Skill description is benign, code is malicious | Automated + manual review pipeline |
+| Threat                   | Example                                           | Mitigation                                           |
+| ------------------------ | ------------------------------------------------- | ---------------------------------------------------- |
+| **Prompt injection**     | SKILL.md contains "ignore previous instructions"  | 3-layer detection: regex + ProtectAI ML + Lakera API |
+| **Malicious code**       | Script exfiltrates data via `curl`                | Static analysis + network policy                     |
+| **Supply chain**         | Popular skill gets compromised in update          | Sigstore signing + diff review                       |
+| **Data exfiltration**    | Skill reads sensitive files and encodes in output | Filesystem scope enforcement                         |
+| **Dependency confusion** | Skill claims false dependency to inject code      | Dependency resolution with checksums                 |
+| **Name squatting**       | Typosquat or homoglyph of popular skill           | string-similarity + confusables detection            |
+| **Social engineering**   | Skill description is benign, code is malicious    | Automated + manual review pipeline                   |
 
 ### 9.2 Security Scanning Pipeline
 
@@ -1000,11 +1004,11 @@ Even after installation, skills operate under constraints:
   "filesystem": {
     "read": ["$WORKDIR", "$SKILL_DIR"],
     "write": ["$WORKDIR", "$OUTPUTS"],
-    "deny": ["$UPLOADS"]  // unless user grants
+    "deny": ["$UPLOADS"] // unless user grants
   },
   "network": {
-    "allowed": false,  // default deny
-    "exceptions": []   // declared in manifest, user-approved
+    "allowed": false, // default deny
+    "exceptions": [] // declared in manifest, user-approved
   },
   "execution": {
     "timeout_seconds": 300,
@@ -1021,6 +1025,7 @@ Even after installation, skills operate under constraints:
 ### 10.1 Why Signing?
 
 Signing ensures:
+
 - **Integrity** — The package hasn't been tampered with since the author published it
 - **Attribution** — You know who created it
 - **Non-repudiation** — The author can't deny they published it
@@ -1065,19 +1070,19 @@ No key management required — authors authenticate via GitHub/Google OIDC. Sign
 
 SPM uses `@sigstore/sign` and `@sigstore/verify` — the same libraries npm uses for package provenance.
 
-| Component | Package | Purpose |
-|-----------|---------|---------|
-| `@sigstore/sign` | Sign .skl packages | Keyless signing via OIDC identity |
-| `@sigstore/bundle` | Create sigstore bundles | Bundle cert + signature + Rekor entry |
-| `@sigstore/verify` | Verify on install | Check signature + Rekor log + cert chain |
+| Component          | Package                 | Purpose                                  |
+| ------------------ | ----------------------- | ---------------------------------------- |
+| `@sigstore/sign`   | Sign .skl packages      | Keyless signing via OIDC identity        |
+| `@sigstore/bundle` | Create sigstore bundles | Bundle cert + signature + Rekor entry    |
+| `@sigstore/verify` | Verify on install       | Check signature + Rekor log + cert chain |
 
 **Why Sigstore over alternatives:**
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| **GPG signatures** | Well-established | Complex key management, users forget passwords |
-| **~~Sigstore / Cosign~~** → **Sigstore** | Keyless, OIDC identity, transparency log | ~~Newer~~ Now used by npm + PyPI |
-| **TUF** | Designed for package managers | Complex to implement, overkill for Phase 1 |
+| Approach                                 | Pros                                     | Cons                                           |
+| ---------------------------------------- | ---------------------------------------- | ---------------------------------------------- |
+| **GPG signatures**                       | Well-established                         | Complex key management, users forget passwords |
+| **~~Sigstore / Cosign~~** → **Sigstore** | Keyless, OIDC identity, transparency log | ~~Newer~~ Now used by npm + PyPI               |
+| **TUF**                                  | Designed for package managers            | Complex to implement, overkill for Phase 1     |
 
 ### 10.4 Signature Verification
 
@@ -1088,7 +1093,7 @@ $ spm install data-viz
 Downloading data-viz@1.2.0...
 Verifying signature...
   ✓ Signed by: almog@example.com
-  ✓ Identity: github.com/almog (via Sigstore OIDC)  
+  ✓ Identity: github.com/almog (via Sigstore OIDC)
   ✓ Logged in Rekor transparency log
   ✓ Checksum matches: sha256:a1b2c3d4...
 Installing to ~/.spm/skills/data-viz/1.2.0/
@@ -1109,43 +1114,43 @@ Status: ✓ VALID
 
 ### 11.1 Technical Challenges
 
-| Issue | Details | Possible Approach |
-|-------|---------|-------------------|
-| **System prompt bloat** | Hundreds of installed skills = enormous `<available_skills>` section | Tiered loading: only top-N by usage, MCP search for the rest |
-| **Skill conflicts** | Two skills trigger on the same description keywords | Priority system, user-configurable ordering, conflict detection at install |
-| **Dependency hell** | Skill A needs frontend-design@1.x, skill B needs @2.x | Allow multiple versions, isolated install like pnpm |
-| **Cross-platform parity** | Skills behave differently across agent platforms | Platform compatibility matrix in manifest, conditional instructions in SKILL.md |
-| **Offline usage** | Registry not available, or air-gapped environments | Local-only mode, skill bundles, cached registry snapshots |
-| **Skill update trust** | A verified skill publishes a malicious update | Mandatory diff review for permission escalation, staged rollouts |
+| Issue                     | Details                                                              | Possible Approach                                                               |
+| ------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| **System prompt bloat**   | Hundreds of installed skills = enormous `<available_skills>` section | Tiered loading: only top-N by usage, MCP search for the rest                    |
+| **Skill conflicts**       | Two skills trigger on the same description keywords                  | Priority system, user-configurable ordering, conflict detection at install      |
+| **Dependency hell**       | Skill A needs frontend-design@1.x, skill B needs @2.x                | Allow multiple versions, isolated install like pnpm                             |
+| **Cross-platform parity** | Skills behave differently across agent platforms                     | Platform compatibility matrix in manifest, conditional instructions in SKILL.md |
+| **Offline usage**         | Registry not available, or air-gapped environments                   | Local-only mode, skill bundles, cached registry snapshots                       |
+| **Skill update trust**    | A verified skill publishes a malicious update                        | Mandatory diff review for permission escalation, staged rollouts                |
 
 ### 11.2 Ecosystem Challenges
 
-| Issue | Details | Possible Approach |
-|-------|---------|-------------------|
-| **Quality control** | Low-quality skills flood the registry | Minimum requirements (tests, docs), community ratings, curation |
-| **Discoverability** | Users can't find the right skill | Semantic search, agent-powered recommendations, curated collections |
-| **Monetization** | How do skill authors get rewarded? | Free tier + premium skills, tips/sponsorship, usage-based revenue share |
-| **Governance** | Who decides what's allowed? | Open governance model, published policies, appeal process |
-| **Fragmentation** | Multiple registries emerge | Default registry + ability to add custom registries (like npm scopes) |
-| **Prompt injection arms race** | Attackers find new ways to embed injections | Continuous scanning updates, bug bounty program, community reporting |
+| Issue                          | Details                                     | Possible Approach                                                       |
+| ------------------------------ | ------------------------------------------- | ----------------------------------------------------------------------- |
+| **Quality control**            | Low-quality skills flood the registry       | Minimum requirements (tests, docs), community ratings, curation         |
+| **Discoverability**            | Users can't find the right skill            | Semantic search, agent-powered recommendations, curated collections     |
+| **Monetization**               | How do skill authors get rewarded?          | Free tier + premium skills, tips/sponsorship, usage-based revenue share |
+| **Governance**                 | Who decides what's allowed?                 | Open governance model, published policies, appeal process               |
+| **Fragmentation**              | Multiple registries emerge                  | Default registry + ability to add custom registries (like npm scopes)   |
+| **Prompt injection arms race** | Attackers find new ways to embed injections | Continuous scanning updates, bug bounty program, community reporting    |
 
 ### 11.3 Design Decisions (Resolved)
 
 All previously open questions have been resolved. See `spm-open-questions-resolved.md` for full reasoning.
 
-| Question | Decision |
-|----------|----------|
-| **Scope: global or per-project?** | Both. Global default, per-project with `skills.json` (npm model) |
-| **Who can publish?** | Open registration + security scan gate (npm model, not App Store) |
-| **Skill forking** | Allow forks, namespaces (`@user/name`), optional `forked_from` attribution |
-| **Skill composition** | Dependencies only, no "extends." Agents compose by reading multiple SKILL.md files |
-| **Telemetry** | Anonymous install counts (automatic), trigger analytics (opt-in via MCP) |
-| **Pricing model** | Free for Phase 1-2. Explore premium tiers Phase 3+ |
-| **Registry federation** | Private registries Phase 1, federation protocol Phase 3 |
-| **ONNX vs HF API** | ONNX runtime on server (zero external dependency, ~50-100ms per scan) |
-| **Fork Vercel CLI?** | No. Subprocess call, pinned version |
-| **Index skills.sh Day 1?** | All 200+ pre-launch (scanner tuning exercise) |
-| **Lock file coexistence** | Project-local `skills-lock.json` next to `skills.json` (like package-lock.json) |
+| Question                          | Decision                                                                           |
+| --------------------------------- | ---------------------------------------------------------------------------------- |
+| **Scope: global or per-project?** | Both. Global default, per-project with `skills.json` (npm model)                   |
+| **Who can publish?**              | Open registration + security scan gate (npm model, not App Store)                  |
+| **Skill forking**                 | Allow forks, namespaces (`@user/name`), optional `forked_from` attribution         |
+| **Skill composition**             | Dependencies only, no "extends." Agents compose by reading multiple SKILL.md files |
+| **Telemetry**                     | Anonymous install counts (automatic), trigger analytics (opt-in via MCP)           |
+| **Pricing model**                 | Free for Phase 1-2. Explore premium tiers Phase 3+                                 |
+| **Registry federation**           | Private registries Phase 1, federation protocol Phase 3                            |
+| **ONNX vs HF API**                | ONNX runtime on server (zero external dependency, ~50-100ms per scan)              |
+| **Fork Vercel CLI?**              | No. Subprocess call, pinned version                                                |
+| **Index skills.sh Day 1?**        | All 200+ pre-launch (scanner tuning exercise)                                      |
+| **Lock file coexistence**         | Project-local `skills-lock.json` next to `skills.json` (like package-lock.json)    |
 
 ---
 
@@ -1154,6 +1159,7 @@ All previously open questions have been resolved. See `spm-open-questions-resolv
 With borrowed tools (Vercel skills CLI, ProtectAI DeBERTa, sigstore-js, etc.), the timeline compresses significantly.
 
 ### Phase 1 — MVP (Weeks 1-4)
+
 - Define `.skl` format specification
 - Build CLI core: `init`, `pack`, `install`, `list`, `validate`, `publish`
 - Set up registry API (Hono + Neon + R2)
@@ -1165,6 +1171,7 @@ With borrowed tools (Vercel skills CLI, ProtectAI DeBERTa, sigstore-js, etc.), t
 - Postgres full-text search
 
 ### Phase 2 — Growth (Months 2-3)
+
 - Reviews and ratings system
 - Author analytics dashboard (trigger analytics = the moat)
 - MCP server for agent-native skill discovery
@@ -1174,6 +1181,7 @@ With borrowed tools (Vercel skills CLI, ProtectAI DeBERTa, sigstore-js, etc.), t
 - skills.sh indexing (import 200+ skills with security scanning)
 
 ### Phase 3 — Ecosystem (Months 4-6)
+
 - Web UI / marketplace (Astro or Next.js)
 - Advanced search (Meilisearch if Postgres FTS isn't enough)
 - Federation API for private registries
@@ -1182,6 +1190,7 @@ With borrowed tools (Vercel skills CLI, ProtectAI DeBERTa, sigstore-js, etc.), t
 - Curated collections and recommendations
 
 ### Phase 4 — Scale (Months 7+)
+
 - Enterprise features (SSO, teams, audit logs)
 - Regional mirrors
 - Premium skills / monetization
@@ -1225,8 +1234,8 @@ User (in agent): "Create a Gantt chart from my project timeline CSV"
 
 Agent: [No installed skill matches]
 Agent: [Calls spm_search via MCP: "gantt chart project timeline"]
-Agent: "I found a skill called gantt-chart (4.8★, verified author) 
-         that specializes in creating Gantt charts from project data. 
+Agent: "I found a skill called gantt-chart (4.8★, verified author)
+         that specializes in creating Gantt charts from project data.
          Want me to install it?"
 
 User: "Yes, go for it"
@@ -1241,25 +1250,25 @@ Agent: "Here's your Gantt chart! [renders output]"
 
 ## Appendix A: Prior Art & Inspiration
 
-| System | What SPM borrows |
-|--------|-----------------|
-| **npm** | CLI UX, semver, package.json, registry API patterns |
-| **PyPI/pip** | Simple install flow, requirements/lock files |
-| **Homebrew** | Cask-like "tap" system for custom registries |
-| **Docker Hub** | Trust/verified publisher model, layer caching concept |
-| **VS Code Extensions** | Marketplace UI, ratings, categories, compatibility matrix |
-| **Sigstore** | Keyless signing, transparency log |
-| **OpenAI GPTs Store** | AI-tool marketplace concept, but SPM is code-first not config-first |
+| System                 | What SPM borrows                                                    |
+| ---------------------- | ------------------------------------------------------------------- |
+| **npm**                | CLI UX, semver, package.json, registry API patterns                 |
+| **PyPI/pip**           | Simple install flow, requirements/lock files                        |
+| **Homebrew**           | Cask-like "tap" system for custom registries                        |
+| **Docker Hub**         | Trust/verified publisher model, layer caching concept               |
+| **VS Code Extensions** | Marketplace UI, ratings, categories, compatibility matrix           |
+| **Sigstore**           | Keyless signing, transparency log                                   |
+| **OpenAI GPTs Store**  | AI-tool marketplace concept, but SPM is code-first not config-first |
 
 ## Appendix B: Glossary
 
-| Term | Definition |
-|------|-----------|
-| **Skill** | A set of instructions + code that enhances an agent's capabilities for a specific task |
-| **SKILL.md** | The core instruction file agents read to understand how to use a skill |
-| **`.skl`** | The packaged, distributable format for a skill |
-| **SPM** | Skills Package Manager — the CLI, registry, and ecosystem |
-| **Manifest** | `manifest.json` — metadata about a skill package |
-| **Verified Author** | A publisher whose identity has been confirmed |
-| **Signed** | A package with a cryptographic signature proving authenticity (via Sigstore) |
-| **MCP** | Model Context Protocol — how agents communicate with external tools |
+| Term                | Definition                                                                             |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| **Skill**           | A set of instructions + code that enhances an agent's capabilities for a specific task |
+| **SKILL.md**        | The core instruction file agents read to understand how to use a skill                 |
+| **`.skl`**          | The packaged, distributable format for a skill                                         |
+| **SPM**             | Skills Package Manager — the CLI, registry, and ecosystem                              |
+| **Manifest**        | `manifest.json` — metadata about a skill package                                       |
+| **Verified Author** | A publisher whose identity has been confirmed                                          |
+| **Signed**          | A package with a cryptographic signature proving authenticity (via Sigstore)           |
+| **MCP**             | Model Context Protocol — how agents communicate with external tools                    |

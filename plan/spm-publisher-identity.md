@@ -7,6 +7,7 @@
 ## 1. The Problem
 
 Without identity verification:
+
 - Anyone creates `almog@throwaway.com`, publishes a malicious skill
 - Fake accounts squat popular names
 - No accountability when something goes wrong
@@ -132,7 +133,7 @@ $ spm register
 # Back in terminal after browser flow:
 
   ✓ Authenticated via GitHub
-  
+
   GitHub profile:
     Username:   almog
     Email:      almog@example.com (verified ✓)
@@ -192,7 +193,7 @@ Email-only accounts face additional friction to prevent abuse:
 GitHub-linked account:          Email-only account:
 ─────────────────────           ─────────────────────
 24h cooldown                    72h cooldown
-5 skills/day publish limit      1 skill/day publish limit  
+5 skills/day publish limit      1 skill/day publish limit
 Auto-scan (async)               Scan must PASS before visible
 Can reach Tier 2 organically    Must link GitHub for Tier 2
 Package signing optional        Package signing required
@@ -285,7 +286,7 @@ $ spm token create
     spm_tok_v1_abc123def456ghi789...
 
     ⚠️  Copy this token now — it won't be shown again.
-    
+
     Scopes:  publish, read
     Expires: 2026-05-28
 
@@ -316,6 +317,7 @@ $ spm token create
 ```
 
 The credential file is:
+
 - `chmod 600` (owner read/write only)
 - Encrypted with OS keychain when available (macOS Keychain, Linux libsecret)
 - Never committed to git (added to global gitignore by `spm register`)
@@ -335,7 +337,7 @@ $ spm publish my-third-skill
   ✓ Published!
 
   🎉 Congratulations! You've been upgraded to Verified Author.
-  
+
   Your account now shows the ✓ Verified badge because:
     ✓ GitHub linked (account age: 8 years)
     ✓ 3 skills published, all with clean security scans
@@ -398,7 +400,7 @@ $ spm org create my-company
   ? Organization email: dev@mycompany.com
 
   To verify organization ownership:
-  
+
   Option A: DNS verification
     Add a TXT record to mycompany.com:
     spm-verification=spm_verify_abc123def456
@@ -413,17 +415,18 @@ $ spm org create my-company
 ```
 
 After DNS verification:
+
 ```bash
 $ spm org verify my-company
 
   Checking DNS records for mycompany.com...
   ✓ TXT record found: spm-verification=spm_verify_abc123def456
-  
+
   ✓ Organization @my-company verified!
-  
+
   Skills published under @my-company will show:
     🏢 Verified Organization badge
-  
+
   Manage members: spm org members my-company
 ```
 
@@ -433,13 +436,13 @@ $ spm org verify my-company
 
 ### 7.1 Rate Limits by Tier
 
-| Action | Tier 0 | Tier 1 | Tier 2 | Tier 3 | Tier 4 |
-|--------|--------|--------|--------|--------|--------|
-| Search | 100/hr | 500/hr | 1000/hr | 5000/hr | Unlimited |
-| Download | 500/hr | 1000/hr | 5000/hr | Unlimited | Unlimited |
-| Publish | — | 2/day | 10/day | 50/day | Unlimited |
-| Create account | 1/IP/day | — | — | — | — |
-| Reviews | — | 10/day | 20/day | 50/day | Unlimited |
+| Action         | Tier 0   | Tier 1  | Tier 2  | Tier 3    | Tier 4    |
+| -------------- | -------- | ------- | ------- | --------- | --------- |
+| Search         | 100/hr   | 500/hr  | 1000/hr | 5000/hr   | Unlimited |
+| Download       | 500/hr   | 1000/hr | 5000/hr | Unlimited | Unlimited |
+| Publish        | —        | 2/day   | 10/day  | 50/day    | Unlimited |
+| Create account | 1/IP/day | —       | —       | —         | —         |
+| Reviews        | —        | 10/day  | 20/day  | 50/day    | Unlimited |
 
 ### 7.2 Automated Abuse Detection
 
@@ -614,13 +617,13 @@ $ spm 2fa enable
   │  █ ███ █ ▀█▀▄  │
   │  ▀▀▀▀▀ ▀ ▀ ▀▀  │
   └─────────────────┘
-  
+
   Or enter manually: JBSWY3DPEHPK3PXP
-  
+
   ? Enter the 6-digit code from your app: 482193
-  
+
   ✓ 2FA enabled
-  
+
   Recovery codes (save these securely):
     abc123-def456
     ghi789-jkl012
@@ -629,6 +632,7 @@ $ spm 2fa enable
 ```
 
 2FA is required for:
+
 - Publishing (Tier 2+, configurable)
 - Yanking versions
 - Transferring ownership
@@ -657,26 +661,26 @@ ALTER TABLE authors ADD COLUMN
     github_account_age  TIMESTAMPTZ,        -- When their GitHub was created
     github_repos_count  INTEGER,
     github_followers     INTEGER,
-    
+
     email_verified      BOOLEAN DEFAULT FALSE,
     email_verified_at   TIMESTAMPTZ,
     email_domain        VARCHAR(255),        -- For disposable email detection
-    
+
     terms_accepted      BOOLEAN DEFAULT FALSE,
     terms_accepted_at   TIMESTAMPTZ,
     terms_version       VARCHAR(16),         -- Which version of terms
-    
+
     totp_secret         TEXT,                -- Encrypted TOTP seed
     totp_enabled        BOOLEAN DEFAULT FALSE,
     webauthn_credentials JSONB,              -- FIDO2 keys
     recovery_codes      TEXT[],              -- Encrypted recovery codes
-    
+
     -- Anti-abuse
     registration_ip     INET,
     last_publish_at     TIMESTAMPTZ,
     publish_count_today INTEGER DEFAULT 0,
     abuse_score         INTEGER DEFAULT 0,   -- Automated risk score
-    
+
     -- Suspension
     suspended           BOOLEAN DEFAULT FALSE,
     suspended_at        TIMESTAMPTZ,
@@ -709,7 +713,7 @@ CREATE TABLE oauth_connections (
     profile_data    JSONB,                   -- Raw profile from provider
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     updated_at      TIMESTAMPTZ DEFAULT NOW(),
-    
+
     UNIQUE (provider, provider_user_id)
 );
 
@@ -722,7 +726,7 @@ CREATE TABLE org_members (
                 -- 'owner', 'admin', 'member'
     invited_by  UUID REFERENCES authors(id),
     created_at  TIMESTAMPTZ DEFAULT NOW(),
-    
+
     UNIQUE (org_id, user_id)
 );
 

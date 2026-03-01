@@ -33,6 +33,7 @@ ECOSYSTEM-SPECIFIC:
 ```
 
 Fields from other ecosystems worth adding to SPM:
+
 - `repository` (npm) → where's the source code
 - `funding` (npm) → sponsorship link
 - `private` (npm) → prevent accidental publish
@@ -59,7 +60,7 @@ Fields from other ecosystems worth adding to SPM:
   "version": "1.2.0",
   // Semver. "0.0.0" for migrated skills without versions.
 
-  "description": "Create charts, dashboards, and data visualizations from CSV, JSON, or database output. Use when the user asks to plot, chart, graph, or visualize data."
+  "description": "Create charts, dashboards, and data visualizations from CSV, JSON, or database output. Use when the user asks to plot, chart, graph, or visualize data.",
   // 30-1024 chars. This is what agents match against user prompts.
   // The MOST important field for discoverability — make it "pushy".
 }
@@ -104,7 +105,7 @@ Why only 3 required? Because the goal is to make publishing as frictionless as p
 
   "category": "data",
   // Single primary category. Predefined list:
-  // "data", "code", "writing", "design", "devops", 
+  // "data", "code", "writing", "design", "devops",
   // "productivity", "education", "finance", "other"
   // Default: "other"
 
@@ -311,9 +312,7 @@ That's it. 3 lines. Everything else defaults.
   "name": "csv-analyzer",
   "version": "1.0.0",
   "description": "Analyze CSV files: generate summaries, find outliers, create pivot tables, and suggest visualizations. Trigger when user uploads a CSV or asks to analyze tabular data.",
-  "authors": [
-    { "name": "Almog", "email": "almog@example.com" }
-  ],
+  "authors": [{ "name": "Almog", "email": "almog@example.com" }],
   "license": "MIT",
   "keywords": ["csv", "data", "analysis", "statistics"],
   "category": "data",
@@ -335,13 +334,11 @@ That's it. 3 lines. Everything else defaults.
   "description": "Generate quarterly business reports in ACME brand format with financial charts and executive summary.",
   "private": false,
   "authors": [
-    { "name": "Data Team",       "email": "data@acme.com" },
-    { "name": "Alice Chen",      "email": "alice@acme.com" },
-    { "name": "Bob Rodriguez",   "email": "bob@acme.com" }
+    { "name": "Data Team", "email": "data@acme.com" },
+    { "name": "Alice Chen", "email": "alice@acme.com" },
+    { "name": "Bob Rodriguez", "email": "bob@acme.com" }
   ],
-  "maintainers": [
-    { "name": "Charlie Kim",     "email": "charlie@acme.com" }
-  ],
+  "maintainers": [{ "name": "Charlie Kim", "email": "charlie@acme.com" }],
   "license": "Proprietary",
   "category": "writing",
   "agents": {
@@ -366,23 +363,21 @@ That's it. 3 lines. Everything else defaults.
   "version": "2.0.0",
   "description": "Scaffold a full-stack web application with React frontend, FastAPI backend, PostgreSQL database, and Docker deployment. Use when the user says 'create an app', 'scaffold a project', 'new web app', or 'full stack'.",
   "authors": [
-    { "name": "Almog",  "email": "almog@example.com", "url": "https://almog.dev" },
-    { "name": "Dana",   "email": "dana@example.com" }
+    { "name": "Almog", "email": "almog@example.com", "url": "https://almog.dev" },
+    { "name": "Dana", "email": "dana@example.com" }
   ],
-  "maintainers": [
-    { "name": "Almog", "email": "almog@example.com" }
-  ],
+  "maintainers": [{ "name": "Almog", "email": "almog@example.com" }],
   "license": "Apache-2.0",
   "keywords": ["scaffold", "react", "fastapi", "docker", "fullstack", "webapp", "template"],
   "category": "code",
   "private": false,
   "urls": {
-    "homepage":      "https://fullstack-scaffold.dev",
-    "repository":    "https://github.com/almog/full-stack-scaffold",
-    "issues":        "https://github.com/almog/full-stack-scaffold/issues",
+    "homepage": "https://fullstack-scaffold.dev",
+    "repository": "https://github.com/almog/full-stack-scaffold",
+    "issues": "https://github.com/almog/full-stack-scaffold/issues",
     "documentation": "https://fullstack-scaffold.dev/docs",
-    "changelog":     "https://github.com/almog/full-stack-scaffold/blob/main/CHANGELOG.md",
-    "funding":       "https://github.com/sponsors/almog"
+    "changelog": "https://github.com/almog/full-stack-scaffold/blob/main/CHANGELOG.md",
+    "funding": "https://github.com/sponsors/almog"
   },
   "agents": {
     "platforms": ["claude-code", "cursor", "codex"],
@@ -422,6 +417,7 @@ That's it. 3 lines. Everything else defaults.
 ### Why only 3 required fields?
 
 npm requires 2 (name, version). PyPI requires 2 (name, version). We add description because it's the trigger mechanism — without it, agents can't find your skill. But we don't force author, license, keywords, etc. because:
+
 - Many authors just want to share a quick skill
 - Company skills don't need public author info
 - License can be "unspecified" — it's the author's choice
@@ -432,6 +428,7 @@ npm requires 2 (name, version). PyPI requires 2 (name, version). We add descript
 npm has `author` (string or object) + `contributors` (array) — confusing.
 PyPI has `authors` (array) + `maintainers` (array) — cleaner.
 SPM uses `authors` (array) because:
+
 - Skills are often built by teams
 - First entry is primary author (display order matters)
 - No need for a separate `contributors` field — just add them to `authors`

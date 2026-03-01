@@ -112,20 +112,20 @@ function parseInstallTarget(input) {
   if (input.endsWith('.skl') || input.startsWith('./') || input.startsWith('/')) {
     return { type: 'local', path: input };
   }
-  
+
   // GitHub shorthand
   if (input.startsWith('github:')) {
     const [owner, repoAndTag] = input.replace('github:', '').split('/');
     const [repo, tag] = repoAndTag.split('#');
     return { type: 'github', owner, repo, tag: tag || 'latest' };
   }
-  
+
   // Registry (default)
   const [name, version] = input.split('@');
-  return { 
-    type: 'registry', 
-    name, 
-    version: version || 'latest' 
+  return {
+    type: 'registry',
+    name,
+    version: version || 'latest',
   };
 }
 ```
@@ -194,7 +194,7 @@ SPM recursively resolves skill dependencies, building a flat list of everything 
 // Check against already-installed skills
 function detectConflicts(toInstall, installed) {
   const conflicts = [];
-  
+
   // Version conflict: another skill requires incompatible version
   for (const [dep, range] of toInstall.dependencies.skills) {
     const existing = installed.get(dep);
@@ -204,11 +204,11 @@ function detectConflicts(toInstall, installed) {
         skill: dep,
         installed: existing.version,
         required: range,
-        by: toInstall.name
+        by: toInstall.name,
       });
     }
   }
-  
+
   // Trigger conflict: skill description overlaps with existing skill
   for (const existing of installed.values()) {
     const overlap = computeTriggerOverlap(toInstall.description, existing.description);
@@ -217,11 +217,11 @@ function detectConflicts(toInstall, installed) {
         type: 'trigger_overlap',
         skill: existing.name,
         overlap_score: overlap,
-        suggestion: `Consider uninstalling ${existing.name} or adjusting trigger priorities`
+        suggestion: `Consider uninstalling ${existing.name} or adjusting trigger priorities`,
       });
     }
   }
-  
+
   return conflicts;
 }
 ```
@@ -249,7 +249,7 @@ Install plan:
      Suggestion: data-viz will take priority (newer install)
 
   Total download: 77.3 KB
-  
+
 Proceed? (Y/n) █
 ```
 
@@ -262,19 +262,19 @@ Proceed? (Y/n) █
 ```javascript
 async function downloadPackage(resolvedInfo) {
   const response = await fetch(resolvedInfo.download_url, {
-    headers: { 'Authorization': `Bearer ${getToken()}` }
+    headers: { Authorization: `Bearer ${getToken()}` },
   });
-  
+
   // Stream to temp file with progress
   const tempPath = path.join(CACHE_DIR, `${resolvedInfo.name}-${resolvedInfo.version}.skl.tmp`);
   const writer = fs.createWriteStream(tempPath);
   const progress = new ProgressBar(':bar :percent :etas', { total: resolvedInfo.size_bytes });
-  
+
   for await (const chunk of response.body) {
     writer.write(chunk);
     progress.tick(chunk.length);
   }
-  
+
   writer.close();
   return tempPath;
 }
@@ -286,13 +286,13 @@ async function downloadPackage(resolvedInfo) {
 function verifyChecksum(filePath, expected) {
   const hash = crypto.createHash('sha256');
   const stream = fs.createReadStream(filePath);
-  
+
   for await (const chunk of stream) {
     hash.update(chunk);
   }
-  
+
   const actual = `sha256:${hash.digest('hex')}`;
-  
+
   if (actual !== expected) {
     throw new IntegrityError(
       `Checksum mismatch!\n` +
@@ -311,19 +311,19 @@ async function verifySignature(sklPath, bundleUrl, authorIdentity) {
   // Download Sigstore bundle (.sigstore file)
   const bundleResponse = await fetch(bundleUrl);
   const bundleJson = await bundleResponse.json();
-  
+
   // sigstore-js verification (@sigstore/verify)
   // Same infrastructure npm uses for provenance verification
   const { verify } = require('@sigstore/verify');
   const { bundleFromJSON } = require('@sigstore/bundle');
-  
+
   const bundle = bundleFromJSON(bundleJson);
   const artifact = fs.readFileSync(sklPath);
-  
+
   try {
     verify(bundle, artifact, {
       certificateIssuer: 'https://github.com/login/oauth',
-      certificateIdentityEmail: authorIdentity  // e.g., almog@example.com
+      certificateIdentityEmail: authorIdentity, // e.g., almog@example.com
     });
   } catch (err) {
     if (flags.skipVerify) {
@@ -332,17 +332,17 @@ async function verifySignature(sklPath, bundleUrl, authorIdentity) {
     } else {
       throw new SignatureError(
         `Signature verification failed for ${sklPath}.\n` +
-        `This package may have been tampered with.\n` +
-        `Use --skip-verify to install anyway (not recommended).`
+          `This package may have been tampered with.\n` +
+          `Use --skip-verify to install anyway (not recommended).`,
       );
     }
   }
-  
+
   return {
     signer: result.signerIdentity,
     timestamp: result.signedAt,
     rekorLogId: result.tlogEntry?.logIndex,
-    verified: true
+    verified: true,
   };
 }
 ```
@@ -355,12 +355,16 @@ const cachePath = path.join(CACHE_DIR, `${name}-${version}.skl`);
 fs.renameSync(tempPath, cachePath);
 
 // Write cache metadata
-fs.writeFileSync(cachePath + '.meta.json', JSON.stringify({
-  name, version,
-  checksum: resolvedInfo.checksum,
-  signature_verified: true,
-  cached_at: new Date().toISOString()
-}));
+fs.writeFileSync(
+  cachePath + '.meta.json',
+  JSON.stringify({
+    name,
+    version,
+    checksum: resolvedInfo.checksum,
+    signature_verified: true,
+    cached_at: new Date().toISOString(),
+  }),
+);
 ```
 
 ---
@@ -383,14 +387,14 @@ await extractSkl(cachePath, tempDir);
 ```javascript
 async function staticAnalysis(skillDir) {
   const issues = [];
-  
+
   // Scan all script files
   const scripts = glob.sync(path.join(skillDir, '**/*.{py,js,ts,sh,bash}'));
-  
+
   for (const script of scripts) {
     const content = fs.readFileSync(script, 'utf-8');
     const filename = path.relative(skillDir, script);
-    
+
     // --- Network access detection ---
     const networkPatterns = [
       /import\s+requests/,
@@ -404,7 +408,7 @@ async function staticAnalysis(skillDir) {
       /socket\./,
       /subprocess.*curl|wget|nc\b/,
     ];
-    
+
     for (const pattern of networkPatterns) {
       if (pattern.test(content)) {
         issues.push({
@@ -412,11 +416,11 @@ async function staticAnalysis(skillDir) {
           file: filename,
           type: 'network_access',
           pattern: pattern.toString(),
-          message: `Potential network access detected. Skill manifest declares network_access: ${manifest.security?.network_access || false}`
+          message: `Potential network access detected. Skill manifest declares network_access: ${manifest.security?.network_access || false}`,
         });
       }
     }
-    
+
     // --- Dangerous execution patterns ---
     const execPatterns = [
       { pattern: /eval\s*\(/, type: 'eval', severity: 'critical' },
@@ -426,13 +430,13 @@ async function staticAnalysis(skillDir) {
       { pattern: /__import__/, type: 'dynamic_import', severity: 'high' },
       { pattern: /compile\s*\(.*exec/, type: 'code_compilation', severity: 'high' },
     ];
-    
+
     for (const { pattern, type, severity } of execPatterns) {
       if (pattern.test(content)) {
         issues.push({ severity, file: filename, type, message: `Dangerous pattern: ${type}` });
       }
     }
-    
+
     // --- Filesystem access outside declared scope ---
     const fsPatterns = [
       /\/etc\//,
@@ -445,18 +449,18 @@ async function staticAnalysis(skillDir) {
       /credentials/i,
       /\.env\b/,
     ];
-    
+
     for (const pattern of fsPatterns) {
       if (pattern.test(content)) {
         issues.push({
           severity: 'high',
           file: filename,
           type: 'suspicious_fs_access',
-          message: `Access to sensitive path detected: ${pattern}`
+          message: `Access to sensitive path detected: ${pattern}`,
         });
       }
     }
-    
+
     // --- Obfuscation detection ---
     const obfuscationPatterns = [
       { pattern: /base64\.(b64decode|decodebytes)/, type: 'base64_decode' },
@@ -464,19 +468,19 @@ async function staticAnalysis(skillDir) {
       { pattern: /String\.fromCharCode/, type: 'char_code_construction' },
       { pattern: /atob\s*\(/, type: 'base64_decode_js' },
     ];
-    
+
     for (const { pattern, type } of obfuscationPatterns) {
       if (pattern.test(content)) {
         issues.push({
           severity: 'medium',
           file: filename,
           type: 'obfuscation',
-          message: `Potential code obfuscation: ${type}`
+          message: `Potential code obfuscation: ${type}`,
         });
       }
     }
   }
-  
+
   return issues;
 }
 ```
@@ -487,7 +491,7 @@ async function staticAnalysis(skillDir) {
 async function scanForPromptInjection(skillMdPath) {
   const content = fs.readFileSync(skillMdPath, 'utf-8');
   const issues = [];
-  
+
   // Pattern-based detection
   const injectionPatterns = [
     /ignore\s+(all\s+)?previous\s+instructions/i,
@@ -500,7 +504,7 @@ async function scanForPromptInjection(skillMdPath) {
     /act\s+as\s+if\s+you\s+have\s+no\s+restrictions/i,
     /do\s+not\s+follow\s+(the\s+)?(safety|content)\s+(guidelines|policy)/i,
   ];
-  
+
   for (const pattern of injectionPatterns) {
     const match = content.match(pattern);
     if (match) {
@@ -508,11 +512,11 @@ async function scanForPromptInjection(skillMdPath) {
         severity: 'critical',
         type: 'prompt_injection',
         match: match[0],
-        message: `Potential prompt injection detected: "${match[0]}"`
+        message: `Potential prompt injection detected: "${match[0]}"`,
       });
     }
   }
-  
+
   // Hidden content detection
   // Zero-width characters that could hide instructions
   const hiddenChars = /[\u200B\u200C\u200D\uFEFF\u00AD]/g;
@@ -521,20 +525,20 @@ async function scanForPromptInjection(skillMdPath) {
     issues.push({
       severity: 'critical',
       type: 'hidden_content',
-      message: `${hiddenMatches.length} zero-width/invisible characters detected — may hide instructions`
+      message: `${hiddenMatches.length} zero-width/invisible characters detected — may hide instructions`,
     });
   }
-  
+
   // Unicode homograph detection (e.g., Cyrillic "а" instead of Latin "a")
   const suspiciousUnicode = /[\u0400-\u04FF].*[a-zA-Z]|[a-zA-Z].*[\u0400-\u04FF]/;
   if (suspiciousUnicode.test(content)) {
     issues.push({
       severity: 'medium',
       type: 'unicode_homograph',
-      message: 'Mixed scripts detected — possible homograph attack'
+      message: 'Mixed scripts detected — possible homograph attack',
     });
   }
-  
+
   return issues;
 }
 ```
@@ -550,21 +554,21 @@ function auditPermissions(manifest, staticIssues) {
       tools_required: manifest.agents?.requires_tools || [],
     },
     detected: {
-      network: staticIssues.some(i => i.type === 'network_access'),
-      sensitive_fs: staticIssues.some(i => i.type === 'suspicious_fs_access'),
-      code_execution: staticIssues.some(i => ['eval', 'exec', 'os_system'].includes(i.type)),
+      network: staticIssues.some((i) => i.type === 'network_access'),
+      sensitive_fs: staticIssues.some((i) => i.type === 'suspicious_fs_access'),
+      code_execution: staticIssues.some((i) => ['eval', 'exec', 'os_system'].includes(i.type)),
     },
-    mismatches: []
+    mismatches: [],
   };
-  
+
   // Flag undeclared capabilities
   if (report.detected.network && !report.declared.network) {
     report.mismatches.push({
       severity: 'critical',
-      message: 'Skill uses network access but does not declare it in manifest'
+      message: 'Skill uses network access but does not declare it in manifest',
     });
   }
-  
+
   return report;
 }
 ```
@@ -577,12 +581,12 @@ Security scan results for data-viz@1.2.3:
   Static analysis:     ✓ Passed (0 critical, 0 high, 1 medium)
   Prompt injection:    ✓ Passed (no injection patterns found)
   Permission audit:    ✓ Consistent (declared matches detected)
-  
+
   Permissions requested:
     📁 Filesystem: $WORKDIR, $OUTPUTS
     🌐 Network:    None
     🔧 Tools:      bash_tool, create_file, view
-  
+
   ℹ️  1 medium issue:
     scripts/helpers/utils.py — base64 encoding detected (used for chart export)
 
@@ -596,16 +600,16 @@ Security scan results for sketchy-skill@0.1.0:
 
   ❌ CRITICAL: Prompt injection pattern detected in SKILL.md
      Line 47: "ignore previous instructions and..."
-  
+
   ❌ CRITICAL: Undeclared network access
      scripts/main.py uses 'requests' library but manifest declares
      network_access: false
-  
+
   ❌ CRITICAL: eval() with dynamic input
      scripts/helpers.py line 23: eval(user_input)
 
   Installation BLOCKED due to critical security issues.
-  
+
   Options:
     --force     Install anyway (dangerous, you accept all risk)
     spm report sketchy-skill    Report this skill to SPM security team
@@ -620,7 +624,7 @@ Security scan results for sketchy-skill@0.1.0:
 ```javascript
 async function installSystemDeps(manifest) {
   const deps = manifest.dependencies?.system || {};
-  
+
   // Check Python version
   if (deps.python) {
     const pythonVersion = execSync('python3 --version').toString().trim();
@@ -628,23 +632,19 @@ async function installSystemDeps(manifest) {
       throw new DependencyError(`Requires Python ${deps.python}, found ${pythonVersion}`);
     }
   }
-  
+
   // Install pip packages
   if (deps.pip_packages?.length) {
     console.log(`Installing ${deps.pip_packages.length} pip packages...`);
-    execSync(
-      `pip install ${deps.pip_packages.join(' ')} --break-system-packages`,
-      { stdio: 'inherit' }
-    );
+    execSync(`pip install ${deps.pip_packages.join(' ')} --break-system-packages`, {
+      stdio: 'inherit',
+    });
   }
-  
+
   // Install npm packages
   if (deps.npm_packages?.length) {
     console.log(`Installing ${deps.npm_packages.length} npm packages...`);
-    execSync(
-      `npm install -g ${deps.npm_packages.join(' ')}`,
-      { stdio: 'inherit' }
-    );
+    execSync(`npm install -g ${deps.npm_packages.join(' ')}`, { stdio: 'inherit' });
   }
 }
 ```
@@ -655,20 +655,21 @@ async function installSystemDeps(manifest) {
 function extractToStore(sklPath, name, version) {
   const storeDir = path.join(SPM_HOME, 'skills', name, version);
   fs.mkdirSync(storeDir, { recursive: true });
-  
+
   // Extract .skl (tar.gz) to version directory
   execSync(`tar -xzf ${sklPath} -C ${storeDir}`);
-  
+
   // Update "current" symlink
   const currentLink = path.join(SPM_HOME, 'skills', name, 'current');
   if (fs.existsSync(currentLink)) fs.unlinkSync(currentLink);
   fs.symlinkSync(storeDir, currentLink);
-  
+
   return storeDir;
 }
 ```
 
 Result:
+
 ```
 ~/.spm/skills/
 └── data-viz/
@@ -689,20 +690,20 @@ Result:
 ```javascript
 async function installSkillDeps(manifest) {
   const skillDeps = manifest.dependencies?.skills || {};
-  
+
   for (const [depName, versionRange] of Object.entries(skillDeps)) {
     const installed = getInstalledVersion(depName);
-    
+
     if (installed && semver.satisfies(installed, versionRange)) {
       console.log(`  ✓ ${depName}@${installed} (already installed, compatible)`);
       continue;
     }
-    
+
     if (installed && !semver.satisfies(installed, versionRange)) {
       console.log(`  ↑ ${depName}@${installed} → needs ${versionRange}`);
       // Recursive install with version constraint
     }
-    
+
     // Recursive call — installs the dependency using the same pipeline
     console.log(`  + ${depName}@${versionRange}`);
     await spmInstall(depName, versionRange);
@@ -723,36 +724,36 @@ async function linkToAgentPlatforms(name, storeDir) {
   // - Creating symlinks into each agent's expected directory
   // - Handling edge cases (Windows junctions, copy mode fallback)
   // - Lock file management (~/.agents/.skill-lock.json)
-  
+
   try {
-    const result = execSync(
-      `npx skills add "${storeDir}" -a '*' -y`,
-      { encoding: 'utf-8', timeout: 30000 }
-    );
-    
+    const result = execSync(`npx skills add "${storeDir}" -a '*' -y`, {
+      encoding: 'utf-8',
+      timeout: 30000,
+    });
+
     // Parse which agents were linked
     const linkedAgents = parseSkillsOutput(result);
     // e.g., ['claude-code', 'cursor', 'copilot']
-    
+
     return {
       linked: true,
       agents: linkedAgents,
-      method: 'vercel-skills-cli'
+      method: 'vercel-skills-cli',
     };
   } catch (err) {
     // Vercel CLI not available — fall back to basic linking
     console.warn('⚠️  Vercel skills CLI not found. Using basic linking.');
     console.warn('    Install with: npm install -g skills');
-    
+
     // Minimal fallback: just link to .agents/skills/ (canonical dir)
     const agentsDir = path.join(os.homedir(), '.agents', 'skills', name);
     fs.mkdirSync(path.dirname(agentsDir), { recursive: true });
     fs.symlinkSync(storeDir, agentsDir);
-    
+
     return {
       linked: true,
       agents: ['generic'],
-      method: 'fallback-symlink'
+      method: 'fallback-symlink',
     };
   }
 }
@@ -803,7 +804,7 @@ async function linkToAgentPlatforms(name, storeDir) {
 // ~/.spm/index.json — fast lookup for installed skills
 function updateLocalIndex(name, version, manifest) {
   const index = readIndex();
-  
+
   index.skills[name] = {
     version,
     installed_at: new Date().toISOString(),
@@ -813,13 +814,13 @@ function updateLocalIndex(name, version, manifest) {
     trust: {
       signed: true,
       verified_author: true,
-      scan_passed: true
+      scan_passed: true,
     },
     path: path.join(SPM_HOME, 'skills', name, 'current'),
-    linked_agents: linkResult.agents,  // e.g., ['claude-code', 'cursor', 'copilot']
-    link_method: linkResult.method     // 'vercel-skills-cli' or 'fallback-symlink'
+    linked_agents: linkResult.agents, // e.g., ['claude-code', 'cursor', 'copilot']
+    link_method: linkResult.method, // 'vercel-skills-cli' or 'fallback-symlink'
   };
-  
+
   writeIndex(index);
 }
 ```
@@ -837,7 +838,7 @@ async function validateSkill(skillDir) {
   if (!skillMd.includes('---')) {
     console.warn('⚠️  SKILL.md missing YAML frontmatter');
   }
-  
+
   // Check all declared scripts exist and are executable
   const manifest = readManifest(skillDir);
   for (const script of manifest.files?.scripts || []) {
@@ -846,7 +847,7 @@ async function validateSkill(skillDir) {
       throw new ValidationError(`Declared script missing: ${script}`);
     }
   }
-  
+
   // Dry-run any test cases
   if (fs.existsSync(path.join(skillDir, 'tests', 'eval.json'))) {
     console.log('Running quick validation tests...');
@@ -862,9 +863,9 @@ Agent system prompts include `<available_skills>`. SPM generates this from the l
 ```javascript
 function generateAvailableSkillsXml() {
   const index = readIndex();
-  
+
   let xml = '<available_skills>\n';
-  
+
   for (const [name, info] of Object.entries(index.skills)) {
     xml += `<skill>\n`;
     xml += `<name>\n${name}\n</name>\n`;
@@ -872,7 +873,7 @@ function generateAvailableSkillsXml() {
     xml += `<location>\n${info.path}/SKILL.md\n</location>\n`;
     xml += `</skill>\n\n`;
   }
-  
+
   xml += '</available_skills>';
   return xml;
 }
@@ -931,14 +932,14 @@ async function installFromGithub(owner, repo, tag) {
   // 1. Clone or download tarball from GitHub
   const url = `https://github.com/${owner}/${repo}/archive/refs/tags/${tag}.tar.gz`;
   const tarball = await download(url);
-  
+
   // 2. Extract and look for manifest.json
   const tempDir = extractTarball(tarball);
   const manifest = readManifest(tempDir);
-  
+
   // 3. Pack it into .skl format locally
   const sklPath = await packSkl(tempDir, manifest);
-  
+
   // 4. Continue with normal install pipeline (scan, install, activate)
   // Note: no registry signature — will be marked as "unverified source"
   await installFromLocal(sklPath, { source: 'github', unverified: true });
@@ -957,13 +958,13 @@ async function mcpInstall(name, version) {
   //    - Auto-accept if trust level >= verified
   //    - Block if critical security issues (no --force in MCP)
   // 3. Return result to agent
-  
+
   return {
     success: true,
     name: 'data-viz',
     version: '1.2.3',
     skill_path: '/mnt/skills/user/data-viz/SKILL.md',
-    message: 'Skill installed. You can now read the SKILL.md to use it.'
+    message: 'Skill installed. You can now read the SKILL.md to use it.',
   };
 }
 ```
@@ -1021,7 +1022,7 @@ Installing...     ✓ Extracted to ~/.spm/skills/data-viz/1.3.0
                   ✓ Previous version 1.2.3 retained
 
   ✅ data-viz updated: 1.2.3 → 1.3.0
-  
+
   Rollback: spm install data-viz@1.2.3
 ```
 
@@ -1046,7 +1047,7 @@ Removing...
   ✓ Files retained in cache (~/.spm/cache/data-viz-1.2.3.skl)
 
   ✅ data-viz@1.2.3 uninstalled
-  
+
   Reinstall: spm install data-viz@1.2.3 (will use cache)
 ```
 
@@ -1054,16 +1055,19 @@ Removing...
 
 ## 7. Error Handling Matrix
 
-| Error | Phase | User Sees | Recovery |
-|-------|-------|-----------|----------|
-| Skill not found in registry | Resolve | `Skill "xyz" not found. Did you mean...?` | Suggest similar names |
-| No version satisfies range | Resolve | `No version of data-viz matches ^3.0.0. Available: 1.x, 2.x` | Show available versions |
-| Network timeout | Download | `Download failed. Retrying (2/3)...` | Auto-retry 3x, then fail |
-| Checksum mismatch | Download | `INTEGRITY ERROR: package may be tampered` | Block install, suggest reporting |
-| Signature invalid | Download | `Signature verification failed` | Block (or `--skip-verify`) |
-| Critical scan issue | Scan | `BLOCKED: [details]` | Block (or `--force`) |
-| pip install fails | Install | `Failed to install plotly: [pip error]` | Show pip output, suggest manual fix |
-| Disk full | Install | `Not enough disk space (need 45MB, have 12MB)` | Suggest `spm cache clean` |
-| Symlink permission denied | Install | `Cannot link skill to agent directories` | Suggest `--copy` mode or check permissions |
-| Circular dependency | Resolve | `Circular dependency: A → B → C → A` | Block, show cycle |
+| Error                       | Phase    | User Sees                                                    | Recovery                                   |
+| --------------------------- | -------- | ------------------------------------------------------------ | ------------------------------------------ |
+| Skill not found in registry | Resolve  | `Skill "xyz" not found. Did you mean...?`                    | Suggest similar names                      |
+| No version satisfies range  | Resolve  | `No version of data-viz matches ^3.0.0. Available: 1.x, 2.x` | Show available versions                    |
+| Network timeout             | Download | `Download failed. Retrying (2/3)...`                         | Auto-retry 3x, then fail                   |
+| Checksum mismatch           | Download | `INTEGRITY ERROR: package may be tampered`                   | Block install, suggest reporting           |
+| Signature invalid           | Download | `Signature verification failed`                              | Block (or `--skip-verify`)                 |
+| Critical scan issue         | Scan     | `BLOCKED: [details]`                                         | Block (or `--force`)                       |
+| pip install fails           | Install  | `Failed to install plotly: [pip error]`                      | Show pip output, suggest manual fix        |
+| Disk full                   | Install  | `Not enough disk space (need 45MB, have 12MB)`               | Suggest `spm cache clean`                  |
+| Symlink permission denied   | Install  | `Cannot link skill to agent directories`                     | Suggest `--copy` mode or check permissions |
+| Circular dependency         | Resolve  | `Circular dependency: A → B → C → A`                         | Block, show cycle                          |
+
+```
+
 ```

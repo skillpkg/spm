@@ -13,17 +13,17 @@ import chalk from 'chalk';
 
 // ── Status icons ──
 export const icons = {
-  success:  chalk.green('✓'),
-  error:    chalk.red('✗'),
-  warning:  chalk.yellow('⚠'),
-  info:     chalk.blue('ℹ'),
-  pending:  chalk.gray('○'),
-  arrow:    chalk.gray('→'),
-  bullet:   chalk.gray('•'),
-  shield:   chalk.green('🛡'),     // security/trust
-  package:  '📦',                   // skill packages
-  link:     '🔗',                   // agent linking
-  lock:     '🔒',                   // signing/verification
+  success: chalk.green('✓'),
+  error: chalk.red('✗'),
+  warning: chalk.yellow('⚠'),
+  info: chalk.blue('ℹ'),
+  pending: chalk.gray('○'),
+  arrow: chalk.gray('→'),
+  bullet: chalk.gray('•'),
+  shield: chalk.green('🛡'), // security/trust
+  package: '📦', // skill packages
+  link: '🔗', // agent linking
+  lock: '🔒', // signing/verification
 } as const;
 
 // ── Semantic colors ──
@@ -36,17 +36,17 @@ export const icons = {
 // White:  primary text (default)
 
 export const c = {
-  name:     chalk.cyan,             // skill names
-  version:  chalk.cyan.dim,         // version numbers
-  cmd:      chalk.cyan.bold,        // commands the user should run
-  path:     chalk.underline,        // file paths
-  url:      chalk.blue.underline,   // URLs
-  trust:    chalk.green,            // trust badges
-  dim:      chalk.gray,             // secondary info
-  bold:     chalk.bold,             // emphasis
-  err:      chalk.red,              // error text
-  warn:     chalk.yellow,           // warning text
-  hint:     chalk.blue,             // suggestions (💡)
+  name: chalk.cyan, // skill names
+  version: chalk.cyan.dim, // version numbers
+  cmd: chalk.cyan.bold, // commands the user should run
+  path: chalk.underline, // file paths
+  url: chalk.blue.underline, // URLs
+  trust: chalk.green, // trust badges
+  dim: chalk.gray, // secondary info
+  bold: chalk.bold, // emphasis
+  err: chalk.red, // error text
+  warn: chalk.yellow, // warning text
+  hint: chalk.blue, // suggestions (💡)
 } as const;
 ```
 
@@ -151,14 +151,17 @@ Use `ora` for operations that take >500ms. Short operations just print the resul
 
 import ora from 'ora';
 
-export function withSpinner<T>(
-  text: string,
-  fn: () => Promise<T>
-): Promise<T> {
+export function withSpinner<T>(text: string, fn: () => Promise<T>): Promise<T> {
   const spinner = ora({ text, color: 'cyan' }).start();
   return fn()
-    .then(result => { spinner.succeed(); return result; })
-    .catch(err => { spinner.fail(); throw err; });
+    .then((result) => {
+      spinner.succeed();
+      return result;
+    })
+    .catch((err) => {
+      spinner.fail();
+      throw err;
+    });
 }
 ```
 

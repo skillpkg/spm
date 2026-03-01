@@ -97,43 +97,43 @@ The public registry is the hub. Private registries pull from it.
 
 federation:
   enabled: true
-  role: spoke              # This registry pulls from a hub
-  
+  role: spoke # This registry pulls from a hub
+
   upstream:
     url: https://registry.spm.dev/api/v1
-    auth: none             # Public registry, no auth needed
-  
+    auth: none # Public registry, no auth needed
+
   sync:
-    mode: selective        # "all", "selective", "none"
-    schedule: "0 */6 * * *"  # Every 6 hours (cron)
-    
+    mode: selective # "all", "selective", "none"
+    schedule: '0 */6 * * *' # Every 6 hours (cron)
+
     # Only mirror skills matching these criteria
     allowlist:
-      categories: ["data", "code", "writing", "design"]
-      trust_levels: ["official", "verified"]
-      min_downloads: 100   # Skip obscure skills
+      categories: ['data', 'code', 'writing', 'design']
+      trust_levels: ['official', 'verified']
+      min_downloads: 100 # Skip obscure skills
       # OR explicit skill list:
       # skills: ["pdf", "docx", "data-viz", "frontend-design"]
-    
+
     # Never mirror these
     blocklist:
-      skills: ["some-banned-skill"]
-      authors: ["untrusted-author"]
-    
+      skills: ['some-banned-skill']
+      authors: ['untrusted-author']
+
     # What to sync
     include:
-      packages: true       # Download .skl files
-      signatures: true     # Include signatures
-      metadata: true       # Skill info, versions
-      reviews: false       # Don't sync community reviews
-    
+      packages: true # Download .skl files
+      signatures: true # Include signatures
+      metadata: true # Skill info, versions
+      reviews: false # Don't sync community reviews
+
     # Security
     verify_signatures: true
     require_scan_passed: true
-    re_scan_locally: true  # Run our own security scan too
-  
+    re_scan_locally: true # Run our own security scan too
+
   # What this registry shares back (if anything)
-  publish_upstream: false   # Private skills stay private
+  publish_upstream: false # Private skills stay private
 ```
 
 ### 3.3 Sync Process
@@ -141,28 +141,28 @@ federation:
 ```python
 class FederationSync:
     """Syncs skills from upstream registry to local."""
-    
+
     async def sync(self):
         """Run a federation sync cycle."""
         config = load_federation_config()
-        
+
         if not config["enabled"]:
             return
-        
+
         log.info("Starting federation sync from %s", config["upstream"]["url"])
-        
+
         # 1. Fetch upstream catalog
         upstream_skills = await self.fetch_upstream_catalog()
-        
+
         # 2. Filter by allowlist/blocklist
         filtered = self.apply_filters(upstream_skills, config["sync"])
-        
+
         # 3. Compare with local state
         to_add, to_update, to_remove = await self.diff_with_local(filtered)
-        
+
         log.info("Sync plan: %d new, %d updates, %d removals",
                  len(to_add), len(to_update), len(to_remove))
-        
+
         # 4. Download and verify new/updated packages
         for skill in to_add + to_update:
             try:
@@ -170,24 +170,24 @@ class FederationSync:
             except Exception as e:
                 log.error("Failed to sync %s: %s", skill["name"], e)
                 continue
-        
+
         # 5. Remove skills no longer in upstream (optional)
         if config["sync"].get("remove_stale", False):
             for skill in to_remove:
                 await self.remove_local(skill)
-        
+
         # 6. Update sync metadata
         await self.update_sync_state(
             last_sync=datetime.utcnow(),
             skills_synced=len(to_add) + len(to_update),
             errors=self.error_count
         )
-    
+
     async def fetch_upstream_catalog(self):
         """Get list of all skills from upstream."""
         all_skills = []
         page = 1
-        
+
         while True:
             response = await self.http.get(
                 f"{self.upstream_url}/skills",
@@ -195,31 +195,31 @@ class FederationSync:
             )
             data = response.json()
             all_skills.extend(data["results"])
-            
+
             if page >= data["pages"]:
                 break
             page += 1
-        
+
         return all_skills
-    
+
     def apply_filters(self, skills, sync_config):
         """Apply allowlist and blocklist filters."""
         filtered = []
-        
+
         for skill in skills:
             # Blocklist check
             if skill["name"] in sync_config.get("blocklist", {}).get("skills", []):
                 continue
             if skill["author"] in sync_config.get("blocklist", {}).get("authors", []):
                 continue
-            
+
             allowlist = sync_config.get("allowlist", {})
-            
+
             # Category filter
             if "categories" in allowlist:
                 if skill.get("category") not in allowlist["categories"]:
                     continue
-            
+
             # Trust level filter
             if "trust_levels" in allowlist:
                 author_trust = "verified" if skill.get("author_verified") else "unverified"
@@ -227,42 +227,42 @@ class FederationSync:
                     author_trust = "official"
                 if author_trust not in allowlist["trust_levels"]:
                     continue
-            
+
             # Download threshold
             if "min_downloads" in allowlist:
                 if skill.get("downloads", 0) < allowlist["min_downloads"]:
                     continue
-            
+
             # Explicit skill list (if provided, overrides other filters)
             if "skills" in allowlist:
                 if skill["name"] not in allowlist["skills"]:
                     continue
-            
+
             filtered.append(skill)
-        
+
         return filtered
-    
+
     async def sync_skill(self, skill, config):
         """Download and verify a single skill."""
         name = skill["name"]
         version = skill["version"]
-        
+
         # Download .skl package
         download_url = f"{self.upstream_url}/skills/{name}/{version}/download"
         package = await self.http.get(download_url, follow_redirects=True)
-        
+
         # Verify checksum
         actual_checksum = hashlib.sha256(package.content).hexdigest()
         if actual_checksum != skill.get("checksum"):
             raise IntegrityError(f"Checksum mismatch for {name}@{version}")
-        
+
         # Verify signature (if required)
         if config["sync"].get("verify_signatures"):
             sig_url = f"{self.upstream_url}/skills/{name}/{version}/signature"
             sig = await self.http.get(sig_url)
             if not verify_sigstore(package.content, sig.content):
                 raise SignatureError(f"Signature invalid for {name}@{version}")
-        
+
         # Re-scan locally (if required)
         if config["sync"].get("re_scan_locally"):
             temp_dir = extract_skl(package.content)
@@ -271,11 +271,11 @@ class FederationSync:
                 raise SecurityError(
                     f"Local scan failed for {name}@{version}: {scan_result.summary}"
                 )
-        
+
         # Store locally
         await self.store_package(name, version, package.content)
         await self.update_local_metadata(name, version, skill)
-        
+
         log.info("Synced %s@%s from upstream", name, version)
 ```
 
@@ -322,53 +322,57 @@ const PUBLIC_REGISTRY = 'https://registry.spm.dev';
 // Check local first, then proxy to public
 app.get('/api/v1/skills/:name', (req, res, next) => {
   const localPath = path.join(PRIVATE_SKILLS_DIR, req.params.name);
-  
+
   if (fs.existsSync(localPath)) {
     // Serve from local private registry
     return serveLocalSkill(req, res, localPath);
   }
-  
+
   // Forward to public registry
   next();
 });
 
 app.get('/api/v1/skills/:name/:version/download', (req, res, next) => {
   const localPath = path.join(
-    PRIVATE_SKILLS_DIR, req.params.name, 
-    `${req.params.name}-${req.params.version}.skl`
+    PRIVATE_SKILLS_DIR,
+    req.params.name,
+    `${req.params.name}-${req.params.version}.skl`,
   );
-  
+
   if (fs.existsSync(localPath)) {
     return res.sendFile(localPath);
   }
-  
+
   next();
 });
 
 // Search: merge local + public results
 app.get('/api/v1/skills', async (req, res) => {
   const localResults = searchLocalSkills(req.query.q);
-  
+
   const publicResponse = await fetch(
-    `${PUBLIC_REGISTRY}/api/v1/skills?${new URLSearchParams(req.query)}`
+    `${PUBLIC_REGISTRY}/api/v1/skills?${new URLSearchParams(req.query)}`,
   );
   const publicResults = await publicResponse.json();
-  
+
   // Merge, dedup (local wins on name collision)
   const merged = mergeResults(localResults, publicResults.results);
-  
+
   res.json({
     results: merged,
     total: merged.length,
-    sources: ["private", "public"]
+    sources: ['private', 'public'],
   });
 });
 
 // Everything else: proxy to public
-app.use('/api/v1', httpProxy.createProxyMiddleware({
-  target: PUBLIC_REGISTRY,
-  changeOrigin: true,
-}));
+app.use(
+  '/api/v1',
+  httpProxy.createProxyMiddleware({
+    target: PUBLIC_REGISTRY,
+    changeOrigin: true,
+  }),
+);
 
 app.listen(3000);
 ```
@@ -547,11 +551,11 @@ $ spm search "report" --all-registries
   Public (registry.spm.dev):
     📦 report-builder v1.2.0 (★4.5, 2.1k downloads)
     📦 pdf-report v1.0.0 (★4.2, 890 downloads)
-  
+
   @acme (spm.acme.com):
     📦 @acme/quarterly-report v3.0.0 (internal)
     📦 @acme/client-report v2.1.0 (internal)
-  
+
   @partner (spm.partner.io):
     📦 @partner/compliance-report v1.0.0
 ```
@@ -563,7 +567,7 @@ def resolve_registry(skill_name: str) -> str:
     """Determine which registry to query for a skill."""
     config = load_config()
     registries = config.get("registries", {})
-    
+
     # Check for scope prefix
     if skill_name.startswith("@"):
         scope = skill_name.split("/")[0]  # "@acme"
@@ -573,7 +577,7 @@ def resolve_registry(skill_name: str) -> str:
             f"No registry configured for scope '{scope}'. "
             f"Add it: spm config set registries.{scope} https://..."
         )
-    
+
     # Default registry
     return registries.get("default", "https://registry.spm.dev/api/v1")
 ```
@@ -614,19 +618,19 @@ mirror:
   role: mirror
   primary: https://registry.spm.dev
   region: eu-west-1
-  
+
   sync:
-    mode: all              # Mirror everything
-    method: streaming      # Real-time via change stream
+    mode: all # Mirror everything
+    method: streaming # Real-time via change stream
     # OR
     # method: polling
     # interval: 300        # Every 5 minutes
-  
+
   storage:
     packages: s3://spm-mirror-eu/packages/
     database: postgres://mirror-eu.rds.amazonaws.com/spm
-  
-  read_only: true          # This mirror never accepts publishes
+
+  read_only: true # This mirror never accepts publishes
   redirect_writes: https://registry.spm.dev
 ```
 
@@ -642,9 +646,9 @@ A skill in one registry can depend on a skill in another:
   "name": "@acme/internal-report",
   "dependencies": {
     "skills": {
-      "pdf": "^1.0.0",                    // From public registry
-      "@acme/branding": "^2.0.0",         // From company registry
-      "@partner/data-feed": "^1.0.0"      // From partner registry
+      "pdf": "^1.0.0", // From public registry
+      "@acme/branding": "^2.0.0", // From company registry
+      "@partner/data-feed": "^1.0.0" // From partner registry
     }
   }
 }
@@ -782,13 +786,13 @@ def check_dependency_confusion(skill_name: str, registries: dict):
     # Scoped packages (@acme/tool) are safe — scope determines registry
     if skill_name.startswith("@"):
         return True
-    
+
     # Unscoped packages: check if it exists in multiple registries
     found_in = []
     for registry_name, registry_url in registries.items():
         if skill_exists(skill_name, registry_url):
             found_in.append(registry_name)
-    
+
     if len(found_in) > 1:
         # Exists in both public and private — dangerous!
         raise DependencyConfusionWarning(
@@ -796,7 +800,7 @@ def check_dependency_confusion(skill_name: str, registries: dict):
             f"Use a scoped name (@scope/{skill_name}) to be explicit, "
             f"or pin the source in skills.json."
         )
-    
+
     return True
 ```
 
@@ -809,7 +813,7 @@ DAY 1 (Launch):
   ✓ Scoped registries in config (~/.spm/config.json)
   ✓ CLI routes to correct registry by scope
   ✓ Cross-registry dependencies resolve correctly
-  
+
   This is just config + routing. No sync protocol needed.
 
 PHASE 2 (When enterprise customers ask):

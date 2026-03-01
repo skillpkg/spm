@@ -51,8 +51,8 @@ Month 6 without Day 1 analytics:
 
 Month 6 WITH Day 1 analytics:
   Author: "How's my skill doing?"
-  SPM: "847 installs, 62% trigger rate, most common prompt pattern 
-        is 'create a chart from CSV', you're the #3 skill in the 
+  SPM: "847 installs, 62% trigger rate, most common prompt pattern
+        is 'create a chart from CSV', you're the #3 skill in the
         data category, and usage grew 23% this month."
   Author: stays, improves skill, tells friends
 ```
@@ -85,7 +85,7 @@ EVENTS = {
         },
         "why": "Basic adoption metric. Segment by platform, scope, source."
     },
-    
+
     "skill.uninstalled": {
         "fields": {
             "skill_name": str,
@@ -95,7 +95,7 @@ EVENTS = {
         },
         "why": "Churn tracking. Short duration = skill didn't meet expectations."
     },
-    
+
     "skill.updated": {
         "fields": {
             "skill_name": str,
@@ -116,7 +116,7 @@ EVENTS = {
         },
         "why": "What are people looking for? Where are the gaps?"
     },
-    
+
     "search.click": {
         "fields": {
             "query": str,           # Original search query
@@ -125,7 +125,7 @@ EVENTS = {
         },
         "why": "Search ranking quality. Do people click the top result?"
     },
-    
+
     "search.install": {
         "fields": {
             "query": str,           # Original search query
@@ -154,7 +154,7 @@ EVENTS = {
         "why": "How often does the agent even consider this skill? "
                "High considered + low triggered = bad description."
     },
-    
+
     "skill.triggered": {
         "fields": {
             "skill_name": str,
@@ -169,7 +169,7 @@ EVENTS = {
         },
         "why": "The core metric. When the agent reads and uses your skill."
     },
-    
+
     "skill.skipped": {
         "fields": {
             "skill_name": str,
@@ -212,7 +212,7 @@ EVENTS = {
         },
         "why": "Ecosystem health. Publishing velocity."
     },
-    
+
     "skill.publish_blocked": {
         "fields": {
             "skill_name": str,
@@ -270,25 +270,25 @@ ANONYMIZATION:
 Don't build a data warehouse. Just append events to a table and a time-series-friendly structure.
 
 ```sql
--- Single events table. Partitioned by month. 
+-- Single events table. Partitioned by month.
 -- This handles millions of events cheaply.
 
 CREATE TABLE analytics_events (
     id              UUID DEFAULT gen_random_uuid(),
     event_type      VARCHAR(32) NOT NULL,
-    
+
     -- Common dimensions
     skill_name      VARCHAR(64),
     skill_version   VARCHAR(32),
     platform        VARCHAR(16),
     source          VARCHAR(16),
-    
+
     -- Event-specific data (flexible schema)
     properties      JSONB NOT NULL DEFAULT '{}',
-    
+
     -- Time
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    
+
 ) PARTITION BY RANGE (created_at);
 
 -- Create monthly partitions
@@ -311,28 +311,28 @@ CREATE INDEX idx_events_type_skill ON analytics_events (event_type, skill_name, 
 CREATE TABLE analytics_daily (
     date            DATE NOT NULL,
     skill_name      VARCHAR(64) NOT NULL,
-    
+
     -- Install metrics
     installs        INTEGER DEFAULT 0,
     uninstalls      INTEGER DEFAULT 0,
     updates         INTEGER DEFAULT 0,
-    
+
     -- Trigger metrics
     times_considered INTEGER DEFAULT 0,
     times_triggered  INTEGER DEFAULT 0,
     times_skipped    INTEGER DEFAULT 0,
     avg_execution_ms INTEGER DEFAULT 0,
     success_rate     DECIMAL(5,4) DEFAULT 0,
-    
+
     -- Search metrics
     search_impressions INTEGER DEFAULT 0,  -- Appeared in search results
     search_clicks      INTEGER DEFAULT 0,  -- Clicked from search
     search_installs    INTEGER DEFAULT 0,  -- Installed from search
-    
+
     -- Platform breakdown (JSONB for flexibility)
     platform_breakdown JSONB DEFAULT '{}',
     -- e.g., {"claude-code": 45, "cursor": 30, "copilot": 5}
-    
+
     PRIMARY KEY (date, skill_name)
 );
 
@@ -340,12 +340,12 @@ CREATE TABLE analytics_daily (
 CREATE TABLE analytics_weekly (
     week_start      DATE NOT NULL,      -- Monday
     skill_name      VARCHAR(64) NOT NULL,
-    
+
     installs        INTEGER DEFAULT 0,
     triggers        INTEGER DEFAULT 0,
     trigger_rate    DECIMAL(5,4) DEFAULT 0,
     unique_users    INTEGER DEFAULT 0,  -- Approximate (HyperLogLog)
-    
+
     PRIMARY KEY (week_start, skill_name)
 );
 ```
@@ -358,16 +358,16 @@ CREATE TABLE analytics_weekly (
 async def aggregate_daily():
     """Roll up raw events into daily stats."""
     yesterday = date.today() - timedelta(days=1)
-    
+
     skills = await db.fetch("""
-        SELECT DISTINCT skill_name 
-        FROM analytics_events 
+        SELECT DISTINCT skill_name
+        FROM analytics_events
         WHERE created_at >= $1 AND created_at < $2
     """, yesterday, yesterday + timedelta(days=1))
-    
+
     for skill in skills:
         name = skill["skill_name"]
-        
+
         stats = await db.fetchrow("""
             SELECT
                 COUNT(*) FILTER (WHERE event_type = 'skill.installed') as installs,
@@ -376,18 +376,18 @@ async def aggregate_daily():
                 COUNT(*) FILTER (WHERE event_type = 'skill.considered') as considered,
                 COUNT(*) FILTER (WHERE event_type = 'skill.triggered') as triggered,
                 COUNT(*) FILTER (WHERE event_type = 'skill.skipped') as skipped,
-                AVG((properties->>'execution_time_ms')::int) 
+                AVG((properties->>'execution_time_ms')::int)
                     FILTER (WHERE event_type = 'skill.triggered') as avg_exec,
-                AVG(CASE WHEN event_type = 'skill.triggered' 
+                AVG(CASE WHEN event_type = 'skill.triggered'
                          AND (properties->>'success')::bool THEN 1.0 ELSE 0.0 END)
                     FILTER (WHERE event_type = 'skill.triggered') as success_rate
             FROM analytics_events
             WHERE skill_name = $1
               AND created_at >= $2 AND created_at < $3
         """, name, yesterday, yesterday + timedelta(days=1))
-        
+
         await db.execute("""
-            INSERT INTO analytics_daily 
+            INSERT INTO analytics_daily
                 (date, skill_name, installs, uninstalls, updates,
                  times_considered, times_triggered, times_skipped,
                  avg_execution_ms, success_rate)
@@ -401,22 +401,22 @@ async def aggregate_daily():
                 times_skipped = EXCLUDED.times_skipped,
                 avg_execution_ms = EXCLUDED.avg_execution_ms,
                 success_rate = EXCLUDED.success_rate
-        """, yesterday, name, 
+        """, yesterday, name,
             stats["installs"], stats["uninstalls"], stats["updates"],
             stats["considered"], stats["triggered"], stats["skipped"],
             stats["avg_exec"], stats["success_rate"])
-    
+
     # Update skills table with running totals
     await db.execute("""
         UPDATE skills s SET
             total_downloads = (
-                SELECT COALESCE(SUM(installs), 0) 
+                SELECT COALESCE(SUM(installs), 0)
                 FROM analytics_daily WHERE skill_name = s.name
             ),
             weekly_downloads = (
-                SELECT COALESCE(SUM(installs), 0) 
-                FROM analytics_daily 
-                WHERE skill_name = s.name 
+                SELECT COALESCE(SUM(installs), 0)
+                FROM analytics_daily
+                WHERE skill_name = s.name
                   AND date >= CURRENT_DATE - 7
             )
     """)
@@ -443,14 +443,14 @@ async def track_event(event_type: str, properties: dict):
     # Respect opt-out
     if get_config("analytics.opt_out"):
         return
-    
+
     event = {
         "type": event_type,
         "properties": properties,
         "timestamp": datetime.utcnow().isoformat(),
         "cli_version": SPM_VERSION,
     }
-    
+
     try:
         async with aiohttp.ClientSession() as session:
             await asyncio.wait_for(
@@ -465,11 +465,11 @@ async def track_event(event_type: str, properties: dict):
 
 async def cmd_install(skill_name, version):
     start = time.monotonic()
-    
+
     # ... actual install logic ...
-    
+
     elapsed = int((time.monotonic() - start) * 1000)
-    
+
     await track_event("skill.installed", {
         "skill_name": skill_name,
         "version": resolved_version,
@@ -491,28 +491,28 @@ event_buffer = deque(maxlen=1000)
 async def ingest_event(request):
     event = request.json
     event_buffer.append(event)
-    
+
     # Flush to DB every 100 events or 30 seconds
     if len(event_buffer) >= 100:
         await flush_events()
-    
+
     return Response(202)  # Accepted, not 200 — async processing
 
 async def flush_events():
     """Batch insert buffered events."""
     if not event_buffer:
         return
-    
+
     events = list(event_buffer)
     event_buffer.clear()
-    
+
     # Bulk insert
     await db.executemany("""
-        INSERT INTO analytics_events (event_type, skill_name, skill_version, 
+        INSERT INTO analytics_events (event_type, skill_name, skill_version,
                                        platform, source, properties, created_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
     """, [
-        (e["type"], 
+        (e["type"],
          e["properties"].get("skill_name"),
          e["properties"].get("version"),
          e["properties"].get("platform"),
@@ -534,7 +534,7 @@ Users must be able to opt out. This is non-negotiable.
 $ spm config set analytics.opt_out true
 
   ✓ Analytics disabled. SPM will not send usage data.
-  
+
   Note: download counts are still tracked server-side
   (they're part of the registry, not your CLI).
   Only CLI-side events (installs, triggers, searches) are affected.
@@ -548,14 +548,14 @@ First run prompt:
 ```bash
 $ spm install data-viz    # First ever spm command after install
 
-  📊 SPM collects anonymous usage analytics to help skill 
+  📊 SPM collects anonymous usage analytics to help skill
      authors understand how their skills are used.
-     
+
      We NEVER collect: prompts, file contents, personal data.
      We DO collect: install/trigger counts, platform, timing.
-     
+
      Full policy: https://spm.dev/privacy
-     
+
   ? Enable analytics? (Y/n): Y
   ✓ Analytics enabled. Opt out anytime: spm config set analytics.opt_out true
 ```
@@ -597,46 +597,46 @@ Response to user
 
 ```
 Option A: spm-runtime skill reports back (most feasible)
-  
+
   An spm-runtime SKILL.md could instruct the agent to fire
   events when it reads skills. But this is fragile — agents
   might not consistently follow these meta-instructions.
-  
+
   Feasibility: Medium
   Reliability: Low-Medium
 
 Option B: MCP server observes skill usage
-  
+
   If the spm MCP server is connected, the agent's tool calls
   to spm_search and spm_install are observable. But actual
   skill triggering (reading SKILL.md) doesn't go through MCP.
-  
+
   Feasibility: Medium
   Reliability: Medium (only for MCP-initiated actions)
 
 Option C: CLI reports from local observation
-  
+
   When an agent uses bash or file-read tools to access a SKILL.md,
   the CLI could detect this from file access logs or
   inotify/fswatch on the skills directory.
-  
+
   Feasibility: High (Claude Code, Cursor), Low (web-based agents)
   Reliability: High where available
 
 Option D: Platform usage APIs
-  
+
   The ideal solution. Agent platforms expose anonymized skill
   usage data to skill authors. Requires partnerships.
-  
+
   Feasibility: Depends on platform relationships
   Reliability: Highest
-  
+
 Option E: Instrumented wrapper scripts
-  
+
   Instead of the agent running scripts/main.py directly,
   SKILL.md instructs the agent to run scripts/run.sh which
   wraps main.py and reports usage before executing.
-  
+
   Feasibility: High
   Reliability: High (for skills with scripts)
 ```
@@ -705,10 +705,10 @@ def report_trigger(skill_name, script_name, success, duration_ms):
 if __name__ == "__main__":
     skill_name = os.environ.get("SPM_SKILL_NAME", "unknown")
     script = sys.argv[1] if len(sys.argv) > 1 else "main.py"
-    
+
     start = time.monotonic()
     success = True
-    
+
     try:
         # Execute the actual script
         exec(open(script).read())
@@ -762,7 +762,7 @@ FUTURE PRO (Phase 3, paid tier):
 □ Analytics opt-out config + first-run prompt
 □ Instrument: skill.installed, skill.uninstalled, skill.updated
 □ Instrument: search.query, search.no_results
-□ Instrument: skill.published, skill.publish_blocked  
+□ Instrument: skill.published, skill.publish_blocked
 □ Instrument: mcp.search, mcp.install_suggested
 □ Wrapper script template in spm init scaffold
 □ Pending events file + flush on next CLI command

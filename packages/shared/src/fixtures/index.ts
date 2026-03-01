@@ -11,7 +11,8 @@ export const SEED_SKILLS: SeedSkill[] = [
     manifest: {
       name: 'code-review',
       version: '1.0.0',
-      description: 'Perform thorough code reviews with actionable feedback on correctness, performance, security, and style. Use when the user asks to review code, check a PR, or audit a file.',
+      description:
+        'Perform thorough code reviews with actionable feedback on correctness, performance, security, and style. Use when the user asks to review code, check a PR, or audit a file.',
       category: 'code-quality',
       keywords: ['code-review', 'pull-request', 'audit', 'best-practices', 'lint'],
       license: 'MIT',
@@ -58,7 +59,8 @@ Always be constructive and explain the *why* behind each suggestion.
     manifest: {
       name: 'test-gen',
       version: '1.0.0',
-      description: 'Generate comprehensive test suites for any codebase. Covers unit tests, integration tests, edge cases, and mocks. Use when the user asks to write tests or improve coverage.',
+      description:
+        'Generate comprehensive test suites for any codebase. Covers unit tests, integration tests, edge cases, and mocks. Use when the user asks to write tests or improve coverage.',
       category: 'testing',
       keywords: ['test', 'unit-test', 'integration', 'coverage', 'jest', 'vitest', 'pytest'],
       license: 'MIT',
@@ -107,7 +109,8 @@ You are an expert test engineer. Generate comprehensive tests for the given code
     manifest: {
       name: 'data-viz',
       version: '1.0.0',
-      description: 'Create charts, dashboards, and data visualizations from CSV, JSON, or database output. Use when the user asks to plot, chart, graph, or visualize data in any format.',
+      description:
+        'Create charts, dashboards, and data visualizations from CSV, JSON, or database output. Use when the user asks to plot, chart, graph, or visualize data in any format.',
       category: 'data-viz',
       keywords: ['chart', 'visualization', 'dashboard', 'plotly', 'csv', 'graph', 'data'],
       license: 'MIT',
@@ -169,7 +172,8 @@ You are a data visualization expert. Create clear, informative charts and dashbo
     manifest: {
       name: 'api-design',
       version: '1.0.0',
-      description: 'Design and scaffold RESTful and GraphQL APIs with proper routing, validation, error handling, and documentation. Use when the user asks to create an API, design endpoints, or build a backend service.',
+      description:
+        'Design and scaffold RESTful and GraphQL APIs with proper routing, validation, error handling, and documentation. Use when the user asks to create an API, design endpoints, or build a backend service.',
       category: 'backend',
       keywords: ['api', 'rest', 'graphql', 'endpoint', 'openapi', 'swagger', 'backend'],
       license: 'MIT',
@@ -227,7 +231,8 @@ Always version APIs (/v1/) and document breaking changes.
     manifest: {
       name: 'git-workflow',
       version: '1.0.0',
-      description: 'Automate git workflows including branching strategies, commit message formatting, rebasing, merge conflict resolution, and release tagging. Use when the user asks for git help or workflow automation.',
+      description:
+        'Automate git workflows including branching strategies, commit message formatting, rebasing, merge conflict resolution, and release tagging. Use when the user asks for git help or workflow automation.',
       category: 'productivity',
       keywords: ['git', 'workflow', 'branching', 'commit', 'merge', 'rebase', 'release'],
       license: 'MIT',
@@ -291,7 +296,8 @@ You are a git workflow expert. Help automate and optimize git-based development 
     manifest: {
       name: 'docs-writer',
       version: '1.0.0',
-      description: 'Generate and maintain technical documentation including READMEs, API docs, architecture guides, and inline code comments. Use when the user asks to document code or write technical content.',
+      description:
+        'Generate and maintain technical documentation including READMEs, API docs, architecture guides, and inline code comments. Use when the user asks to document code or write technical content.',
       category: 'documents',
       keywords: ['documentation', 'readme', 'api-docs', 'jsdoc', 'docstring', 'technical-writing'],
       license: 'MIT',
@@ -355,7 +361,8 @@ You are a technical documentation expert. Create clear, comprehensive documentat
     manifest: {
       name: 'security-audit',
       version: '1.0.0',
-      description: 'Perform security audits on codebases to find vulnerabilities including injection attacks, auth flaws, dependency risks, and misconfigurations. Use when the user asks for a security review or vulnerability scan.',
+      description:
+        'Perform security audits on codebases to find vulnerabilities including injection attacks, auth flaws, dependency risks, and misconfigurations. Use when the user asks for a security review or vulnerability scan.',
       category: 'security',
       keywords: ['security', 'audit', 'vulnerability', 'owasp', 'injection', 'xss', 'auth'],
       license: 'MIT',
@@ -425,9 +432,18 @@ Include proof-of-concept and remediation steps for each finding.
     manifest: {
       name: 'perf-optimize',
       version: '1.0.0',
-      description: 'Analyze and optimize code performance by identifying bottlenecks, reducing complexity, improving algorithms, and suggesting caching strategies. Use when the user asks to speed up code or fix performance issues.',
+      description:
+        'Analyze and optimize code performance by identifying bottlenecks, reducing complexity, improving algorithms, and suggesting caching strategies. Use when the user asks to speed up code or fix performance issues.',
       category: 'code-quality',
-      keywords: ['performance', 'optimization', 'profiling', 'benchmark', 'speed', 'memory', 'algorithm'],
+      keywords: [
+        'performance',
+        'optimization',
+        'profiling',
+        'benchmark',
+        'speed',
+        'memory',
+        'algorithm',
+      ],
       license: 'MIT',
       authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
     },
@@ -493,7 +509,8 @@ You are a performance optimization expert. Analyze code and suggest targeted imp
     manifest: {
       name: 'db-migration',
       version: '1.0.0',
-      description: 'Generate and manage database migrations for schema changes including table creation, column modifications, index management, and data migrations. Use when the user needs to change the database schema.',
+      description:
+        'Generate and manage database migrations for schema changes including table creation, column modifications, index management, and data migrations. Use when the user needs to change the database schema.',
       category: 'backend',
       keywords: ['database', 'migration', 'schema', 'sql', 'postgres', 'mysql', 'prisma', 'knex'],
       license: 'MIT',
@@ -563,7 +580,8 @@ You are a database migration expert. Generate safe, reversible schema changes.
     manifest: {
       name: 'deploy-checklist',
       version: '1.0.0',
-      description: 'Generate and validate deployment checklists for production releases including pre-deploy checks, rollback plans, monitoring setup, and post-deploy verification. Use when deploying to production or staging.',
+      description:
+        'Generate and validate deployment checklists for production releases including pre-deploy checks, rollback plans, monitoring setup, and post-deploy verification. Use when deploying to production or staging.',
       category: 'infra',
       keywords: ['deploy', 'deployment', 'checklist', 'production', 'release', 'rollback', 'ci-cd'],
       license: 'MIT',

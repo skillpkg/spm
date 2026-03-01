@@ -46,6 +46,7 @@ spm/
 ```
 
 **Tasks:**
+
 - [ ] Init monorepo (pnpm workspaces + Turborepo)
 - [ ] Set up `packages/shared` — Zod schemas for Manifest, SearchParams, PublishRequest, Category enum, TrustTier enum, error codes
 - [ ] Provision Neon Postgres database
@@ -64,6 +65,7 @@ spm/
 **Goal:** Register, login, publish a skill, read it back. No security scanning yet.
 
 **Tasks:**
+
 - [ ] Init `packages/api` — Hono app, Cloudflare Workers config (wrangler.toml)
 - [ ] DB client setup (Neon serverless driver + Drizzle ORM)
 - [ ] Auth routes:
@@ -95,6 +97,7 @@ spm/
 **Goal:** Full search & discovery API working. MCP server for agent discovery. Homepage data ready.
 
 **Tasks:**
+
 - [ ] `GET /skills` — full-text search with Postgres GIN index, category/trust/platform filters, sort options, pagination
 - [ ] `GET /categories` — list with counts (query from skills table)
 - [ ] `GET /trending` — 4 tabs:
@@ -131,6 +134,7 @@ spm/
 **Goal:** `npm i -g spm` installs a working CLI. Login, search, info work.
 
 **Tasks:**
+
 - [ ] Init `packages/cli` — TypeScript + tsup for bundling
 - [ ] CLI framework: commander.js, chalk, ora, inquirer, cli-table3
 - [ ] Config management:
@@ -155,6 +159,7 @@ spm/
 **Goal:** `spm install data-viz` downloads, verifies, links to agents. The core loop.
 
 **Tasks:**
+
 - [ ] `spm install <name>` — resolve, download .skl, extract to `~/.spm/skills/<name>/<version>/`
 - [ ] `spm install -g <name>` — global install
 - [ ] Local `skills.json` management — add to project dependencies
@@ -183,6 +188,7 @@ spm/
 **Goal:** `spm init` → `spm test` → `spm publish` works. No security scanning yet (still auto-pass).
 
 **Tasks:**
+
 - [ ] `spm init` — interactive scaffold:
   - Name, description, category (from list), language, license
   - Generate manifest.json + SKILL.md template + scripts/ dir
@@ -208,6 +214,7 @@ spm/
 **Goal:** Layer 1 running server-side on publish. Flagged queue works. Layers 2-3 deferred to post-launch.
 
 **Tasks:**
+
 - [ ] Layer 1 — Regex pattern scanner:
   - Port pattern list from spm-content-security.md
   - Run on .skl contents server-side
@@ -238,6 +245,7 @@ spm/
 **Goal:** Skills are cryptographically signed. `spm install` verifies signatures.
 
 **Tasks:**
+
 - [ ] `spm publish` signing:
   - Integrate `@sigstore/sign` for keyless signing
   - Ephemeral key from Fulcio CA (GitHub OIDC identity)
@@ -267,6 +275,7 @@ spm/
 **Goal:** spm.dev is live. Homepage, search, skill detail, author profile.
 
 **Tasks:**
+
 - [ ] Init `packages/web` — Vite + React + Tailwind
 - [ ] Deploy to Cloudflare Pages
 - [ ] Homepage (registry-first):
@@ -298,6 +307,7 @@ spm/
 **Goal:** Authors can see their stats. Admin can moderate.
 
 **Tasks:**
+
 - [ ] Author dashboard (auth required):
   - Overview: stat cards, skills table, activity feed, trust progress
   - Skills tab: full table with metrics
@@ -329,22 +339,23 @@ spm/
 
 **Test strategy:**
 
-| Layer | Tool | Coverage |
-|---|---|---|
-| Unit | vitest | Services, Zod schemas, utilities, pattern matching |
-| Component | vitest + msw | CLI commands with mocked API, React components in isolation |
+| Layer       | Tool             | Coverage                                                         |
+| ----------- | ---------------- | ---------------------------------------------------------------- |
+| Unit        | vitest           | Services, Zod schemas, utilities, pattern matching               |
+| Component   | vitest + msw     | CLI commands with mocked API, React components in isolation      |
 | Integration | vitest + test DB | API route handlers with real Neon branch, full request lifecycle |
-| Browser E2E | Playwright | Web UI and admin panel user flows, responsive, accessibility |
-| CLI E2E | vitest + staging | Full `spm` workflow against live staging registry |
+| Browser E2E | Playwright       | Web UI and admin panel user flows, responsive, accessibility     |
+| CLI E2E     | vitest + staging | Full `spm` workflow against live staging registry                |
 
 **Tasks:**
-- [ ] API tests (packages/api/src/__tests__/):
+
+- [ ] API tests (packages/api/src/**tests**/):
   - Unit: auth JWT/guard logic, name validation, search query builder, Layer 1 patterns
   - Integration: full publish flow (upload → scan → store → search → download)
   - Integration: auth lifecycle (device-code → poll → JWT → whoami → revoke)
   - Integration: review queue (flag → admin approve/reject)
   - Seed data: "first 10 skills" fixtures (manifest + SKILL.md each)
-- [ ] CLI tests (packages/cli/src/__tests__/):
+- [ ] CLI tests (packages/cli/src/**tests**/):
   - Unit: resolver, config.toml parser, skills.json/lock file generation
   - Component: each command with mocked API via msw (Mock Service Worker)
   - Linker: test all 3 fallback modes (Vercel CLI → symlink → copy)
@@ -382,6 +393,7 @@ spm/
 **Goal:** Public beta. Announce, onboard first external authors.
 
 **Tasks:**
+
 - [ ] Production deployment checklist:
   - [ ] Cloudflare Workers production env
   - [ ] Neon production database (separate from staging)
@@ -416,45 +428,45 @@ spm/
 
 Items deprioritized from the 12-week plan:
 
-| Item | Priority | Notes |
-|---|---|---|
-| npm bridge | High | See spm-npm-bridge.md — Wk 12: proxy install (`github:`), Wk 13: bulk import top 100, Wk 14: claim flow + sync cron |
-| CI/CD GitHub Action | High | `spm install` in CI, `spm publish` on release |
-| Skill dependencies | Medium | Skills that depend on other skills |
-| MCP bridge skills | Medium | Skills that wrap MCP servers |
-| Private registries | Medium | Enterprise self-hosted registries |
-| Skill analytics API | Low | Detailed usage telemetry for authors |
-| Web-based skill editor | Low | Edit SKILL.md in browser, publish from web |
-| Skill versioning UI | Low | Visual diff between versions |
-| Community features | Low | Comments, discussions, collections |
+| Item                   | Priority | Notes                                                                                                               |
+| ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| npm bridge             | High     | See spm-npm-bridge.md — Wk 12: proxy install (`github:`), Wk 13: bulk import top 100, Wk 14: claim flow + sync cron |
+| CI/CD GitHub Action    | High     | `spm install` in CI, `spm publish` on release                                                                       |
+| Skill dependencies     | Medium   | Skills that depend on other skills                                                                                  |
+| MCP bridge skills      | Medium   | Skills that wrap MCP servers                                                                                        |
+| Private registries     | Medium   | Enterprise self-hosted registries                                                                                   |
+| Skill analytics API    | Low      | Detailed usage telemetry for authors                                                                                |
+| Web-based skill editor | Low      | Edit SKILL.md in browser, publish from web                                                                          |
+| Skill versioning UI    | Low      | Visual diff between versions                                                                                        |
+| Community features     | Low      | Comments, discussions, collections                                                                                  |
 
 ---
 
 ## Risk Register
 
-| Risk | Mitigation |
-|---|---|
-| Vercel skills CLI changes/breaks | Symlink + copy fallback chain; monitor releases |
-| Neon cold start latency | Connection pooling, edge caching, materialized views |
-| Sigstore availability | Graceful degradation — allow unsigned with warning |
-| ML model false positives | Conservative thresholds, fast admin review queue |
-| Name squatting at launch | Anti-squat detection + reserved names list pre-launch |
-| Low initial skill count | Seed with 10+ official skills, write migration guides |
-| Agent ecosystem fragmentation | Support "all" platform target, monitor new agents |
+| Risk                             | Mitigation                                            |
+| -------------------------------- | ----------------------------------------------------- |
+| Vercel skills CLI changes/breaks | Symlink + copy fallback chain; monitor releases       |
+| Neon cold start latency          | Connection pooling, edge caching, materialized views  |
+| Sigstore availability            | Graceful degradation — allow unsigned with warning    |
+| ML model false positives         | Conservative thresholds, fast admin review queue      |
+| Name squatting at launch         | Anti-squat detection + reserved names list pre-launch |
+| Low initial skill count          | Seed with 10+ official skills, write migration guides |
+| Agent ecosystem fragmentation    | Support "all" platform target, monitor new agents     |
 
 ---
 
 ## Key Decisions Log
 
-| Decision | Chosen | Rationale |
-|---|---|---|
-| Monorepo vs separate repos | Monorepo | Shared types, atomic deploys, one CI |
-| ORM | Drizzle | Type-safe, serverless-friendly, good Neon support |
-| Edge runtime | Cloudflare Workers | Global edge, R2 integration, Workers KV for rate limits |
-| CLI bundler | tsup | Fast, simple, ESM + CJS output |
-| Web framework | Vite + React | Fast dev, Cloudflare Pages deploy |
-| Package format | .skl (tar.gz) | Simple, inspectable, standard tooling |
-| Auth | GitHub OAuth device flow | No browser redirect needed, works in terminal |
-| Signing | Sigstore keyless | No key management, tied to GitHub identity |
-| Categories | Postgres enum (10 values) | Controlled vocabulary, enforced at DB level |
-| Category assignment | Hybrid LLM + author | LLM suggests, author confirms/changes |
+| Decision                   | Chosen                    | Rationale                                               |
+| -------------------------- | ------------------------- | ------------------------------------------------------- |
+| Monorepo vs separate repos | Monorepo                  | Shared types, atomic deploys, one CI                    |
+| ORM                        | Drizzle                   | Type-safe, serverless-friendly, good Neon support       |
+| Edge runtime               | Cloudflare Workers        | Global edge, R2 integration, Workers KV for rate limits |
+| CLI bundler                | tsup                      | Fast, simple, ESM + CJS output                          |
+| Web framework              | Vite + React              | Fast dev, Cloudflare Pages deploy                       |
+| Package format             | .skl (tar.gz)             | Simple, inspectable, standard tooling                   |
+| Auth                       | GitHub OAuth device flow  | No browser redirect needed, works in terminal           |
+| Signing                    | Sigstore keyless          | No key management, tied to GitHub identity              |
+| Categories                 | Postgres enum (10 values) | Controlled vocabulary, enforced at DB level             |
+| Category assignment        | Hybrid LLM + author       | LLM suggests, author confirms/changes                   |

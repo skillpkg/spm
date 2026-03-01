@@ -22,6 +22,7 @@ Authorization: Bearer spm_<jwt>
 Start GitHub OAuth device flow. Called by `spm login`.
 
 **Request:**
+
 ```json
 {
   "client_id": "spm_github_client_id"
@@ -29,6 +30,7 @@ Start GitHub OAuth device flow. Called by `spm login`.
 ```
 
 **Response: 200**
+
 ```json
 {
   "device_code": "abc123",
@@ -44,6 +46,7 @@ Start GitHub OAuth device flow. Called by `spm login`.
 Poll for token after user completes GitHub auth. CLI polls every `interval` seconds.
 
 **Request:**
+
 ```json
 {
   "device_code": "abc123",
@@ -52,6 +55,7 @@ Poll for token after user completes GitHub auth. CLI polls every `interval` seco
 ```
 
 **Response: 200 (authorized)**
+
 ```json
 {
   "token": "spm_eyJhbGciOiJIUzI1NiIs...",
@@ -66,6 +70,7 @@ Poll for token after user completes GitHub auth. CLI polls every `interval` seco
 ```
 
 **Response: 428 (pending — user hasn't authorized yet)**
+
 ```json
 {
   "error": "authorization_pending"
@@ -73,6 +78,7 @@ Poll for token after user completes GitHub auth. CLI polls every `interval` seco
 ```
 
 **Response: 410 (expired — device code timed out)**
+
 ```json
 {
   "error": "expired_token"
@@ -86,6 +92,7 @@ Get current authenticated user.
 **Headers:** `Authorization: Bearer spm_<jwt>`
 
 **Response: 200**
+
 ```json
 {
   "id": "uuid",
@@ -118,17 +125,18 @@ Search and list skills. Powers both CLI `spm search` and web UI.
 
 **Query parameters:**
 
-| Param | Type | Description |
-|---|---|---|
-| `q` | string | Full-text search (name, description, tags) |
-| `category` | string | Filter by category slug (`data-viz`, `frontend`, etc.) |
-| `trust` | string | Minimum trust tier: `registered`, `scanned`, `verified`, `official` |
-| `platform` | string | Filter by platform: `all`, `claude-code`, `cursor`, `codex`, etc. |
-| `sort` | string | `relevance` (default), `downloads`, `rating`, `updated`, `new` |
-| `page` | int | Page number (default: 1) |
-| `per_page` | int | Results per page (default: 20, max: 100) |
+| Param      | Type   | Description                                                         |
+| ---------- | ------ | ------------------------------------------------------------------- |
+| `q`        | string | Full-text search (name, description, tags)                          |
+| `category` | string | Filter by category slug (`data-viz`, `frontend`, etc.)              |
+| `trust`    | string | Minimum trust tier: `registered`, `scanned`, `verified`, `official` |
+| `platform` | string | Filter by platform: `all`, `claude-code`, `cursor`, `codex`, etc.   |
+| `sort`     | string | `relevance` (default), `downloads`, `rating`, `updated`, `new`      |
+| `page`     | int    | Page number (default: 1)                                            |
+| `per_page` | int    | Results per page (default: 20, max: 100)                            |
 
 **Response: 200**
+
 ```json
 {
   "results": [
@@ -165,6 +173,7 @@ Search and list skills. Powers both CLI `spm search` and web UI.
 Get full skill metadata (latest version). Powers skill detail page and `spm info`.
 
 **Response: 200**
+
 ```json
 {
   "name": "data-viz",
@@ -212,6 +221,7 @@ Get full skill metadata (latest version). Powers skill detail page and `spm info
 ```
 
 **Response: 404**
+
 ```json
 {
   "error": "skill_not_found",
@@ -232,11 +242,12 @@ The `suggestion` field uses string similarity to offer did-you-mean corrections.
 Get a specific version's metadata.
 
 **Response: 200**
+
 ```json
 {
   "name": "data-viz",
   "version": "1.2.3",
-  "manifest": { },
+  "manifest": {},
   "readme_md": "# data-viz\n\nCreate beautiful data...",
   "size_bytes": 22528,
   "checksum_sha256": "a1b2c3d4e5f6...",
@@ -252,6 +263,7 @@ Get a specific version's metadata.
 Download the `.skl` package. Returns a redirect to the R2 presigned URL.
 
 **Response: 302**
+
 ```
 Location: https://r2.spm.dev/packages/data-viz/1.2.3.skl?sig=...&expires=...
 ```
@@ -266,13 +278,14 @@ Publish a new skill or new version. Called by `spm publish`.
 
 **Content-Type:** `multipart/form-data`
 
-| Field | Type | Description |
-|---|---|---|
-| `package` | file | The `.skl` archive |
-| `manifest` | json | manifest.json contents |
+| Field             | Type | Description                 |
+| ----------------- | ---- | --------------------------- |
+| `package`         | file | The `.skl` archive          |
+| `manifest`        | json | manifest.json contents      |
 | `sigstore_bundle` | file | Optional `.sigstore` bundle |
 
 **Response: 201 (published)**
+
 ```json
 {
   "status": "published",
@@ -288,6 +301,7 @@ Publish a new skill or new version. Called by `spm publish`.
 ```
 
 **Response: 200 (held for review)**
+
 ```json
 {
   "status": "held",
@@ -304,6 +318,7 @@ Publish a new skill or new version. Called by `spm publish`.
 ```
 
 **Response: 422 (blocked)**
+
 ```json
 {
   "status": "blocked",
@@ -331,6 +346,7 @@ Publish a new skill or new version. Called by `spm publish`.
 ```
 
 **Response: 409 (version exists)**
+
 ```json
 {
   "error": "version_exists",
@@ -346,6 +362,7 @@ Yank a version. Removes from new installs, existing lock files still resolve.
 **Headers:** `Authorization: Bearer spm_<jwt>`
 
 **Request:**
+
 ```json
 {
   "reason": "Critical bug in heatmap script causes data corruption"
@@ -353,6 +370,7 @@ Yank a version. Removes from new installs, existing lock files still resolve.
 ```
 
 **Response: 200**
+
 ```json
 {
   "name": "data-viz",
@@ -370,6 +388,7 @@ Update skill metadata (deprecate, change category, update description).
 **Headers:** `Authorization: Bearer spm_<jwt>`
 
 **Request:**
+
 ```json
 {
   "deprecated": true,
@@ -378,6 +397,7 @@ Update skill metadata (deprecate, change category, update description).
 ```
 
 **Response: 200**
+
 ```json
 {
   "name": "data-viz",
@@ -396,19 +416,20 @@ Update skill metadata (deprecate, change category, update description).
 List all categories with skill counts. Powers the browse-by-category UI.
 
 **Response: 200**
+
 ```json
 {
   "categories": [
-    { "slug": "documents",    "display": "Documents",           "count": 34, "icon": "📄" },
-    { "slug": "data-viz",     "display": "Data & Visualization","count": 28, "icon": "📊" },
-    { "slug": "frontend",     "display": "Frontend",            "count": 22, "icon": "🎨" },
-    { "slug": "backend",      "display": "Backend",             "count": 18, "icon": "🔌" },
-    { "slug": "infra",        "display": "Infrastructure",      "count": 19, "icon": "⚙️" },
-    { "slug": "testing",      "display": "Testing",             "count": 16, "icon": "🧪" },
-    { "slug": "code-quality", "display": "Code Quality",        "count": 10, "icon": "✨" },
-    { "slug": "security",     "display": "Security",            "count": 9,  "icon": "🛡" },
-    { "slug": "productivity", "display": "Productivity",        "count": 11, "icon": "⚡" },
-    { "slug": "other",        "display": "Other",               "count": 5,  "icon": "📦" }
+    { "slug": "documents", "display": "Documents", "count": 34, "icon": "📄" },
+    { "slug": "data-viz", "display": "Data & Visualization", "count": 28, "icon": "📊" },
+    { "slug": "frontend", "display": "Frontend", "count": 22, "icon": "🎨" },
+    { "slug": "backend", "display": "Backend", "count": 18, "icon": "🔌" },
+    { "slug": "infra", "display": "Infrastructure", "count": 19, "icon": "⚙️" },
+    { "slug": "testing", "display": "Testing", "count": 16, "icon": "🧪" },
+    { "slug": "code-quality", "display": "Code Quality", "count": 10, "icon": "✨" },
+    { "slug": "security", "display": "Security", "count": 9, "icon": "🛡" },
+    { "slug": "productivity", "display": "Productivity", "count": 11, "icon": "⚡" },
+    { "slug": "other", "display": "Other", "count": 5, "icon": "📦" }
   ]
 }
 ```
@@ -420,6 +441,7 @@ LLM-based category suggestion. Called during `spm publish` to verify/suggest cat
 **Headers:** `Authorization: Bearer spm_<jwt>`
 
 **Request:**
+
 ```json
 {
   "skill_md_content": "# data-viz\n\nCreate publication-quality charts...",
@@ -428,14 +450,13 @@ LLM-based category suggestion. Called during `spm publish` to verify/suggest cat
 ```
 
 **Response: 200**
+
 ```json
 {
   "suggested_category": "data-viz",
   "confidence": 0.92,
   "matches_manifest": true,
-  "alternatives": [
-    { "category": "frontend", "confidence": 0.35 }
-  ]
+  "alternatives": [{ "category": "frontend", "confidence": 0.35 }]
 }
 ```
 
@@ -449,13 +470,14 @@ Get reviews for a skill.
 
 **Query parameters:**
 
-| Param | Type | Description |
-|---|---|---|
-| `sort` | string | `recent` (default), `rating_high`, `rating_low` |
-| `page` | int | Page number |
-| `per_page` | int | Default: 20 |
+| Param      | Type   | Description                                     |
+| ---------- | ------ | ----------------------------------------------- |
+| `sort`     | string | `recent` (default), `rating_high`, `rating_low` |
+| `page`     | int    | Page number                                     |
+| `per_page` | int    | Default: 20                                     |
 
 **Response: 200**
+
 ```json
 {
   "skill": "data-viz",
@@ -483,6 +505,7 @@ Submit or update a review (one per user per skill).
 **Headers:** `Authorization: Bearer spm_<jwt>`
 
 **Request:**
+
 ```json
 {
   "rating": 5,
@@ -491,6 +514,7 @@ Submit or update a review (one per user per skill).
 ```
 
 **Response: 201**
+
 ```json
 {
   "id": "uuid",
@@ -509,6 +533,7 @@ Submit or update a review (one per user per skill).
 Public author profile. Powers the author page on spm.dev.
 
 **Response: 200**
+
 ```json
 {
   "username": "almog",
@@ -542,6 +567,7 @@ Author dashboard stats (auth required, own profile only).
 **Headers:** `Authorization: Bearer spm_<jwt>`
 
 **Response: 200**
+
 ```json
 {
   "total_downloads": 24600,
@@ -579,6 +605,7 @@ Report a skill for review. Called by `spm report <name>`.
 **Headers:** `Authorization: Bearer spm_<jwt>` (optional — anonymous reports allowed)
 
 **Request:**
+
 ```json
 {
   "reason": "Skill reads clipboard contents without user consent",
@@ -587,6 +614,7 @@ Report a skill for review. Called by `spm report <name>`.
 ```
 
 **Response: 201**
+
 ```json
 {
   "id": "uuid",
@@ -606,12 +634,13 @@ Get trending skills for the homepage. Results are cached (5 min TTL).
 
 **Query parameters:**
 
-| Param | Type | Description |
-|---|---|---|
-| `tab` | string | `featured`, `rising`, `most_installed`, `new` |
-| `limit` | int | Default: 10, max: 50 |
+| Param   | Type   | Description                                   |
+| ------- | ------ | --------------------------------------------- |
+| `tab`   | string | `featured`, `rising`, `most_installed`, `new` |
+| `limit` | int    | Default: 10, max: 50                          |
 
 **Response: 200**
+
 ```json
 {
   "tab": "rising",
@@ -640,6 +669,7 @@ Get trending skills for the homepage. Results are cached (5 min TTL).
 Resolve a set of skill specifiers to exact versions and download URLs. Called by `spm install`. Allows the CLI to resolve all dependencies in one round-trip.
 
 **Request:**
+
 ```json
 {
   "skills": [
@@ -651,6 +681,7 @@ Resolve a set of skill specifiers to exact versions and download URLs. Called by
 ```
 
 **Response: 200**
+
 ```json
 {
   "resolved": [
@@ -684,6 +715,7 @@ Resolve a set of skill specifiers to exact versions and download URLs. Called by
 ```
 
 **Response: 422 (unresolvable)**
+
 ```json
 {
   "resolved": [],
@@ -710,12 +742,13 @@ Get flagged skills awaiting review.
 
 **Query parameters:**
 
-| Param | Type | Description |
-|---|---|---|
-| `sort` | string | `oldest` (default), `newest`, `confidence` |
-| `status` | string | `pending` (default), `all` |
+| Param    | Type   | Description                                |
+| -------- | ------ | ------------------------------------------ |
+| `sort`   | string | `oldest` (default), `newest`, `confidence` |
+| `status` | string | `pending` (default), `all`                 |
 
 **Response: 200**
+
 ```json
 {
   "queue": [
@@ -743,6 +776,7 @@ Get flagged skills awaiting review.
 Approve a flagged skill.
 
 **Request:**
+
 ```json
 {
   "notes": "Legitimate automation skill, deployment instructions are expected"
@@ -750,6 +784,7 @@ Approve a flagged skill.
 ```
 
 **Response: 200**
+
 ```json
 {
   "id": "uuid",
@@ -765,6 +800,7 @@ Approve a flagged skill.
 Reject a flagged skill.
 
 **Request:**
+
 ```json
 {
   "reason": "Contains instructions to bypass security prompts",
@@ -774,6 +810,7 @@ Reject a flagged skill.
 ```
 
 **Response: 200**
+
 ```json
 {
   "id": "uuid",
@@ -792,6 +829,7 @@ List all skills with admin metadata (same as GET /skills but includes held/block
 Admin-initiated yank (doesn't require ownership).
 
 **Request:**
+
 ```json
 {
   "version": "0.3.0",
@@ -811,6 +849,7 @@ List all users with trust tiers and stats.
 Change a user's trust tier.
 
 **Request:**
+
 ```json
 {
   "trust_tier": "verified",
@@ -829,6 +868,7 @@ List user-submitted reports.
 Update report status.
 
 **Request:**
+
 ```json
 {
   "status": "resolved",
@@ -844,6 +884,7 @@ Aggregated user errors from CLI telemetry.
 **Query parameters:** `type`, `status`, `page`, `per_page`
 
 **Response: 200**
+
 ```json
 {
   "errors": [
@@ -869,6 +910,7 @@ Aggregated user errors from CLI telemetry.
 Update error status.
 
 **Request:**
+
 ```json
 {
   "status": "resolved",
@@ -881,6 +923,7 @@ Update error status.
 Dashboard-level statistics for admin panel.
 
 **Response: 200**
+
 ```json
 {
   "publishes": {
@@ -908,6 +951,7 @@ Dashboard-level statistics for admin panel.
 ### Admin Access Model
 
 **Separate domain:** The admin panel runs on `admin.spm.dev` — a separate Cloudflare Pages deployment. This gives:
+
 - CORS isolation (admin API routes only accept `admin.spm.dev` origin)
 - Separate deploy pipeline (admin changes don't affect public site)
 - No admin code in the public JS bundle
@@ -929,6 +973,7 @@ UPDATE users SET role = 'admin' WHERE username = 'almog';
 Promote or revoke admin access. Requires existing admin auth.
 
 **Request:**
+
 ```json
 {
   "role": "admin",
@@ -937,6 +982,7 @@ Promote or revoke admin access. Requires existing admin auth.
 ```
 
 **Response: 200**
+
 ```json
 {
   "username": "sarah",
@@ -948,6 +994,7 @@ Promote or revoke admin access. Requires existing admin auth.
 ```
 
 To revoke:
+
 ```json
 {
   "role": "user",
@@ -967,10 +1014,10 @@ async function auditAdmin(c, action: string, details: object) {
   const admin = c.get('jwtPayload');
   await db.insert(audit_log).values({
     actor_id: admin.sub,
-    action,            // 'admin.approve', 'admin.reject', 'admin.yank', 'admin.trust_change'
+    action, // 'admin.approve', 'admin.reject', 'admin.yank', 'admin.trust_change'
     skill_id: details.skillId,
     version_id: details.versionId,
-    details,           // full context: reason, old_trust, new_trust, etc.
+    details, // full context: reason, old_trust, new_trust, etc.
   });
 }
 ```
@@ -984,6 +1031,7 @@ async function auditAdmin(c, action: string, details: object) {
 Health check for uptime monitoring.
 
 **Response: 200**
+
 ```json
 {
   "status": "ok",
@@ -999,6 +1047,7 @@ Health check for uptime monitoring.
 Public status page data (cached, 1 min TTL).
 
 **Response: 200**
+
 ```json
 {
   "status": "operational",
@@ -1026,32 +1075,32 @@ All errors follow a consistent shape:
 
 **Standard error codes:**
 
-| Code | HTTP | Description |
-|---|---|---|
-| `unauthorized` | 401 | Missing or invalid token |
-| `forbidden` | 403 | Valid token but insufficient permissions |
-| `skill_not_found` | 404 | Skill name doesn't exist |
-| `version_not_found` | 404 | Specific version doesn't exist |
-| `version_exists` | 409 | Version already published (immutable) |
-| `validation_error` | 422 | Invalid manifest, bad semver, etc. |
-| `publish_blocked` | 422 | Security scan blocked the publish |
-| `publish_held` | 200 | Scan flagged, held for manual review |
-| `rate_limited` | 429 | Too many requests |
-| `internal_error` | 500 | Server error |
+| Code                | HTTP | Description                              |
+| ------------------- | ---- | ---------------------------------------- |
+| `unauthorized`      | 401  | Missing or invalid token                 |
+| `forbidden`         | 403  | Valid token but insufficient permissions |
+| `skill_not_found`   | 404  | Skill name doesn't exist                 |
+| `version_not_found` | 404  | Specific version doesn't exist           |
+| `version_exists`    | 409  | Version already published (immutable)    |
+| `validation_error`  | 422  | Invalid manifest, bad semver, etc.       |
+| `publish_blocked`   | 422  | Security scan blocked the publish        |
+| `publish_held`      | 200  | Scan flagged, held for manual review     |
+| `rate_limited`      | 429  | Too many requests                        |
+| `internal_error`    | 500  | Server error                             |
 
 ---
 
 ## 12. Rate Limiting
 
-| Endpoint | Limit | Window |
-|---|---|---|
-| `GET /skills` (search) | 100 | per minute |
-| `GET /skills/:name/:version/download` | 60 | per minute |
-| `POST /skills` (publish) | 10 | per hour |
-| `POST /auth/*` | 20 | per minute |
-| `POST /resolve` | 60 | per minute |
-| Admin routes | 120 | per minute |
-| All other GET | 200 | per minute |
+| Endpoint                              | Limit | Window     |
+| ------------------------------------- | ----- | ---------- |
+| `GET /skills` (search)                | 100   | per minute |
+| `GET /skills/:name/:version/download` | 60    | per minute |
+| `POST /skills` (publish)              | 10    | per hour   |
+| `POST /auth/*`                        | 20    | per minute |
+| `POST /resolve`                       | 60    | per minute |
+| Admin routes                          | 120   | per minute |
+| All other GET                         | 200   | per minute |
 
 Rate limit headers on every response:
 
@@ -1160,8 +1209,8 @@ import { authed, adminGuard } from '../middleware/auth';
 
 // Every route in this file is automatically guarded
 const admin = new Hono();
-admin.use('*', authed);       // Step 1: must be authenticated
-admin.use('*', adminGuard);   // Step 2: must be admin (JWT + DB check)
+admin.use('*', authed); // Step 1: must be authenticated
+admin.use('*', adminGuard); // Step 2: must be admin (JWT + DB check)
 
 admin.get('/queue', getQueue);
 admin.post('/queue/:id/approve', approveItem);
@@ -1189,14 +1238,14 @@ app.route('/admin', admin);
 
 **Why this is safe:**
 
-| Attack | Defense |
-|---|---|
-| No token | `authed` middleware rejects (401) |
-| Valid token, not admin | `adminGuard` checks JWT claim (403) |
-| Forged JWT with admin claim | JWT signature verification fails (401) |
-| Revoked admin with valid JWT | DB role check fails (403) |
-| Dev forgets guard on new route | Impossible — guard is on `admin.use('*')` |
-| Admin panel accessed from wrong origin | CORS restricts to `admin.spm.dev` |
+| Attack                                 | Defense                                   |
+| -------------------------------------- | ----------------------------------------- |
+| No token                               | `authed` middleware rejects (401)         |
+| Valid token, not admin                 | `adminGuard` checks JWT claim (403)       |
+| Forged JWT with admin claim            | JWT signature verification fails (401)    |
+| Revoked admin with valid JWT           | DB role check fails (403)                 |
+| Dev forgets guard on new route         | Impossible — guard is on `admin.use('*')` |
+| Admin panel accessed from wrong origin | CORS restricts to `admin.spm.dev`         |
 
 ### Validation
 
@@ -1208,13 +1257,19 @@ All request bodies validated with Zod schemas. The schemas live in a shared `spm
 import { z } from 'zod';
 
 export const SkillCategory = z.enum([
-  'documents', 'data-viz', 'frontend', 'backend', 'infra',
-  'testing', 'code-quality', 'security', 'productivity', 'other',
+  'documents',
+  'data-viz',
+  'frontend',
+  'backend',
+  'infra',
+  'testing',
+  'code-quality',
+  'security',
+  'productivity',
+  'other',
 ]);
 
-export const TrustTier = z.enum([
-  'registered', 'scanned', 'verified', 'official',
-]);
+export const TrustTier = z.enum(['registered', 'scanned', 'verified', 'official']);
 
 export const PublishRequest = z.object({
   manifest: ManifestSchema,
@@ -1237,11 +1292,14 @@ export const SearchParams = z.object({
 The API serves the CLI (no CORS needed), the public web UI, and the admin panel. Admin panel runs on a separate origin:
 
 ```typescript
-app.use('*', cors({
-  origin: ['https://spm.dev', 'https://admin.spm.dev'],
-  allowMethods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  allowHeaders: ['Authorization', 'Content-Type'],
-}));
+app.use(
+  '*',
+  cors({
+    origin: ['https://spm.dev', 'https://admin.spm.dev'],
+    allowMethods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowHeaders: ['Authorization', 'Content-Type'],
+  }),
+);
 ```
 
 Admin routes additionally verify the `Origin` header:
@@ -1259,12 +1317,12 @@ admin.use('*', async (c, next) => {
 
 ### Caching Strategy
 
-| Route | Cache | TTL |
-|---|---|---|
-| `GET /skills` (search) | Edge (Cloudflare) | 30s |
-| `GET /skills/:name` | Edge | 60s |
-| `GET /categories` | Edge | 5min |
-| `GET /trending` | Edge | 5min |
-| `GET /status` | Edge | 1min |
-| All POST/PATCH/DELETE | No cache | — |
-| Download redirects | R2 presigned | 1hr |
+| Route                  | Cache             | TTL  |
+| ---------------------- | ----------------- | ---- |
+| `GET /skills` (search) | Edge (Cloudflare) | 30s  |
+| `GET /skills/:name`    | Edge              | 60s  |
+| `GET /categories`      | Edge              | 5min |
+| `GET /trending`        | Edge              | 5min |
+| `GET /status`          | Edge              | 1min |
+| All POST/PATCH/DELETE  | No cache          | —    |
+| Download redirects     | R2 presigned      | 1hr  |

@@ -70,10 +70,10 @@ This matches npm exactly: `npm install <pkg>` is project-local, `npm install -g 
 ```json
 {
   "$schema": "https://spm.dev/schemas/skills-v1.json",
-  
+
   "name": "vacai-agent",
   "description": "Multi-agent trip advisor built with LangGraph",
-  
+
   "skills": {
     "frontend-design": "^1.0.0",
     "pdf": "^2.0.0",
@@ -103,27 +103,27 @@ This matches npm exactly: `npm install <pkg>` is project-local, `npm install -g 
 
 ### Field Reference
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `name` | No | Project name (informational) |
-| `description` | No | What the project is about |
-| `skills` | **Yes** | Map of skill name → version constraint |
-| `resolution` | No | How to handle global vs project conflicts |
-| `settings` | No | Project-wide SPM settings |
+| Field         | Required | Description                               |
+| ------------- | -------- | ----------------------------------------- |
+| `name`        | No       | Project name (informational)              |
+| `description` | No       | What the project is about                 |
+| `skills`      | **Yes**  | Map of skill name → version constraint    |
+| `resolution`  | No       | How to handle global vs project conflicts |
+| `settings`    | No       | Project-wide SPM settings                 |
 
 ### Version Specifiers
 
 ```json
 {
   "skills": {
-    "data-viz": "1.2.3",                              // Exact version
-    "frontend-design": "^1.0.0",                       // Compatible (>=1.0.0 <2.0.0)
-    "pdf": "~2.1.0",                                   // Patch only (>=2.1.0 <2.2.0)
-    "chart-maker": ">=1.5.0",                          // Minimum version
-    "custom-skill": "github:user/repo#tag",            // GitHub source
-    "local-skill": "file:./skills/my-local-skill",     // Local path
-    "internal": "file:../shared-skills/internal",      // Relative path
-    "beta-feature": "3.0.0-beta.1"                     // Pre-release
+    "data-viz": "1.2.3", // Exact version
+    "frontend-design": "^1.0.0", // Compatible (>=1.0.0 <2.0.0)
+    "pdf": "~2.1.0", // Patch only (>=2.1.0 <2.2.0)
+    "chart-maker": ">=1.5.0", // Minimum version
+    "custom-skill": "github:user/repo#tag", // GitHub source
+    "local-skill": "file:./skills/my-local-skill", // Local path
+    "internal": "file:../shared-skills/internal", // Relative path
+    "beta-feature": "3.0.0-beta.1" // Pre-release
   }
 }
 ```
@@ -135,9 +135,10 @@ This matches npm exactly: `npm install <pkg>` is project-local, `npm install -g 
 ### The Current Reality
 
 Agents load skills from directories in this order (example: Claude Code):
+
 ```
 /mnt/skills/public/      ← Built-in skills
-/mnt/skills/examples/    ← Example/reference skills  
+/mnt/skills/examples/    ← Example/reference skills
 /mnt/skills/user/        ← User-installed skills (global)
 ```
 
@@ -275,7 +276,7 @@ Like `package-lock.json` or `poetry.lock`, this pins exact versions for reproduc
   "lockfileVersion": 1,
   "generated_at": "2026-02-27T10:00:00Z",
   "generated_by": "spm@0.1.0",
-  
+
   "skills": {
     "frontend-design": {
       "version": "1.4.1",
@@ -343,11 +344,11 @@ $ cd my-project
 $ spm init
 
 Creating skills.json...
-  
+
   ? Project name: vacai-agent
   ? Resolution strategy: (project-first)
   ? Minimum trust level: (verified)
-  
+
   ✓ Created skills.json
   ✓ Created .spm/ directory
   ✓ Added .spm/ to .gitignore
@@ -378,7 +379,7 @@ Installing 5 skills...
   ✓ data-viz@1.2.3
   ✓ custom-report@1.0.0 (from GitHub)
   ✓ internal-templates (local)
-  
+
   System dependencies:
   ✓ pip: plotly, pandas, seaborn (installed)
 
@@ -426,7 +427,6 @@ Installed data-viz@1.2.3 (global)
 Global skills are available in every session on this machine, regardless of project.
 
 **The distinction:** `spm install <n>` = project (committed to git). `spm install -g <n>` = global (your machine only). Same as npm.
-
 
 ### Remove a Skill
 
@@ -510,7 +510,7 @@ Checking registry...
 Changelog for 1.3.0:
   + Added heatmap support
   + New dependency: seaborn>=0.12
-  
+
   No permission changes
   No breaking changes (minor version)
 
@@ -562,9 +562,9 @@ Reading skills-lock.json...
 ```javascript
 class SkillResolver {
   constructor(projectConfig, globalSkills, builtinSkills) {
-    this.project = projectConfig;       // from skills.json
-    this.global = globalSkills;          // from ~/.spm/skills/
-    this.builtin = builtinSkills;        // from /mnt/skills/public/
+    this.project = projectConfig; // from skills.json
+    this.global = globalSkills; // from ~/.spm/skills/
+    this.builtin = builtinSkills; // from /mnt/skills/public/
     this.strategy = projectConfig?.resolution?.strategy || 'project-first';
   }
 
@@ -591,7 +591,7 @@ class SkillResolver {
         name,
         version,
         source: 'project',
-        path: `.spm/skills/${name}/current/`
+        path: `.spm/skills/${name}/current/`,
       });
     }
 
@@ -604,7 +604,7 @@ class SkillResolver {
           winner: 'project',
           project_version: result.get(name).version,
           global_version: info.version,
-          reason: this.getOverrideReason(name) || 'project-first strategy'
+          reason: this.getOverrideReason(name) || 'project-first strategy',
         });
         continue;
       }
@@ -618,7 +618,7 @@ class SkillResolver {
           skill: name,
           winner: result.get(name).source,
           builtin_version: info.version,
-          reason: `${result.get(name).source} takes priority over built-in`
+          reason: `${result.get(name).source} takes priority over built-in`,
         });
         continue;
       }
@@ -652,7 +652,7 @@ class SkillResolver {
         name,
         version,
         source: 'project',
-        path: `.spm/skills/${name}/current/`
+        path: `.spm/skills/${name}/current/`,
       });
     }
 
@@ -662,7 +662,7 @@ class SkillResolver {
         conflicts.push({
           skill: name,
           status: 'excluded',
-          reason: 'strict-project: not declared in skills.json'
+          reason: 'strict-project: not declared in skills.json',
         });
       }
     }
@@ -677,9 +677,9 @@ class SkillResolver {
   // Generate the <available_skills> XML that goes into the agent's context
   generateAvailableSkillsXml() {
     const { skills, conflicts } = this.resolve();
-    
+
     let xml = '<available_skills>\n';
-    
+
     // Sort: project skills first, then global, then built-in
     const sorted = [...skills.entries()].sort((a, b) => {
       const priority = { project: 0, global: 1, builtin: 2 };
@@ -694,7 +694,7 @@ class SkillResolver {
       xml += `<location>\n${info.path}/SKILL.md\n</location>\n`;
       xml += `</skill>\n\n`;
     }
-    
+
     xml += '</available_skills>';
     return xml;
   }
@@ -754,6 +754,7 @@ SPM adds a resolution step between scanning and generating:
 For this to actually work in Claude.ai / Claude Code, one of these must happen:
 
 **Option A: SPM generates a skill overlay file**
+
 ```bash
 # SPM writes a resolved skills manifest
 spm resolve --output /mnt/skills/.resolved_skills.json
@@ -763,6 +764,7 @@ spm resolve --output /mnt/skills/.resolved_skills.json
 ```
 
 **Option B: SPM controls the symlinks**
+
 ```bash
 # SPM manages what appears in /mnt/skills/user/
 # Only resolved skills get symlinked in
@@ -773,6 +775,7 @@ spm deactivate pdf  # Unlinks without uninstalling
 ```
 
 **Option C: SPM generates available_skills directly**
+
 ```bash
 # SPM generates the XML fragment
 spm generate-context > /mnt/skills/.available_skills_override.xml
@@ -793,6 +796,7 @@ SPM falls back to current behavior — all installed global skills are visible. 
 ### `skills.json` But No `skills-lock.json`
 
 First run — SPM resolves versions, installs, and creates the lock file:
+
 ```bash
 $ spm install
   ⚠️  No skills-lock.json found. Resolving from skills.json...
@@ -805,13 +809,13 @@ $ spm install
 $ spm install
 
   ❌ skills-lock.json is out of sync with skills.json
-  
+
   Changes detected:
     + chart-maker@^1.0.0 (added to skills.json, not in lock)
     - old-skill (in lock but removed from skills.json)
     ~ pdf: skills.json says ^2.0.0, lock has 2.0.3 (compatible ✓)
-  
-  Run 'spm install --update-lock' to regenerate, 
+
+  Run 'spm install --update-lock' to regenerate,
   or 'spm ci' will fail until resolved.
 ```
 
@@ -824,12 +828,13 @@ When a local file-referenced skill changes:
 ```
 
 SPM detects content changes by checking the checksum:
+
 ```bash
 $ spm check
   ⚠️  internal-templates: local files modified since last lock
      Lock checksum: sha256:mno345...
      Current checksum: sha256:xyz789...
-  
+
   Run 'spm lock' to update the lock file
 ```
 
@@ -842,7 +847,7 @@ $ spm install --offline
   ✓ frontend-design@1.4.1 (cached)
   ✓ pdf@2.0.3 (cached)
   ❌ data-viz@1.2.3 not in cache
-  
+
   Failed: 1 skill not available offline.
   Pre-cache with: spm cache add data-viz@1.2.3
 ```

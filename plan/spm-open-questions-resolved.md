@@ -11,6 +11,7 @@ All open questions from across the 20+ design docs, consolidated and decided.
 **Decision: ONNX runtime on the server.**
 
 Why:
+
 - Zero latency to external API, runs in-process
 - No HF rate limits or downtime dependency
 - Free forever (no API usage billing)
@@ -30,22 +31,24 @@ Fallback: If ONNX fails to load (memory pressure, cold start), skip Layer 2 and 
 **Decision: Subprocess call in Phase 1. Pin version. Evaluate fork later.**
 
 Why NOT fork now:
+
 - Vercel ships updates when new agents appear — we'd miss those
 - Maintenance burden of merging upstream changes
 - Their codebase is 3k+ lines of agent-specific logic we don't want to own
 - Fork signals competition, subprocess signals collaboration
 
 How:
+
 ```typescript
 // spm-cli/src/lib/linker.ts
 import { execSync } from 'child_process';
 
-const SKILLS_CLI_VERSION = '0.3.14';  // pinned, tested
+const SKILLS_CLI_VERSION = '0.3.14'; // pinned, tested
 
 export function linkSkill(skillPath: string, agents: string = '*') {
   execSync(`npx skills@${SKILLS_CLI_VERSION} add ${skillPath} -a '${agents}' -y`, {
     stdio: 'pipe',
-    timeout: 30000
+    timeout: 30000,
   });
 }
 ```
@@ -53,6 +56,7 @@ export function linkSkill(skillPath: string, agents: string = '*') {
 Pin the version to avoid breaking changes. Bump deliberately after testing.
 
 **When to reconsider forking:**
+
 - If Vercel makes breaking changes without semver
 - If we need to add custom behavior (e.g., SPM-specific metadata in the lock file)
 - If Vercel abandons the project
@@ -66,6 +70,7 @@ Pin the version to avoid breaking changes. Bump deliberately after testing.
 **Decision: Yes. Import all 200+ at launch. Use failures to tune the scanner.**
 
 Reasoning:
+
 - Empty registry on Day 1 = dead on arrival
 - 200+ skills gives immediate value and legitimacy
 - Running all 200+ through the security pipeline is the best stress test we could ask for before launch
@@ -73,6 +78,7 @@ Reasoning:
 - This doubles as scanner calibration — if 30% of legitimate skills fail, we know our patterns are too aggressive
 
 Approach:
+
 1. **Pre-launch**: Import all 200+ skills from skills.sh. Run through full security pipeline. Treat blocked skills as a tuning exercise — adjust scanner thresholds and patterns until the false positive rate is acceptable.
 2. **On-demand**: `spm import --from github <owner>/<repo>` for any new skill on skills.sh or GitHub. Runs full security pipeline, publishes as "Scanned" tier.
 3. **Phase 2**: Background job that periodically syncs newly added skills from skills.sh into SPM.
@@ -86,10 +92,12 @@ Approach:
 **Decision: Both. Global by default, per-project with skills.json. Both levels tracked.**
 
 Two separate file pairs:
+
 - **Global**: `~/.spm/skills.json` + `~/.spm/skills-lock.json` — your machine, not committed
 - **Project**: `./skills.json` + `./skills-lock.json` — your repo, committed to git
 
 Commands:
+
 - `spm install data-viz` → adds to project `./skills.json`
 - `spm install -g data-viz` → adds to global `~/.spm/skills.json`
 - `spm install` (no args, in a project) → installs everything from `./skills.json`
@@ -141,6 +149,7 @@ Phase 2: Add "fork graph" to web UI showing lineage.
 **Decision: Dependencies, not "extends." Composition is the agent's job.**
 
 Skills can depend on other skills:
+
 ```json
 {
   "dependencies": {
@@ -164,16 +173,19 @@ Why: "extends" creates tight coupling, versioning nightmares, and diamond depend
 **Decision: Anonymous install counts only. Opt-in for trigger analytics.**
 
 **What's collected automatically (no opt-out):**
+
 - Download counts per skill per version (anonymous, no user ID)
 - Platform breakdown (which agents installed it)
 
 **What's opt-in (trigger analytics):**
+
 - When an agent triggers a skill, it can report the event to SPM
 - This powers author dashboards ("your skill was triggered 1,200 times this week")
 - Requires the user to have the SPM MCP server connected
 - No message content is ever sent — just: `{skill: "data-viz", platform: "claude-code", timestamp}`
 
 **What's never collected:**
+
 - Conversation content
 - User messages
 - File contents
@@ -224,11 +236,13 @@ This is already documented in spm-federation.md and spm-registry-infrastructure.
 **Decision: Phase 1 for the integration, Phase 2 for relying on it.**
 
 Reasoning:
+
 - The Lakera integration is literally one API call. It takes a day to build.
 - Free tier (10k requests) is more than enough for early publishes.
 - BUT: We don't want to depend on it for launch. If Lakera is down, publishes should still work.
 
 Implementation:
+
 - Build the Lakera provider (implements `ScannerProvider` interface)
 - Layer 3 runs if Layer 2 is borderline (score 0.7-0.95) AND Lakera API is available
 - If Lakera is unavailable: hold for manual review instead
@@ -258,6 +272,7 @@ If we need plugins later (e.g., `spm plugin install custom-scanner`), we can mig
 **Decision: SPM owns skills.json + skills-lock.json (project-local). Vercel's lock file is separate and we don't touch it.**
 
 This follows the npm convention exactly:
+
 - `skills.json` = `package.json` — human-editable intent ("I want data-viz ^1.2.0")
 - `skills-lock.json` = `package-lock.json` — auto-generated resolved versions ("data-viz pinned to 1.2.3, sha256:abc")
 - Both live in the project root, both get committed to git
@@ -282,6 +297,7 @@ Someone clones the repo, runs `spm install`, and gets the exact same resolved ve
 **Decision: Already handled. Section 2 Option B covers CLI fallback.**
 
 The SKILL.md has two paths:
+
 - **Option A**: MCP tools available → agent searches and installs directly
 - **Option B**: No MCP → agent suggests CLI commands to the user
 
@@ -305,20 +321,20 @@ A verified author's skills aren't automatically "verified" — they still go thr
 
 ## Summary Table
 
-| # | Question | Decision | Phase |
-|---|----------|----------|-------|
-| 1 | ONNX vs HF API | ONNX runtime on server | 1 |
-| 2 | Fork Vercel CLI | Subprocess, pin version | 1 |
-| 3 | Index skills.sh Day 1 | All 200+ pre-launch (scanner tuning exercise) | 1 |
-| 4 | Global vs per-project | Both (npm model) | 1 |
-| 5 | Who can publish | Open + security gate | 1 |
-| 6 | Skill forking | Namespaces + attribution field | 1 |
-| 7 | Skill composition | Dependencies only, no "extends" | 1 |
-| 8 | Telemetry | Anonymous installs, opt-in triggers | 1 |
-| 9 | Pricing | Free, explore premium Phase 3 | 3 |
-| 10 | Federation | Private registries Phase 1, federation Phase 3 | 1/3 |
-| 11 | Lakera phase | Integration Phase 1, hard gate Phase 2 | 1/2 |
-| 12 | CLI framework | Commander.js | 1 |
-| 13 | Lock file coexistence | Project-local `skills-lock.json` (like package-lock.json) | 1 |
-| 14 | No-MCP fallback | CLI fallback in spm-runtime | 1 |
-| 15 | Trust: per-author or per-skill | Per-author + per-version scans | 1 |
+| #   | Question                       | Decision                                                  | Phase |
+| --- | ------------------------------ | --------------------------------------------------------- | ----- |
+| 1   | ONNX vs HF API                 | ONNX runtime on server                                    | 1     |
+| 2   | Fork Vercel CLI                | Subprocess, pin version                                   | 1     |
+| 3   | Index skills.sh Day 1          | All 200+ pre-launch (scanner tuning exercise)             | 1     |
+| 4   | Global vs per-project          | Both (npm model)                                          | 1     |
+| 5   | Who can publish                | Open + security gate                                      | 1     |
+| 6   | Skill forking                  | Namespaces + attribution field                            | 1     |
+| 7   | Skill composition              | Dependencies only, no "extends"                           | 1     |
+| 8   | Telemetry                      | Anonymous installs, opt-in triggers                       | 1     |
+| 9   | Pricing                        | Free, explore premium Phase 3                             | 3     |
+| 10  | Federation                     | Private registries Phase 1, federation Phase 3            | 1/3   |
+| 11  | Lakera phase                   | Integration Phase 1, hard gate Phase 2                    | 1/2   |
+| 12  | CLI framework                  | Commander.js                                              | 1     |
+| 13  | Lock file coexistence          | Project-local `skills-lock.json` (like package-lock.json) | 1     |
+| 14  | No-MCP fallback                | CLI fallback in spm-runtime                               | 1     |
+| 15  | Trust: per-author or per-skill | Per-author + per-version scans                            | 1     |
