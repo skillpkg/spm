@@ -1,0 +1,44 @@
+{
+  "$schema": "https://spm.dev/schemas/manifest-v1.json",
+  "name": "spm-runtime",
+  "version": "0.1.0",
+  "description": "SPM skill manager integration. Use this skill when: the user asks about installed skills, skill packages, or the skill registry; the user wants to search for, install, update, or remove skills; you cannot find an installed skill that matches the user's request and want to suggest one; the user mentions 'spm', 'skill package', or 'skill registry'. Do NOT read this skill for normal task execution — only for skill management and discovery.",
+
+  "author": {
+    "name": "SPM Team",
+    "url": "https://github.com/spm-dev"
+  },
+  "license": "MIT",
+  "keywords": ["spm", "runtime", "meta-skill", "skill-management", "discovery", "registry"],
+  "category": "system",
+
+  "agents": {
+    "min_context": "standard",
+    "requires_tools": [],
+    "requires_network": false,
+    "requires_mcp": ["spm-registry"],
+    "platforms": ["*"]
+  },
+
+  "dependencies": {},
+
+  "files": {
+    "entry": "SKILL.md"
+  },
+
+  "security": {
+    "sandboxed": true,
+    "network_access": false,
+    "filesystem_scope": ["$WORKDIR"]
+  },
+
+  "_meta": {
+    "type": "meta-skill",
+    "auto_installed": true,
+    "managed_by": "spm-cli",
+    "goal": "Make agents aware of the SPM ecosystem so they can help users discover, install, and manage skills mid-conversation. Without this, agents see skills but can't search for new ones or explain where their skills come from.",
+    "how_installed": "Bundled with SPM CLI binary at assets/spm-runtime-SKILL.md. Auto-installed by 'spm bootstrap' into all detected agent skill directories via Vercel's skills CLI (npx skills add). Never published to the registry.",
+    "when_triggered": "Only when user asks about skill management, the registry, or when the agent can't find a matching skill. NOT for normal task execution.",
+    "security_notes": "This skill does not execute code, access the network, or modify files. It only provides instructions to the agent about how to interact with SPM."
+  }
+}
