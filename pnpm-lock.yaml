@@ -26,22 +26,43 @@ importers:
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
+      typescript-eslint:
+        specifier: ^8.56.1
+        version: 8.56.1(eslint@9.39.3)(typescript@5.9.3)
 
   packages/api:
     dependencies:
+      '@hono/zod-validator':
+        specifier: ^0.7.6
+        version: 0.7.6(hono@4.12.3)(zod@3.25.76)
       '@neondatabase/serverless':
         specifier: ^0.10.0
         version: 0.10.4
+      '@spm/shared':
+        specifier: workspace:*
+        version: link:../shared
       drizzle-orm:
         specifier: ^0.38.0
-        version: 0.38.4(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@19.2.14)(react@19.2.4)
+        version: 0.38.4(@cloudflare/workers-types@4.20260301.1)(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@19.2.14)(react@19.2.4)
       hono:
         specifier: ^4.7.0
         version: 4.12.3
+      jose:
+        specifier: ^6.1.3
+        version: 6.1.3
+      string-similarity:
+        specifier: ^4.0.4
+        version: 4.0.4
       zod:
         specifier: ^3.24.0
         version: 3.25.76
     devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20260301.1
+        version: 4.20260301.1
+      '@types/string-similarity':
+        specifier: ^4.0.2
+        version: 4.0.2
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -50,7 +71,7 @@ importers:
         version: 2.1.9(@types/node@25.3.3)
       wrangler:
         specifier: ^3.99.0
-        version: 3.114.17
+        version: 3.114.17(@cloudflare/workers-types@4.20260301.1)
 
   packages/cli:
     dependencies:
@@ -254,6 +275,9 @@ packages:
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
+
+  '@cloudflare/workers-types@4.20260301.1':
+    resolution: {integrity: sha512-klKnECMb5A4GtVF0P5NH6rCjtyjqIEKJaz6kEtx9YPHhfFO2HUEarO+MI4F8WPchgeZqpGlEpDhRapzrOTw51Q==}
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -900,6 +924,12 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
+  '@hono/zod-validator@0.7.6':
+    resolution: {integrity: sha512-Io1B6d011Gj1KknV4rXYz4le5+5EubcWEU/speUjuw9XMMIaP3n78yXLhjd2A3PXaXaUwEAluOiAyLqhBEJgsw==}
+    peerDependencies:
+      hono: '>=3.9.0'
+      zod: ^3.25.0 || ^4.0.0
+
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -1342,6 +1372,9 @@ packages:
 
   '@types/react@19.2.14':
     resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
+
+  '@types/string-similarity@4.0.2':
+    resolution: {integrity: sha512-LkJQ/jsXtCVMK+sKYAmX/8zEq+/46f1PTQw7YtmQwb74jemS1SlNLmARM2Zml9DgdDTWKAtc5L13WorpHPDjDA==}
 
   '@typescript-eslint/eslint-plugin@8.56.1':
     resolution: {integrity: sha512-Jz9ZztpB37dNC+HU2HI28Bs9QXpzCz+y/twHOwhyrIRdbuVDxSytJNDl6z/aAKlaRIwC7y8wJdkBv7FxYGgi0A==}
@@ -2023,6 +2056,9 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
+  jose@6.1.3:
+    resolution: {integrity: sha512-0TpaTfihd4QMNwrz/ob2Bp7X04yuxJkjRGi4aKmOqwhov54i6u79oCv7T+C7lo70MKH6BesI3vscD1yb/yzKXQ==}
+
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
@@ -2416,6 +2452,10 @@ packages:
     resolution: {integrity: sha512-KXDYZ9dszj6bzvnEMRYvxgeTHU74QBFL54XKtP3nyMuJ81CFYtABZ3bAzL2EdFUaEwJOBOgENyFj3R7oTzDyyw==}
     engines: {node: '>=4', npm: '>=6'}
 
+  string-similarity@4.0.4:
+    resolution: {integrity: sha512-/q/8Q4Bl4ZKAPjj8WerIBJWALKkaPRfrvhfF8k/B23i4nzrlRj2/go1m90In7nG/3XDSbOo0+pu6RvCTM9RGMQ==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
     engines: {node: '>=8'}
@@ -2560,6 +2600,13 @@ packages:
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
+
+  typescript-eslint@8.56.1:
+    resolution: {integrity: sha512-U4lM6pjmBX7J5wk4szltF7I1cGBHXZopnAXCMXb3+fZ3B/0Z3hq3wS/CCUB2NZBNAExK92mCU2tEohWuwVMsDQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
+      typescript: '>=4.8.4 <6.0.0'
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
@@ -2930,6 +2977,8 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20250718.0':
     optional: true
 
+  '@cloudflare/workers-types@4.20260301.1': {}
+
   '@colors/colors@1.5.0':
     optional: true
 
@@ -3290,6 +3339,11 @@ snapshots:
       levn: 0.4.1
 
   '@fastify/busboy@2.1.1': {}
+
+  '@hono/zod-validator@0.7.6(hono@4.12.3)(zod@3.25.76)':
+    dependencies:
+      hono: 4.12.3
+      zod: 3.25.76
 
   '@humanfs/core@0.19.1': {}
 
@@ -3657,6 +3711,8 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
+  '@types/string-similarity@4.0.2': {}
+
   '@typescript-eslint/eslint-plugin@8.56.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3)(typescript@5.9.3))(eslint@9.39.3)(typescript@5.9.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
@@ -4018,8 +4074,9 @@ snapshots:
   detect-libc@2.1.2:
     optional: true
 
-  drizzle-orm@0.38.4(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@19.2.14)(react@19.2.4):
+  drizzle-orm@0.38.4(@cloudflare/workers-types@4.20260301.1)(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@19.2.14)(react@19.2.4):
     optionalDependencies:
+      '@cloudflare/workers-types': 4.20260301.1
       '@neondatabase/serverless': 0.10.4
       '@types/pg': 8.11.6
       '@types/react': 19.2.14
@@ -4337,6 +4394,8 @@ snapshots:
       is-inside-container: 1.0.0
 
   isexe@2.0.0: {}
+
+  jose@6.1.3: {}
 
   joycon@3.1.1: {}
 
@@ -4718,6 +4777,8 @@ snapshots:
 
   stoppable@1.1.0: {}
 
+  string-similarity@4.0.4: {}
+
   string-width@4.2.3:
     dependencies:
       emoji-regex: 8.0.0
@@ -4855,6 +4916,17 @@ snapshots:
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
+
+  typescript-eslint@8.56.1(eslint@9.39.3)(typescript@5.9.3):
+    dependencies:
+      '@typescript-eslint/eslint-plugin': 8.56.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3)(typescript@5.9.3))(eslint@9.39.3)(typescript@5.9.3)
+      '@typescript-eslint/parser': 8.56.1(eslint@9.39.3)(typescript@5.9.3)
+      '@typescript-eslint/typescript-estree': 8.56.1(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.56.1(eslint@9.39.3)(typescript@5.9.3)
+      eslint: 9.39.3
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
 
   typescript@5.9.3: {}
 
@@ -5039,7 +5111,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20250718.0
       '@cloudflare/workerd-windows-64': 1.20250718.0
 
-  wrangler@3.114.17:
+  wrangler@3.114.17(@cloudflare/workers-types@4.20260301.1):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.3.4
       '@cloudflare/unenv-preset': 2.0.2(unenv@2.0.0-rc.14)(workerd@1.20250718.0)
@@ -5052,6 +5124,7 @@ snapshots:
       unenv: 2.0.0-rc.14
       workerd: 1.20250718.0
     optionalDependencies:
+      '@cloudflare/workers-types': 4.20260301.1
       fsevents: 2.3.3
       sharp: 0.33.5
     transitivePeerDependencies:

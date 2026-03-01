@@ -1,0 +1,24 @@
+name = "spm-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "spm-packages"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "<RATE_LIMIT_KV_ID>"
+
+[env.staging]
+name = "spm-api-staging"
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+[env.dev]
+name = "spm-api-dev"
+[env.dev.vars]
+ENVIRONMENT = "development"
