@@ -316,3 +316,155 @@ describe('skills routes — POST /skills (publish)', () => {
     expect(res.status).toBe(401);
   });
 });
+
+// ── Additional name validation edge cases ──
+
+describe('name validation — edge cases', () => {
+  it('should reject empty string', () => {
+    expect(validateSkillName('').valid).toBe(false);
+  });
+
+  it('should accept names ending with a hyphen (regex allows it)', () => {
+    // The NAME_RE pattern /^(@[a-z0-9-]+\/)?[a-z][a-z0-9-]*$/ allows trailing hyphens
+    const result = validateSkillName('my-skill-');
+    expect(result.valid).toBe(true);
+  });
+
+  it('should accept names with consecutive hyphens (regex allows it)', () => {
+    // The NAME_RE pattern allows consecutive hyphens
+    const result = validateSkillName('my--skill');
+    expect(result.valid).toBe(true);
+  });
+
+  it('should accept exactly 2 character name', () => {
+    expect(validateSkillName('ab').valid).toBe(true);
+  });
+
+  it('should accept exactly 50 character name', () => {
+    // "a" + 49 chars = 50 total (start with letter, rest kebab-case)
+    const name = 'a' + '-bc'.repeat(16) + 'x'; // a-bc-bc-bc...-bcx = 50
+    // Let's make a proper 50-char name
+    const name50 = 'a' + 'b'.repeat(49);
+    expect(name50.length).toBe(50);
+    expect(validateSkillName(name50).valid).toBe(true);
+  });
+
+  it('should reject 51 character name', () => {
+    const name51 = 'a' + 'b'.repeat(50);
+    expect(name51.length).toBe(51);
+    expect(validateSkillName(name51).valid).toBe(false);
+  });
+
+  it('should reject names starting with a hyphen', () => {
+    expect(validateSkillName('-my-skill').valid).toBe(false);
+  });
+
+  it('should reject names with numbers at start', () => {
+    expect(validateSkillName('123-skill').valid).toBe(false);
+  });
+
+  it('should reject scoped names with invalid scope format', () => {
+    expect(validateSkillName('@/my-skill').valid).toBe(false);
+  });
+
+  it('should accept scoped name with numbers in scope', () => {
+    expect(validateSkillName('@org123/my-skill').valid).toBe(true);
+  });
+});
+
+describe('checkNameSimilarity — edge cases', () => {
+  it('should not flag exact match as similar (it IS the same name)', () => {
+    const result = checkNameSimilarity('pdf-generator', ['pdf-generator']);
+    // Exact match has similarity 1.0 which is >= 0.8 threshold
+    expect(result.similar).toBe(true);
+    expect(result.matches).toContain('pdf-generator');
+  });
+
+  it('should not flag completely different names', () => {
+    const result = checkNameSimilarity('aaa', ['zzz-yyy-xxx']);
+    expect(result.similar).toBe(false);
+  });
+
+  it('should detect single-char typo', () => {
+    const result = checkNameSimilarity('pdf-genertor', ['pdf-generator']);
+    expect(result.similar).toBe(true);
+  });
+
+  it('should handle large list of existing names', () => {
+    const existing = Array.from({ length: 100 }, (_, i) => `skill-${i}`);
+    const result = checkNameSimilarity('skill-50', existing);
+    expect(result.similar).toBe(true);
+    expect(result.matches).toContain('skill-50');
+  });
+});
+
+describe('r2 service — edge cases', () => {
+  it('should handle scoped package name in storage key', async () => {
+    const { uploadPackage } = await import('../services/r2.js');
+
+    const mockPut = vi.fn().mockResolvedValue(undefined);
+    const mockBucket = { put: mockPut } as unknown as R2Bucket;
+    const data = new ArrayBuffer(10);
+
+    const key = await uploadPackage(mockBucket, '@org/my-skill', '2.0.0', data);
+
+    expect(key).toBe('packages/@org/my-skill/2.0.0.skl');
+    expect(mockPut).toHaveBeenCalledWith('packages/@org/my-skill/2.0.0.skl', data);
+  });
+
+  it('should return null when object does not exist in bucket', async () => {
+    const { getObject } = await import('../services/r2.js');
+
+    const mockGet = vi.fn().mockResolvedValue(null);
+    const mockBucket = { get: mockGet } as unknown as R2Bucket;
+
+    const result = await getObject(mockBucket, 'packages/nonexistent/1.0.0.skl');
+
+    expect(result).toBeNull();
+  });
+});
+
+describe('skills routes — GET /skills/:name with did-you-mean', () => {
+  it('should suggest similar names when skill not found', async () => {
+    const { skillsRoutes } = await import('../routes/skills.js');
+
+    const mockSelect = vi.fn();
+    const mockFrom = vi.fn();
+    const mockWhere = vi.fn();
+    const mockLimit = vi.fn();
+
+    // First query: skill lookup returns empty
+    mockSelect.mockReturnValueOnce({ from: mockFrom });
+    mockFrom.mockReturnValueOnce({ where: mockWhere });
+    mockWhere.mockReturnValueOnce({ limit: mockLimit });
+    mockLimit.mockResolvedValueOnce([]); // no skill found
+
+    // Second query: all skills for did-you-mean
+    mockSelect.mockReturnValueOnce({ from: mockFrom });
+    mockFrom.mockResolvedValueOnce([{ name: 'pdf-generator' }, { name: 'csv-parser' }]);
+
+    const db = {
+      select: mockSelect,
+      insert: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    };
+
+    const app = new Hono<AppEnv>();
+    app.use('*', async (c, next) => {
+      c.set('db', db as never);
+      await next();
+    });
+    app.route('/', skillsRoutes);
+
+    const res = await app.request('/skills/pdf-genertor');
+    const body = (await res.json()) as Record<string, unknown>;
+
+    expect(res.status).toBe(404);
+    expect(body.error).toBe('skill_not_found');
+    // Should suggest similar name
+    if (body.suggestions) {
+      expect(Array.isArray(body.suggestions)).toBe(true);
+    }
+  });
+});

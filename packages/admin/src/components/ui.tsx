@@ -1,11 +1,46 @@
 import { useState, type ReactNode } from 'react';
 import { TRUST_CONFIG, type TrustTier, type Priority } from '../data/mock';
 
+// ---- Color mapping ----
+// Tailwind v4 cannot detect dynamic class names like `bg-${color}/10`.
+// We map semantic color names to their CSS variable values for inline styles.
+
+const COLOR_VALUES: Record<string, string> = {
+  accent: 'var(--color-accent)',
+  'accent-dim': 'var(--color-accent-dim)',
+  cyan: 'var(--color-cyan)',
+  yellow: 'var(--color-yellow)',
+  blue: 'var(--color-blue)',
+  red: 'var(--color-red)',
+  purple: 'var(--color-purple)',
+  orange: 'var(--color-orange)',
+  'text-primary': 'var(--color-text-primary)',
+  'text-secondary': 'var(--color-text-secondary)',
+  'text-dim': 'var(--color-text-dim)',
+  'text-muted': 'var(--color-text-muted)',
+  'text-faint': 'var(--color-text-faint)',
+};
+
+const resolveColor = (color: string): string => COLOR_VALUES[color] ?? color;
+
+const withAlpha = (color: string, alpha: number): string => {
+  const resolved = resolveColor(color);
+  if (resolved.startsWith('var(')) {
+    // For CSS variables, use color-mix
+    return `color-mix(in srgb, ${resolved} ${Math.round(alpha * 100)}%, transparent)`;
+  }
+  return resolved;
+};
+
 // ---- Badge ----
 
 export const Badge = ({ label, color }: { label: string; color: string }) => (
   <span
-    className={`font-mono text-[11px] px-2 py-0.5 rounded whitespace-nowrap bg-${color}/10 text-${color}`}
+    className="font-mono text-[11px] px-2 py-0.5 rounded whitespace-nowrap"
+    style={{
+      backgroundColor: withAlpha(color, 0.1),
+      color: resolveColor(color),
+    }}
   >
     {label}
   </span>
@@ -43,13 +78,16 @@ export const TrustBadge = ({ tier }: { tier: TrustTier }) => {
 // ---- PriorityDot ----
 
 const PRIORITY_COLORS: Record<Priority, string> = {
-  high: 'bg-red',
-  medium: 'bg-yellow',
-  low: 'bg-text-dim',
+  high: 'red',
+  medium: 'yellow',
+  low: 'text-dim',
 };
 
 export const PriorityDot = ({ priority }: { priority: Priority }) => (
-  <div className={`w-2 h-2 rounded-full shrink-0 ${PRIORITY_COLORS[priority] ?? 'bg-text-dim'}`} />
+  <div
+    className="w-2 h-2 rounded-full shrink-0"
+    style={{ backgroundColor: resolveColor(PRIORITY_COLORS[priority] ?? 'text-dim') }}
+  />
 );
 
 // ---- SectionCard ----
@@ -82,7 +120,8 @@ export const StatBox = ({
   <div className="flex-1 min-w-[120px] px-4 py-3.5 bg-bg-card border border-border-default rounded-lg">
     <div className="font-sans text-[11px] text-text-muted mb-1">{label}</div>
     <div
-      className={`font-mono text-[22px] font-bold ${color ? `text-${color}` : 'text-text-primary'}`}
+      className="font-mono text-[22px] font-bold"
+      style={{ color: color ? resolveColor(color) : 'var(--color-text-primary)' }}
     >
       {value}
     </div>
@@ -103,15 +142,21 @@ export const ActionButton = ({
   small?: boolean;
 }) => {
   const [hovered, setHovered] = useState(false);
+  const resolved = resolveColor(color);
 
   return (
     <button
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`font-mono rounded-[5px] border cursor-pointer transition-all duration-100 whitespace-nowrap border-${color}/25 text-${color} ${
+      className={`font-mono rounded-[5px] border cursor-pointer transition-all duration-100 whitespace-nowrap ${
         small ? 'text-[11px] px-2.5 py-0.5' : 'text-xs px-3.5 py-1'
-      } ${hovered ? `bg-${color}/15` : 'bg-transparent'}`}
+      }`}
+      style={{
+        borderColor: withAlpha(color, 0.25),
+        color: resolved,
+        backgroundColor: hovered ? withAlpha(color, 0.15) : 'transparent',
+      }}
     >
       {label}
     </button>
@@ -141,20 +186,21 @@ export const Tabs = ({
       <button
         key={tab.id}
         onClick={() => onChange(tab.id)}
-        className={`font-sans text-[13px] font-medium px-4 py-2.5 border-none cursor-pointer -mb-px whitespace-nowrap flex items-center gap-1.5 bg-transparent ${
-          active === tab.id
-            ? 'text-text-primary border-b-2 border-b-accent'
-            : 'text-text-dim border-b-2 border-b-transparent'
-        }`}
+        className="font-sans text-[13px] font-medium px-4 py-2.5 border-none cursor-pointer -mb-px whitespace-nowrap flex items-center gap-1.5 bg-transparent"
+        style={{
+          color: active === tab.id ? 'var(--color-text-primary)' : 'var(--color-text-dim)',
+          borderBottom:
+            active === tab.id ? '2px solid var(--color-accent)' : '2px solid transparent',
+        }}
       >
         {tab.label}
         {tab.count != null && (
           <span
-            className={`font-mono text-[10px] px-1.5 py-px rounded-full ${
-              tab.countColor
-                ? `bg-${tab.countColor}/10 text-${tab.countColor}`
-                : 'bg-accent/10 text-accent'
-            }`}
+            className="font-mono text-[10px] px-1.5 py-px rounded-full"
+            style={{
+              backgroundColor: withAlpha(tab.countColor ?? 'accent', 0.1),
+              color: resolveColor(tab.countColor ?? 'accent'),
+            }}
           >
             {tab.count}
           </span>
@@ -219,11 +265,20 @@ export const FilterDropdown = ({
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`font-sans text-xs px-3 py-1.5 rounded-md cursor-pointer flex items-center gap-1.5 ${
+        className="font-sans text-xs px-3 py-1.5 rounded-md cursor-pointer flex items-center gap-1.5 border"
+        style={
           hasValue
-            ? `border border-${activeColor}/25 bg-${activeColor}/5 text-${activeColor}`
-            : 'border border-border-default bg-bg-card text-text-dim'
-        }`}
+            ? {
+                borderColor: withAlpha(activeColor, 0.25),
+                backgroundColor: withAlpha(activeColor, 0.05),
+                color: resolveColor(activeColor),
+              }
+            : {
+                borderColor: 'var(--color-border-default)',
+                backgroundColor: 'var(--color-bg-card)',
+                color: 'var(--color-text-dim)',
+              }
+        }
       >
         {label} <span className="text-[10px] opacity-60">&#x25BE;</span>
       </button>
@@ -231,23 +286,31 @@ export const FilterDropdown = ({
         <>
           <div onClick={() => setOpen(false)} className="fixed inset-0 z-50" />
           <div className="absolute top-full left-0 mt-1 z-[51] bg-bg-card border border-border-default rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.4)] min-w-[140px] overflow-hidden">
-            {options.map((opt) => (
-              <div
-                key={opt.value}
-                onClick={() => {
-                  onChange(opt.value);
-                  setOpen(false);
-                }}
-                className={`font-sans text-xs px-3.5 py-2 cursor-pointer flex justify-between items-center hover:bg-bg-hover ${
-                  value === opt.value
-                    ? `text-${opt.color ?? 'accent'} bg-${opt.color ?? 'accent'}/5`
-                    : 'text-text-secondary'
-                }`}
-              >
-                {opt.label}
-                {value === opt.value && <span className="text-[11px]">&#x2713;</span>}
-              </div>
-            ))}
+            {options.map((opt) => {
+              const isActive = value === opt.value;
+              const optColor = opt.color ?? 'accent';
+              return (
+                <div
+                  key={opt.value}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setOpen(false);
+                  }}
+                  className="font-sans text-xs px-3.5 py-2 cursor-pointer flex justify-between items-center hover:bg-bg-hover"
+                  style={
+                    isActive
+                      ? {
+                          color: resolveColor(optColor),
+                          backgroundColor: withAlpha(optColor, 0.05),
+                        }
+                      : { color: 'var(--color-text-secondary)' }
+                  }
+                >
+                  {opt.label}
+                  {isActive && <span className="text-[11px]">&#x2713;</span>}
+                </div>
+              );
+            })}
           </div>
         </>
       )}
@@ -267,7 +330,11 @@ export const FilterTag = ({
   onRemove: () => void;
 }) => (
   <span
-    className={`font-mono text-[11px] py-0.5 pl-2 pr-2.5 rounded-full inline-flex items-center gap-1.5 bg-${color}/10 text-${color}`}
+    className="font-mono text-[11px] py-0.5 pl-2 pr-2.5 rounded-full inline-flex items-center gap-1.5"
+    style={{
+      backgroundColor: withAlpha(color, 0.1),
+      color: resolveColor(color),
+    }}
   >
     {label}
     <span

@@ -216,4 +216,200 @@ describe('adminGuard middleware', () => {
     const body = (await res.json()) as Json;
     expect(body.error).toBe('forbidden');
   });
+
+  it('rejects admin JWT when DB role has been revoked', async () => {
+    const app = createTestApp();
+
+    // Inject mock db that returns a non-admin role
+    app.use('/admin-check', async (c, next) => {
+      const mockDb = {
+        select: () => ({
+          from: () => ({
+            where: () => ({
+              limit: () => Promise.resolve([{ role: 'user' }]),
+            }),
+          }),
+        }),
+      };
+      c.set('db', mockDb as never);
+      await next();
+    });
+    app.use('/admin-check', authed, adminGuard);
+    app.get('/admin-check', (c) => c.json({ ok: true }));
+
+    const token = await signJwt(
+      { sub: 'admin-revoked', username: 'ex-admin', role: 'admin' },
+      TEST_SECRET,
+    );
+
+    const res = await testRequest(app, '/admin-check', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(res.status).toBe(403);
+    const body = (await res.json()) as Json;
+    expect(body.message).toBe('Admin privileges have been revoked');
+  });
+
+  it('rejects admin JWT when user not found in DB', async () => {
+    const app = createTestApp();
+
+    // Inject mock db that returns empty result
+    app.use('/admin-gone', async (c, next) => {
+      const mockDb = {
+        select: () => ({
+          from: () => ({
+            where: () => ({
+              limit: () => Promise.resolve([]),
+            }),
+          }),
+        }),
+      };
+      c.set('db', mockDb as never);
+      await next();
+    });
+    app.use('/admin-gone', authed, adminGuard);
+    app.get('/admin-gone', (c) => c.json({ ok: true }));
+
+    const token = await signJwt(
+      { sub: 'admin-deleted', username: 'deleted-admin', role: 'admin' },
+      TEST_SECRET,
+    );
+
+    const res = await testRequest(app, '/admin-gone', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(res.status).toBe(403);
+  });
+});
+
+// ── Additional auth edge case tests ──────────────────────────────
+
+describe('JWT helpers — edge cases', () => {
+  it('rejects completely empty string as token', async () => {
+    await expect(verifyJwt('', TEST_SECRET)).rejects.toThrow();
+  });
+
+  it('rejects token with only the spm_ prefix', async () => {
+    await expect(verifyJwt('spm_', TEST_SECRET)).rejects.toThrow();
+  });
+
+  it('rejects a random base64 string', async () => {
+    await expect(verifyJwt('spm_YWJjZGVmZw.abc.def', TEST_SECRET)).rejects.toThrow();
+  });
+
+  it('rejects token signed with different algorithm concept (wrong secret)', async () => {
+    const token = await signJwt({ sub: 'u-alg', username: 'algtest', role: 'user' }, 'secret-A');
+    await expect(verifyJwt(token, 'secret-B')).rejects.toThrow();
+  });
+
+  it('token payload contains iat and exp as numbers', async () => {
+    const payload = { sub: 'u-time', username: 'timecheck', role: 'user' };
+    const token = await signJwt(payload, TEST_SECRET);
+    const decoded = await verifyJwt(token, TEST_SECRET);
+    expect(decoded.iat).toBeLessThanOrEqual(Math.floor(Date.now() / 1000));
+    expect(decoded.exp).toBeGreaterThan(decoded.iat);
+  });
+});
+
+describe('authed middleware — malformed Authorization headers', () => {
+  it('rejects Authorization header with empty Bearer value', async () => {
+    const app = createTestApp();
+    app.use('/protected', authed);
+    app.get('/protected', (c) => c.json({ ok: true }));
+
+    const res = await testRequest(app, '/protected', {
+      headers: { Authorization: 'Bearer ' },
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects Authorization header with only whitespace after Bearer', async () => {
+    const app = createTestApp();
+    app.use('/protected', authed);
+    app.get('/protected', (c) => c.json({ ok: true }));
+
+    const res = await testRequest(app, '/protected', {
+      headers: { Authorization: 'Bearer    ' },
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects lowercase bearer scheme', async () => {
+    const app = createTestApp();
+    app.use('/protected', authed);
+    app.get('/protected', (c) => c.json({ ok: true }));
+
+    const token = await signJwt({ sub: 'u-case', username: 'casetest', role: 'user' }, TEST_SECRET);
+
+    const res = await testRequest(app, '/protected', {
+      headers: { Authorization: `bearer ${token}` },
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects token scheme (no Bearer prefix)', async () => {
+    const app = createTestApp();
+    app.use('/protected', authed);
+    app.get('/protected', (c) => c.json({ ok: true }));
+
+    const token = await signJwt(
+      { sub: 'u-noprefix', username: 'noprefix', role: 'user' },
+      TEST_SECRET,
+    );
+
+    const res = await testRequest(app, '/protected', {
+      headers: { Authorization: `Token ${token}` },
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects double Bearer prefix', async () => {
+    const app = createTestApp();
+    app.use('/protected', authed);
+    app.get('/protected', (c) => c.json({ ok: true }));
+
+    const token = await signJwt(
+      { sub: 'u-double', username: 'doublebearer', role: 'user' },
+      TEST_SECRET,
+    );
+
+    const res = await testRequest(app, '/protected', {
+      headers: { Authorization: `Bearer Bearer ${token}` },
+    });
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('optionalAuth middleware — edge cases', () => {
+  it('ignores empty Bearer value gracefully', async () => {
+    const app = createTestApp();
+    app.use('/public', optionalAuth);
+    app.get('/public', (c) => {
+      const payload = c.get('jwtPayload');
+      return c.json({ hasAuth: !!payload });
+    });
+
+    const res = await testRequest(app, '/public', {
+      headers: { Authorization: 'Bearer ' },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Json;
+    expect(body.hasAuth).toBe(false);
+  });
+
+  it('ignores non-Bearer scheme gracefully', async () => {
+    const app = createTestApp();
+    app.use('/public', optionalAuth);
+    app.get('/public', (c) => {
+      const payload = c.get('jwtPayload');
+      return c.json({ hasAuth: !!payload });
+    });
+
+    const res = await testRequest(app, '/public', {
+      headers: { Authorization: 'Basic abc123' },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Json;
+    expect(body.hasAuth).toBe(false);
+  });
 });

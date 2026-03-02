@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { SKILLS_DB, TRUST_CONFIG } from '../data/mock';
+import { SKILLS_DB } from '../data/mock';
 import { TrustBadge } from '../components/TrustBadge';
 
 export const AuthorProfile = () => {
@@ -19,7 +19,6 @@ export const AuthorProfile = () => {
   }
 
   const primaryTrust = authorSkills[0].trust;
-  const trustInfo = TRUST_CONFIG[primaryTrust];
   const totalDownloads = authorSkills.reduce((sum, s) => {
     const num = parseInt(s.downloads.replace(/,/g, ''), 10);
     return sum + (isNaN(num) ? 0 : num);

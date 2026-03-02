@@ -234,7 +234,10 @@ export const UsersTab = () => {
             ) : (
               <span className="font-mono text-[11px] text-text-faint">user</span>
             )}
-            <span className={`font-mono text-[11px] text-${TRUST_CONFIG[user.trust].color}`}>
+            <span
+              className="font-mono text-[11px]"
+              style={{ color: `var(--color-${TRUST_CONFIG[user.trust].color})` }}
+            >
               {TRUST_CONFIG[user.trust].checks} {TRUST_CONFIG[user.trust].label}
             </span>
             <span className="font-mono text-[11px] text-text-muted">{user.joined.slice(5)}</span>

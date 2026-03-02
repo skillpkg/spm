@@ -55,7 +55,11 @@ export const ErrorsTab = () => {
 
               {/* Error message */}
               <div
-                className={`font-mono text-xs px-3 py-2 bg-bg border border-${typeColor}/10 border-l-[3px] border-l-${typeColor} rounded-r-md text-text-secondary mb-2.5 overflow-x-auto`}
+                className="font-mono text-xs px-3 py-2 bg-bg border border-l-[3px] rounded-r-md text-text-secondary mb-2.5 overflow-x-auto"
+                style={{
+                  borderColor: `color-mix(in srgb, var(--color-${typeColor}) 10%, transparent)`,
+                  borderLeftColor: `var(--color-${typeColor})`,
+                }}
               >
                 {err.error}
               </div>

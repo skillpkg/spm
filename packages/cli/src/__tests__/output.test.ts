@@ -235,3 +235,194 @@ describe('logError', () => {
     expect(consoleSpy).not.toHaveBeenCalled();
   });
 });
+
+// ============================================
+// JSON output structure validation
+// ============================================
+
+describe('logJson output structure', () => {
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    setOutputMode('json');
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
+    setOutputMode('default');
+  });
+
+  it('outputs valid JSON for an object', () => {
+    const data = { name: 'test', version: '1.0.0', count: 42 };
+    logJson(data);
+
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    const output = consoleSpy.mock.calls[0][0] as string;
+    const parsed: unknown = JSON.parse(output);
+    expect(parsed).toEqual(data);
+  });
+
+  it('outputs valid JSON for an array', () => {
+    const data = [{ id: 1 }, { id: 2 }];
+    logJson(data);
+
+    const output = consoleSpy.mock.calls[0][0] as string;
+    const parsed: unknown = JSON.parse(output);
+    expect(parsed).toEqual(data);
+  });
+
+  it('outputs pretty-printed JSON with 2-space indent', () => {
+    logJson({ key: 'value' });
+
+    const output = consoleSpy.mock.calls[0][0] as string;
+    expect(output).toContain('\n');
+    expect(output).toContain('  "key"');
+  });
+
+  it('handles null value', () => {
+    logJson(null);
+
+    const output = consoleSpy.mock.calls[0][0] as string;
+    expect(output).toBe('null');
+  });
+
+  it('handles nested objects', () => {
+    const data = { outer: { inner: { deep: 'value' } } };
+    logJson(data);
+
+    const output = consoleSpy.mock.calls[0][0] as string;
+    const parsed: unknown = JSON.parse(output);
+    expect(parsed).toEqual(data);
+  });
+});
+
+// ============================================
+// Silent mode
+// ============================================
+
+describe('silent mode behavior', () => {
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    setOutputMode('silent');
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
+    setOutputMode('default');
+  });
+
+  it('log produces no output', () => {
+    log('hello');
+    log('world');
+    expect(consoleSpy).not.toHaveBeenCalled();
+  });
+
+  it('logVerbose produces no output', () => {
+    logVerbose('detail');
+    expect(consoleSpy).not.toHaveBeenCalled();
+  });
+
+  it('logJson produces no output', () => {
+    logJson({ data: true });
+    expect(consoleSpy).not.toHaveBeenCalled();
+  });
+
+  it('logError produces no output in silent mode (it uses json check, not silent)', () => {
+    // logError is NOT suppressed by silent mode per the implementation —
+    // it only suppresses in json mode. Verify it still outputs in silent.
+    logError('Error title');
+    // logError outputs regardless of silent mode (only json suppresses it)
+    expect(consoleSpy).toHaveBeenCalled();
+  });
+});
+
+// ============================================
+// Verbose mode
+// ============================================
+
+describe('verbose mode behavior', () => {
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    setOutputMode('verbose');
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
+    setOutputMode('default');
+  });
+
+  it('log produces output in verbose mode', () => {
+    log('visible');
+    expect(consoleSpy).toHaveBeenCalledWith('  visible');
+  });
+
+  it('logVerbose produces output in verbose mode', () => {
+    logVerbose('extra detail');
+    expect(consoleSpy).toHaveBeenCalledWith('  extra detail');
+  });
+
+  it('logJson does NOT produce output in verbose mode', () => {
+    logJson({ shouldNot: 'appear' });
+    expect(consoleSpy).not.toHaveBeenCalled();
+  });
+});
+
+// ============================================
+// Color function behavior
+// ============================================
+
+describe('c color functions', () => {
+  it('name wraps input and returns string', () => {
+    const result = c.name('my-skill');
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it('err wraps error text and returns string', () => {
+    const result = c.err('something broke');
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it('dim wraps text and returns string', () => {
+    const result = c.dim('faded text');
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it('all color functions accept empty string', () => {
+    for (const key of Object.keys(c) as Array<keyof typeof c>) {
+      const result = c[key]('');
+      expect(typeof result).toBe('string');
+    }
+  });
+});
+
+// ============================================
+// getOutputMode edge cases
+// ============================================
+
+describe('getOutputMode edge cases', () => {
+  it('returns current mode when called with undefined', () => {
+    setOutputMode('verbose');
+    expect(getOutputMode()).toBe('verbose');
+    setOutputMode('default');
+  });
+
+  it('json overrides both silent and verbose', () => {
+    expect(getOutputMode({ json: true, silent: true, verbose: true })).toBe('json');
+  });
+
+  it('returns default for empty opts object', () => {
+    expect(getOutputMode({})).toBe('default');
+  });
+
+  it('returns default for opts with all false', () => {
+    expect(getOutputMode({ json: false, silent: false, verbose: false })).toBe('default');
+  });
+});

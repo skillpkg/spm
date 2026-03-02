@@ -313,3 +313,155 @@ describe('skills routes — GET /skills with GIN search', () => {
     expect(result!.raw).toBe('data:* & visualization:* & chart:*');
   });
 });
+
+// ── Additional buildSearchQuery edge cases ──
+
+describe('buildSearchQuery — edge cases', () => {
+  it('should return null for whitespace-only input', () => {
+    expect(buildSearchQuery('   ')).toBeNull();
+    expect(buildSearchQuery('\t')).toBeNull();
+  });
+
+  it('should handle single-character terms', () => {
+    const result = buildSearchQuery('a');
+    expect(result).not.toBeNull();
+    expect(result!.raw).toBe('a:*');
+  });
+
+  it('should handle parentheses in query', () => {
+    const result = buildSearchQuery('func(arg)');
+    expect(result).not.toBeNull();
+    // Parentheses stripped, "func" and "arg" become separate terms
+    const terms = result!.raw.split(' & ').map((t) => t.replace(':*', ''));
+    expect(terms).not.toContain('(');
+    expect(terms).not.toContain(')');
+  });
+
+  it('should handle backslashes in query', () => {
+    const result = buildSearchQuery('path\\to\\file');
+    expect(result).not.toBeNull();
+    // Backslashes stripped
+    const raw = result!.raw;
+    expect(raw).not.toContain('\\');
+  });
+
+  it('should handle angle brackets in query', () => {
+    const result = buildSearchQuery('<script>alert</script>');
+    expect(result).not.toBeNull();
+    const terms = result!.raw.split(' & ').map((t) => t.replace(':*', ''));
+    for (const term of terms) {
+      expect(term).not.toContain('<');
+      expect(term).not.toContain('>');
+    }
+  });
+
+  it('should handle numbers in search', () => {
+    const result = buildSearchQuery('python3');
+    expect(result).not.toBeNull();
+    expect(result!.raw).toBe('python3:*');
+  });
+
+  it('should handle mixed alphanumeric terms', () => {
+    const result = buildSearchQuery('v2 api rest');
+    expect(result).not.toBeNull();
+    expect(result!.raw).toBe('v2:* & api:* & rest:*');
+  });
+
+  it('should strip asterisks from user input', () => {
+    const result = buildSearchQuery('pdf*');
+    expect(result).not.toBeNull();
+    // User asterisk is stripped, then :* is appended
+    expect(result!.raw).toBe('pdf:*');
+  });
+
+  it('should handle SQL injection attempt in query', () => {
+    const result = buildSearchQuery("'; DROP TABLE skills; --");
+    // Single quotes are stripped by sanitizeTerm, but semicolons are not in the strip list.
+    // The key protection is that buildSearchQuery uses parameterized SQL ($1),
+    // not string interpolation, so injection is neutralized regardless.
+    if (result) {
+      expect(result.raw).not.toContain("'");
+      // The raw tsquery string still has terms — what matters is
+      // these are passed as a parameterized value, not interpolated.
+      expect(typeof result.raw).toBe('string');
+    }
+  });
+
+  it('should handle very long query gracefully', () => {
+    const longQuery = 'word '.repeat(100).trim();
+    const result = buildSearchQuery(longQuery);
+    expect(result).not.toBeNull();
+    const terms = result!.raw.split(' & ');
+    expect(terms.length).toBe(100);
+  });
+});
+
+// ── buildSearchCondition edge cases ──
+
+describe('buildSearchCondition — edge cases', () => {
+  it('should return null for special-characters-only input', () => {
+    expect(buildSearchCondition('***')).toBeNull();
+  });
+
+  it('should return a condition for numeric query', () => {
+    const condition = buildSearchCondition('42');
+    expect(condition).not.toBeNull();
+  });
+
+  it('should handle query with dashes', () => {
+    // Dashes are not stripped by sanitizeTerm (not in the special char list)
+    const condition = buildSearchCondition('pdf-generator');
+    expect(condition).not.toBeNull();
+  });
+});
+
+// ── buildRankExpression edge cases ──
+
+describe('buildRankExpression — edge cases', () => {
+  it('should return null for whitespace-only input', () => {
+    expect(buildRankExpression('   ')).toBeNull();
+  });
+
+  it('should return a rank expression for single term', () => {
+    const rank = buildRankExpression('react');
+    expect(rank).not.toBeNull();
+  });
+});
+
+// ── Category routes edge cases ──
+
+describe('categories routes — edge cases', () => {
+  it('should handle DB returning empty category counts', async () => {
+    const { categoriesRoutes } = await import('../routes/categories.js');
+
+    const mockSelect = vi.fn();
+    const mockFrom = vi.fn();
+    const mockGroupBy = vi.fn();
+
+    mockSelect.mockReturnValueOnce({ from: mockFrom });
+    mockFrom.mockReturnValueOnce({ groupBy: mockGroupBy });
+    mockGroupBy.mockResolvedValueOnce([]); // No categories have any skills
+
+    const db = { select: mockSelect };
+
+    const app = new Hono<AppEnv>();
+    app.use('*', async (c, next) => {
+      c.set('db', db as never);
+      await next();
+    });
+    app.route('/', categoriesRoutes);
+
+    const res = await app.request('/categories');
+    expect(res.status).toBe(200);
+
+    const body = (await res.json()) as {
+      categories: Array<{ slug: string; count: number }>;
+    };
+
+    // All categories should be present with count 0
+    expect(body.categories).toHaveLength(10);
+    for (const cat of body.categories) {
+      expect(cat.count).toBe(0);
+    }
+  });
+});

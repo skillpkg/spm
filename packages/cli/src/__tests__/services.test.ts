@@ -437,3 +437,279 @@ describe('linker', () => {
     vi.doUnmock('node:os');
   });
 });
+
+// ──────────────────────────────────────────────
+// Resolver edge cases
+// ──────────────────────────────────────────────
+
+describe('resolver (edge cases)', () => {
+  describe('parseSpecifier edge cases', () => {
+    it('parses name with tilde range', () => {
+      expect(parseSpecifier('my-skill@~1.2.0')).toEqual({
+        name: 'my-skill',
+        range: '~1.2.0',
+      });
+    });
+
+    it('parses name with exact version', () => {
+      expect(parseSpecifier('my-skill@1.0.0')).toEqual({
+        name: 'my-skill',
+        range: '1.0.0',
+      });
+    });
+
+    it('parses name with pre-release version', () => {
+      expect(parseSpecifier('my-skill@2.0.0-beta.1')).toEqual({
+        name: 'my-skill',
+        range: '2.0.0-beta.1',
+      });
+    });
+
+    it('parses scoped package without version as name only', () => {
+      expect(parseSpecifier('@org/tool')).toEqual({
+        name: '@org/tool',
+      });
+    });
+
+    it('parses scope-only string (no slash)', () => {
+      expect(parseSpecifier('@scope')).toEqual({
+        name: '@scope',
+      });
+    });
+
+    it('parses name with wildcard range', () => {
+      expect(parseSpecifier('my-skill@*')).toEqual({
+        name: 'my-skill',
+        range: '*',
+      });
+    });
+
+    it('parses name with greater-than range', () => {
+      expect(parseSpecifier('my-skill@>=1.0.0')).toEqual({
+        name: 'my-skill',
+        range: '>=1.0.0',
+      });
+    });
+
+    it('parses scoped package with pre-release', () => {
+      expect(parseSpecifier('@org/tool@1.0.0-alpha.3')).toEqual({
+        name: '@org/tool',
+        range: '1.0.0-alpha.3',
+      });
+    });
+  });
+
+  describe('resolveSkills edge cases', () => {
+    it('handles multiple skills mixed resolved and unresolved', async () => {
+      const { resolveSkills } = await import('../services/resolver.js');
+
+      const mockApiClient = {
+        resolve: vi.fn().mockResolvedValue({
+          resolved: [
+            {
+              name: 'found-skill',
+              version: '1.0.0',
+              download_url: 'https://registry.spm.dev/api/v1/skills/found-skill/1.0.0/download',
+              checksum: 'sha256:abc',
+              trust_tier: 'scanned',
+              signed: false,
+            },
+            {
+              name: 'missing-skill',
+              error: 'Not found',
+              suggestions: ['found-skill'],
+            },
+          ],
+        }),
+      } as unknown as import('../lib/api-client.js').ApiClient;
+
+      const result = await resolveSkills(mockApiClient, [
+        { name: 'found-skill', range: '^1.0.0' },
+        { name: 'missing-skill' },
+      ]);
+
+      expect(result.resolved).toHaveLength(1);
+      expect(result.unresolved).toHaveLength(1);
+      expect(result.resolved[0].name).toBe('found-skill');
+      expect(result.unresolved[0].name).toBe('missing-skill');
+      expect(result.unresolved[0].suggestions).toEqual(['found-skill']);
+    });
+
+    it('defaults range to latest when not specified', async () => {
+      const { resolveSkills } = await import('../services/resolver.js');
+
+      const mockApiClient = {
+        resolve: vi.fn().mockResolvedValue({
+          resolved: [
+            {
+              name: 'my-skill',
+              version: '3.0.0',
+              download_url: 'https://registry.spm.dev/api/v1/skills/my-skill/3.0.0/download',
+              checksum: 'sha256:def',
+              trust_tier: 'verified',
+              signed: true,
+            },
+          ],
+        }),
+      } as unknown as import('../lib/api-client.js').ApiClient;
+
+      await resolveSkills(mockApiClient, [{ name: 'my-skill' }]);
+
+      expect(mockApiClient.resolve).toHaveBeenCalledWith([{ name: 'my-skill', range: 'latest' }]);
+    });
+
+    it('handles empty resolved array', async () => {
+      const { resolveSkills } = await import('../services/resolver.js');
+
+      const mockApiClient = {
+        resolve: vi.fn().mockResolvedValue({
+          resolved: [],
+        }),
+      } as unknown as import('../lib/api-client.js').ApiClient;
+
+      const result = await resolveSkills(mockApiClient, []);
+
+      expect(result.resolved).toHaveLength(0);
+      expect(result.unresolved).toHaveLength(0);
+    });
+  });
+});
+
+// ──────────────────────────────────────────────
+// Skills-json edge cases
+// ──────────────────────────────────────────────
+
+describe('skills-json (edge cases)', () => {
+  let tmpDir: string;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'spm-test-sjson-'));
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  it('addSkillToJson updates existing skill version', async () => {
+    const { saveSkillsJson, addSkillToJson, loadSkillsJson } =
+      await import('../services/skills-json.js');
+
+    await saveSkillsJson(tmpDir, { skills: { 'my-skill': '^1.0.0' } });
+    await addSkillToJson(tmpDir, 'my-skill', '^2.0.0');
+
+    const loaded = await loadSkillsJson(tmpDir);
+    expect(loaded!.skills['my-skill']).toBe('^2.0.0');
+  });
+
+  it('removeSkillFromJson returns false for missing skills.json', async () => {
+    const { removeSkillFromJson } = await import('../services/skills-json.js');
+    const removed = await removeSkillFromJson(tmpDir, 'anything');
+    expect(removed).toBe(false);
+  });
+
+  it('loadLockFile throws on invalid JSON in lock file', async () => {
+    const { loadLockFile } = await import('../services/skills-json.js');
+
+    const filePath = path.join(tmpDir, 'skills-lock.json');
+    await fs.writeFile(filePath, '{ invalid json', 'utf-8');
+
+    await expect(loadLockFile(tmpDir)).rejects.toThrow();
+  });
+
+  it('loadSkillsJson throws on invalid schema in skills.json', async () => {
+    const { loadSkillsJson } = await import('../services/skills-json.js');
+
+    const filePath = path.join(tmpDir, 'skills.json');
+    await fs.writeFile(filePath, JSON.stringify({ not_skills: true }), 'utf-8');
+
+    await expect(loadSkillsJson(tmpDir)).rejects.toThrow('Invalid skills.json');
+  });
+
+  it('updateLockFile creates new lock file if none exists', async () => {
+    const { updateLockFile, loadLockFile } = await import('../services/skills-json.js');
+
+    await updateLockFile(tmpDir, [
+      {
+        name: 'brand-new',
+        version: '1.0.0',
+        downloadUrl: 'https://registry.spm.dev/api/v1/skills/brand-new/1.0.0/download',
+        checksum: 'sha256:new',
+        trustTier: 'registered',
+        signed: false,
+      },
+    ]);
+
+    const loaded = await loadLockFile(tmpDir);
+    expect(loaded).not.toBeNull();
+    expect(loaded!.lockfileVersion).toBe(1);
+    expect(loaded!.skills['brand-new'].version).toBe('1.0.0');
+  });
+
+  it('removeFromLockFile returns false for missing lock file', async () => {
+    const { removeFromLockFile } = await import('../services/skills-json.js');
+    const removed = await removeFromLockFile(tmpDir, 'anything');
+    expect(removed).toBe(false);
+  });
+
+  it('removeFromLockFile removes entry and updates timestamp', async () => {
+    const { saveLockFile, removeFromLockFile, loadLockFile } =
+      await import('../services/skills-json.js');
+
+    await saveLockFile(tmpDir, {
+      lockfileVersion: 1,
+      generated_at: '2026-01-01T00:00:00Z',
+      generated_by: 'spm@0.0.1',
+      skills: {
+        'to-remove': {
+          version: '1.0.0',
+          resolved: 'https://example.com',
+          checksum: 'sha256:old',
+          source: 'registry',
+        },
+        keep: {
+          version: '2.0.0',
+          resolved: 'https://example.com/keep',
+          checksum: 'sha256:keep',
+          source: 'registry',
+        },
+      },
+    });
+
+    const removed = await removeFromLockFile(tmpDir, 'to-remove');
+    expect(removed).toBe(true);
+
+    const loaded = await loadLockFile(tmpDir);
+    expect(loaded!.skills['to-remove']).toBeUndefined();
+    expect(loaded!.skills['keep']).toBeDefined();
+    // Timestamp should have been updated
+    expect(loaded!.generated_at).not.toBe('2026-01-01T00:00:00Z');
+  });
+
+  it('removeFromLockFile returns false for non-existent skill in lock', async () => {
+    const { saveLockFile, removeFromLockFile } = await import('../services/skills-json.js');
+
+    await saveLockFile(tmpDir, {
+      lockfileVersion: 1,
+      generated_at: '2026-01-01T00:00:00Z',
+      generated_by: 'spm@0.0.1',
+      skills: {
+        existing: {
+          version: '1.0.0',
+          resolved: 'https://example.com',
+          checksum: 'sha256:abc',
+          source: 'registry',
+        },
+      },
+    });
+
+    const removed = await removeFromLockFile(tmpDir, 'not-in-lock');
+    expect(removed).toBe(false);
+  });
+
+  it('getGlobalSkillsDir returns path under home directory', async () => {
+    const { getGlobalSkillsDir } = await import('../services/skills-json.js');
+    const dir = getGlobalSkillsDir();
+    expect(dir).toContain('.spm');
+    expect(dir).toContain(os.homedir());
+  });
+});
