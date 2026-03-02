@@ -46,17 +46,43 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
           }}
         />
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: 8,
+          }}
+        >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 16, color: 'var(--color-cyan)', fontWeight: 600 }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 16,
+                  color: 'var(--color-cyan)',
+                  fontWeight: 600,
+                }}
+              >
                 {skill.name}
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-faint)' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: 'var(--color-text-faint)',
+                }}
+              >
                 {skill.version}
               </span>
             </div>
-            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-muted)' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                color: 'var(--color-text-muted)',
+              }}
+            >
               by @{skill.author}
             </span>
           </div>
@@ -114,8 +140,12 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
           }}
         >
           <span style={{ color: 'var(--color-text-dim)' }}>&#x2B07; {skill.downloads}</span>
-          {skill.weeklyGrowth && <span style={{ color: 'var(--color-accent)' }}>{skill.weeklyGrowth}</span>}
-          {skill.rating && <span style={{ color: 'var(--color-yellow)' }}>&#x2605; {skill.rating}</span>}
+          {skill.weeklyGrowth && (
+            <span style={{ color: 'var(--color-accent)' }}>{skill.weeklyGrowth}</span>
+          )}
+          {skill.rating && (
+            <span style={{ color: 'var(--color-yellow)' }}>&#x2605; {skill.rating}</span>
+          )}
         </div>
       </div>
     </Link>

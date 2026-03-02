@@ -53,7 +53,10 @@ export const App = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+          <a
+            href="#"
+            style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}
+          >
             <div
               style={{
                 width: 26,
@@ -71,13 +74,38 @@ export const App = () => {
             >
               A
             </div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 700, color: '#ef4444' }}>spm</span>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 16,
+                fontWeight: 700,
+                color: '#ef4444',
+              }}
+            >
+              spm
+            </span>
             <Badge label="ADMIN" color="red" />
           </a>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-muted)' }}>admin@spm.dev</span>
-          <a href="#" style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-dim)', textDecoration: 'none' }}>
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 12,
+              color: 'var(--color-text-muted)',
+            }}
+          >
+            admin@spm.dev
+          </span>
+          <a
+            href="#"
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              color: 'var(--color-text-dim)',
+              textDecoration: 'none',
+            }}
+          >
             &larr; Back to registry
           </a>
         </div>

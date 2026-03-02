@@ -72,11 +72,41 @@ const commands = [
 
 export const CLI = () => (
   <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 32px 60px' }}>
-    <h1 style={{ fontFamily: 'var(--font-sans)', fontSize: 24, fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 4, marginTop: 0 }}>
+    <h1
+      style={{
+        fontFamily: 'var(--font-sans)',
+        fontSize: 24,
+        fontWeight: 700,
+        color: 'var(--color-text-primary)',
+        marginBottom: 4,
+        marginTop: 0,
+      }}
+    >
       CLI Reference
     </h1>
-    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 24, marginTop: 0 }}>
-      Complete reference for the <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-accent)', background: 'rgba(16,185,129,0.08)', padding: '2px 6px', borderRadius: 4 }}>spm</code> command-line tool.
+    <p
+      style={{
+        fontFamily: 'var(--font-sans)',
+        fontSize: 14,
+        color: 'var(--color-text-muted)',
+        marginBottom: 24,
+        marginTop: 0,
+      }}
+    >
+      Complete reference for the{' '}
+      <code
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 13,
+          color: 'var(--color-accent)',
+          background: 'rgba(16,185,129,0.08)',
+          padding: '2px 6px',
+          borderRadius: 4,
+        }}
+      >
+        spm
+      </code>{' '}
+      command-line tool.
     </p>
 
     {/* Install */}
@@ -89,7 +119,14 @@ export const CLI = () => (
         marginBottom: 24,
       }}
     >
-      <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 8 }}>
+      <div
+        style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 13,
+          color: 'var(--color-text-muted)',
+          marginBottom: 8,
+        }}
+      >
         Install
       </div>
       <div
@@ -108,7 +145,16 @@ export const CLI = () => (
     </div>
 
     {/* Commands */}
-    <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 14, marginTop: 0 }}>
+    <h2
+      style={{
+        fontFamily: 'var(--font-sans)',
+        fontSize: 16,
+        fontWeight: 600,
+        color: 'var(--color-text-secondary)',
+        marginBottom: 14,
+        marginTop: 0,
+      }}
+    >
       Commands
     </h2>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -123,26 +169,63 @@ export const CLI = () => (
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <code style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 600, color: 'var(--color-cyan)' }}>
+            <code
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 14,
+                fontWeight: 600,
+                color: 'var(--color-cyan)',
+              }}
+            >
               {cmd.name}
             </code>
             {cmd.alias && (
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: 4 }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  color: 'var(--color-text-faint)',
+                  background: 'rgba(255,255,255,0.04)',
+                  padding: '2px 6px',
+                  borderRadius: 4,
+                }}
+              >
                 alias: {cmd.alias}
               </span>
             )}
           </div>
-          <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-muted)', marginBottom: cmd.flags.length ? 10 : 0 }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              color: 'var(--color-text-muted)',
+              marginBottom: cmd.flags.length ? 10 : 0,
+            }}
+          >
             {cmd.desc}
           </div>
           {cmd.flags.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {cmd.flags.map((f) => (
                 <div key={f.flag} style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
-                  <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-yellow)', minWidth: 180, flexShrink: 0 }}>
+                  <code
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      color: 'var(--color-yellow)',
+                      minWidth: 180,
+                      flexShrink: 0,
+                    }}
+                  >
                     {f.flag}
                   </code>
-                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-dim)' }}>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: 12,
+                      color: 'var(--color-text-dim)',
+                    }}
+                  >
                     {f.desc}
                   </span>
                 </div>

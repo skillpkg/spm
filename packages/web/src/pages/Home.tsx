@@ -126,7 +126,9 @@ export const Home = () => {
                 transition: 'all 0.2s',
               }}
             >
-              <span style={{ color: 'var(--color-text-muted)', fontSize: 15, marginRight: 10 }}>&#x2315;</span>
+              <span style={{ color: 'var(--color-text-muted)', fontSize: 15, marginRight: 10 }}>
+                &#x2315;
+              </span>
               <input
                 ref={inputRef}
                 value={query}
@@ -166,7 +168,12 @@ export const Home = () => {
                     setQuery('');
                     inputRef.current?.focus();
                   }}
-                  style={{ color: 'var(--color-text-muted)', cursor: 'pointer', fontSize: 14, padding: 4 }}
+                  style={{
+                    color: 'var(--color-text-muted)',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    padding: 4,
+                  }}
                 >
                   &#x2715;
                 </span>
@@ -214,8 +221,16 @@ export const Home = () => {
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#c8d0dc' }}>{s.query}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-muted)' }}>
+                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#c8d0dc' }}>
+                    {s.query}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      color: 'var(--color-text-muted)',
+                    }}
+                  >
                     {s.results}
                   </span>
                 </div>
@@ -238,10 +253,22 @@ export const Home = () => {
                 padding: '0 4px',
               }}
             >
-              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-dim)' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  color: 'var(--color-text-dim)',
+                }}
+              >
                 {filtered.length} result{filtered.length !== 1 ? 's' : ''} for &quot;{query}&quot;
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-muted)' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: 'var(--color-text-muted)',
+                }}
+              >
                 sorted by relevance
               </span>
             </div>
@@ -266,7 +293,13 @@ export const Home = () => {
                   >
                     No skills found for &quot;{query}&quot;
                   </div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-muted)' }}>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: 13,
+                      color: 'var(--color-text-muted)',
+                    }}
+                  >
                     Try a different search, or{' '}
                     <Link to="#" style={{ color: 'var(--color-accent)', textDecoration: 'none' }}>
                       publish your own
@@ -328,7 +361,14 @@ export const Home = () => {
                       padding: '0 2px',
                     }}
                   >
-                    <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 500, color: '#7a8599' }}>
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: '#7a8599',
+                      }}
+                    >
                       Also trending
                     </span>
                     <Link
@@ -405,7 +445,11 @@ export const Home = () => {
                     }}
                   >
                     {MOST_INSTALLED.map((s, i) => (
-                      <Link key={s.name} to={`/skills/${s.name}`} style={{ textDecoration: 'none' }}>
+                      <Link
+                        key={s.name}
+                        to={`/skills/${s.name}`}
+                        style={{ textDecoration: 'none' }}
+                      >
                         <div
                           style={{
                             display: 'flex',
@@ -439,7 +483,13 @@ export const Home = () => {
                           >
                             {s.name}
                           </span>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}>
+                          <span
+                            style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 11,
+                              color: 'var(--color-text-faint)',
+                            }}
+                          >
                             {s.version}
                           </span>
                           <div style={{ flex: 1 }} />
@@ -535,7 +585,11 @@ export const Home = () => {
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {CATEGORIES.map((cat) => (
-                  <Link key={cat.name} to={`/search?category=${cat.slug}`} style={{ textDecoration: 'none' }}>
+                  <Link
+                    key={cat.name}
+                    to={`/search?category=${cat.slug}`}
+                    style={{ textDecoration: 'none' }}
+                  >
                     <div
                       style={{
                         display: 'flex',
@@ -549,10 +603,18 @@ export const Home = () => {
                       }}
                     >
                       <span style={{ fontSize: 14 }}>{cat.icon}</span>
-                      <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#c8d0dc' }}>
+                      <span
+                        style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#c8d0dc' }}
+                      >
                         {cat.name}
                       </span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-muted)' }}>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 11,
+                          color: 'var(--color-text-muted)',
+                        }}
+                      >
                         {cat.count}
                       </span>
                     </div>

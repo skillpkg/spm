@@ -43,7 +43,15 @@ export const ScanAnalytics = () => {
                       background: isLast ? 'var(--color-accent)' : 'rgba(16,185,129,0.35)',
                     }}
                   />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-faint)' }}>W{i + 1}</span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 9,
+                      color: 'var(--color-text-faint)',
+                    }}
+                  >
+                    W{i + 1}
+                  </span>
                 </div>
               );
             })}
@@ -71,7 +79,15 @@ export const ScanAnalytics = () => {
                       background: isLast ? 'var(--color-red)' : 'rgba(239,68,68,0.35)',
                     }}
                   />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-faint)' }}>W{i + 1}</span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 9,
+                      color: 'var(--color-text-faint)',
+                    }}
+                  >
+                    W{i + 1}
+                  </span>
                 </div>
               );
             })}

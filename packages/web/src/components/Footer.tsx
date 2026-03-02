@@ -17,7 +17,8 @@ export const Footer = () => {
             width: 18,
             height: 18,
             borderRadius: 4,
-            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dim) 100%)',
+            background:
+              'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dim) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -29,10 +30,19 @@ export const Footer = () => {
         >
           S
         </div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--color-accent)', fontWeight: 600 }}>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 14,
+            color: 'var(--color-accent)',
+            fontWeight: 600,
+          }}
+        >
           spm
         </span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}>
+        <span
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}
+        >
           Skills Package Manager
         </span>
       </div>

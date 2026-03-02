@@ -33,10 +33,24 @@ export const SkillRow = ({
         }}
       >
         <div style={{ minWidth: 150 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-cyan)', fontWeight: 500 }}>
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 13,
+              color: 'var(--color-cyan)',
+              fontWeight: 500,
+            }}
+          >
             {skill.name}
           </span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)', marginLeft: 6 }}>
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              color: 'var(--color-text-faint)',
+              marginLeft: 6,
+            }}
+          >
             {skill.version}
           </span>
         </div>

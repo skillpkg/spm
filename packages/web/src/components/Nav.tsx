@@ -34,13 +34,23 @@ export const Nav = ({
         backdropFilter: 'blur(12px)',
       }}
     >
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
+      <Link
+        to="/"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          textDecoration: 'none',
+          flexShrink: 0,
+        }}
+      >
         <div
           style={{
             width: 26,
             height: 26,
             borderRadius: 5,
-            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dim) 100%)',
+            background:
+              'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dim) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -52,7 +62,14 @@ export const Nav = ({
         >
           S
         </div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 700, color: 'var(--color-accent)' }}>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 16,
+            fontWeight: 700,
+            color: 'var(--color-accent)',
+          }}
+        >
           spm
         </span>
       </Link>
@@ -68,7 +85,9 @@ export const Nav = ({
             padding: '0 12px',
           }}
         >
-          <span style={{ color: 'var(--color-text-muted)', fontSize: 14, marginRight: 8 }}>&#x2315;</span>
+          <span style={{ color: 'var(--color-text-muted)', fontSize: 14, marginRight: 8 }}>
+            &#x2315;
+          </span>
           <input
             ref={inputRef}
             value={query ?? ''}
@@ -88,7 +107,12 @@ export const Nav = ({
           {query && (
             <span
               onClick={() => onQueryChange?.('')}
-              style={{ color: 'var(--color-text-muted)', cursor: 'pointer', fontSize: 12, padding: 4 }}
+              style={{
+                color: 'var(--color-text-muted)',
+                cursor: 'pointer',
+                fontSize: 12,
+                padding: 4,
+              }}
             >
               &#x2715;
             </span>
@@ -97,11 +121,13 @@ export const Nav = ({
       </form>
 
       <div style={{ display: 'flex', gap: 16, marginLeft: 'auto', alignItems: 'center' }}>
-        {([
-          { label: 'Docs', to: '/docs' },
-          { label: 'CLI', to: '/cli' },
-          { label: 'Publish', to: '/publish' },
-        ] as const).map((item) => (
+        {(
+          [
+            { label: 'Docs', to: '/docs' },
+            { label: 'CLI', to: '/cli' },
+            { label: 'Publish', to: '/publish' },
+          ] as const
+        ).map((item) => (
           <Link
             key={item.label}
             to={item.to}
@@ -115,7 +141,9 @@ export const Nav = ({
             {item.label}
           </Link>
         ))}
-        <code style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}>
+        <code
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}
+        >
           npm i -g spm
         </code>
         <Link

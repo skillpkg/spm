@@ -50,7 +50,8 @@ export const FlaggedQueue = () => {
                     fontSize: 11,
                     padding: '2px 10px',
                     borderRadius: 4,
-                    backgroundColor: f.confidence > 0.8 ? 'rgba(239,68,68,0.1)' : 'rgba(251,191,36,0.1)',
+                    backgroundColor:
+                      f.confidence > 0.8 ? 'rgba(239,68,68,0.1)' : 'rgba(251,191,36,0.1)',
                     color: f.confidence > 0.8 ? 'var(--color-red)' : 'var(--color-yellow)',
                   }}
                 >

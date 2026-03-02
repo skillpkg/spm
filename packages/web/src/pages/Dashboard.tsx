@@ -90,13 +90,33 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
     <div style={{ flex: 1, minWidth: 0 }}>
       {/* Skills */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 600, color: 'var(--color-text-secondary)', margin: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 15,
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              margin: 0,
+            }}
+          >
             Your skills
           </h2>
           <span
             onClick={onViewAllSkills}
-            style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-accent)', cursor: 'pointer' }}
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 12,
+              color: 'var(--color-accent)',
+              cursor: 'pointer',
+            }}
           >
             View all &rarr;
           </span>
@@ -111,7 +131,16 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
 
       {/* Recent activity */}
       <div>
-        <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 10, marginTop: 0 }}>
+        <h2
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 15,
+            fontWeight: 600,
+            color: 'var(--color-text-secondary)',
+            marginBottom: 10,
+            marginTop: 0,
+          }}
+        >
           Recent activity
         </h2>
         <div style={{ ...cardStyle, padding: '6px 18px' }}>
@@ -128,11 +157,27 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
 
       {/* Agent breakdown */}
       <div style={{ ...cardStyle, padding: '18px 20px', marginTop: 14 }}>
-        <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 14 }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--color-text-primary)',
+            marginBottom: 14,
+          }}
+        >
           Installs by agent
         </div>
         {/* Stacked bar */}
-        <div style={{ display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: 14 }}>
+        <div
+          style={{
+            display: 'flex',
+            height: 28,
+            borderRadius: 6,
+            overflow: 'hidden',
+            marginBottom: 14,
+          }}
+        >
           {AGENT_BREAKDOWN.map((a) => (
             <BarSegment key={a.agent} pct={a.pct} color={a.color} label={a.agent} />
           ))}
@@ -140,14 +185,29 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
         {/* Legend */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {AGENT_BREAKDOWN.map((a) => (
-            <div key={a.agent} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              key={a.agent}
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 2, background: a.color }} />
-                <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 12,
+                    color: 'var(--color-text-secondary)',
+                  }}
+                >
                   {a.agent}
                 </span>
               </div>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-dim)' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: 'var(--color-text-dim)',
+                }}
+              >
                 {a.pct}%
               </span>
             </div>
@@ -157,7 +217,15 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
 
       {/* Quick links */}
       <div style={{ ...cardStyle, padding: '16px 20px', marginTop: 14 }}>
-        <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 10 }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--color-text-primary)',
+            marginBottom: 10,
+          }}
+        >
           Quick links
         </div>
         {['Public profile', 'Account settings', 'API tokens', 'Publish guide'].map((label) => (
@@ -204,14 +272,32 @@ const PublishHistoryTab = () => {
         ))}
       </div>
       <div style={{ ...cardStyle, marginTop: 16, padding: '14px 18px' }}>
-        <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-secondary)' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>{successCount}</span> successful
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 13,
+            color: 'var(--color-text-secondary)',
+          }}
+        >
+          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>
+            {successCount}
+          </span>{' '}
+          successful
           {' \u00b7 '}
-          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-red)' }}>{blockedCount}</span> blocked
+          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-red)' }}>
+            {blockedCount}
+          </span>{' '}
+          blocked
           {' \u00b7 '}
-          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-yellow)' }}>{heldCount}</span> held for review
+          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-yellow)' }}>
+            {heldCount}
+          </span>{' '}
+          held for review
           {' \u00b7 '}
-          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-dim)' }}>{PUBLISH_HISTORY.length}</span> total attempts
+          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-dim)' }}>
+            {PUBLISH_HISTORY.length}
+          </span>{' '}
+          total attempts
         </div>
       </div>
     </div>
@@ -231,8 +317,23 @@ const AnalyticsTab = () => {
             const barHeight = (w.downloads / maxDownloads) * 100;
             const isLast = i === WEEKLY_TREND.length - 1;
             return (
-              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-muted)' }}>
+              <div
+                key={i}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 10,
+                    color: 'var(--color-text-muted)',
+                  }}
+                >
                   {(w.downloads / 1000).toFixed(1)}k
                 </span>
                 <div
@@ -247,7 +348,13 @@ const AnalyticsTab = () => {
                     transition: 'all 0.3s',
                   }}
                 />
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-muted)' }}>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 9,
+                    color: 'var(--color-text-muted)',
+                  }}
+                >
                   {w.week.split(' ')[1]}
                 </span>
               </div>
@@ -264,16 +371,41 @@ const AnalyticsTab = () => {
           return (
             <div key={skill.name} style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-cyan)' }}>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 13,
+                    color: 'var(--color-cyan)',
+                  }}
+                >
                   {skill.name}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    color: 'var(--color-text-secondary)',
+                  }}
+                >
                   {(skill.downloads / 1000).toFixed(1)}k ({pct}%)
                 </span>
               </div>
-              <div style={{ width: '100%', height: 6, background: 'rgba(16,185,129,0.1)', borderRadius: 2 }}>
+              <div
+                style={{
+                  width: '100%',
+                  height: 6,
+                  background: 'rgba(16,185,129,0.1)',
+                  borderRadius: 2,
+                }}
+              >
                 <div
-                  style={{ height: '100%', background: 'var(--color-accent)', borderRadius: 2, width: `${pct}%`, transition: 'all 0.4s' }}
+                  style={{
+                    height: '100%',
+                    background: 'var(--color-accent)',
+                    borderRadius: 2,
+                    width: `${pct}%`,
+                    transition: 'all 0.4s',
+                  }}
                 />
               </div>
             </div>
@@ -287,15 +419,36 @@ const AnalyticsTab = () => {
         {AGENT_BREAKDOWN.map((a) => (
           <div key={a.agent} style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
                 {a.agent}
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-dim)' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: 'var(--color-text-dim)',
+                }}
+              >
                 {a.pct}%
               </span>
             </div>
-            <div style={{ width: '100%', height: 6, borderRadius: 2, background: `color-mix(in srgb, ${a.color} 12%, transparent)` }}>
-              <div style={{ height: '100%', borderRadius: 2, width: `${a.pct}%`, background: a.color }} />
+            <div
+              style={{
+                width: '100%',
+                height: 6,
+                borderRadius: 2,
+                background: `color-mix(in srgb, ${a.color} 12%, transparent)`,
+              }}
+            >
+              <div
+                style={{ height: '100%', borderRadius: 2, width: `${a.pct}%`, background: a.color }}
+              />
             </div>
           </div>
         ))}
@@ -311,7 +464,14 @@ export const Dashboard = () => {
   return (
     <div style={{ maxWidth: 980, margin: '0 auto', padding: '28px 32px 64px' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: 28,
+        }}
+      >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
             <div
@@ -332,7 +492,15 @@ export const Dashboard = () => {
               A
             </div>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-mono)', fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
+              <h1
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 22,
+                  fontWeight: 700,
+                  color: 'var(--color-text-primary)',
+                  margin: 0,
+                }}
+              >
                 @{AUTHOR.username}
               </h1>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: trustCfg.color }}>
@@ -381,7 +549,14 @@ export const Dashboard = () => {
             borderRadius: 10,
           }}
         >
-          <div style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6 }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 12,
+              color: 'var(--color-text-muted)',
+              marginBottom: 6,
+            }}
+          >
             Weekly trend
           </div>
           <MiniChart data={WEEKLY_TREND} />

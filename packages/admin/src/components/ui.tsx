@@ -140,7 +140,14 @@ export const StatBox = ({
       borderRadius: 8,
     }}
   >
-    <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 4 }}>
+    <div
+      style={{
+        fontFamily: 'var(--font-sans)',
+        fontSize: 11,
+        color: 'var(--color-text-muted)',
+        marginBottom: 4,
+      }}
+    >
       {label}
     </div>
     <div

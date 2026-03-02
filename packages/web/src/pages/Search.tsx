@@ -20,26 +20,69 @@ const SearchResultRow = ({ skill }: { skill: SkillFull }) => {
           cursor: 'pointer',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: 6,
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, color: 'var(--color-cyan)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 15,
+                color: 'var(--color-cyan)',
+                fontWeight: 600,
+              }}
+            >
               {skill.name}
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-faint)' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                color: 'var(--color-text-faint)',
+              }}
+            >
               {skill.version}
             </span>
             <TrustBadge tier={skill.trust} />
           </div>
-          <div style={{ display: 'flex', gap: 16, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-muted)' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 16,
+              fontFamily: 'var(--font-mono)',
+              fontSize: 12,
+              color: 'var(--color-text-muted)',
+            }}
+          >
             <span>&#x2B07; {skill.downloads}</span>
             <span style={{ color: 'var(--color-yellow)' }}>&#x2605; {skill.rating}</span>
           </div>
         </div>
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-dim)', marginBottom: 8, lineHeight: 1.6, marginTop: 0 }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 13,
+            color: 'var(--color-text-dim)',
+            marginBottom: 8,
+            lineHeight: 1.6,
+            marginTop: 0,
+          }}
+        >
           {skill.desc}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-muted)' }}>
+          <span
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 12,
+              color: 'var(--color-text-muted)',
+            }}
+          >
             by @{skill.author}
           </span>
           <div style={{ display: 'flex', gap: 4 }}>
@@ -105,17 +148,34 @@ export const Search = () => {
     .filter((s) => trustFilter === 'All' || s.trust === trustFilter.toLowerCase());
 
   return (
-    <div style={{ display: 'flex', maxWidth: 1060, margin: '0 auto', padding: '24px 32px', gap: 28 }}>
+    <div
+      style={{ display: 'flex', maxWidth: 1060, margin: '0 auto', padding: '24px 32px', gap: 28 }}
+    >
       {/* Sidebar filters */}
       <aside style={{ width: 200, flexShrink: 0 }}>
         <div style={{ position: 'sticky', top: 70 }}>
           {/* Category filter */}
           <div style={{ marginBottom: 28 }}>
-            <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--color-text-dim)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 0 }}>
+            <h3
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                fontWeight: 600,
+                color: 'var(--color-text-dim)',
+                marginBottom: 10,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginTop: 0,
+              }}
+            >
               Category
             </h3>
             {CATEGORY_NAMES.map((cat) => (
-              <div key={cat} onClick={() => setCategory(cat)} style={sidebarItemStyle(category === cat)}>
+              <div
+                key={cat}
+                onClick={() => setCategory(cat)}
+                style={sidebarItemStyle(category === cat)}
+              >
                 {cat}
               </div>
             ))}
@@ -123,11 +183,26 @@ export const Search = () => {
 
           {/* Trust filter */}
           <div style={{ marginBottom: 28 }}>
-            <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--color-text-dim)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 0 }}>
+            <h3
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                fontWeight: 600,
+                color: 'var(--color-text-dim)',
+                marginBottom: 10,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginTop: 0,
+              }}
+            >
               Trust tier
             </h3>
             {TRUST_TIERS.map((tier) => (
-              <div key={tier} onClick={() => setTrustFilter(tier)} style={sidebarItemStyle(trustFilter === tier)}>
+              <div
+                key={tier}
+                onClick={() => setTrustFilter(tier)}
+                style={sidebarItemStyle(trustFilter === tier)}
+              >
                 {tier}
               </div>
             ))}
@@ -135,7 +210,18 @@ export const Search = () => {
 
           {/* Platform filter */}
           <div>
-            <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--color-text-dim)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 0 }}>
+            <h3
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                fontWeight: 600,
+                color: 'var(--color-text-dim)',
+                marginBottom: 10,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginTop: 0,
+              }}
+            >
               Platform
             </h3>
             {['All platforms', 'Claude Code', 'Cursor', 'Codex'].map((p) => (
@@ -150,19 +236,47 @@ export const Search = () => {
       {/* Results */}
       <main style={{ flex: 1, minWidth: 0 }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 16,
+          }}
+        >
           <div>
-            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--color-text-secondary)' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 14,
+                color: 'var(--color-text-secondary)',
+              }}
+            >
               {filtered.length} result{filtered.length !== 1 ? 's' : ''}
             </span>
             {queryParam && (
-              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--color-text-dim)' }}>
-                {' '}for &quot;{queryParam}&quot;
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 14,
+                  color: 'var(--color-text-dim)',
+                }}
+              >
+                {' '}
+                for &quot;{queryParam}&quot;
               </span>
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-muted)' }}>Sort:</span>
+            <span
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                color: 'var(--color-text-muted)',
+              }}
+            >
+              Sort:
+            </span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
@@ -232,15 +346,34 @@ export const Search = () => {
         )}
 
         {/* Skill list */}
-        <div style={{ border: '1px solid var(--color-border-default)', borderRadius: 10, overflow: 'hidden' }}>
+        <div
+          style={{
+            border: '1px solid var(--color-border-default)',
+            borderRadius: 10,
+            overflow: 'hidden',
+          }}
+        >
           {filtered.length > 0 ? (
             filtered.map((skill) => <SearchResultRow key={skill.name} skill={skill} />)
           ) : (
             <div style={{ padding: 48, textAlign: 'center' }}>
-              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--color-text-dim)', marginBottom: 8 }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 15,
+                  color: 'var(--color-text-dim)',
+                  marginBottom: 8,
+                }}
+              >
                 No skills match these filters
               </div>
-              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-muted)' }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  color: 'var(--color-text-muted)',
+                }}
+              >
                 Try broadening your search or{' '}
                 <Link to="#" style={{ color: 'var(--color-accent)', textDecoration: 'none' }}>
                   publish your own

@@ -2,13 +2,15 @@ const steps = [
   {
     step: '1',
     title: 'Create your skill',
-    content: 'Initialize a new skill with spm init, which scaffolds a SKILL.md manifest and directory structure.',
+    content:
+      'Initialize a new skill with spm init, which scaffolds a SKILL.md manifest and directory structure.',
     code: '$ spm init my-skill\n$ cd my-skill',
   },
   {
     step: '2',
     title: 'Write SKILL.md',
-    content: 'Define your skill\'s metadata, instructions, and configuration in the SKILL.md manifest file.',
+    content:
+      "Define your skill's metadata, instructions, and configuration in the SKILL.md manifest file.",
     code: `---
 name: my-skill
 version: 1.0.0
@@ -37,7 +39,8 @@ Instructions for the agent go here...`,
   {
     step: '5',
     title: 'Publish',
-    content: 'Push your skill to the registry. It will go through the 3-layer security scan automatically.',
+    content:
+      'Push your skill to the registry. It will go through the 3-layer security scan automatically.',
     code: '$ spm publish',
   },
 ];
@@ -48,16 +51,33 @@ const guidelines = [
   'Include examples of expected input/output',
   'Tag your skill accurately for discoverability',
   'Use semantic versioning (major.minor.patch)',
-  'Don\'t include secrets, API keys, or credentials',
+  "Don't include secrets, API keys, or credentials",
   'Test with multiple agent platforms if possible',
 ];
 
 export const Publish = () => (
   <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 32px 60px' }}>
-    <h1 style={{ fontFamily: 'var(--font-sans)', fontSize: 24, fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 4, marginTop: 0 }}>
+    <h1
+      style={{
+        fontFamily: 'var(--font-sans)',
+        fontSize: 24,
+        fontWeight: 700,
+        color: 'var(--color-text-primary)',
+        marginBottom: 4,
+        marginTop: 0,
+      }}
+    >
       Publish a Skill
     </h1>
-    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 32, marginTop: 0 }}>
+    <p
+      style={{
+        fontFamily: 'var(--font-sans)',
+        fontSize: 14,
+        color: 'var(--color-text-muted)',
+        marginBottom: 32,
+        marginTop: 0,
+      }}
+    >
       Share your skill with the community in 5 steps.
     </p>
 
@@ -92,11 +112,26 @@ export const Publish = () => (
             >
               {s.step}
             </div>
-            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 15,
+                fontWeight: 600,
+                color: 'var(--color-text-primary)',
+              }}
+            >
               {s.title}
             </span>
           </div>
-          <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 12, lineHeight: 1.5 }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              color: 'var(--color-text-muted)',
+              marginBottom: 12,
+              lineHeight: 1.5,
+            }}
+          >
             {s.content}
           </div>
           <pre
@@ -120,7 +155,16 @@ export const Publish = () => (
     </div>
 
     {/* Guidelines */}
-    <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 12, marginTop: 0 }}>
+    <h2
+      style={{
+        fontFamily: 'var(--font-sans)',
+        fontSize: 16,
+        fontWeight: 600,
+        color: 'var(--color-text-secondary)',
+        marginBottom: 12,
+        marginTop: 0,
+      }}
+    >
       Publishing guidelines
     </h2>
     <div
@@ -141,8 +185,19 @@ export const Publish = () => (
             borderBottom: i < guidelines.length - 1 ? '1px solid #1a1d2733' : 'none',
           }}
         >
-          <span style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>&#x2713;</span>
-          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+          <span
+            style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-mono)', fontSize: 12 }}
+          >
+            &#x2713;
+          </span>
+          <span
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              color: 'var(--color-text-secondary)',
+              lineHeight: 1.5,
+            }}
+          >
             {g}
           </span>
         </div>

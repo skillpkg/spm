@@ -44,10 +44,25 @@ export const SkillDetail = () => {
   if (!skill) {
     return (
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '64px 32px', textAlign: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-sans)', fontSize: 20, color: 'var(--color-text-dim)', marginBottom: 16 }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 20,
+            color: 'var(--color-text-dim)',
+            marginBottom: 16,
+          }}
+        >
           Skill not found
         </div>
-        <Link to="/" style={{ color: 'var(--color-accent)', textDecoration: 'none', fontFamily: 'var(--font-sans)', fontSize: 14 }}>
+        <Link
+          to="/"
+          style={{
+            color: 'var(--color-accent)',
+            textDecoration: 'none',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 14,
+          }}
+        >
           Back to registry
         </Link>
       </div>
@@ -82,15 +97,39 @@ export const SkillDetail = () => {
       >
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <h1 style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700, color: 'var(--color-cyan)', margin: 0 }}>
+            <h1
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 26,
+                fontWeight: 700,
+                color: 'var(--color-cyan)',
+                margin: 0,
+              }}
+            >
               {skill.name}
             </h1>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, color: 'var(--color-text-faint)' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 15,
+                color: 'var(--color-text-faint)',
+              }}
+            >
               {skill.version}
             </span>
             <TrustBadge tier={skill.trust} size="lg" />
           </div>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--color-text-secondary)', marginBottom: 16, lineHeight: 1.6, maxWidth: 520, marginTop: 0 }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 15,
+              color: 'var(--color-text-secondary)',
+              marginBottom: 16,
+              lineHeight: 1.6,
+              maxWidth: 520,
+              marginTop: 0,
+            }}
+          >
             {skill.desc}
           </p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -124,7 +163,14 @@ export const SkillDetail = () => {
             marginLeft: 24,
           }}
         >
-          <div style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-dim)', marginBottom: 8 }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 12,
+              color: 'var(--color-text-dim)',
+              marginBottom: 8,
+            }}
+          >
             Install
           </div>
           <div
@@ -162,7 +208,9 @@ export const SkillDetail = () => {
           >
             <span>
               <span style={{ color: 'var(--color-text-muted)' }}>$ </span>
-              <span style={{ color: 'var(--color-text-primary)' }}>spm install -g {skill.name}</span>
+              <span style={{ color: 'var(--color-text-primary)' }}>
+                spm install -g {skill.name}
+              </span>
             </span>
             <CopyButton text={`spm install -g ${skill.name}`} />
           </div>
@@ -174,7 +222,14 @@ export const SkillDetail = () => {
         {/* Main content */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Tabs */}
-          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--color-border-default)', marginBottom: 20 }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 0,
+              borderBottom: '1px solid var(--color-border-default)',
+              marginBottom: 20,
+            }}
+          >
             {(
               [
                 { id: 'readme' as const, label: 'README' },
@@ -193,7 +248,8 @@ export const SkillDetail = () => {
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  borderBottom: activeTab === tab.id ? '2px solid #10b981' : '2px solid transparent',
+                  borderBottom:
+                    activeTab === tab.id ? '2px solid #10b981' : '2px solid transparent',
                   color: activeTab === tab.id ? '#e2e8f0' : '#64748b',
                   marginBottom: -1,
                 }}
@@ -205,7 +261,15 @@ export const SkillDetail = () => {
 
           {/* Tab content */}
           {activeTab === 'readme' && (
-            <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.75, paddingTop: 4 }}>
+            <div
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 14,
+                color: 'var(--color-text-secondary)',
+                lineHeight: 1.75,
+                paddingTop: 4,
+              }}
+            >
               {skill.longDesc?.split('\n\n').map((para, i) => (
                 <p key={i} style={{ marginBottom: 16 }}>
                   {para}
@@ -224,7 +288,8 @@ export const SkillDetail = () => {
                     gap: 16,
                     alignItems: 'flex-start',
                     padding: '14px 0',
-                    borderBottom: i < (skill.versions?.length ?? 0) - 1 ? '1px solid #1a1d2744' : 'none',
+                    borderBottom:
+                      i < (skill.versions?.length ?? 0) - 1 ? '1px solid #1a1d2744' : 'none',
                   }}
                 >
                   <span
@@ -239,10 +304,23 @@ export const SkillDetail = () => {
                     {v.v}
                   </span>
                   <div>
-                    <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: 13,
+                        color: 'var(--color-text-secondary)',
+                      }}
+                    >
                       {v.changes}
                     </div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-muted)', marginTop: 4 }}>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 11,
+                        color: 'var(--color-text-muted)',
+                        marginTop: 4,
+                      }}
+                    >
                       {v.date}
                     </div>
                   </div>
@@ -270,15 +348,35 @@ export const SkillDetail = () => {
             <div style={{ paddingTop: 4, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {/* Signature */}
               <div style={{ ...cardStyle, marginBottom: 0 }}>
-                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 10 }}>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--color-text-primary)',
+                    marginBottom: 10,
+                  }}
+                >
                   {skill.security.signed ? '\uD83D\uDD12' : '\u26A0'} Signature
                 </div>
                 {skill.security.signed ? (
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-accent)' }}>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 13,
+                      color: 'var(--color-accent)',
+                    }}
+                  >
                     &#x2713; Signed by {skill.security.signer} (Sigstore OIDC)
                   </div>
                 ) : (
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-yellow)' }}>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 13,
+                      color: 'var(--color-yellow)',
+                    }}
+                  >
                     &#x26A0; Unsigned — author has not set up Sigstore signing
                   </div>
                 )}
@@ -286,12 +384,27 @@ export const SkillDetail = () => {
 
               {/* Scan results */}
               <div style={{ ...cardStyle, marginBottom: 0 }}>
-                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 10 }}>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--color-text-primary)',
+                    marginBottom: 10,
+                  }}
+                >
                   &#x1F6E1; Scan Results
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {skill.security.layers?.map((layer, i) => (
-                    <div key={i} style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-accent)' }}>
+                    <div
+                      key={i}
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 13,
+                        color: 'var(--color-accent)',
+                      }}
+                    >
                       &#x2713; {layer}
                     </div>
                   ))}
@@ -309,7 +422,11 @@ export const SkillDetail = () => {
               {[
                 { label: 'Downloads', value: skill.downloads },
                 { label: 'This week', value: skill.weeklyDownloads },
-                { label: 'Rating', value: `\u2605 ${skill.rating} (${skill.reviews})`, color: '#fbbf24' },
+                {
+                  label: 'Rating',
+                  value: `\u2605 ${skill.rating} (${skill.reviews})`,
+                  color: '#fbbf24',
+                },
                 { label: 'License', value: skill.license },
                 { label: 'Size', value: skill.size },
               ].map((row) => (
@@ -322,10 +439,22 @@ export const SkillDetail = () => {
                     borderBottom: '1px solid #1a1d2733',
                   }}
                 >
-                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-muted)' }}>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: 12,
+                      color: 'var(--color-text-muted)',
+                    }}
+                  >
                     {row.label}
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: row.color || '#94a3b8' }}>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      color: row.color || '#94a3b8',
+                    }}
+                  >
                     {row.value}
                   </span>
                 </div>
@@ -334,10 +463,22 @@ export const SkillDetail = () => {
 
             {/* Author */}
             <div style={cardStyle}>
-              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 11,
+                  color: 'var(--color-text-muted)',
+                  marginBottom: 8,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
                 Author
               </div>
-              <Link to={`/authors/${skill.author}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+              <Link
+                to={`/authors/${skill.author}`}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}
+              >
                 <div
                   style={{
                     width: 28,
@@ -356,10 +497,18 @@ export const SkillDetail = () => {
                   {skill.author[0].toUpperCase()}
                 </div>
                 <div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-text-primary)' }}>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 13,
+                      color: 'var(--color-text-primary)',
+                    }}
+                  >
                     @{skill.author}
                   </div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: trustInfo.color }}>
+                  <div
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: trustInfo.color }}
+                  >
                     {trustInfo.checks} {trustInfo.label}
                   </div>
                 </div>
@@ -368,13 +517,36 @@ export const SkillDetail = () => {
 
             {/* Links */}
             <div style={cardStyle}>
-              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 11,
+                  color: 'var(--color-text-muted)',
+                  marginBottom: 8,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
                 Links
               </div>
-              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-blue)', padding: '4px 0' }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  color: 'var(--color-blue)',
+                  padding: '4px 0',
+                }}
+              >
                 Repository
               </div>
-              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-blue)', padding: '4px 0' }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  color: 'var(--color-blue)',
+                  padding: '4px 0',
+                }}
+              >
                 Report issue
               </div>
             </div>
@@ -383,16 +555,41 @@ export const SkillDetail = () => {
             {((skill.dependencies?.pip?.length ?? 0) > 0 ||
               (skill.dependencies?.system?.length ?? 0) > 0) && (
               <div style={cardStyle}>
-                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 11,
+                    color: 'var(--color-text-muted)',
+                    marginBottom: 8,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
                   Dependencies
                 </div>
                 {skill.dependencies.system?.map((d) => (
-                  <div key={d} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-dim)', padding: '2px 0' }}>
+                  <div
+                    key={d}
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      color: 'var(--color-text-dim)',
+                      padding: '2px 0',
+                    }}
+                  >
                     {d}
                   </div>
                 ))}
                 {skill.dependencies.pip?.map((d) => (
-                  <div key={d} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-dim)', padding: '2px 0' }}>
+                  <div
+                    key={d}
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      color: 'var(--color-text-dim)',
+                      padding: '2px 0',
+                    }}
+                  >
                     pip: {d}
                   </div>
                 ))}
