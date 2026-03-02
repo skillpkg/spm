@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export const Nav = ({
   query,
@@ -10,6 +11,7 @@ export const Nav = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { isAuthenticated, user, signOut, isLoading } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,21 +148,93 @@ export const Nav = ({
         >
           npm i -g spm
         </code>
-        <Link
-          to="/dashboard"
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 14,
-            color: 'var(--color-bg)',
-            padding: '4px 14px',
-            borderRadius: 6,
-            background: 'var(--color-accent)',
-            textDecoration: 'none',
-            fontWeight: 600,
-          }}
-        >
-          Sign in
-        </Link>
+        {!isLoading && isAuthenticated && user ? (
+          <>
+            <Link
+              to="/dashboard"
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 14,
+                color: 'var(--color-text-dim)',
+                textDecoration: 'none',
+              }}
+            >
+              Dashboard
+            </Link>
+            {user.is_admin && (
+              <a
+                href="/admin"
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 14,
+                  color: 'var(--color-yellow)',
+                  textDecoration: 'none',
+                }}
+              >
+                Admin
+              </a>
+            )}
+            <Link
+              to="/dashboard"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                textDecoration: 'none',
+              }}
+            >
+              <img
+                src={`https://github.com/${user.username}.png?size=28`}
+                alt={user.username}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  border: '1px solid var(--color-border-default)',
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 13,
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                {user.username}
+              </span>
+            </Link>
+            <button
+              onClick={signOut}
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 13,
+                color: 'var(--color-text-muted)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 8px',
+              }}
+            >
+              Sign out
+            </button>
+          </>
+        ) : (
+          <Link
+            to="/signin"
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 14,
+              color: 'var(--color-bg)',
+              padding: '4px 14px',
+              borderRadius: 6,
+              background: 'var(--color-accent)',
+              textDecoration: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Sign in
+          </Link>
+        )}
       </div>
     </nav>
   );

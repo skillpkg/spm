@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import {
   AUTHOR,
   MY_SKILLS,
@@ -8,6 +9,7 @@ import {
   AGENT_BREAKDOWN,
   TRUST_CONFIG,
 } from './dashboard/mock-data';
+import type { TrustTier } from './dashboard/mock-data';
 import { StatCard } from './dashboard/StatCard';
 import { MiniChart } from './dashboard/MiniChart';
 import { SkillRow } from './dashboard/SkillRow';
@@ -459,7 +461,10 @@ const AnalyticsTab = () => {
 
 export const Dashboard = () => {
   const [tab, setTab] = useState('overview');
-  const trustCfg = TRUST_CONFIG[AUTHOR.trust];
+  const { user } = useAuth();
+  const username = user?.username ?? AUTHOR.username;
+  const trustTier = (user?.trust_tier as TrustTier) ?? AUTHOR.trust;
+  const trustCfg = TRUST_CONFIG[trustTier] ?? TRUST_CONFIG[AUTHOR.trust];
 
   return (
     <div style={{ maxWidth: 980, margin: '0 auto', padding: '28px 32px 64px' }}>
@@ -474,23 +479,16 @@ export const Dashboard = () => {
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-            <div
+            <img
+              src={`https://github.com/${username}.png?size=44`}
+              alt={username}
               style={{
                 width: 44,
                 height: 44,
                 borderRadius: 10,
-                background: 'var(--color-bg-hover)',
                 border: '1px solid var(--color-border-default)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 20,
-                color: 'var(--color-text-dim)',
               }}
-            >
-              A
-            </div>
+            />
             <div>
               <h1
                 style={{
@@ -501,7 +499,7 @@ export const Dashboard = () => {
                   margin: 0,
                 }}
               >
-                @{AUTHOR.username}
+                @{username}
               </h1>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: trustCfg.color }}>
                 {trustCfg.checks} {trustCfg.label} Author
