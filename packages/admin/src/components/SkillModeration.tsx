@@ -61,7 +61,10 @@ export const SkillModeration = () => {
               <span className="font-sans text-[11px] text-text-muted ml-2">@{skill.author}</span>
             </div>
             <StatusBadge status={skill.status} />
-            <span className={`font-mono text-[11px] text-${TRUST_CONFIG[skill.trust].color}`}>
+            <span
+              className="font-mono text-[11px]"
+              style={{ color: `var(--color-${TRUST_CONFIG[skill.trust].color})` }}
+            >
               {TRUST_CONFIG[skill.trust].checks}
             </span>
             <span className="font-mono text-xs text-text-secondary text-right">
