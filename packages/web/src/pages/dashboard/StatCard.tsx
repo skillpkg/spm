@@ -7,15 +7,48 @@ interface StatCardProps {
 
 export const StatCard = ({ label, value, sub, color }: StatCardProps) => {
   return (
-    <div className="flex-1 min-w-[150px] px-5 py-[18px] bg-bg-card border border-border-default rounded-[10px]">
-      <div className="font-sans text-xs text-text-muted mb-1.5">{label}</div>
+    <div
+      style={{
+        flex: 1,
+        minWidth: 150,
+        padding: '18px 20px',
+        background: 'var(--color-bg-card)',
+        border: '1px solid var(--color-border-default)',
+        borderRadius: 10,
+      }}
+    >
       <div
-        className="font-mono text-[26px] font-bold"
-        style={{ color: color ?? 'var(--color-text-primary)' }}
+        style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 12,
+          color: 'var(--color-text-muted)',
+          marginBottom: 6,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 26,
+          fontWeight: 700,
+          color: color ?? 'var(--color-text-primary)',
+        }}
       >
         {value}
       </div>
-      {sub && <div className="font-mono text-xs text-accent mt-1">{sub}</div>}
+      {sub && (
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 12,
+            color: 'var(--color-accent)',
+            marginTop: 4,
+          }}
+        >
+          {sub}
+        </div>
+      )}
     </div>
   );
 };

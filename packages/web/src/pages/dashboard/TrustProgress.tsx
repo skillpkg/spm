@@ -17,11 +17,26 @@ export const TrustProgress = ({ currentTier }: TrustProgressProps) => {
   const isDone = (idx: number) => idx <= currentIdx;
 
   return (
-    <div className="px-[22px] py-5 bg-bg-card border border-border-default rounded-[10px]">
-      <div className="font-sans text-sm font-semibold text-text-primary mb-4">
+    <div
+      style={{
+        padding: '20px 22px',
+        background: 'var(--color-bg-card)',
+        border: '1px solid var(--color-border-default)',
+        borderRadius: 10,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 14,
+          fontWeight: 600,
+          color: 'var(--color-text-primary)',
+          marginBottom: 16,
+        }}
+      >
         Trust progression
       </div>
-      <div className="flex flex-col">
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         {TIERS.map((tier, i) => {
           const done = isDone(i);
           const isCurrent = tier.id === currentTier;
@@ -29,11 +44,26 @@ export const TrustProgress = ({ currentTier }: TrustProgressProps) => {
           const nextDone = i < TIERS.length - 1 && isDone(i + 1);
 
           return (
-            <div key={tier.id} className="flex gap-3.5 items-start">
-              <div className="flex flex-col items-center w-5">
+            <div key={tier.id} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  width: 20,
+                }}
+              >
                 <div
-                  className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0"
                   style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 8,
+                    fontWeight: 700,
+                    flexShrink: 0,
                     background: done ? cfg.color : 'var(--color-bg-card)',
                     border: `2px solid ${done ? cfg.color : 'var(--color-border-default)'}`,
                     color: 'var(--color-bg)',
@@ -43,8 +73,9 @@ export const TrustProgress = ({ currentTier }: TrustProgressProps) => {
                 </div>
                 {i < TIERS.length - 1 && (
                   <div
-                    className="w-0.5 h-8"
                     style={{
+                      width: 2,
+                      height: 32,
                       background: nextDone
                         ? TRUST_CONFIG[TIERS[i + 1].id].color
                         : 'var(--color-border-default)',
@@ -52,10 +83,11 @@ export const TrustProgress = ({ currentTier }: TrustProgressProps) => {
                   />
                 )}
               </div>
-              <div className={i < TIERS.length - 1 ? 'pb-[18px]' : ''}>
+              <div style={i < TIERS.length - 1 ? { paddingBottom: 18 } : undefined}>
                 <div
-                  className="font-mono text-[13px]"
                   style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 13,
                     color: isCurrent
                       ? cfg.color
                       : done
@@ -65,9 +97,20 @@ export const TrustProgress = ({ currentTier }: TrustProgressProps) => {
                   }}
                 >
                   {cfg.checks} {cfg.label}
-                  {isCurrent && <span className="text-[11px] ml-2 opacity-70">&larr; you</span>}
+                  {isCurrent && (
+                    <span style={{ fontSize: 11, marginLeft: 8, opacity: 0.7 }}>&larr; you</span>
+                  )}
                 </div>
-                <div className="font-sans text-xs text-text-muted mt-0.5">{tier.desc}</div>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 12,
+                    color: 'var(--color-text-muted)',
+                    marginTop: 2,
+                  }}
+                >
+                  {tier.desc}
+                </div>
               </div>
             </div>
           );

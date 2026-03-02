@@ -7,7 +7,7 @@ export const ReportsTab = () => {
   return (
     <div>
       {/* Stats */}
-      <div className="flex gap-2.5 mb-4">
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
         <StatBox label="Open reports" value={openCount} color="yellow" />
         <StatBox
           label="Investigating"
@@ -22,25 +22,70 @@ export const ReportsTab = () => {
       </div>
 
       {/* Report cards */}
-      <div className="flex flex-col gap-2.5">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {REPORTS.map((report) => (
-          <SectionCard key={report.id} className="p-[14px_18px]">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2.5">
+          <SectionCard key={report.id} style={{ padding: '14px 18px' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: 8,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <PriorityDot priority={report.priority} />
-                <span className="font-mono text-sm text-cyan font-medium">{report.skill}</span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 14,
+                    color: 'var(--color-cyan)',
+                    fontWeight: 500,
+                  }}
+                >
+                  {report.skill}
+                </span>
                 <StatusBadge status={report.status} />
               </div>
-              <span className="font-mono text-[11px] text-text-muted">{report.date}</span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  color: 'var(--color-text-muted)',
+                }}
+              >
+                {report.date}
+              </span>
             </div>
-            <p className="font-sans text-[13px] text-text-secondary mb-2.5 leading-relaxed">
+            <p
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 13,
+                color: 'var(--color-text-secondary)',
+                marginBottom: 10,
+                lineHeight: 1.625,
+                marginTop: 0,
+              }}
+            >
               {report.reason}
             </p>
-            <div className="flex justify-between items-center">
-              <span className="font-sans text-xs text-text-muted">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 12,
+                  color: 'var(--color-text-muted)',
+                }}
+              >
                 Reported by @{report.reporter}
               </span>
-              <div className="flex gap-1.5">
+              <div style={{ display: 'flex', gap: 6 }}>
                 <ActionButton label="Investigate" color="blue" small />
                 <ActionButton label="Dismiss" color="text-dim" small />
                 <ActionButton label="Yank skill" color="red" small />

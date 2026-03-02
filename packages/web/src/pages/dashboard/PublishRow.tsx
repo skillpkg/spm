@@ -1,9 +1,21 @@
 import type { PublishEvent } from './mock-data';
 
 const STATUS_CONFIG = {
-  success: { label: 'Published', colorClass: 'text-accent', bgClass: 'bg-accent/10' },
-  blocked: { label: 'Blocked', colorClass: 'text-red', bgClass: 'bg-red/10' },
-  held: { label: 'Held \u2192 Approved', colorClass: 'text-yellow', bgClass: 'bg-yellow/10' },
+  success: {
+    label: 'Published',
+    color: 'var(--color-accent)',
+    bg: 'rgba(16,185,129,0.1)',
+  },
+  blocked: {
+    label: 'Blocked',
+    color: 'var(--color-red)',
+    bg: 'rgba(239,68,68,0.1)',
+  },
+  held: {
+    label: 'Held \u2192 Approved',
+    color: 'var(--color-yellow)',
+    bg: 'rgba(251,191,36,0.1)',
+  },
 } as const;
 
 interface PublishRowProps {
@@ -15,23 +27,81 @@ export const PublishRow = ({ item }: PublishRowProps) => {
 
   return (
     <div
-      className="grid items-center px-4 py-2.5 border-b border-border-default/25 gap-3"
-      style={{ gridTemplateColumns: '140px 60px 1fr 100px 70px' }}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '140px 60px 1fr 100px 70px',
+        alignItems: 'center',
+        padding: '10px 16px',
+        borderBottom: '1px solid rgba(26,29,39,0.25)',
+        gap: 12,
+      }}
     >
       <div>
-        <span className="font-mono text-[13px] text-cyan">{item.skill}</span>
-        <span className="font-mono text-[11px] text-text-faint ml-1.5">{item.version}</span>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 13,
+            color: 'var(--color-cyan)',
+          }}
+        >
+          {item.skill}
+        </span>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            color: 'var(--color-text-faint)',
+            marginLeft: 6,
+          }}
+        >
+          {item.version}
+        </span>
       </div>
       <span
-        className={`font-mono text-[11px] px-2 py-0.5 rounded text-center ${s.colorClass} ${s.bgClass}`}
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          padding: '2px 8px',
+          borderRadius: 4,
+          textAlign: 'center',
+          color: s.color,
+          background: s.bg,
+        }}
       >
         {s.label}
       </span>
-      <div className="font-sans text-xs text-text-muted truncate">
+      <div
+        style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 12,
+          color: 'var(--color-text-muted)',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
         {item.reason ?? 'All checks passed'}
       </div>
-      <div className="font-mono text-[11px] text-text-muted text-right">{item.date}</div>
-      <div className="font-mono text-[11px] text-text-dim text-right">{item.scanTime}</div>
+      <div
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          color: 'var(--color-text-muted)',
+          textAlign: 'right',
+        }}
+      >
+        {item.date}
+      </div>
+      <div
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          color: 'var(--color-text-dim)',
+          textAlign: 'right',
+        }}
+      >
+        {item.scanTime}
+      </div>
     </div>
   );
 };

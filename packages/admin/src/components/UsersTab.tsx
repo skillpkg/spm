@@ -76,7 +76,7 @@ export const UsersTab = () => {
   return (
     <div>
       {/* Stats */}
-      <div className="flex gap-2.5 mb-4">
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
         <StatBox label="Total users" value={USERS_ADMIN.length} />
         <StatBox label="Admins" value={adminCount} color="red" />
         <StatBox
@@ -93,13 +93,18 @@ export const UsersTab = () => {
 
       {/* Search + dropdown filters */}
       <div
-        className={`flex gap-2.5 items-center flex-wrap ${activeFilters.length > 0 ? 'mb-2' : 'mb-4'}`}
+        style={{
+          display: 'flex',
+          gap: 10,
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          marginBottom: activeFilters.length > 0 ? 8 : 16,
+        }}
       >
         <SearchInput
           value={search}
           onChange={setSearch}
           placeholder="Search username or email..."
-          maxWidth="max-w-[280px]"
         />
 
         <FilterDropdown
@@ -142,7 +147,14 @@ export const UsersTab = () => {
 
       {/* Active filter tags */}
       {activeFilters.length > 0 && (
-        <div className="flex gap-1.5 mb-3.5 items-center">
+        <div
+          style={{
+            display: 'flex',
+            gap: 6,
+            marginBottom: 14,
+            alignItems: 'center',
+          }}
+        >
           {activeFilters.map((f) => (
             <FilterTag key={f.key} label={f.label} color={f.color} onRemove={f.clear} />
           ))}
@@ -153,12 +165,25 @@ export const UsersTab = () => {
                 setStatusFilter('all');
                 setTrustFilter('all');
               }}
-              className="font-sans text-[11px] text-text-dim cursor-pointer ml-1"
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 11,
+                color: 'var(--color-text-dim)',
+                cursor: 'pointer',
+                marginLeft: 4,
+              }}
             >
               Clear all
             </span>
           )}
-          <span className="font-mono text-[11px] text-text-muted ml-auto">
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              color: 'var(--color-text-muted)',
+              marginLeft: 'auto',
+            }}
+          >
             {filtered.length} of {USERS_ADMIN.length}
           </span>
         </div>
@@ -167,33 +192,58 @@ export const UsersTab = () => {
       {/* Confirmation banner */}
       {confirmAction && (
         <div
-          className={`px-[18px] py-3.5 mb-3.5 border rounded-[10px] flex justify-between items-center ${
-            isDestructive ? 'bg-red/5 border-red/20' : 'bg-accent/5 border-accent/20'
-          }`}
+          style={{
+            padding: '14px 18px',
+            marginBottom: 14,
+            border: isDestructive
+              ? '1px solid rgba(239,68,68,0.2)'
+              : '1px solid rgba(16,185,129,0.2)',
+            borderRadius: 10,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            background: isDestructive ? 'rgba(239,68,68,0.05)' : 'rgba(16,185,129,0.05)',
+          }}
         >
           <div>
-            <div className="font-sans text-sm text-text-primary mb-0.5">
+            <div
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 14,
+                color: 'var(--color-text-primary)',
+                marginBottom: 2,
+              }}
+            >
               {confirmAction.action === 'grant' && (
                 <>
                   Grant admin role to{' '}
-                  <strong className="text-cyan">@{confirmAction.username}</strong>?
+                  <strong style={{ color: 'var(--color-cyan)' }}>@{confirmAction.username}</strong>?
                 </>
               )}
               {confirmAction.action === 'revoke' && (
                 <>
                   Revoke admin role from{' '}
-                  <strong className="text-cyan">@{confirmAction.username}</strong>?
+                  <strong style={{ color: 'var(--color-cyan)' }}>@{confirmAction.username}</strong>?
                 </>
               )}
               {confirmAction.action === 'suspend' && (
                 <>
-                  Suspend <strong className="text-cyan">@{confirmAction.username}</strong>?
+                  Suspend{' '}
+                  <strong style={{ color: 'var(--color-cyan)' }}>@{confirmAction.username}</strong>?
                 </>
               )}
             </div>
-            <div className="font-sans text-xs text-text-muted">Logged in audit trail</div>
+            <div
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                color: 'var(--color-text-muted)',
+              }}
+            >
+              Logged in audit trail
+            </div>
           </div>
-          <div className="flex gap-2">
+          <div style={{ display: 'flex', gap: 8 }}>
             <ActionButton
               label="Confirm"
               color={isDestructive ? 'red' : 'accent'}
@@ -206,7 +256,20 @@ export const UsersTab = () => {
 
       {/* Table */}
       <SectionCard>
-        <div className="grid grid-cols-[120px_160px_90px_65px_85px_70px_70px_65px_1fr] gap-1.5 px-3.5 py-2 border-b border-border-default font-sans text-[10px] text-text-muted uppercase tracking-wider">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '120px 160px 90px 65px 85px 70px 70px 65px 1fr',
+            gap: 6,
+            padding: '8px 14px',
+            borderBottom: '1px solid var(--color-border-default)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 10,
+            color: 'var(--color-text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           <span>User</span>
           <span>Email</span>
           <span>GitHub</span>
@@ -215,37 +278,103 @@ export const UsersTab = () => {
           <span>Joined</span>
           <span>Active</span>
           <span>Status</span>
-          <span className="text-right">Actions</span>
+          <span style={{ textAlign: 'right' }}>Actions</span>
         </div>
         {filtered.map((user) => (
           <div
             key={user.username}
-            className="grid grid-cols-[120px_160px_90px_65px_85px_70px_70px_65px_1fr] gap-1.5 px-3.5 py-2.5 border-b border-border-default/25 items-center hover:bg-bg-hover"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '120px 160px 90px 65px 85px 70px 70px 65px 1fr',
+              gap: 6,
+              padding: '10px 14px',
+              borderBottom: '1px solid rgba(26,29,39,0.25)',
+              alignItems: 'center',
+            }}
           >
-            <span className="font-mono text-[13px] text-cyan font-medium">@{user.username}</span>
-            <span className="font-mono text-[11px] text-text-dim overflow-hidden text-ellipsis whitespace-nowrap">
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 13,
+                color: 'var(--color-cyan)',
+                fontWeight: 500,
+              }}
+            >
+              @{user.username}
+            </span>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: 'var(--color-text-dim)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {user.email}
             </span>
-            <span className="font-mono text-[11px] text-blue overflow-hidden text-ellipsis whitespace-nowrap">
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: 'var(--color-blue)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {user.github}
             </span>
             {user.role === 'admin' ? (
               <Badge label="ADMIN" color="red" />
             ) : (
-              <span className="font-mono text-[11px] text-text-faint">user</span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  color: 'var(--color-text-faint)',
+                }}
+              >
+                user
+              </span>
             )}
             <span
-              className="font-mono text-[11px]"
-              style={{ color: `var(--color-${TRUST_CONFIG[user.trust].color})` }}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: `var(--color-${TRUST_CONFIG[user.trust].color})`,
+              }}
             >
               {TRUST_CONFIG[user.trust].checks} {TRUST_CONFIG[user.trust].label}
             </span>
-            <span className="font-mono text-[11px] text-text-muted">{user.joined.slice(5)}</span>
-            <span className="font-mono text-[11px] text-text-muted">
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: 'var(--color-text-muted)',
+              }}
+            >
+              {user.joined.slice(5)}
+            </span>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: 'var(--color-text-muted)',
+              }}
+            >
               {user.lastActive.slice(5)}
             </span>
             <StatusBadge status={user.status} />
-            <div className="flex gap-1 justify-end flex-wrap">
+            <div
+              style={{
+                display: 'flex',
+                gap: 4,
+                justifyContent: 'flex-end',
+                flexWrap: 'wrap',
+              }}
+            >
               {user.role === 'user' ? (
                 <ActionButton
                   label="Make admin"

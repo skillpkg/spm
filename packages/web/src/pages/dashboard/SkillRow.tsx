@@ -13,35 +13,113 @@ export const SkillRow = ({ skill }: SkillRowProps) => {
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="grid items-center px-[18px] py-3.5 border-b border-border-default/25 cursor-pointer transition-colors duration-100"
       style={{
+        display: 'grid',
         gridTemplateColumns: '1fr 100px 100px 90px 80px',
+        alignItems: 'center',
+        padding: '14px 18px',
+        borderBottom: '1px solid rgba(26,29,39,0.25)',
+        cursor: 'pointer',
+        transition: 'background 100ms',
         background: hovered ? 'var(--color-bg-hover)' : 'transparent',
       }}
     >
       <div>
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className="font-mono text-sm text-cyan font-semibold">{skill.name}</span>
-          <span className="font-mono text-[11px] text-text-faint">{skill.version}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 14,
+              color: 'var(--color-cyan)',
+              fontWeight: 600,
+            }}
+          >
+            {skill.name}
+          </span>
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              color: 'var(--color-text-faint)',
+            }}
+          >
+            {skill.version}
+          </span>
         </div>
-        <div className="font-sans text-xs text-text-muted truncate">{skill.desc}</div>
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 12,
+            color: 'var(--color-text-muted)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {skill.desc}
+        </div>
       </div>
-      <div className="text-right">
-        <div className="font-mono text-[13px] text-text-primary">
+      <div style={{ textAlign: 'right' }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 13,
+            color: 'var(--color-text-primary)',
+          }}
+        >
           {(skill.downloads / 1000).toFixed(1)}k
         </div>
-        <div className="font-mono text-[11px] text-accent">{skill.weeklyGrowth}</div>
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            color: 'var(--color-accent)',
+          }}
+        >
+          {skill.weeklyGrowth}
+        </div>
       </div>
-      <div className="text-right">
-        <div className="font-mono text-[13px] text-yellow">&#9733; {skill.rating}</div>
-        <div className="font-mono text-[11px] text-text-muted">{skill.reviews} reviews</div>
+      <div style={{ textAlign: 'right' }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 13,
+            color: 'var(--color-yellow)',
+          }}
+        >
+          &#9733; {skill.rating}
+        </div>
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            color: 'var(--color-text-muted)',
+          }}
+        >
+          {skill.reviews} reviews
+        </div>
       </div>
-      <div className="text-right">
-        <span className="font-mono text-[11px]" style={{ color: trustCfg.color }}>
+      <div style={{ textAlign: 'right' }}>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            color: trustCfg.color,
+          }}
+        >
           {trustCfg.checks} {trustCfg.label}
         </span>
       </div>
-      <div className="text-right font-mono text-[11px] text-text-muted">{skill.updated}</div>
+      <div
+        style={{
+          textAlign: 'right',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          color: 'var(--color-text-muted)',
+        }}
+      >
+        {skill.updated}
+      </div>
     </div>
   );
 };

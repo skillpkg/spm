@@ -16,21 +16,28 @@ export const SkillModeration = () => {
   return (
     <div>
       {/* Filters */}
-      <div className="flex gap-3 mb-4 items-center">
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center' }}>
         <SearchInput
           value={search}
           onChange={setSearch}
           placeholder="Search skills or authors..."
-          maxWidth="max-w-xs"
         />
-        <div className="flex gap-1">
+        <div style={{ display: 'flex', gap: 4 }}>
           {filters.map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`font-sans text-xs px-3 py-1.5 rounded-md border-none cursor-pointer capitalize ${
-                statusFilter === s ? 'bg-accent/10 text-accent' : 'bg-transparent text-text-dim'
-              }`}
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: 'none',
+                cursor: 'pointer',
+                textTransform: 'capitalize',
+                background: statusFilter === s ? 'rgba(16,185,129,0.1)' : 'transparent',
+                color: statusFilter === s ? 'var(--color-accent)' : 'var(--color-text-dim)',
+              }}
             >
               {s}
             </button>
@@ -40,40 +47,104 @@ export const SkillModeration = () => {
 
       <SectionCard>
         {/* Header row */}
-        <div className="grid grid-cols-[1fr_80px_80px_90px_80px_110px] gap-2.5 px-4 py-2 border-b border-border-default font-sans text-[11px] text-text-muted uppercase tracking-wider">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 80px 80px 90px 80px 110px',
+            gap: 10,
+            padding: '8px 16px',
+            borderBottom: '1px solid var(--color-border-default)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 11,
+            color: 'var(--color-text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           <span>Skill</span>
           <span>Status</span>
           <span>Trust</span>
-          <span className="text-right">Downloads</span>
-          <span className="text-right">Published</span>
-          <span className="text-right">Actions</span>
+          <span style={{ textAlign: 'right' }}>Downloads</span>
+          <span style={{ textAlign: 'right' }}>Published</span>
+          <span style={{ textAlign: 'right' }}>Actions</span>
         </div>
 
         {/* Rows */}
         {filtered.map((skill) => (
           <div
             key={skill.name}
-            className="grid grid-cols-[1fr_80px_80px_90px_80px_110px] gap-2.5 px-4 py-2.5 border-b border-border-default/25 items-center hover:bg-bg-hover"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 80px 80px 90px 80px 110px',
+              gap: 10,
+              padding: '10px 16px',
+              borderBottom: '1px solid rgba(26,29,39,0.25)',
+              alignItems: 'center',
+            }}
           >
             <div>
-              <span className="font-mono text-[13px] text-cyan font-medium">{skill.name}</span>
-              <span className="font-mono text-[11px] text-text-faint ml-1.5">{skill.version}</span>
-              <span className="font-sans text-[11px] text-text-muted ml-2">@{skill.author}</span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 13,
+                  color: 'var(--color-cyan)',
+                  fontWeight: 500,
+                }}
+              >
+                {skill.name}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  color: 'var(--color-text-faint)',
+                  marginLeft: 6,
+                }}
+              >
+                {skill.version}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 11,
+                  color: 'var(--color-text-muted)',
+                  marginLeft: 8,
+                }}
+              >
+                @{skill.author}
+              </span>
             </div>
             <StatusBadge status={skill.status} />
             <span
-              className="font-mono text-[11px]"
-              style={{ color: `var(--color-${TRUST_CONFIG[skill.trust].color})` }}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: `var(--color-${TRUST_CONFIG[skill.trust].color})`,
+              }}
             >
               {TRUST_CONFIG[skill.trust].checks}
             </span>
-            <span className="font-mono text-xs text-text-secondary text-right">
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                color: 'var(--color-text-secondary)',
+                textAlign: 'right',
+              }}
+            >
               {skill.downloads > 0 ? `${(skill.downloads / 1000).toFixed(1)}k` : '\u2014'}
             </span>
-            <span className="font-mono text-[11px] text-text-muted text-right">
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: 'var(--color-text-muted)',
+                textAlign: 'right',
+              }}
+            >
               {skill.published.slice(5)}
             </span>
-            <div className="flex gap-1 justify-end">
+            <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
               <ActionButton label="View" color="blue" small />
               <ActionButton label="Yank" color="red" small />
             </div>

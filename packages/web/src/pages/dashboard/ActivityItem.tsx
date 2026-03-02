@@ -12,17 +12,47 @@ interface ActivityItemProps {
 
 export const ActivityItem = ({ item }: ActivityItemProps) => {
   return (
-    <div className="flex gap-3 items-start py-2.5 border-b border-border-default/20">
-      <span className="text-sm shrink-0 mt-px">{ACTIVITY_ICONS[item.type]}</span>
-      <div className="flex-1 min-w-0">
-        <div className="font-sans text-[13px] text-text-secondary">
+    <div
+      style={{
+        display: 'flex',
+        gap: 12,
+        alignItems: 'flex-start',
+        padding: '10px 0',
+        borderBottom: '1px solid rgba(26,29,39,0.2)',
+      }}
+    >
+      <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>{ACTIVITY_ICONS[item.type]}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 13,
+            color: 'var(--color-text-secondary)',
+          }}
+        >
           {item.detail}
           {item.version && (
-            <span className="font-mono text-xs text-text-dim ml-1.5">v{item.version}</span>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                color: 'var(--color-text-dim)',
+                marginLeft: 6,
+              }}
+            >
+              v{item.version}
+            </span>
           )}
         </div>
-        <div className="font-mono text-[11px] text-text-muted mt-0.5">
-          <span className="text-cyan">{item.skill}</span> &middot; {item.date}
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            color: 'var(--color-text-muted)',
+            marginTop: 2,
+          }}
+        >
+          <span style={{ color: 'var(--color-cyan)' }}>{item.skill}</span> &middot; {item.date}
         </div>
       </div>
     </div>

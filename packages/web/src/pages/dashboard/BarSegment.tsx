@@ -13,8 +13,10 @@ export const BarSegment = ({ pct, color, label }: BarSegmentProps) => {
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative cursor-default transition-opacity duration-150"
       style={{
+        position: 'relative',
+        cursor: 'default',
+        transition: 'opacity 150ms',
         width: `${pct}%`,
         height: 28,
         background: color,
@@ -23,7 +25,24 @@ export const BarSegment = ({ pct, color, label }: BarSegmentProps) => {
       }}
     >
       {hovered && (
-        <div className="absolute bottom-[34px] left-1/2 -translate-x-1/2 bg-bg-card border border-border-default rounded-md px-2.5 py-1 whitespace-nowrap z-10 font-mono text-[11px] text-text-primary shadow-lg">
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 34,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'var(--color-bg-card)',
+            border: '1px solid var(--color-border-default)',
+            borderRadius: 6,
+            padding: '4px 10px',
+            whiteSpace: 'nowrap',
+            zIndex: 10,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            color: 'var(--color-text-primary)',
+            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+          }}
+        >
           {label} {pct}%
         </div>
       )}
