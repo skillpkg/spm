@@ -1,4 +1,4 @@
-import { render, type RenderOptions } from '@testing-library/react';
+import { render, type RenderOptions, type RenderResult } from '@testing-library/react';
 import { MemoryRouter, type MemoryRouterProps } from 'react-router-dom';
 import { type ReactNode } from 'react';
 import { AuthProvider } from '../context/AuthContext';
@@ -7,7 +7,7 @@ interface RenderWithProvidersOptions extends RenderOptions {
   routerProps?: MemoryRouterProps;
 }
 
-export const renderWithProviders = (ui: ReactNode, options?: RenderWithProvidersOptions) => {
+export const renderWithProviders = (ui: ReactNode, options?: RenderWithProvidersOptions): RenderResult => {
   const { routerProps, ...renderOptions } = options ?? {};
   return render(
     <MemoryRouter {...routerProps}>
