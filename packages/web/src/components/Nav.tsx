@@ -20,28 +20,75 @@ export const Nav = ({
   };
 
   return (
-    <nav className="flex items-center gap-4 px-8 py-2.5 border-b border-border-default sticky top-0 z-50 bg-[rgba(8,10,15,0.92)] backdrop-blur-xl">
-      <Link to="/" className="flex items-center gap-2 no-underline shrink-0">
-        <div className="w-[26px] h-[26px] rounded-[5px] bg-gradient-to-br from-accent to-accent-dim flex items-center justify-center font-mono text-xs font-bold text-bg">
+    <nav
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        padding: '10px 32px',
+        borderBottom: '1px solid var(--color-border-default)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        background: 'rgba(8,10,15,0.92)',
+        backdropFilter: 'blur(12px)',
+      }}
+    >
+      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
+        <div
+          style={{
+            width: 26,
+            height: 26,
+            borderRadius: 5,
+            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dim) 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 12,
+            fontWeight: 700,
+            color: 'var(--color-bg)',
+          }}
+        >
           S
         </div>
-        <span className="font-mono text-base font-bold text-accent">spm</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 700, color: 'var(--color-accent)' }}>
+          spm
+        </span>
       </Link>
 
-      <form onSubmit={handleSubmit} className="flex-1 max-w-[440px]">
-        <div className="flex items-center bg-bg-input border border-border-default rounded-lg px-3">
-          <span className="text-text-muted text-sm mr-2">&#x2315;</span>
+      <form onSubmit={handleSubmit} style={{ flex: 1, maxWidth: 440 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: 'var(--color-bg-input)',
+            border: '1px solid var(--color-border-default)',
+            borderRadius: 8,
+            padding: '0 12px',
+          }}
+        >
+          <span style={{ color: 'var(--color-text-muted)', fontSize: 14, marginRight: 8 }}>&#x2315;</span>
           <input
             ref={inputRef}
             value={query ?? ''}
             onChange={(e) => onQueryChange?.(e.target.value)}
             placeholder="Search skills..."
-            className="flex-1 font-sans text-sm py-2 bg-transparent border-none text-text-primary outline-none"
+            style={{
+              flex: 1,
+              fontFamily: 'var(--font-sans)',
+              fontSize: 14,
+              padding: '8px 0',
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--color-text-primary)',
+              outline: 'none',
+            }}
           />
           {query && (
             <span
               onClick={() => onQueryChange?.('')}
-              className="text-text-muted cursor-pointer text-xs p-1"
+              style={{ color: 'var(--color-text-muted)', cursor: 'pointer', fontSize: 12, padding: 4 }}
             >
               &#x2715;
             </span>
@@ -49,20 +96,40 @@ export const Nav = ({
         </div>
       </form>
 
-      <div className="flex gap-4 ml-auto items-center">
-        {(['Docs', 'CLI', 'Publish'] as const).map((item) => (
+      <div style={{ display: 'flex', gap: 16, marginLeft: 'auto', alignItems: 'center' }}>
+        {([
+          { label: 'Docs', to: '/docs' },
+          { label: 'CLI', to: '/cli' },
+          { label: 'Publish', to: '/publish' },
+        ] as const).map((item) => (
           <Link
-            key={item}
-            to="#"
-            className="font-sans text-sm text-text-dim no-underline hover:text-text-secondary transition-colors"
+            key={item.label}
+            to={item.to}
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 14,
+              color: 'var(--color-text-dim)',
+              textDecoration: 'none',
+            }}
           >
-            {item}
+            {item.label}
           </Link>
         ))}
-        <code className="font-mono text-[11px] text-text-faint hidden md:block">npm i -g spm</code>
+        <code style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}>
+          npm i -g spm
+        </code>
         <Link
           to="#"
-          className="font-sans text-sm text-bg px-3.5 py-1 rounded-md bg-accent no-underline font-semibold hover:opacity-90 transition-opacity"
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 14,
+            color: 'var(--color-bg)',
+            padding: '4px 14px',
+            borderRadius: 6,
+            background: 'var(--color-accent)',
+            textDecoration: 'none',
+            fontWeight: 600,
+          }}
         >
           Sign in
         </Link>

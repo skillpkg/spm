@@ -41,13 +41,18 @@ export const FlaggedQueue = () => {
             </div>
 
             {/* Flags summary */}
-            <div className="flex gap-2 px-[18px] pb-3 flex-wrap">
+            <div style={{ display: 'flex', gap: 8, padding: '0 18px 12px', flexWrap: 'wrap' }}>
               {item.flags.map((f, i) => (
                 <span
                   key={i}
-                  className={`font-mono text-[11px] px-2.5 py-0.5 rounded ${
-                    f.confidence > 0.8 ? 'bg-red/10 text-red' : 'bg-yellow/10 text-yellow'
-                  }`}
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 11,
+                    padding: '2px 10px',
+                    borderRadius: 4,
+                    backgroundColor: f.confidence > 0.8 ? 'rgba(239,68,68,0.1)' : 'rgba(251,191,36,0.1)',
+                    color: f.confidence > 0.8 ? 'var(--color-red)' : 'var(--color-yellow)',
+                  }}
                 >
                   L{f.layer}: {f.type} ({(f.confidence * 100).toFixed(0)}%)
                 </span>

@@ -35,12 +35,15 @@ export const ScanAnalytics = () => {
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
                   <span className="font-mono text-[10px] text-text-muted">{v}</span>
                   <div
-                    className={`w-full max-w-[40px] rounded-t-[3px] ${
-                      isLast ? 'bg-accent' : 'bg-accent/35'
-                    }`}
-                    style={{ height: h }}
+                    style={{
+                      width: '100%',
+                      maxWidth: 40,
+                      borderRadius: '3px 3px 0 0',
+                      height: h,
+                      background: isLast ? 'var(--color-accent)' : 'rgba(16,185,129,0.35)',
+                    }}
                   />
-                  <span className="font-mono text-[9px] text-text-faint">W{i + 1}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-faint)' }}>W{i + 1}</span>
                 </div>
               );
             })}
@@ -60,12 +63,15 @@ export const ScanAnalytics = () => {
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
                   <span className="font-mono text-[10px] text-text-muted">{v}%</span>
                   <div
-                    className={`w-full max-w-[40px] rounded-t-[3px] ${
-                      isLast ? 'bg-red' : 'bg-red/35'
-                    }`}
-                    style={{ height: h }}
+                    style={{
+                      width: '100%',
+                      maxWidth: 40,
+                      borderRadius: '3px 3px 0 0',
+                      height: h,
+                      background: isLast ? 'var(--color-red)' : 'rgba(239,68,68,0.35)',
+                    }}
                   />
-                  <span className="font-mono text-[9px] text-text-faint">W{i + 1}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-faint)' }}>W{i + 1}</span>
                 </div>
               );
             })}

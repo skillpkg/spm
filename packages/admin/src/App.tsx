@@ -38,27 +38,64 @@ export const App = () => {
   return (
     <div className="bg-bg text-text-primary min-h-screen">
       {/* Nav */}
-      <nav className="flex justify-between items-center px-8 py-[11px] border-b border-border-default sticky top-0 z-[100] bg-bg/90 backdrop-blur-xl">
-        <div className="flex items-center gap-6">
-          <a href="#" className="flex items-center gap-2 no-underline">
-            <div className="w-[26px] h-[26px] rounded-[5px] bg-gradient-to-br from-red to-orange flex items-center justify-center font-mono text-xs font-bold text-bg">
+      <nav
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '11px 32px',
+          borderBottom: '1px solid var(--color-border-default)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          background: 'rgba(8,10,15,0.92)',
+          backdropFilter: 'blur(12px)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+            <div
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 5,
+                background: 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                fontWeight: 700,
+                color: '#080a0f',
+              }}
+            >
               A
             </div>
-            <span className="font-mono text-base font-bold text-red">spm</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 700, color: '#ef4444' }}>spm</span>
             <Badge label="ADMIN" color="red" />
           </a>
         </div>
-        <div className="flex gap-3 items-center">
-          <span className="font-mono text-xs text-text-muted">admin@spm.dev</span>
-          <a href="#" className="font-sans text-[13px] text-text-dim no-underline">
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-muted)' }}>admin@spm.dev</span>
+          <a href="#" style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-dim)', textDecoration: 'none' }}>
             &larr; Back to registry
           </a>
         </div>
       </nav>
 
       {/* Content */}
-      <div className="max-w-[1040px] mx-auto px-8 pt-6 pb-16">
-        <h1 className="font-sans text-[22px] font-bold text-text-primary mb-5">Admin Panel</h1>
+      <div style={{ maxWidth: 1040, margin: '0 auto', padding: '24px 32px 60px' }}>
+        <h1
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 22,
+            fontWeight: 700,
+            color: 'var(--color-text-primary)',
+            marginBottom: 20,
+          }}
+        >
+          Admin Panel
+        </h1>
 
         <Tabs tabs={TABS} active={tab} onChange={setTab} />
 

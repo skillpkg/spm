@@ -36,8 +36,12 @@ const withAlpha = (color: string, alpha: number): string => {
 
 export const Badge = ({ label, color }: { label: string; color: string }) => (
   <span
-    className="font-mono text-[11px] px-2 py-0.5 rounded whitespace-nowrap"
     style={{
+      fontFamily: 'var(--font-mono)',
+      fontSize: 11,
+      padding: '2px 8px',
+      borderRadius: 4,
+      whiteSpace: 'nowrap',
       backgroundColor: withAlpha(color, 0.1),
       color: resolveColor(color),
     }}
@@ -95,12 +99,21 @@ export const PriorityDot = ({ priority }: { priority: Priority }) => (
 export const SectionCard = ({
   children,
   className = '',
+  style,
 }: {
   children: ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }) => (
   <div
-    className={`bg-bg-card border border-border-default rounded-[10px] overflow-hidden ${className}`}
+    className={className}
+    style={{
+      background: 'var(--color-bg-card)',
+      border: '1px solid var(--color-border-default)',
+      borderRadius: 10,
+      overflow: 'hidden',
+      ...style,
+    }}
   >
     {children}
   </div>
@@ -117,11 +130,26 @@ export const StatBox = ({
   value: string | number;
   color?: string;
 }) => (
-  <div className="flex-1 min-w-[120px] px-4 py-3.5 bg-bg-card border border-border-default rounded-lg">
-    <div className="font-sans text-[11px] text-text-muted mb-1">{label}</div>
+  <div
+    style={{
+      flex: 1,
+      minWidth: 120,
+      padding: '14px 16px',
+      background: 'var(--color-bg-card)',
+      border: '1px solid var(--color-border-default)',
+      borderRadius: 8,
+    }}
+  >
+    <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 4 }}>
+      {label}
+    </div>
     <div
-      className="font-mono text-[22px] font-bold"
-      style={{ color: color ? resolveColor(color) : 'var(--color-text-primary)' }}
+      style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: 22,
+        fontWeight: 700,
+        color: color ? resolveColor(color) : 'var(--color-text-primary)',
+      }}
     >
       {value}
     </div>
@@ -149,11 +177,15 @@ export const ActionButton = ({
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`font-mono rounded-[5px] border cursor-pointer transition-all duration-100 whitespace-nowrap ${
-        small ? 'text-[11px] px-2.5 py-0.5' : 'text-xs px-3.5 py-1'
-      }`}
       style={{
-        borderColor: withAlpha(color, 0.25),
+        fontFamily: 'var(--font-mono)',
+        fontSize: small ? 11 : 12,
+        padding: small ? '2px 10px' : '4px 14px',
+        borderRadius: 5,
+        border: `1px solid ${withAlpha(color, 0.25)}`,
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.1s',
         color: resolved,
         backgroundColor: hovered ? withAlpha(color, 0.15) : 'transparent',
       }}
@@ -181,23 +213,45 @@ export const Tabs = ({
   active: string;
   onChange: (id: string) => void;
 }) => (
-  <div className="flex gap-0 border-b border-border-default mb-5 overflow-x-auto">
+  <div
+    style={{
+      display: 'flex',
+      gap: 0,
+      borderBottom: '1px solid var(--color-border-default)',
+      marginBottom: 20,
+      overflowX: 'auto',
+    }}
+  >
     {tabs.map((tab) => (
       <button
         key={tab.id}
         onClick={() => onChange(tab.id)}
-        className="font-sans text-[13px] font-medium px-4 py-2.5 border-none cursor-pointer -mb-px whitespace-nowrap flex items-center gap-1.5 bg-transparent"
         style={{
-          color: active === tab.id ? 'var(--color-text-primary)' : 'var(--color-text-dim)',
+          fontFamily: 'var(--font-sans)',
+          fontSize: 13,
+          fontWeight: 500,
+          padding: '10px 18px',
+          border: 'none',
           borderBottom:
             active === tab.id ? '2px solid var(--color-accent)' : '2px solid transparent',
+          background: 'transparent',
+          color: active === tab.id ? 'var(--color-text-primary)' : 'var(--color-text-dim)',
+          cursor: 'pointer',
+          marginBottom: -1,
+          whiteSpace: 'nowrap',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
         }}
       >
         {tab.label}
         {tab.count != null && (
           <span
-            className="font-mono text-[10px] px-1.5 py-px rounded-full"
             style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 10,
+              padding: '1px 6px',
+              borderRadius: 10,
               backgroundColor: withAlpha(tab.countColor ?? 'accent', 0.1),
               color: resolveColor(tab.countColor ?? 'accent'),
             }}
@@ -216,7 +270,6 @@ export const SearchInput = ({
   value,
   onChange,
   placeholder,
-  maxWidth = 'max-w-xs',
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -224,14 +277,32 @@ export const SearchInput = ({
   maxWidth?: string;
 }) => (
   <div
-    className={`flex items-center bg-bg-card border border-border-default rounded-lg px-3 flex-1 ${maxWidth}`}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      background: 'var(--color-bg-card)',
+      border: '1px solid var(--color-border-default)',
+      borderRadius: 8,
+      padding: '0 12px',
+      flex: 1,
+      maxWidth: 320,
+    }}
   >
-    <span className="text-text-muted text-[13px] mr-2">&#x2315;</span>
+    <span style={{ color: 'var(--color-text-muted)', fontSize: 13, marginRight: 8 }}>&#x2315;</span>
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="flex-1 font-sans text-[13px] py-2 bg-transparent border-none text-text-primary outline-none"
+      style={{
+        flex: 1,
+        fontFamily: 'var(--font-sans)',
+        fontSize: 13,
+        padding: '8px 0',
+        background: 'transparent',
+        border: 'none',
+        color: 'var(--color-text-primary)',
+        outline: 'none',
+      }}
     />
   </div>
 );
@@ -262,30 +333,43 @@ export const FilterDropdown = ({
   const activeColor = color ?? 'accent';
 
   return (
-    <div className="relative">
+    <div style={{ position: 'relative' }}>
       <button
         onClick={() => setOpen(!open)}
-        className="font-sans text-xs px-3 py-1.5 rounded-md cursor-pointer flex items-center gap-1.5 border"
-        style={
-          hasValue
-            ? {
-                borderColor: withAlpha(activeColor, 0.25),
-                backgroundColor: withAlpha(activeColor, 0.05),
-                color: resolveColor(activeColor),
-              }
-            : {
-                borderColor: 'var(--color-border-default)',
-                backgroundColor: 'var(--color-bg-card)',
-                color: 'var(--color-text-dim)',
-              }
-        }
+        style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 12,
+          padding: '6px 12px',
+          borderRadius: 6,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          border: `1px solid ${hasValue ? withAlpha(activeColor, 0.25) : 'var(--color-border-default)'}`,
+          backgroundColor: hasValue ? withAlpha(activeColor, 0.05) : 'var(--color-bg-card)',
+          color: hasValue ? resolveColor(activeColor) : 'var(--color-text-dim)',
+        }}
       >
-        {label} <span className="text-[10px] opacity-60">&#x25BE;</span>
+        {label} <span style={{ fontSize: 10, opacity: 0.6 }}>&#x25BE;</span>
       </button>
       {open && (
         <>
-          <div onClick={() => setOpen(false)} className="fixed inset-0 z-50" />
-          <div className="absolute top-full left-0 mt-1 z-[51] bg-bg-card border border-border-default rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.4)] min-w-[140px] overflow-hidden">
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              marginTop: 4,
+              zIndex: 51,
+              background: 'var(--color-bg-card)',
+              border: '1px solid var(--color-border-default)',
+              borderRadius: 8,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+              minWidth: 140,
+              overflow: 'hidden',
+            }}
+          >
             {options.map((opt) => {
               const isActive = value === opt.value;
               const optColor = opt.color ?? 'accent';
@@ -296,18 +380,20 @@ export const FilterDropdown = ({
                     onChange(opt.value);
                     setOpen(false);
                   }}
-                  className="font-sans text-xs px-3.5 py-2 cursor-pointer flex justify-between items-center hover:bg-bg-hover"
-                  style={
-                    isActive
-                      ? {
-                          color: resolveColor(optColor),
-                          backgroundColor: withAlpha(optColor, 0.05),
-                        }
-                      : { color: 'var(--color-text-secondary)' }
-                  }
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 12,
+                    padding: '8px 14px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    color: isActive ? resolveColor(optColor) : 'var(--color-text-secondary)',
+                    backgroundColor: isActive ? withAlpha(optColor, 0.05) : 'transparent',
+                  }}
                 >
                   {opt.label}
-                  {isActive && <span className="text-[11px]">&#x2713;</span>}
+                  {isActive && <span style={{ fontSize: 11 }}>&#x2713;</span>}
                 </div>
               );
             })}
@@ -330,8 +416,14 @@ export const FilterTag = ({
   onRemove: () => void;
 }) => (
   <span
-    className="font-mono text-[11px] py-0.5 pl-2 pr-2.5 rounded-full inline-flex items-center gap-1.5"
     style={{
+      fontFamily: 'var(--font-mono)',
+      fontSize: 11,
+      padding: '2px 10px 2px 8px',
+      borderRadius: 20,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
       backgroundColor: withAlpha(color, 0.1),
       color: resolveColor(color),
     }}
@@ -339,7 +431,7 @@ export const FilterTag = ({
     {label}
     <span
       onClick={onRemove}
-      className="cursor-pointer text-sm leading-none opacity-60 font-semibold"
+      style={{ cursor: 'pointer', fontSize: 14, lineHeight: 1, opacity: 0.6, fontWeight: 600 }}
     >
       &#xD7;
     </span>

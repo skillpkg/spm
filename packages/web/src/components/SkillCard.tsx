@@ -12,49 +12,89 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
   return (
     <Link
       to={`/skills/${skill.name}`}
-      className="no-underline flex-1 min-w-[240px]"
+      style={{ textDecoration: 'none', flex: 1, minWidth: 240, display: 'flex' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       <div
-        className="relative overflow-hidden rounded-xl p-5 transition-all duration-200"
         style={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: 12,
+          padding: 20,
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
           background: hovered ? '#10131a' : '#0c0e14',
           border: `1px solid ${hovered ? accent + '44' : '#1a1d27'}`,
           transform: hovered ? 'translateY(-2px)' : 'none',
           boxShadow: hovered ? `0 8px 30px ${accent}11` : 'none',
+          transition: 'all 0.2s',
         }}
       >
         {/* Rank accent bar */}
         <div
-          className="absolute top-0 left-0 w-[3px] h-full transition-opacity duration-200"
           style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 3,
+            height: '100%',
             background: accent,
             opacity: hovered ? 1 : 0.4,
+            transition: 'opacity 0.2s',
           }}
         />
 
-        <div className="flex justify-between items-start mb-2">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
           <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="font-mono text-base text-cyan font-semibold">{skill.name}</span>
-              <span className="font-mono text-xs text-text-faint">{skill.version}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 16, color: 'var(--color-cyan)', fontWeight: 600 }}>
+                {skill.name}
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-faint)' }}>
+                {skill.version}
+              </span>
             </div>
-            <span className="font-sans text-xs text-text-muted">by @{skill.author}</span>
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-muted)' }}>
+              by @{skill.author}
+            </span>
           </div>
           <TrustBadge tier={skill.trust} />
         </div>
 
-        <p className="font-sans text-[13px] text-[#8896aa] mb-3.5 leading-relaxed line-clamp-2">
+        <p
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 13,
+            color: '#8896aa',
+            marginBottom: 14,
+            lineHeight: 1.6,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            margin: '0 0 14px 0',
+            flex: 1,
+          }}
+        >
           {skill.desc}
         </p>
 
         {skill.tags && skill.tags.length > 0 && (
-          <div className="flex gap-1.5 flex-wrap mb-3.5">
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
             {skill.tags.map((tag) => (
               <span
                 key={tag}
-                className="font-mono text-[10px] px-[7px] py-[2px] rounded bg-[#111318] text-text-dim border border-border-default"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  padding: '2px 7px',
+                  borderRadius: 4,
+                  background: '#111318',
+                  color: 'var(--color-text-dim)',
+                  border: '1px solid var(--color-border-default)',
+                }}
               >
                 {tag}
               </span>
@@ -62,10 +102,20 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
           </div>
         )}
 
-        <div className="flex gap-3.5 font-mono text-xs pt-3 border-t border-border-default">
-          <span className="text-text-dim">&#x2B07; {skill.downloads}</span>
-          {skill.weeklyGrowth && <span className="text-accent">{skill.weeklyGrowth}</span>}
-          {skill.rating && <span className="text-yellow">&#x2605; {skill.rating}</span>}
+        <div
+          style={{
+            display: 'flex',
+            gap: 14,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 12,
+            paddingTop: 12,
+            borderTop: '1px solid var(--color-border-default)',
+            marginTop: 'auto',
+          }}
+        >
+          <span style={{ color: 'var(--color-text-dim)' }}>&#x2B07; {skill.downloads}</span>
+          {skill.weeklyGrowth && <span style={{ color: 'var(--color-accent)' }}>{skill.weeklyGrowth}</span>}
+          {skill.rating && <span style={{ color: 'var(--color-yellow)' }}>&#x2605; {skill.rating}</span>}
         </div>
       </div>
     </Link>

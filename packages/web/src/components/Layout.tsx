@@ -4,9 +4,17 @@ import { Footer } from './Footer';
 
 export const Layout = () => {
   return (
-    <div className="min-h-screen bg-bg text-text-primary flex flex-col">
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'var(--color-bg)',
+        color: 'var(--color-text-primary)',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <Nav />
-      <main className="flex-1">
+      <main style={{ flex: 1 }}>
         <Outlet />
       </main>
       <Footer />

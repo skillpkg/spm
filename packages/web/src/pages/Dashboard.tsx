@@ -24,48 +24,84 @@ const TABS = [
   { id: 'analytics', label: 'Analytics' },
 ];
 
+const cardStyle: React.CSSProperties = {
+  background: 'var(--color-bg-card)',
+  border: '1px solid var(--color-border-default)',
+  borderRadius: 10,
+  overflow: 'hidden',
+};
+
+const sectionTitle: React.CSSProperties = {
+  fontFamily: 'var(--font-sans)',
+  fontSize: 14,
+  fontWeight: 600,
+  color: 'var(--color-text-primary)',
+  marginBottom: 16,
+};
+
 const SkillsTableHeader = () => (
   <div
-    className="grid px-[18px] py-2 border-b border-border-default font-sans text-[11px] text-text-muted uppercase tracking-wide"
-    style={{ gridTemplateColumns: '1fr 100px 100px 90px 80px' }}
+    style={{
+      display: 'grid',
+      gridTemplateColumns: '1fr 100px 100px 90px 80px',
+      padding: '8px 18px',
+      borderBottom: '1px solid var(--color-border-default)',
+      fontFamily: 'var(--font-sans)',
+      fontSize: 11,
+      color: 'var(--color-text-muted)',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+    }}
   >
     <span>Skill</span>
-    <span className="text-right">Downloads</span>
-    <span className="text-right">Rating</span>
-    <span className="text-right">Trust</span>
-    <span className="text-right">Updated</span>
+    <span style={{ textAlign: 'right' }}>Downloads</span>
+    <span style={{ textAlign: 'right' }}>Rating</span>
+    <span style={{ textAlign: 'right' }}>Trust</span>
+    <span style={{ textAlign: 'right' }}>Updated</span>
   </div>
 );
 
 const PublishTableHeader = () => (
   <div
-    className="grid px-4 py-2 border-b border-border-default font-sans text-[11px] text-text-muted uppercase tracking-wide gap-3"
-    style={{ gridTemplateColumns: '140px 60px 1fr 100px 70px' }}
+    style={{
+      display: 'grid',
+      gridTemplateColumns: '140px 60px 1fr 100px 70px',
+      padding: '8px 16px',
+      gap: 12,
+      borderBottom: '1px solid var(--color-border-default)',
+      fontFamily: 'var(--font-sans)',
+      fontSize: 11,
+      color: 'var(--color-text-muted)',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+    }}
   >
     <span>Skill</span>
     <span>Status</span>
     <span>Detail</span>
-    <span className="text-right">Date</span>
-    <span className="text-right">Scan</span>
+    <span style={{ textAlign: 'right' }}>Date</span>
+    <span style={{ textAlign: 'right' }}>Scan</span>
   </div>
 );
 
 const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
-  <div className="flex gap-5">
+  <div style={{ display: 'flex', gap: 20 }}>
     {/* Main column */}
-    <div className="flex-1 min-w-0">
+    <div style={{ flex: 1, minWidth: 0 }}>
       {/* Skills */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2.5">
-          <h2 className="font-sans text-[15px] font-semibold text-text-secondary">Your skills</h2>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 600, color: 'var(--color-text-secondary)', margin: 0 }}>
+            Your skills
+          </h2>
           <span
             onClick={onViewAllSkills}
-            className="font-mono text-xs text-accent cursor-pointer hover:opacity-80"
+            style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-accent)', cursor: 'pointer' }}
           >
             View all &rarr;
           </span>
         </div>
-        <div className="border border-border-default rounded-[10px] overflow-hidden">
+        <div style={cardStyle}>
           <SkillsTableHeader />
           {MY_SKILLS.map((s) => (
             <SkillRow key={s.name} skill={s} />
@@ -75,10 +111,10 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
 
       {/* Recent activity */}
       <div>
-        <h2 className="font-sans text-[15px] font-semibold text-text-secondary mb-2.5">
+        <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 10, marginTop: 0 }}>
           Recent activity
         </h2>
-        <div className="px-[18px] py-1.5 bg-bg-card border border-border-default rounded-[10px]">
+        <div style={{ ...cardStyle, padding: '6px 18px' }}>
           {RECENT_ACTIVITY.map((item, i) => (
             <ActivityItem key={i} item={item} />
           ))}
@@ -87,42 +123,55 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
     </div>
 
     {/* Sidebar */}
-    <aside className="w-60 shrink-0">
+    <aside style={{ width: 240, flexShrink: 0 }}>
       <TrustProgress currentTier={AUTHOR.trust} />
 
       {/* Agent breakdown */}
-      <div className="px-5 py-[18px] bg-bg-card border border-border-default rounded-[10px] mt-3.5">
-        <div className="font-sans text-sm font-semibold text-text-primary mb-3.5">
+      <div style={{ ...cardStyle, padding: '18px 20px', marginTop: 14 }}>
+        <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 14 }}>
           Installs by agent
         </div>
         {/* Stacked bar */}
-        <div className="flex h-7 rounded-md overflow-hidden mb-3.5">
+        <div style={{ display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: 14 }}>
           {AGENT_BREAKDOWN.map((a) => (
             <BarSegment key={a.agent} pct={a.pct} color={a.color} label={a.agent} />
           ))}
         </div>
         {/* Legend */}
-        <div className="flex flex-col gap-1.5">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {AGENT_BREAKDOWN.map((a) => (
-            <div key={a.agent} className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-sm" style={{ background: a.color }} />
-                <span className="font-sans text-xs text-text-secondary">{a.agent}</span>
+            <div key={a.agent} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: a.color }} />
+                <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+                  {a.agent}
+                </span>
               </div>
-              <span className="font-mono text-xs text-text-dim">{a.pct}%</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-dim)' }}>
+                {a.pct}%
+              </span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Quick links */}
-      <div className="px-5 py-4 bg-bg-card border border-border-default rounded-[10px] mt-3.5">
-        <div className="font-sans text-sm font-semibold text-text-primary mb-2.5">Quick links</div>
+      <div style={{ ...cardStyle, padding: '16px 20px', marginTop: 14 }}>
+        <div style={{ fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 10 }}>
+          Quick links
+        </div>
         {['Public profile', 'Account settings', 'API tokens', 'Publish guide'].map((label) => (
           <a
             key={label}
             href="#"
-            className="block font-sans text-[13px] text-blue no-underline py-1 hover:opacity-80"
+            style={{
+              display: 'block',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              color: 'var(--color-blue)',
+              textDecoration: 'none',
+              padding: '4px 0',
+            }}
           >
             {label}
           </a>
@@ -133,7 +182,7 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
 );
 
 const SkillsTab = () => (
-  <div className="border border-border-default rounded-[10px] overflow-hidden">
+  <div style={cardStyle}>
     <SkillsTableHeader />
     {MY_SKILLS.map((s) => (
       <SkillRow key={s.name} skill={s} />
@@ -148,21 +197,21 @@ const PublishHistoryTab = () => {
 
   return (
     <div>
-      <div className="border border-border-default rounded-[10px] overflow-hidden">
+      <div style={cardStyle}>
         <PublishTableHeader />
         {PUBLISH_HISTORY.map((item, i) => (
           <PublishRow key={i} item={item} />
         ))}
       </div>
-      <div className="mt-4 px-[18px] py-3.5 bg-bg-card border border-border-default rounded-[10px]">
-        <div className="font-sans text-[13px] text-text-secondary">
-          <span className="font-mono text-accent">{successCount}</span> successful
+      <div style={{ ...cardStyle, marginTop: 16, padding: '14px 18px' }}>
+        <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>{successCount}</span> successful
           {' \u00b7 '}
-          <span className="font-mono text-red">{blockedCount}</span> blocked
+          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-red)' }}>{blockedCount}</span> blocked
           {' \u00b7 '}
-          <span className="font-mono text-yellow">{heldCount}</span> held for review
+          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-yellow)' }}>{heldCount}</span> held for review
           {' \u00b7 '}
-          <span className="font-mono text-text-dim">{PUBLISH_HISTORY.length}</span> total attempts
+          <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-dim)' }}>{PUBLISH_HISTORY.length}</span> total attempts
         </div>
       </div>
     </div>
@@ -175,29 +224,32 @@ const AnalyticsTab = () => {
   return (
     <div>
       {/* Weekly downloads chart */}
-      <div className="px-6 py-5 bg-bg-card border border-border-default rounded-[10px] mb-5">
-        <div className="font-sans text-sm font-semibold text-text-primary mb-4">
-          Weekly downloads
-        </div>
-        <div className="flex items-end gap-1.5 h-[120px]">
+      <div style={{ ...cardStyle, padding: '20px 24px', marginBottom: 20 }}>
+        <div style={sectionTitle}>Weekly downloads</div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 120 }}>
           {WEEKLY_TREND.map((w, i) => {
             const barHeight = (w.downloads / maxDownloads) * 100;
             const isLast = i === WEEKLY_TREND.length - 1;
             return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-                <span className="font-mono text-[10px] text-text-muted">
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-muted)' }}>
                   {(w.downloads / 1000).toFixed(1)}k
                 </span>
                 <div
-                  className="w-full max-w-[48px] rounded-t transition-all duration-300"
                   style={{
+                    width: '100%',
+                    maxWidth: 48,
+                    borderRadius: '4px 4px 0 0',
                     height: barHeight,
                     background: isLast
                       ? 'linear-gradient(180deg, var(--color-accent) 0%, var(--color-accent-dim) 100%)'
                       : 'rgba(16,185,129,0.19)',
+                    transition: 'all 0.3s',
                   }}
                 />
-                <span className="font-mono text-[9px] text-text-muted">{w.week.split(' ')[1]}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-muted)' }}>
+                  {w.week.split(' ')[1]}
+                </span>
               </div>
             );
           })}
@@ -205,24 +257,23 @@ const AnalyticsTab = () => {
       </div>
 
       {/* Per-skill breakdown */}
-      <div className="px-6 py-5 bg-bg-card border border-border-default rounded-[10px] mb-5">
-        <div className="font-sans text-sm font-semibold text-text-primary mb-4">
-          Downloads by skill
-        </div>
+      <div style={{ ...cardStyle, padding: '20px 24px', marginBottom: 20 }}>
+        <div style={sectionTitle}>Downloads by skill</div>
         {MY_SKILLS.map((skill) => {
           const pct = Math.round((skill.downloads / AUTHOR.totalDownloads) * 100);
           return (
-            <div key={skill.name} className="mb-3.5">
-              <div className="flex justify-between mb-1">
-                <span className="font-mono text-[13px] text-cyan">{skill.name}</span>
-                <span className="font-mono text-xs text-text-secondary">
+            <div key={skill.name} style={{ marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-cyan)' }}>
+                  {skill.name}
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-secondary)' }}>
                   {(skill.downloads / 1000).toFixed(1)}k ({pct}%)
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-accent/10 rounded-sm">
+              <div style={{ width: '100%', height: 6, background: 'rgba(16,185,129,0.1)', borderRadius: 2 }}>
                 <div
-                  className="h-full bg-accent rounded-sm transition-all duration-400"
-                  style={{ width: `${pct}%` }}
+                  style={{ height: '100%', background: 'var(--color-accent)', borderRadius: 2, width: `${pct}%`, transition: 'all 0.4s' }}
                 />
               </div>
             </div>
@@ -231,24 +282,20 @@ const AnalyticsTab = () => {
       </div>
 
       {/* Agent breakdown (bigger version) */}
-      <div className="px-6 py-5 bg-bg-card border border-border-default rounded-[10px]">
-        <div className="font-sans text-sm font-semibold text-text-primary mb-4">
-          Installs by agent platform
-        </div>
+      <div style={{ ...cardStyle, padding: '20px 24px' }}>
+        <div style={sectionTitle}>Installs by agent platform</div>
         {AGENT_BREAKDOWN.map((a) => (
-          <div key={a.agent} className="mb-3">
-            <div className="flex justify-between mb-1">
-              <span className="font-sans text-[13px] text-text-secondary">{a.agent}</span>
-              <span className="font-mono text-xs text-text-dim">{a.pct}%</span>
+          <div key={a.agent} style={{ marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+                {a.agent}
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-dim)' }}>
+                {a.pct}%
+              </span>
             </div>
-            <div
-              className="w-full h-1.5 rounded-sm"
-              style={{ background: `color-mix(in srgb, ${a.color} 12%, transparent)` }}
-            >
-              <div
-                className="h-full rounded-sm"
-                style={{ width: `${a.pct}%`, background: a.color }}
-              />
+            <div style={{ width: '100%', height: 6, borderRadius: 2, background: `color-mix(in srgb, ${a.color} 12%, transparent)` }}>
+              <div style={{ height: '100%', borderRadius: 2, width: `${a.pct}%`, background: a.color }} />
             </div>
           </div>
         ))}
@@ -262,19 +309,33 @@ export const Dashboard = () => {
   const trustCfg = TRUST_CONFIG[AUTHOR.trust];
 
   return (
-    <div className="max-w-[980px] mx-auto px-8 py-7 pb-16">
+    <div style={{ maxWidth: 980, margin: '0 auto', padding: '28px 32px 64px' }}>
       {/* Header */}
-      <div className="flex justify-between items-start mb-7">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <div className="flex items-center gap-3 mb-1.5">
-            <div className="w-11 h-11 rounded-[10px] bg-bg-hover border border-border-default flex items-center justify-center font-mono text-xl text-text-dim">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                background: 'var(--color-bg-hover)',
+                border: '1px solid var(--color-border-default)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 20,
+                color: 'var(--color-text-dim)',
+              }}
+            >
               A
             </div>
             <div>
-              <h1 className="font-mono text-[22px] font-bold text-text-primary">
+              <h1 style={{ fontFamily: 'var(--font-mono)', fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
                 @{AUTHOR.username}
               </h1>
-              <div className="font-mono text-xs" style={{ color: trustCfg.color }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: trustCfg.color }}>
                 {trustCfg.checks} {trustCfg.label} Author
               </div>
             </div>
@@ -282,14 +343,22 @@ export const Dashboard = () => {
         </div>
         <a
           href="#"
-          className="font-mono text-[13px] text-accent px-[18px] py-2 rounded-lg border border-accent/25 no-underline hover:border-accent/50 transition-colors"
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 13,
+            color: 'var(--color-accent)',
+            padding: '8px 18px',
+            borderRadius: 8,
+            border: '1px solid rgba(16,185,129,0.25)',
+            textDecoration: 'none',
+          }}
         >
           + Publish new skill
         </a>
       </div>
 
       {/* Stat cards */}
-      <div className="flex gap-3 mb-6">
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
         <StatCard
           label="Total downloads"
           value={`${(AUTHOR.totalDownloads / 1000).toFixed(1)}k`}
@@ -302,8 +371,19 @@ export const Dashboard = () => {
           sub={`${AUTHOR.totalReviews} reviews`}
           color="var(--color-yellow)"
         />
-        <div className="flex-1 min-w-[150px] px-5 py-[18px] bg-bg-card border border-border-default rounded-[10px]">
-          <div className="font-sans text-xs text-text-muted mb-1.5">Weekly trend</div>
+        <div
+          style={{
+            flex: 1,
+            minWidth: 150,
+            padding: '18px 20px',
+            background: 'var(--color-bg-card)',
+            border: '1px solid var(--color-border-default)',
+            borderRadius: 10,
+          }}
+        >
+          <div style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6 }}>
+            Weekly trend
+          </div>
           <MiniChart data={WEEKLY_TREND} />
         </div>
       </div>

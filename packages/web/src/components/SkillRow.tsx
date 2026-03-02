@@ -17,32 +17,63 @@ export const SkillRow = ({
   return (
     <Link
       to={`/skills/${skill.name}`}
-      className="no-underline"
+      style={{ textDecoration: 'none' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       <div
-        className="flex items-center px-4 py-[11px] gap-3 transition-colors duration-100"
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '11px 16px',
+          gap: 12,
+          transition: 'background 0.1s',
           borderBottom: '1px solid #1a1d2744',
           background: hovered ? '#10131a' : 'transparent',
         }}
       >
-        <div className="min-w-[150px]">
-          <span className="font-mono text-[13px] text-cyan font-medium">{skill.name}</span>
-          <span className="font-mono text-[11px] text-text-faint ml-1.5">{skill.version}</span>
+        <div style={{ minWidth: 150 }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-cyan)', fontWeight: 500 }}>
+            {skill.name}
+          </span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)', marginLeft: 6 }}>
+            {skill.version}
+          </span>
         </div>
-        <div className="flex-1 min-w-0 font-sans text-xs text-[#5a6578] whitespace-nowrap overflow-hidden text-ellipsis">
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            fontFamily: 'var(--font-sans)',
+            fontSize: 12,
+            color: '#5a6578',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {skill.desc || ''}
         </div>
-        <div className="flex items-center gap-3.5 font-mono text-[11px] text-text-muted shrink-0">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            color: 'var(--color-text-muted)',
+            flexShrink: 0,
+          }}
+        >
           <TrustBadge tier={skill.trust} showLabel={false} />
-          <span className="min-w-[50px] text-right">&#x2B07; {skill.downloads}</span>
+          <span style={{ minWidth: 50, textAlign: 'right' }}>&#x2B07; {skill.downloads}</span>
           {showGrowth && skill.weeklyGrowth && (
-            <span className="text-accent min-w-[40px] text-right">{skill.weeklyGrowth}</span>
+            <span style={{ color: 'var(--color-accent)', minWidth: 40, textAlign: 'right' }}>
+              {skill.weeklyGrowth}
+            </span>
           )}
           {showDaysAgo && skill.daysAgo != null && (
-            <span className="text-text-dim min-w-[50px] text-right">
+            <span style={{ color: 'var(--color-text-dim)', minWidth: 50, textAlign: 'right' }}>
               {skill.daysAgo === 0
                 ? 'today'
                 : skill.daysAgo === 1
@@ -50,7 +81,9 @@ export const SkillRow = ({
                   : `${skill.daysAgo}d ago`}
             </span>
           )}
-          <span className="text-yellow min-w-[30px]">&#x2605; {skill.rating || '\u2014'}</span>
+          <span style={{ color: 'var(--color-yellow)', minWidth: 30 }}>
+            &#x2605; {skill.rating || '\u2014'}
+          </span>
         </div>
       </div>
     </Link>

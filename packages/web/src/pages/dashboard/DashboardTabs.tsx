@@ -11,13 +11,27 @@ interface DashboardTabsProps {
 
 export const DashboardTabs = ({ tabs, active, onChange }: DashboardTabsProps) => {
   return (
-    <div className="flex gap-0 border-b border-border-default mb-5">
+    <div
+      style={{
+        display: 'flex',
+        gap: 0,
+        borderBottom: '1px solid var(--color-border-default)',
+        marginBottom: 20,
+      }}
+    >
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
-          className="font-sans text-[13px] font-medium px-[18px] py-[9px] border-none bg-transparent cursor-pointer -mb-px transition-colors"
           style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 13,
+            fontWeight: 500,
+            padding: '10px 18px',
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            marginBottom: -1,
             borderBottom:
               active === tab.id ? '2px solid var(--color-accent)' : '2px solid transparent',
             color: active === tab.id ? 'var(--color-text-primary)' : 'var(--color-text-dim)',

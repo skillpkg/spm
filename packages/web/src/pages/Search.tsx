@@ -12,27 +12,49 @@ import { TrustBadge } from '../components/TrustBadge';
 
 const SearchResultRow = ({ skill }: { skill: SkillFull }) => {
   return (
-    <Link to={`/skills/${skill.name}`} className="no-underline block">
-      <div className="px-5 py-4 border-b border-[#1a1d2744] hover:bg-bg-hover cursor-pointer transition-colors duration-100">
-        <div className="flex justify-between items-start mb-1.5">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[15px] text-cyan font-semibold">{skill.name}</span>
-            <span className="font-mono text-xs text-text-faint">{skill.version}</span>
+    <Link to={`/skills/${skill.name}`} style={{ textDecoration: 'none', display: 'block' }}>
+      <div
+        style={{
+          padding: '16px 20px',
+          borderBottom: '1px solid #1a1d2744',
+          cursor: 'pointer',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, color: 'var(--color-cyan)', fontWeight: 600 }}>
+              {skill.name}
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-faint)' }}>
+              {skill.version}
+            </span>
             <TrustBadge tier={skill.trust} />
           </div>
-          <div className="flex gap-4 font-mono text-xs text-text-muted">
+          <div style={{ display: 'flex', gap: 16, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-muted)' }}>
             <span>&#x2B07; {skill.downloads}</span>
-            <span className="text-yellow">&#x2605; {skill.rating}</span>
+            <span style={{ color: 'var(--color-yellow)' }}>&#x2605; {skill.rating}</span>
           </div>
         </div>
-        <p className="font-sans text-[13px] text-text-dim mb-2 leading-relaxed">{skill.desc}</p>
-        <div className="flex items-center gap-3">
-          <span className="font-sans text-xs text-text-muted">by @{skill.author}</span>
-          <div className="flex gap-1">
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-dim)', marginBottom: 8, lineHeight: 1.6, marginTop: 0 }}>
+          {skill.desc}
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-muted)' }}>
+            by @{skill.author}
+          </span>
+          <div style={{ display: 'flex', gap: 4 }}>
             {skill.tags?.slice(0, 4).map((t) => (
               <span
                 key={t}
-                className="font-mono text-[11px] px-2 py-[3px] rounded bg-[#111318] text-text-dim border border-border-default"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  padding: '3px 8px',
+                  borderRadius: 4,
+                  background: '#111318',
+                  color: 'var(--color-text-dim)',
+                  border: '1px solid var(--color-border-default)',
+                }}
               >
                 {t}
               </span>
@@ -43,6 +65,17 @@ const SearchResultRow = ({ skill }: { skill: SkillFull }) => {
     </Link>
   );
 };
+
+const sidebarItemStyle = (isActive: boolean): React.CSSProperties => ({
+  fontFamily: 'var(--font-sans)',
+  fontSize: 13,
+  padding: '6px 10px',
+  borderRadius: 6,
+  cursor: 'pointer',
+  marginBottom: 1,
+  color: isActive ? '#e2e8f0' : '#64748b',
+  background: isActive ? 'rgba(16,185,129,0.07)' : 'transparent',
+});
 
 export const Search = () => {
   const [searchParams] = useSearchParams();
@@ -72,45 +105,29 @@ export const Search = () => {
     .filter((s) => trustFilter === 'All' || s.trust === trustFilter.toLowerCase());
 
   return (
-    <div className="flex max-w-[1060px] mx-auto px-8 py-6 gap-7">
+    <div style={{ display: 'flex', maxWidth: 1060, margin: '0 auto', padding: '24px 32px', gap: 28 }}>
       {/* Sidebar filters */}
-      <aside className="w-[200px] shrink-0">
-        <div className="sticky top-[70px]">
+      <aside style={{ width: 200, flexShrink: 0 }}>
+        <div style={{ position: 'sticky', top: 70 }}>
           {/* Category filter */}
-          <div className="mb-7">
-            <h3 className="font-sans text-xs font-semibold text-text-dim mb-2.5 uppercase tracking-wide">
+          <div style={{ marginBottom: 28 }}>
+            <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--color-text-dim)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 0 }}>
               Category
             </h3>
             {CATEGORY_NAMES.map((cat) => (
-              <div
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className="font-sans text-[13px] px-2.5 py-1.5 rounded-md cursor-pointer transition-all duration-100 mb-[1px]"
-                style={{
-                  color: category === cat ? '#e2e8f0' : '#64748b',
-                  background: category === cat ? 'rgba(16,185,129,0.07)' : 'transparent',
-                }}
-              >
+              <div key={cat} onClick={() => setCategory(cat)} style={sidebarItemStyle(category === cat)}>
                 {cat}
               </div>
             ))}
           </div>
 
           {/* Trust filter */}
-          <div className="mb-7">
-            <h3 className="font-sans text-xs font-semibold text-text-dim mb-2.5 uppercase tracking-wide">
+          <div style={{ marginBottom: 28 }}>
+            <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--color-text-dim)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 0 }}>
               Trust tier
             </h3>
             {TRUST_TIERS.map((tier) => (
-              <div
-                key={tier}
-                onClick={() => setTrustFilter(tier)}
-                className="font-sans text-[13px] px-2.5 py-1.5 rounded-md cursor-pointer transition-all duration-100 mb-[1px]"
-                style={{
-                  color: trustFilter === tier ? '#e2e8f0' : '#64748b',
-                  background: trustFilter === tier ? 'rgba(16,185,129,0.07)' : 'transparent',
-                }}
-              >
+              <div key={tier} onClick={() => setTrustFilter(tier)} style={sidebarItemStyle(trustFilter === tier)}>
                 {tier}
               </div>
             ))}
@@ -118,18 +135,11 @@ export const Search = () => {
 
           {/* Platform filter */}
           <div>
-            <h3 className="font-sans text-xs font-semibold text-text-dim mb-2.5 uppercase tracking-wide">
+            <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--color-text-dim)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 0 }}>
               Platform
             </h3>
             {['All platforms', 'Claude Code', 'Cursor', 'Codex'].map((p) => (
-              <div
-                key={p}
-                className="font-sans text-[13px] px-2.5 py-1.5 rounded-md cursor-pointer mb-[1px]"
-                style={{
-                  color: p === 'All platforms' ? '#e2e8f0' : '#64748b',
-                  background: p === 'All platforms' ? 'rgba(16,185,129,0.07)' : 'transparent',
-                }}
-              >
+              <div key={p} style={sidebarItemStyle(p === 'All platforms')}>
                 {p}
               </div>
             ))}
@@ -138,23 +148,35 @@ export const Search = () => {
       </aside>
 
       {/* Results */}
-      <main className="flex-1 min-w-0">
+      <main style={{ flex: 1, minWidth: 0 }}>
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <div>
-            <span className="font-sans text-sm text-text-secondary">
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--color-text-secondary)' }}>
               {filtered.length} result{filtered.length !== 1 ? 's' : ''}
             </span>
             {queryParam && (
-              <span className="font-sans text-sm text-text-dim"> for &quot;{queryParam}&quot;</span>
+              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--color-text-dim)' }}>
+                {' '}for &quot;{queryParam}&quot;
+              </span>
             )}
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="font-sans text-xs text-text-muted">Sort:</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--color-text-muted)' }}>Sort:</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="font-sans text-xs bg-bg-card text-text-secondary border border-border-default rounded-md px-2 py-1 outline-none cursor-pointer"
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                background: 'var(--color-bg-card)',
+                color: 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border-default)',
+                borderRadius: 6,
+                padding: '4px 8px',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.id} value={o.id}>
@@ -167,46 +189,60 @@ export const Search = () => {
 
         {/* Active filters */}
         {(category !== 'All' || trustFilter !== 'All') && (
-          <div className="flex gap-1.5 mb-3.5 flex-wrap">
+          <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
             {category !== 'All' && (
               <span
                 onClick={() => setCategory('All')}
-                className="font-sans text-xs px-2.5 py-1 rounded-full cursor-pointer flex items-center gap-1"
                 style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 12,
+                  padding: '4px 10px',
+                  borderRadius: 20,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
                   background: 'rgba(16,185,129,0.08)',
                   color: '#10b981',
                 }}
               >
-                {category} <span className="text-[10px]">&#x2715;</span>
+                {category} <span style={{ fontSize: 10 }}>&#x2715;</span>
               </span>
             )}
             {trustFilter !== 'All' && (
               <span
                 onClick={() => setTrustFilter('All')}
-                className="font-sans text-xs px-2.5 py-1 rounded-full cursor-pointer flex items-center gap-1"
                 style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 12,
+                  padding: '4px 10px',
+                  borderRadius: 20,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
                   background: 'rgba(16,185,129,0.08)',
                   color: '#10b981',
                 }}
               >
-                {trustFilter} <span className="text-[10px]">&#x2715;</span>
+                {trustFilter} <span style={{ fontSize: 10 }}>&#x2715;</span>
               </span>
             )}
           </div>
         )}
 
         {/* Skill list */}
-        <div className="border border-border-default rounded-[10px] overflow-hidden">
+        <div style={{ border: '1px solid var(--color-border-default)', borderRadius: 10, overflow: 'hidden' }}>
           {filtered.length > 0 ? (
             filtered.map((skill) => <SearchResultRow key={skill.name} skill={skill} />)
           ) : (
-            <div className="p-12 text-center">
-              <div className="font-sans text-[15px] text-text-dim mb-2">
+            <div style={{ padding: 48, textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--color-text-dim)', marginBottom: 8 }}>
                 No skills match these filters
               </div>
-              <div className="font-sans text-[13px] text-text-muted">
+              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-muted)' }}>
                 Try broadening your search or{' '}
-                <Link to="#" className="text-accent no-underline">
+                <Link to="#" style={{ color: 'var(--color-accent)', textDecoration: 'none' }}>
                   publish your own
                 </Link>
               </div>

@@ -14,13 +14,15 @@ export const TrustBadge = ({
 
   return (
     <span
-      className={`font-mono whitespace-nowrap rounded-[5px] border`}
       style={{
+        fontFamily: 'var(--font-mono)',
+        whiteSpace: 'nowrap',
+        borderRadius: 5,
+        border: `1px solid ${t.color}18`,
         fontSize: isLg ? 13 : 11,
         padding: isLg ? '5px 12px' : '3px 8px',
         background: t.bg,
         color: t.color,
-        borderColor: `${t.color}18`,
       }}
     >
       {t.checks}

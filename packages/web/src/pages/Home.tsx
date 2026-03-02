@@ -61,10 +61,25 @@ export const Home = () => {
   return (
     <div>
       {/* Hero search */}
-      <section className="pt-10 pb-8 px-8 flex flex-col items-center relative">
+      <section
+        style={{
+          paddingTop: 40,
+          paddingBottom: 32,
+          paddingLeft: 32,
+          paddingRight: 32,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          position: 'relative',
+        }}
+      >
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
           style={{
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            pointerEvents: 'none',
             width: 500,
             height: 250,
             borderRadius: '50%',
@@ -72,23 +87,46 @@ export const Home = () => {
           }}
         />
 
-        <h1 className="font-sans text-2xl font-semibold text-text-primary mb-1 relative">
+        <h1
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 24,
+            fontWeight: 600,
+            color: 'var(--color-text-primary)',
+            marginBottom: 4,
+            position: 'relative',
+            marginTop: 0,
+          }}
+        >
           Find skills for your agents
         </h1>
-        <p className="font-sans text-sm text-text-muted mb-5">
+        <p
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 14,
+            color: 'var(--color-text-muted)',
+            marginBottom: 20,
+            marginTop: 0,
+          }}
+        >
           200+ skills &middot; 8 categories &middot; 37+ agent platforms
         </p>
 
-        <div className="w-full max-w-[600px] relative">
+        <div style={{ width: '100%', maxWidth: 600, position: 'relative' }}>
           <form onSubmit={handleSubmit}>
             <div
-              className="flex items-center bg-bg-card rounded-[10px] px-4 transition-all duration-200"
               style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: 'var(--color-bg-card)',
+                borderRadius: 10,
+                padding: '0 16px',
                 border: `1.5px solid ${focused ? '#10b981' : '#1e293b'}`,
                 boxShadow: focused ? '0 0 0 3px rgba(16,185,129,0.07)' : 'none',
+                transition: 'all 0.2s',
               }}
             >
-              <span className="text-text-muted text-[15px] mr-2.5">&#x2315;</span>
+              <span style={{ color: 'var(--color-text-muted)', fontSize: 15, marginRight: 10 }}>&#x2315;</span>
               <input
                 ref={inputRef}
                 value={query}
@@ -96,10 +134,29 @@ export const Home = () => {
                 onFocus={() => setFocused(true)}
                 onBlur={() => setTimeout(() => setFocused(false), 150)}
                 placeholder="Search skills..."
-                className="flex-1 font-sans text-[15px] py-[13px] bg-transparent border-none text-text-primary outline-none"
+                style={{
+                  flex: 1,
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 15,
+                  padding: '13px 0',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--color-text-primary)',
+                  outline: 'none',
+                }}
               />
               {!query && (
-                <kbd className="font-mono text-[11px] px-1.5 py-[2px] bg-[#111318] border border-[#1e293b] rounded text-text-muted">
+                <kbd
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 11,
+                    padding: '2px 6px',
+                    background: '#111318',
+                    border: '1px solid #1e293b',
+                    borderRadius: 4,
+                    color: 'var(--color-text-muted)',
+                  }}
+                >
                   /
                 </kbd>
               )}
@@ -109,7 +166,7 @@ export const Home = () => {
                     setQuery('');
                     inputRef.current?.focus();
                   }}
-                  className="text-text-muted cursor-pointer text-sm p-1"
+                  style={{ color: 'var(--color-text-muted)', cursor: 'pointer', fontSize: 14, padding: 4 }}
                 >
                   &#x2715;
                 </span>
@@ -118,8 +175,29 @@ export const Home = () => {
           </form>
 
           {showSuggestions && (
-            <div className="absolute top-[calc(100%+4px)] w-full bg-bg-card border border-[#1e293b] rounded-[10px] overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.4)] z-50">
-              <div className="px-3.5 py-2 font-sans text-[11px] text-text-muted uppercase tracking-wide">
+            <div
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 4px)',
+                width: '100%',
+                background: 'var(--color-bg-card)',
+                border: '1px solid #1e293b',
+                borderRadius: 10,
+                overflow: 'hidden',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+                zIndex: 50,
+              }}
+            >
+              <div
+                style={{
+                  padding: '8px 14px',
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 11,
+                  color: 'var(--color-text-muted)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
                 Popular searches
               </div>
               {SEARCH_SUGGESTIONS.map((s, i) => (
@@ -129,10 +207,17 @@ export const Home = () => {
                     setQuery(s.query);
                     navigate(`/search?q=${encodeURIComponent(s.query)}`);
                   }}
-                  className="flex justify-between px-3.5 py-2.5 cursor-pointer hover:bg-bg-hover transition-colors"
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    cursor: 'pointer',
+                  }}
                 >
-                  <span className="font-sans text-[13px] text-[#c8d0dc]">{s.query}</span>
-                  <span className="font-mono text-[11px] text-text-muted">{s.results}</span>
+                  <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#c8d0dc' }}>{s.query}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-muted)' }}>
+                    {s.results}
+                  </span>
                 </div>
               ))}
             </div>
@@ -141,26 +226,49 @@ export const Home = () => {
       </section>
 
       {/* Content */}
-      <section className="max-w-[920px] mx-auto px-8 pb-[60px]">
+      <section style={{ maxWidth: 920, margin: '0 auto', padding: '0 32px 60px' }}>
         {filtered ? (
           <div>
-            <div className="flex justify-between items-center mb-2 px-1">
-              <span className="font-sans text-[13px] text-text-dim">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 8,
+                padding: '0 4px',
+              }}
+            >
+              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-dim)' }}>
                 {filtered.length} result{filtered.length !== 1 ? 's' : ''} for &quot;{query}&quot;
               </span>
-              <span className="font-mono text-xs text-text-muted">sorted by relevance</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-muted)' }}>
+                sorted by relevance
+              </span>
             </div>
-            <div className="border border-border-default rounded-[10px] overflow-hidden">
+            <div
+              style={{
+                border: '1px solid var(--color-border-default)',
+                borderRadius: 10,
+                overflow: 'hidden',
+              }}
+            >
               {filtered.length > 0 ? (
                 filtered.map((s) => <SkillRow key={s.name} skill={s} />)
               ) : (
-                <div className="p-10 text-center">
-                  <div className="font-sans text-[15px] text-text-dim mb-2">
+                <div style={{ padding: 40, textAlign: 'center' }}>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: 15,
+                      color: 'var(--color-text-dim)',
+                      marginBottom: 8,
+                    }}
+                  >
                     No skills found for &quot;{query}&quot;
                   </div>
-                  <div className="font-sans text-[13px] text-text-muted">
+                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-muted)' }}>
                     Try a different search, or{' '}
-                    <Link to="#" className="text-accent no-underline">
+                    <Link to="#" style={{ color: 'var(--color-accent)', textDecoration: 'none' }}>
                       publish your own
                     </Link>
                   </div>
@@ -171,18 +279,32 @@ export const Home = () => {
         ) : (
           <div>
             {/* Trending section with tabs */}
-            <div className="mb-10">
-              <div className="flex gap-0.5 mb-[18px] border-b border-border-default">
+            <div style={{ marginBottom: 40 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 0,
+                  marginBottom: 18,
+                  borderBottom: '1px solid var(--color-border-default)',
+                }}
+              >
                 {TABS.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setTrendingTab(tab.id)}
-                    className="font-sans text-[13px] font-medium px-4 py-2 pb-2.5 border-none bg-transparent cursor-pointer transition-all duration-150"
                     style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      padding: '10px 18px',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
                       borderBottom:
                         trendingTab === tab.id ? '2px solid #10b981' : '2px solid transparent',
                       color: trendingTab === tab.id ? '#e2e8f0' : '#64748b',
                       marginBottom: -1,
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     {tab.label}
@@ -192,20 +314,42 @@ export const Home = () => {
 
               {trendingTab === 'featured' && (
                 <div>
-                  <div className="flex gap-3.5 mb-6">
+                  <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
                     {FEATURED.map((s, i) => (
                       <SkillCard key={s.name} skill={s} rank={i} />
                     ))}
                   </div>
-                  <div className="flex justify-between items-center mb-2.5 px-0.5">
-                    <span className="font-sans text-[13px] font-medium text-[#7a8599]">
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 10,
+                      padding: '0 2px',
+                    }}
+                  >
+                    <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 500, color: '#7a8599' }}>
                       Also trending
                     </span>
-                    <Link to="/search" className="font-mono text-xs text-accent no-underline">
+                    <Link
+                      to="/search"
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 12,
+                        color: 'var(--color-accent)',
+                        textDecoration: 'none',
+                      }}
+                    >
                       View all &rarr;
                     </Link>
                   </div>
-                  <div className="border border-border-default rounded-[10px] overflow-hidden">
+                  <div
+                    style={{
+                      border: '1px solid var(--color-border-default)',
+                      borderRadius: 10,
+                      overflow: 'hidden',
+                    }}
+                  >
                     {RISING.slice(0, 3).map((s) => (
                       <SkillRow key={s.name} skill={s} showGrowth />
                     ))}
@@ -215,10 +359,24 @@ export const Home = () => {
 
               {trendingTab === 'rising' && (
                 <div>
-                  <p className="font-sans text-xs text-text-muted mb-3">
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: 12,
+                      color: 'var(--color-text-muted)',
+                      marginBottom: 12,
+                      marginTop: 0,
+                    }}
+                  >
                     Fastest growing installs this week
                   </p>
-                  <div className="border border-border-default rounded-[10px] overflow-hidden">
+                  <div
+                    style={{
+                      border: '1px solid var(--color-border-default)',
+                      borderRadius: 10,
+                      overflow: 'hidden',
+                    }}
+                  >
                     {RISING.map((s) => (
                       <SkillRow key={s.name} skill={s} showGrowth />
                     ))}
@@ -228,31 +386,83 @@ export const Home = () => {
 
               {trendingTab === 'most-installed' && (
                 <div>
-                  <p className="font-sans text-xs text-text-muted mb-3">
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: 12,
+                      color: 'var(--color-text-muted)',
+                      marginBottom: 12,
+                      marginTop: 0,
+                    }}
+                  >
                     All-time most installed skills
                   </p>
-                  <div className="border border-border-default rounded-[10px] overflow-hidden">
+                  <div
+                    style={{
+                      border: '1px solid var(--color-border-default)',
+                      borderRadius: 10,
+                      overflow: 'hidden',
+                    }}
+                  >
                     {MOST_INSTALLED.map((s, i) => (
-                      <Link key={s.name} to={`/skills/${s.name}`} className="no-underline">
-                        <div className="flex items-center px-4 py-[11px] gap-3 cursor-pointer hover:bg-bg-hover transition-colors border-b border-[#1a1d2744]">
+                      <Link key={s.name} to={`/skills/${s.name}`} style={{ textDecoration: 'none' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '11px 16px',
+                            gap: 12,
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #1a1d2744',
+                          }}
+                        >
                           <span
-                            className="font-mono text-sm font-bold min-w-[24px] text-right"
                             style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 14,
+                              fontWeight: 700,
+                              minWidth: 24,
+                              textAlign: 'right',
                               color: i < 3 ? '#10b981' : '#334155',
                             }}
                           >
                             #{i + 1}
                           </span>
-                          <span className="font-mono text-[13px] text-cyan font-medium min-w-[140px]">
+                          <span
+                            style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 13,
+                              color: 'var(--color-cyan)',
+                              fontWeight: 500,
+                              minWidth: 140,
+                            }}
+                          >
                             {s.name}
                           </span>
-                          <span className="font-mono text-[11px] text-text-faint">{s.version}</span>
-                          <div className="flex-1" />
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}>
+                            {s.version}
+                          </span>
+                          <div style={{ flex: 1 }} />
                           <TrustBadge tier={s.trust} showLabel={false} />
-                          <span className="font-mono text-[11px] text-text-muted min-w-[54px] text-right">
+                          <span
+                            style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 11,
+                              color: 'var(--color-text-muted)',
+                              minWidth: 54,
+                              textAlign: 'right',
+                            }}
+                          >
                             &#x2B07; {s.downloads}
                           </span>
-                          <span className="font-mono text-[11px] text-yellow min-w-[30px]">
+                          <span
+                            style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 11,
+                              color: 'var(--color-yellow)',
+                              minWidth: 30,
+                            }}
+                          >
                             &#x2605; {s.rating}
                           </span>
                         </div>
@@ -264,10 +474,24 @@ export const Home = () => {
 
               {trendingTab === 'new' && (
                 <div>
-                  <p className="font-sans text-xs text-text-muted mb-3">
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: 12,
+                      color: 'var(--color-text-muted)',
+                      marginBottom: 12,
+                      marginTop: 0,
+                    }}
+                  >
                     Recently published skills
                   </p>
-                  <div className="border border-border-default rounded-[10px] overflow-hidden">
+                  <div
+                    style={{
+                      border: '1px solid var(--color-border-default)',
+                      borderRadius: 10,
+                      overflow: 'hidden',
+                    }}
+                  >
                     {NEW_THIS_WEEK.map((s) => (
                       <SkillRow key={s.name} skill={s} showDaysAgo />
                     ))}
@@ -278,21 +502,59 @@ export const Home = () => {
 
             {/* Categories */}
             <div>
-              <div className="flex justify-between items-center mb-3.5">
-                <h2 className="font-sans text-[15px] font-semibold text-text-secondary m-0">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 14,
+                }}
+              >
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 15,
+                    fontWeight: 600,
+                    color: 'var(--color-text-secondary)',
+                    margin: 0,
+                  }}
+                >
                   Browse by category
                 </h2>
-                <Link to="/search" className="font-mono text-xs text-accent no-underline">
+                <Link
+                  to="/search"
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    color: 'var(--color-accent)',
+                    textDecoration: 'none',
+                  }}
+                >
                   All categories &rarr;
                 </Link>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {CATEGORIES.map((cat) => (
-                  <Link key={cat.name} to={`/search?category=${cat.slug}`} className="no-underline">
-                    <div className="flex items-center gap-2 px-3.5 py-2 bg-bg-card border border-border-default rounded-lg cursor-pointer hover:bg-bg-hover hover:border-border-hover transition-all duration-150">
-                      <span className="text-sm">{cat.icon}</span>
-                      <span className="font-sans text-[13px] text-[#c8d0dc]">{cat.name}</span>
-                      <span className="font-mono text-[11px] text-text-muted">{cat.count}</span>
+                  <Link key={cat.name} to={`/search?category=${cat.slug}`} style={{ textDecoration: 'none' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '8px 14px',
+                        background: 'var(--color-bg-card)',
+                        border: '1px solid var(--color-border-default)',
+                        borderRadius: 8,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <span style={{ fontSize: 14 }}>{cat.icon}</span>
+                      <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#c8d0dc' }}>
+                        {cat.name}
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-muted)' }}>
+                        {cat.count}
+                      </span>
                     </div>
                   </Link>
                 ))}
