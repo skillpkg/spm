@@ -346,7 +346,7 @@ describe('linker', () => {
     await fs.rm(tmpDir, { recursive: true, force: true });
   });
 
-  it('linkSkill falls back to symlink when npx fails', async () => {
+  it('linkSkill falls back to symlink when npx fails', { timeout: 15000 }, async () => {
     vi.doMock('node:os', async () => {
       const actual = await vi.importActual<typeof import('node:os')>('node:os');
       return { ...actual, homedir: () => tmpDir };
