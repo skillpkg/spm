@@ -11,7 +11,7 @@ export const ScanAnalytics = () => {
   return (
     <div>
       {/* Top stats */}
-      <div className="flex gap-2.5 mb-5">
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
         <StatBox label="Total publishes" value={SCAN_STATS.total} />
         <StatBox label="Passed" value={SCAN_STATS.passed} color="accent" />
         <StatBox label="Blocked" value={SCAN_STATS.blocked} color="red" />
@@ -21,19 +21,44 @@ export const ScanAnalytics = () => {
       </div>
 
       {/* Charts row */}
-      <div className="flex gap-4">
+      <div style={{ display: 'flex', gap: 16 }}>
         {/* Weekly publishes */}
-        <SectionCard className="flex-1 p-[18px_22px]">
-          <div className="font-sans text-sm font-semibold text-text-primary mb-3.5">
+        <SectionCard style={{ flex: 1, padding: '18px 22px' }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 14,
+              fontWeight: 600,
+              color: 'var(--color-text-primary)',
+              marginBottom: 14,
+            }}
+          >
             Weekly publishes
           </div>
-          <div className="flex items-end gap-1.5 h-[100px]">
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 100 }}>
             {SCAN_STATS.weeklyPublishes.map((v, i) => {
               const h = (v / maxPublish) * 80;
               const isLast = i === SCAN_STATS.weeklyPublishes.length - 1;
               return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <span className="font-mono text-[10px] text-text-muted">{v}</span>
+                <div
+                  key={i}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 10,
+                      color: 'var(--color-text-muted)',
+                    }}
+                  >
+                    {v}
+                  </span>
                   <div
                     style={{
                       width: '100%',
@@ -59,17 +84,42 @@ export const ScanAnalytics = () => {
         </SectionCard>
 
         {/* Block rate trend */}
-        <SectionCard className="flex-1 p-[18px_22px]">
-          <div className="font-sans text-sm font-semibold text-text-primary mb-3.5">
+        <SectionCard style={{ flex: 1, padding: '18px 22px' }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 14,
+              fontWeight: 600,
+              color: 'var(--color-text-primary)',
+              marginBottom: 14,
+            }}
+          >
             Block rate (%)
           </div>
-          <div className="flex items-end gap-1.5 h-[100px]">
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 100 }}>
             {SCAN_STATS.blockRate.map((v, i) => {
               const h = (v / 8) * 80;
               const isLast = i === SCAN_STATS.blockRate.length - 1;
               return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <span className="font-mono text-[10px] text-text-muted">{v}%</span>
+                <div
+                  key={i}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 10,
+                      color: 'var(--color-text-muted)',
+                    }}
+                  >
+                    {v}%
+                  </span>
                   <div
                     style={{
                       width: '100%',
@@ -96,37 +146,73 @@ export const ScanAnalytics = () => {
       </div>
 
       {/* Outcome breakdown */}
-      <SectionCard className="mt-4 p-[18px_22px]">
-        <div className="font-sans text-sm font-semibold text-text-primary mb-3.5">
+      <SectionCard style={{ marginTop: 16, padding: '18px 22px' }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--color-text-primary)',
+            marginBottom: 14,
+          }}
+        >
           Outcome breakdown
         </div>
-        <div className="flex h-6 rounded-md overflow-hidden mb-3.5">
+        <div
+          style={{
+            display: 'flex',
+            height: 24,
+            borderRadius: 6,
+            overflow: 'hidden',
+            marginBottom: 14,
+          }}
+        >
           <div
-            className="bg-accent"
-            style={{ width: `${passRate}%` }}
+            style={{ width: `${passRate}%`, background: 'var(--color-accent)' }}
             title={`Passed: ${passRate}%`}
           />
           <div
-            className="bg-yellow"
-            style={{ width: `${holdRate}%` }}
+            style={{ width: `${holdRate}%`, background: 'var(--color-yellow)' }}
             title={`Held: ${holdRate}%`}
           />
           <div
-            className="bg-red"
-            style={{ width: `${blockRate}%` }}
+            style={{ width: `${blockRate}%`, background: 'var(--color-red)' }}
             title={`Blocked: ${blockRate}%`}
           />
         </div>
-        <div className="flex gap-5">
+        <div style={{ display: 'flex', gap: 20 }}>
           {[
-            { label: 'Passed', pct: passRate, colorClass: 'bg-accent' },
-            { label: 'Held', pct: holdRate, colorClass: 'bg-yellow' },
-            { label: 'Blocked', pct: blockRate, colorClass: 'bg-red' },
+            { label: 'Passed', pct: passRate, color: 'var(--color-accent)' },
+            { label: 'Held', pct: holdRate, color: 'var(--color-yellow)' },
+            { label: 'Blocked', pct: blockRate, color: 'var(--color-red)' },
           ].map((r) => (
-            <div key={r.label} className="flex items-center gap-1.5">
-              <div className={`w-2 h-2 rounded-sm ${r.colorClass}`} />
-              <span className="font-sans text-xs text-text-secondary">{r.label}</span>
-              <span className="font-mono text-xs text-text-dim">{r.pct}%</span>
+            <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 2,
+                  background: r.color,
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 12,
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                {r.label}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: 'var(--color-text-dim)',
+                }}
+              >
+                {r.pct}%
+              </span>
             </div>
           ))}
         </div>

@@ -47,20 +47,30 @@ export const Footer = () => {
         </span>
       </div>
       <div style={{ display: 'flex', gap: 18 }}>
-        {(['Docs', 'GitHub', 'Status', 'Discord'] as const).map((item) => (
-          <Link
-            key={item}
-            to="#"
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 12,
-              color: 'var(--color-text-muted)',
-              textDecoration: 'none',
-            }}
-          >
-            {item}
-          </Link>
-        ))}
+        <Link
+          to="/docs"
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 12,
+            color: 'var(--color-text-muted)',
+            textDecoration: 'none',
+          }}
+        >
+          Docs
+        </Link>
+        <a
+          href="https://github.com/almog27/spm"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 12,
+            color: 'var(--color-text-muted)',
+            textDecoration: 'none',
+          }}
+        >
+          GitHub
+        </a>
       </div>
     </footer>
   );

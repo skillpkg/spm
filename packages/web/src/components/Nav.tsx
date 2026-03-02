@@ -147,7 +147,7 @@ export const Nav = ({
           npm i -g spm
         </code>
         <Link
-          to="#"
+          to="/dashboard"
           style={{
             fontFamily: 'var(--font-sans)',
             fontSize: 14,
