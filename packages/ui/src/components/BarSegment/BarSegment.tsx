@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-interface BarSegmentProps {
+export interface BarSegmentProps {
   pct: number;
   color: string;
   label: string;

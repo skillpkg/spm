@@ -1,16 +1,26 @@
-import type { ActivityEvent } from './mock-data';
+export interface ActivityEvent {
+  type: string;
+  skill: string;
+  version?: string;
+  date: string;
+  detail: string;
+}
 
-const ACTIVITY_ICONS: Record<ActivityEvent['type'], string> = {
+export interface ActivityItemProps {
+  item: ActivityEvent;
+  icons?: Record<string, string>;
+}
+
+const DEFAULT_ICONS: Record<string, string> = {
   publish: '\ud83d\udce6',
   review: '\u2b50',
   milestone: '\ud83c\udfaf',
 };
 
-interface ActivityItemProps {
-  item: ActivityEvent;
-}
+export const ActivityItem = ({ item, icons }: ActivityItemProps) => {
+  const iconMap = icons ?? DEFAULT_ICONS;
+  const icon = iconMap[item.type] ?? '\u25cf';
 
-export const ActivityItem = ({ item }: ActivityItemProps) => {
   return (
     <div
       style={{
@@ -21,7 +31,7 @@ export const ActivityItem = ({ item }: ActivityItemProps) => {
         borderBottom: '1px solid rgba(26,29,39,0.2)',
       }}
     >
-      <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>{ACTIVITY_ICONS[item.type]}</span>
+      <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>{icon}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{

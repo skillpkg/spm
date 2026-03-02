@@ -8,13 +8,18 @@ import {
   PUBLISH_HISTORY,
   AGENT_BREAKDOWN,
 } from './dashboard/mock-data';
-import { StatBox, Tabs, TRUST_CONFIG, type TrustTier } from '@spm/ui';
-import { MiniChart } from './dashboard/MiniChart';
+import {
+  ActivityItem,
+  BarSegment,
+  MiniChart,
+  StatBox,
+  Tabs,
+  TRUST_CONFIG,
+  type TrustTier,
+} from '@spm/ui';
 import { SkillRow } from './dashboard/SkillRow';
-import { ActivityItem } from './dashboard/ActivityItem';
 import { PublishRow } from './dashboard/PublishRow';
 import { TrustProgress } from './dashboard/TrustProgress';
-import { BarSegment } from './dashboard/BarSegment';
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
@@ -554,7 +559,7 @@ export const Dashboard = () => {
           >
             Weekly trend
           </div>
-          <MiniChart data={WEEKLY_TREND} />
+          <MiniChart data={WEEKLY_TREND.map((d) => ({ value: d.downloads }))} />
         </div>
       </div>
 

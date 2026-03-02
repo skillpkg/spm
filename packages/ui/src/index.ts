@@ -23,3 +23,14 @@ export {
 } from './components/FilterDropdown/FilterDropdown';
 export { FilterTag, type FilterTagProps } from './components/FilterTag/FilterTag';
 export { CopyButton, type CopyButtonProps } from './components/CopyButton/CopyButton';
+export { BarSegment, type BarSegmentProps } from './components/BarSegment/BarSegment';
+export {
+  MiniChart,
+  type MiniChartPoint,
+  type MiniChartProps,
+} from './components/MiniChart/MiniChart';
+export {
+  ActivityItem,
+  type ActivityEvent,
+  type ActivityItemProps,
+} from './components/ActivityItem/ActivityItem';
