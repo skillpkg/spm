@@ -1,5 +1,5 @@
 {
-  "name": "@spm/web",
+  "name": "@spm/admin",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -14,11 +14,10 @@
   },
   "dependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.13.1"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.1",
+    "@tailwindcss/vite": "^4.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.0",
