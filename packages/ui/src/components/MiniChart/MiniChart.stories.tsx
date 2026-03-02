@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { MiniChart } from './MiniChart';
 
 const meta: Meta<typeof MiniChart> = {
-  title: 'Atoms/MiniChart',
+  title: 'Molecules/MiniChart',
   component: MiniChart,
   argTypes: {
     width: { control: { type: 'range', min: 100, max: 500 } },

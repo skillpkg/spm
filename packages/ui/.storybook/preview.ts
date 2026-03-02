@@ -3,6 +3,11 @@ import './storybook.css';
 
 const preview: Preview = {
   parameters: {
+    options: {
+      storySort: {
+        order: ['Atoms', 'Molecules'],
+      },
+    },
     backgrounds: {
       default: 'dark',
       values: [

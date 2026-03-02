@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { BarSegment } from './BarSegment';
 
 const meta: Meta<typeof BarSegment> = {
-  title: 'Atoms/BarSegment',
+  title: 'Molecules/BarSegment',
   component: BarSegment,
   argTypes: {
     pct: { control: { type: 'range', min: 0, max: 100 } },

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ActivityItem } from './ActivityItem';
 
 const meta: Meta<typeof ActivityItem> = {
-  title: 'Atoms/ActivityItem',
+  title: 'Molecules/ActivityItem',
   component: ActivityItem,
 };
 
