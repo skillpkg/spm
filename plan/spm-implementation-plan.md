@@ -38,7 +38,7 @@ spm/
 │   │   └── package.json
 │   ├── api/               # Hono registry API
 │   ├── cli/               # spm CLI
-│   └── web/               # spm.dev React app
+│   └── web/               # skillpkg.dev React app
 ├── migrations/            # Neon SQL migrations
 ├── turbo.json
 ├── package.json
@@ -272,7 +272,7 @@ spm/
 
 ## Week 9 — Web UI: Public Pages
 
-**Goal:** spm.dev is live. Homepage, search, skill detail, author profile.
+**Goal:** skillpkg.dev is live. Homepage, search, skill detail, author profile.
 
 **Tasks:**
 
@@ -298,7 +298,7 @@ spm/
 - [ ] Responsive design (mobile, tablet, desktop)
 - [ ] SEO: meta tags, og:image, structured data for skills
 
-**Deliverable:** spm.dev is live and browseable. All data comes from the API.
+**Deliverable:** skillpkg.dev is live and browseable. All data comes from the API.
 
 ---
 
@@ -313,8 +313,8 @@ spm/
   - Skills tab: full table with metrics
   - Publish history: all attempts with status
   - Analytics: weekly downloads chart, per-skill breakdown, agent breakdown
-- [ ] Admin panel — **separate deploy to `admin.spm.dev`** (Cloudflare Pages):
-  - Shared JWT auth (same token works on both spm.dev and admin.spm.dev)
+- [ ] Admin panel — **separate deploy to `admin.skillpkg.dev`** (Cloudflare Pages):
+  - Shared JWT auth (same token works on both skillpkg.dev and admin.skillpkg.dev)
   - Public site nav shows "Admin" link when `whoami.role === 'admin'`
   - First admin: manual `UPDATE users SET role = 'admin'` after your first login
   - `PATCH /admin/users/:username/role` for subsequent admin promotion/revocation
@@ -380,7 +380,7 @@ spm/
   - CLI: install cold start <3s, search response <1s
 - [ ] Documentation:
   - CLI `--help` for all commands
-  - spm.dev/docs (getting started, publishing guide, security model)
+  - skillpkg.dev/docs (getting started, publishing guide, security model)
   - API reference (auto-generated from Zod schemas)
 - [ ] Seed registry with first 10 official skills
 
@@ -399,7 +399,7 @@ spm/
   - [ ] Neon production database (separate from staging)
   - [ ] First admin bootstrap: `spm login` → `UPDATE users SET role = 'admin' WHERE username = 'almog'`
   - [ ] R2 production bucket
-  - [ ] Custom domain: registry.spm.dev, spm.dev, admin.spm.dev
+  - [ ] Custom domain: registry.skillpkg.dev, skillpkg.dev, admin.skillpkg.dev
   - [ ] SSL certificates
   - [ ] Monitoring: uptime (Checkly), error tracking (Sentry), logs (Logflare)
   - [ ] Backup strategy: Neon point-in-time recovery, R2 versioning

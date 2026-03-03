@@ -87,7 +87,7 @@ let mockToken: string | null = 'test-token-123';
 
 vi.mock('../lib/config.js', () => ({
   loadConfig: () => ({
-    registry: 'https://registry.spm.dev/api/v1',
+    registry: 'https://registry.skillpkg.dev/api/v1',
     token: mockToken,
   }),
 }));
@@ -383,7 +383,7 @@ describe('publish command with signing', () => {
     mockPublishSkill.mockResolvedValue({
       name: 'my-skill',
       version: '1.0.0',
-      url: 'https://spm.dev/skills/my-skill',
+      url: 'https://skillpkg.dev/skills/my-skill',
       trust_tier: 'registered',
       signed: true,
     });
@@ -424,7 +424,7 @@ describe('publish command with signing', () => {
     mockPublishSkill.mockResolvedValue({
       name: 'my-skill',
       version: '1.0.0',
-      url: 'https://spm.dev/skills/my-skill',
+      url: 'https://skillpkg.dev/skills/my-skill',
       trust_tier: 'registered',
       signed: false,
     });
@@ -464,7 +464,7 @@ describe('publish command with signing', () => {
     mockPublishSkill.mockResolvedValue({
       name: 'my-skill',
       version: '1.0.0',
-      url: 'https://spm.dev/skills/my-skill',
+      url: 'https://skillpkg.dev/skills/my-skill',
       trust_tier: 'registered',
       signed: false,
     });

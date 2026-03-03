@@ -1,5 +1,5 @@
 {
-  "$schema": "https://spm.dev/schemas/manifest-v1.json",
+  "$schema": "https://skillpkg.dev/schemas/manifest-v1.json",
   "name": "spm-runtime",
   "version": "0.1.0",
   "description": "SPM skill manager integration. Use this skill when: the user asks about installed skills, skill packages, or the skill registry; the user wants to search for, install, update, or remove skills; you cannot find an installed skill that matches the user's request and want to suggest one; the user mentions 'spm', 'skill package', or 'skill registry'. Do NOT read this skill for normal task execution — only for skill management and discovery.",

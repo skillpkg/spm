@@ -75,7 +75,7 @@ Reserved names can only be published by:
 $ spm publish
   ❌ The name "claude" is reserved.
      Reserved names can only be published by authorized maintainers.
-     If you believe you should have access, contact: names@spm.dev
+     If you believe you should have access, contact: names@skillpkg.dev
 ```
 
 ### 2.2 Naming Rules
@@ -385,7 +385,7 @@ Actions:
 If no action is taken, the name "cool-charts" will be released
 on 2027-06-15.
 
-Questions? names@spm.dev
+Questions? names@skillpkg.dev
 ```
 
 ### 4.2 Pre-Registration (Name Reservation)

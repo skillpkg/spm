@@ -1320,7 +1320,7 @@ $ spm scan-update
 
 # Patterns stored at:
 # ~/.spm/patterns/content-v1.5.0.json
-# Downloaded from: https://registry.spm.dev/api/v1/security/patterns
+# Downloaded from: https://registry.skillpkg.dev/api/v1/security/patterns
 ```
 
 ---

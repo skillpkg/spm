@@ -3,7 +3,7 @@ import { cors } from 'hono/cors';
 export const corsMiddleware = (env: string) =>
   cors({
     origin: (origin) => {
-      const allowed = ['https://spm.dev', 'https://admin.spm.dev'];
+      const allowed = ['https://skillpkg.dev', 'https://admin.skillpkg.dev'];
 
       if (env !== 'production') {
         if (origin.startsWith('http://localhost:') || origin === 'http://localhost') {

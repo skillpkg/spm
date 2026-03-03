@@ -148,7 +148,7 @@ describe('fetchSkills', () => {
       json: () => Promise.resolve(mockResponse),
     });
 
-    const result = await fetchSkills('https://registry.spm.dev/api/v1', { q: 'test' });
+    const result = await fetchSkills('https://registry.skillpkg.dev/api/v1', { q: 'test' });
     expect(result).toEqual(mockResponse);
     expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/skills?q=test'));
   });
@@ -161,7 +161,7 @@ describe('fetchSkills', () => {
     });
 
     try {
-      await fetchSkills('https://registry.spm.dev/api/v1', { q: 'test' });
+      await fetchSkills('https://registry.skillpkg.dev/api/v1', { q: 'test' });
       expect.fail('Should have thrown');
     } catch (err) {
       const error = err as ApiClientError;
@@ -179,7 +179,7 @@ describe('fetchSkillInfo', () => {
       json: () => Promise.resolve(mockSkill),
     });
 
-    const result = await fetchSkillInfo('https://registry.spm.dev/api/v1', 'data-viz');
+    const result = await fetchSkillInfo('https://registry.skillpkg.dev/api/v1', 'data-viz');
     expect(result).toEqual(mockSkill);
   });
 
@@ -191,7 +191,7 @@ describe('fetchSkillInfo', () => {
     });
 
     try {
-      await fetchSkillInfo('https://registry.spm.dev/api/v1', 'nonexistent');
+      await fetchSkillInfo('https://registry.skillpkg.dev/api/v1', 'nonexistent');
       expect.fail('Should have thrown');
     } catch (err) {
       const error = err as ApiClientError;
@@ -211,7 +211,7 @@ describe('fetchCategories', () => {
       json: () => Promise.resolve(mockCategories),
     });
 
-    const result = await fetchCategories('https://registry.spm.dev/api/v1');
+    const result = await fetchCategories('https://registry.skillpkg.dev/api/v1');
     expect(result).toEqual(mockCategories);
   });
 
@@ -219,7 +219,7 @@ describe('fetchCategories', () => {
     mockFetch.mockRejectedValue(new TypeError('fetch failed'));
 
     try {
-      await fetchCategories('https://registry.spm.dev/api/v1');
+      await fetchCategories('https://registry.skillpkg.dev/api/v1');
       expect.fail('Should have thrown');
     } catch (err) {
       expect(err).toBeInstanceOf(TypeError);

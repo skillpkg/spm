@@ -141,7 +141,7 @@ describe('ManifestSchema', () => {
         include: ['SKILL.md', 'scripts/'],
         exclude: ['tests/'],
       },
-      $schema: 'https://spm.dev/schemas/manifest-v1.json',
+      $schema: 'https://skillpkg.dev/schemas/manifest-v1.json',
       spm: {
         manifest_version: 1,
       },
@@ -366,7 +366,7 @@ describe('SkillsJsonSchema', () => {
 
   it('accepts a full skills.json with all fields', () => {
     const result = SkillsJsonSchema.parse({
-      $schema: 'https://spm.dev/schemas/skills-v1.json',
+      $schema: 'https://skillpkg.dev/schemas/skills-v1.json',
       name: 'my-project',
       description: 'Project skills configuration',
       skills: {

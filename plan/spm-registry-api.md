@@ -1,6 +1,6 @@
 # SPM Registry API Specification
 
-Base URL: `https://registry.spm.dev/api/v1`
+Base URL: `https://registry.skillpkg.dev/api/v1`
 
 Framework: Hono (Cloudflare Workers)
 Database: Neon Postgres
@@ -107,7 +107,7 @@ Get current authenticated user.
 }
 ```
 
-The `role` field is used by the web UI to conditionally show the admin nav link. The admin panel itself lives on a **separate domain** (`admin.spm.dev`) as an independent deployment — this gives CORS isolation, separate deploy pipeline, and no risk of admin routes leaking into the public bundle.
+The `role` field is used by the web UI to conditionally show the admin nav link. The admin panel itself lives on a **separate domain** (`admin.skillpkg.dev`) as an independent deployment — this gives CORS isolation, separate deploy pipeline, and no risk of admin routes leaking into the public bundle.
 
 ### POST /auth/logout
 
@@ -252,7 +252,7 @@ Get a specific version's metadata.
   "size_bytes": 22528,
   "checksum_sha256": "a1b2c3d4e5f6...",
   "signer_identity": "almog@github",
-  "sigstore_bundle_url": "https://r2.spm.dev/bundles/data-viz/1.2.3.sigstore",
+  "sigstore_bundle_url": "https://r2.skillpkg.dev/bundles/data-viz/1.2.3.sigstore",
   "yanked": false,
   "published_at": "2026-02-15T00:00:00Z"
 }
@@ -265,7 +265,7 @@ Download the `.skl` package. Returns a redirect to the R2 presigned URL.
 **Response: 302**
 
 ```
-Location: https://r2.spm.dev/packages/data-viz/1.2.3.skl?sig=...&expires=...
+Location: https://r2.skillpkg.dev/packages/data-viz/1.2.3.skl?sig=...&expires=...
 ```
 
 The server also records the download event (debounced per user/IP per version per hour).
@@ -291,7 +291,7 @@ Publish a new skill or new version. Called by `spm publish`.
   "status": "published",
   "name": "data-viz",
   "version": "1.2.3",
-  "url": "https://spm.dev/skills/data-viz",
+  "url": "https://skillpkg.dev/skills/data-viz",
   "checksum_sha256": "a1b2c3d4e5f6...",
   "scans": [
     { "layer": 1, "status": "passed" },
@@ -530,7 +530,7 @@ Submit or update a review (one per user per skill).
 
 ### GET /authors/:username
 
-Public author profile. Powers the author page on spm.dev.
+Public author profile. Powers the author page on skillpkg.dev.
 
 **Response: 200**
 
@@ -689,8 +689,8 @@ Resolve a set of skill specifiers to exact versions and download URLs. Called by
       "name": "data-viz",
       "version": "1.2.3",
       "checksum_sha256": "a1b2c3d4...",
-      "download_url": "https://r2.spm.dev/packages/data-viz/1.2.3.skl?sig=...",
-      "sigstore_bundle_url": "https://r2.spm.dev/bundles/data-viz/1.2.3.sigstore",
+      "download_url": "https://r2.skillpkg.dev/packages/data-viz/1.2.3.skl?sig=...",
+      "sigstore_bundle_url": "https://r2.skillpkg.dev/bundles/data-viz/1.2.3.sigstore",
       "size_bytes": 22528,
       "trust_tier": "verified",
       "signed": true,
@@ -701,8 +701,8 @@ Resolve a set of skill specifiers to exact versions and download URLs. Called by
       "name": "pdf",
       "version": "2.0.3",
       "checksum_sha256": "ff00ab12...",
-      "download_url": "https://r2.spm.dev/packages/pdf/2.0.3.skl?sig=...",
-      "sigstore_bundle_url": "https://r2.spm.dev/bundles/pdf/2.0.3.sigstore",
+      "download_url": "https://r2.skillpkg.dev/packages/pdf/2.0.3.skl?sig=...",
+      "sigstore_bundle_url": "https://r2.skillpkg.dev/bundles/pdf/2.0.3.sigstore",
       "size_bytes": 34816,
       "trust_tier": "official",
       "signed": true,
@@ -950,14 +950,14 @@ Dashboard-level statistics for admin panel.
 
 ### Admin Access Model
 
-**Separate domain:** The admin panel runs on `admin.spm.dev` — a separate Cloudflare Pages deployment. This gives:
+**Separate domain:** The admin panel runs on `admin.skillpkg.dev` — a separate Cloudflare Pages deployment. This gives:
 
-- CORS isolation (admin API routes only accept `admin.spm.dev` origin)
+- CORS isolation (admin API routes only accept `admin.skillpkg.dev` origin)
 - Separate deploy pipeline (admin changes don't affect public site)
 - No admin code in the public JS bundle
-- Security through separation — even if spm.dev is compromised, admin.spm.dev is a different deployment
+- Security through separation — even if skillpkg.dev is compromised, admin.skillpkg.dev is a different deployment
 
-**Nav link for admins:** The public site (`spm.dev`) calls `GET /auth/whoami` on login. If `role === "admin"`, a subtle "Admin" link appears in the nav bar pointing to `admin.spm.dev`. Regular users never see it.
+**Nav link for admins:** The public site (`skillpkg.dev`) calls `GET /auth/whoami` on login. If `role === "admin"`, a subtle "Admin" link appears in the nav bar pointing to `admin.skillpkg.dev`. Regular users never see it.
 
 **First admin:** Manually set in the database. No self-service promotion:
 
@@ -1245,7 +1245,7 @@ app.route('/admin', admin);
 | Forged JWT with admin claim            | JWT signature verification fails (401)    |
 | Revoked admin with valid JWT           | DB role check fails (403)                 |
 | Dev forgets guard on new route         | Impossible — guard is on `admin.use('*')` |
-| Admin panel accessed from wrong origin | CORS restricts to `admin.spm.dev`         |
+| Admin panel accessed from wrong origin | CORS restricts to `admin.skillpkg.dev`         |
 
 ### Validation
 
@@ -1295,7 +1295,7 @@ The API serves the CLI (no CORS needed), the public web UI, and the admin panel.
 app.use(
   '*',
   cors({
-    origin: ['https://spm.dev', 'https://admin.spm.dev'],
+    origin: ['https://skillpkg.dev', 'https://admin.skillpkg.dev'],
     allowMethods: ['GET', 'POST', 'PATCH', 'DELETE'],
     allowHeaders: ['Authorization', 'Content-Type'],
   }),
@@ -1307,8 +1307,8 @@ Admin routes additionally verify the `Origin` header:
 ```typescript
 admin.use('*', async (c, next) => {
   const origin = c.req.header('Origin');
-  // Allow CLI (no origin) and admin.spm.dev only
-  if (origin && origin !== 'https://admin.spm.dev') {
+  // Allow CLI (no origin) and admin.skillpkg.dev only
+  if (origin && origin !== 'https://admin.skillpkg.dev') {
     return c.json({ error: 'forbidden' }, 403);
   }
   await next();

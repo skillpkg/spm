@@ -16,7 +16,7 @@ export const SEED_SKILLS: SeedSkill[] = [
       category: 'code-quality',
       keywords: ['code-review', 'pull-request', 'audit', 'best-practices', 'lint'],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
     },
     skill_md: `---
 name: code-review
@@ -64,7 +64,7 @@ Always be constructive and explain the *why* behind each suggestion.
       category: 'testing',
       keywords: ['test', 'unit-test', 'integration', 'coverage', 'jest', 'vitest', 'pytest'],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
     },
     skill_md: `---
 name: test-gen
@@ -114,7 +114,7 @@ You are an expert test engineer. Generate comprehensive tests for the given code
       category: 'data-viz',
       keywords: ['chart', 'visualization', 'dashboard', 'plotly', 'csv', 'graph', 'data'],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
       dependencies: {
         skills: {},
         pip: ['plotly>=5.0', 'pandas>=2.0', 'matplotlib>=3.7'],
@@ -177,7 +177,7 @@ You are a data visualization expert. Create clear, informative charts and dashbo
       category: 'backend',
       keywords: ['api', 'rest', 'graphql', 'endpoint', 'openapi', 'swagger', 'backend'],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
     },
     skill_md: `---
 name: api-design
@@ -236,7 +236,7 @@ Always version APIs (/v1/) and document breaking changes.
       category: 'productivity',
       keywords: ['git', 'workflow', 'branching', 'commit', 'merge', 'rebase', 'release'],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
       agents: {
         platforms: ['*'],
         requires_tools: ['bash'],
@@ -301,7 +301,7 @@ You are a git workflow expert. Help automate and optimize git-based development 
       category: 'documents',
       keywords: ['documentation', 'readme', 'api-docs', 'jsdoc', 'docstring', 'technical-writing'],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
     },
     skill_md: `---
 name: docs-writer
@@ -366,7 +366,7 @@ You are a technical documentation expert. Create clear, comprehensive documentat
       category: 'security',
       keywords: ['security', 'audit', 'vulnerability', 'owasp', 'injection', 'xss', 'auth'],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
       security: {
         sandboxed: true,
         network_access: false,
@@ -445,7 +445,7 @@ Include proof-of-concept and remediation steps for each finding.
         'algorithm',
       ],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
     },
     skill_md: `---
 name: perf-optimize
@@ -514,7 +514,7 @@ You are a performance optimization expert. Analyze code and suggest targeted imp
       category: 'backend',
       keywords: ['database', 'migration', 'schema', 'sql', 'postgres', 'mysql', 'prisma', 'knex'],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
       dependencies: {
         skills: {},
         pip: [],
@@ -585,7 +585,7 @@ You are a database migration expert. Generate safe, reversible schema changes.
       category: 'infra',
       keywords: ['deploy', 'deployment', 'checklist', 'production', 'release', 'rollback', 'ci-cd'],
       license: 'MIT',
-      authors: [{ name: 'SPM Team', email: 'team@spm.dev' }],
+      authors: [{ name: 'SPM Team', email: 'team@skillpkg.dev' }],
       agents: {
         platforms: ['*'],
         requires_tools: ['bash', 'file_read'],

@@ -228,7 +228,7 @@ Why only 3 required? Because the goal is to make publishing as frictionless as p
   // ── SPM METADATA ─────────────────────────────────────
   // These fields are MANAGED by spm tooling, not manually edited.
 
-  "$schema": "https://spm.dev/schemas/manifest-v1.json",
+  "$schema": "https://skillpkg.dev/schemas/manifest-v1.json",
   // JSON schema for editor autocompletion + validation.
 
   "spm": {
@@ -403,7 +403,7 @@ That's it. 3 lines. Everything else defaults.
     "include": ["SKILL.md", "scripts/", "templates/", "references/"],
     "exclude": ["tests/", "evals/", "*.pyc", "__pycache__/"]
   },
-  "$schema": "https://spm.dev/schemas/manifest-v1.json",
+  "$schema": "https://skillpkg.dev/schemas/manifest-v1.json",
   "spm": {
     "manifest_version": 1
   }

@@ -790,7 +790,7 @@ CREATE INDEX idx_payouts_author ON payouts (author_id, period_start);
 │                                                          │
 │  Process:                                                │
 │  $ spm refund enterprise-report-builder                  │
-│  or: email support@spm.dev                               │
+│  or: email support@skillpkg.dev                               │
 └──────────────────────────────────────────────────────────┘
 ```
 

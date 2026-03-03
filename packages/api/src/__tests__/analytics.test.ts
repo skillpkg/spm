@@ -196,26 +196,26 @@ describe('cache service', () => {
     it('should build cache key from path', async () => {
       const { buildCacheKey } = await import('../services/cache.js');
       const key = buildCacheKey('/skills');
-      expect(key).toBe('https://spm.dev/cache/skills');
+      expect(key).toBe('https://skillpkg.dev/cache/skills');
     });
 
     it('should include query string when provided', async () => {
       const { buildCacheKey } = await import('../services/cache.js');
       const key = buildCacheKey('/skills', 'q=test&page=1');
-      expect(key).toBe('https://spm.dev/cache/skills?q=test&page=1');
+      expect(key).toBe('https://skillpkg.dev/cache/skills?q=test&page=1');
     });
 
     it('should strip leading slash from path', async () => {
       const { buildCacheKey } = await import('../services/cache.js');
       const key = buildCacheKey('/categories');
-      expect(key).toBe('https://spm.dev/cache/categories');
+      expect(key).toBe('https://skillpkg.dev/cache/categories');
     });
   });
 
   describe('invalidateCache', () => {
     it('should return false when caches API is unavailable', async () => {
       const { invalidateCache } = await import('../services/cache.js');
-      const result = await invalidateCache('https://spm.dev/cache/skills');
+      const result = await invalidateCache('https://skillpkg.dev/cache/skills');
       // In Node test environment, caches is undefined
       expect(result).toBe(false);
     });
@@ -227,7 +227,7 @@ describe('cache service', () => {
       const fetcher = vi.fn().mockResolvedValue(new Response('fresh data', { status: 200 }));
       const mockContext = {} as never;
 
-      const response = await cachedResponse(mockContext, 'https://spm.dev/cache/test', 60, fetcher);
+      const response = await cachedResponse(mockContext, 'https://skillpkg.dev/cache/test', 60, fetcher);
 
       expect(fetcher).toHaveBeenCalledOnce();
       expect(await response.text()).toBe('fresh data');

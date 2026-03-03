@@ -59,7 +59,7 @@ describe('resolver', () => {
             {
               name: 'data-viz',
               version: '1.2.3',
-              download_url: 'https://registry.spm.dev/api/v1/skills/data-viz/1.2.3/download',
+              download_url: 'https://registry.skillpkg.dev/api/v1/skills/data-viz/1.2.3/download',
               checksum: 'sha256:abc123',
               trust_tier: 'verified',
               signed: true,
@@ -74,7 +74,7 @@ describe('resolver', () => {
       expect(result.resolved[0]).toEqual({
         name: 'data-viz',
         version: '1.2.3',
-        downloadUrl: 'https://registry.spm.dev/api/v1/skills/data-viz/1.2.3/download',
+        downloadUrl: 'https://registry.skillpkg.dev/api/v1/skills/data-viz/1.2.3/download',
         checksum: 'sha256:abc123',
         trustTier: 'verified',
         signed: true,
@@ -208,7 +208,7 @@ describe('skills-json', () => {
       skills: {
         'data-viz': {
           version: '1.2.3',
-          resolved: 'https://registry.spm.dev/api/v1/skills/data-viz/1.2.3/download',
+          resolved: 'https://registry.skillpkg.dev/api/v1/skills/data-viz/1.2.3/download',
           checksum: 'sha256:abc123',
           source: 'registry' as const,
         },
@@ -235,7 +235,7 @@ describe('skills-json', () => {
       skills: {
         existing: {
           version: '1.0.0',
-          resolved: 'https://registry.spm.dev/api/v1/skills/existing/1.0.0/download',
+          resolved: 'https://registry.skillpkg.dev/api/v1/skills/existing/1.0.0/download',
           checksum: 'sha256:old',
           source: 'registry' as const,
         },
@@ -249,7 +249,7 @@ describe('skills-json', () => {
       {
         name: 'new-skill',
         version: '2.0.0',
-        downloadUrl: 'https://registry.spm.dev/api/v1/skills/new-skill/2.0.0/download',
+        downloadUrl: 'https://registry.skillpkg.dev/api/v1/skills/new-skill/2.0.0/download',
         checksum: 'sha256:new',
         trustTier: 'verified',
         signed: true,
@@ -509,7 +509,7 @@ describe('resolver (edge cases)', () => {
             {
               name: 'found-skill',
               version: '1.0.0',
-              download_url: 'https://registry.spm.dev/api/v1/skills/found-skill/1.0.0/download',
+              download_url: 'https://registry.skillpkg.dev/api/v1/skills/found-skill/1.0.0/download',
               checksum: 'sha256:abc',
               trust_tier: 'scanned',
               signed: false,
@@ -544,7 +544,7 @@ describe('resolver (edge cases)', () => {
             {
               name: 'my-skill',
               version: '3.0.0',
-              download_url: 'https://registry.spm.dev/api/v1/skills/my-skill/3.0.0/download',
+              download_url: 'https://registry.skillpkg.dev/api/v1/skills/my-skill/3.0.0/download',
               checksum: 'sha256:def',
               trust_tier: 'verified',
               signed: true,
@@ -632,7 +632,7 @@ describe('skills-json (edge cases)', () => {
       {
         name: 'brand-new',
         version: '1.0.0',
-        downloadUrl: 'https://registry.spm.dev/api/v1/skills/brand-new/1.0.0/download',
+        downloadUrl: 'https://registry.skillpkg.dev/api/v1/skills/brand-new/1.0.0/download',
         checksum: 'sha256:new',
         trustTier: 'registered',
         signed: false,

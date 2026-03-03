@@ -69,7 +69,7 @@ This matches npm exactly: `npm install <pkg>` is project-local, `npm install -g 
 
 ```json
 {
-  "$schema": "https://spm.dev/schemas/skills-v1.json",
+  "$schema": "https://skillpkg.dev/schemas/skills-v1.json",
 
   "name": "vacai-agent",
   "description": "Multi-agent trip advisor built with LangGraph",
@@ -280,21 +280,21 @@ Like `package-lock.json` or `poetry.lock`, this pins exact versions for reproduc
   "skills": {
     "frontend-design": {
       "version": "1.4.1",
-      "resolved": "https://registry.spm.dev/api/v1/skills/frontend-design/1.4.1/download",
+      "resolved": "https://registry.skillpkg.dev/api/v1/skills/frontend-design/1.4.1/download",
       "checksum": "sha256:abc123...",
       "source": "registry",
       "signer": "anthropic-official@anthropic.com"
     },
     "pdf": {
       "version": "2.0.3",
-      "resolved": "https://registry.spm.dev/api/v1/skills/pdf/2.0.3/download",
+      "resolved": "https://registry.skillpkg.dev/api/v1/skills/pdf/2.0.3/download",
       "checksum": "sha256:def456...",
       "source": "registry",
       "signer": "almog@example.com"
     },
     "data-viz": {
       "version": "1.2.3",
-      "resolved": "https://registry.spm.dev/api/v1/skills/data-viz/1.2.3/download",
+      "resolved": "https://registry.skillpkg.dev/api/v1/skills/data-viz/1.2.3/download",
       "checksum": "sha256:ghi789...",
       "source": "registry",
       "signer": "almog@example.com",

@@ -31,7 +31,7 @@ export const CACHE_TTLS = {
  * Build a deterministic cache key URL from path and query string.
  */
 export const buildCacheKey = (path: string, querystring?: string): string => {
-  const base = `https://spm.dev/cache/${path.replace(/^\//, '')}`;
+  const base = `https://skillpkg.dev/cache/${path.replace(/^\//, '')}`;
   return querystring ? `${base}?${querystring}` : base;
 };
 

@@ -95,7 +95,7 @@ export const App = () => {
               color: 'var(--color-text-muted)',
             }}
           >
-            admin@spm.dev
+            admin@skillpkg.dev
           </span>
           <a
             href="#"

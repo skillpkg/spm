@@ -432,7 +432,7 @@ Lightweight — don't over-engineer this at launch.
 import asyncio
 import aiohttp
 
-ANALYTICS_ENDPOINT = "https://registry.spm.dev/api/v1/analytics/events"
+ANALYTICS_ENDPOINT = "https://registry.skillpkg.dev/api/v1/analytics/events"
 
 async def track_event(event_type: str, properties: dict):
     """
@@ -554,7 +554,7 @@ $ spm install data-viz    # First ever spm command after install
      We NEVER collect: prompts, file contents, personal data.
      We DO collect: install/trigger counts, platform, timing.
 
-     Full policy: https://spm.dev/privacy
+     Full policy: https://skillpkg.dev/privacy
 
   ? Enable analytics? (Y/n): Y
   ✓ Analytics enabled. Opt out anytime: spm config set analytics.opt_out true
@@ -767,7 +767,7 @@ FUTURE PRO (Phase 3, paid tier):
 □ Wrapper script template in spm init scaffold
 □ Pending events file + flush on next CLI command
 □ Free author dashboard: downloads, rating, basic stats
-□ Privacy policy page (spm.dev/privacy)
+□ Privacy policy page (skillpkg.dev/privacy)
 ```
 
 Everything else — the pro dashboard, trigger analytics depth, competitor comparison — comes later. But the data pipeline is ready for it.

@@ -21,7 +21,7 @@ That's it. No "spm init --global". No "spm bootstrap install". Just works.
 # Formula: spm.rb
 class Spm < Formula
   desc "Skills Package Manager for AI Agents"
-  homepage "https://spm.dev"
+  homepage "https://skillpkg.dev"
   url "https://github.com/spm-dev/spm/releases/download/v0.1.0/spm-0.1.0.tar.gz"
   sha256 "abc123..."
   license "MIT"
@@ -56,7 +56,7 @@ class Spm < Formula
         spm install <skill>        # Install a skill
         cd my-project && spm init  # Set up project skills
 
-      Docs: https://spm.dev/docs
+      Docs: https://skillpkg.dev/docs
     EOS
   end
 
@@ -182,7 +182,7 @@ Searching for "charts"...
 
 ```bash
 # For quick installs / CI environments
-curl -fsSL https://spm.dev/install.sh | sh
+curl -fsSL https://skillpkg.dev/install.sh | sh
 ```
 
 ```bash
@@ -332,7 +332,7 @@ export async function installRuntime({ silent = false } = {}) {
 
   if (!fs.existsSync(globalSkillsJson)) {
     const initialSkillsJson = {
-      $schema: 'https://spm.dev/schemas/skills-v1.json',
+      $schema: 'https://skillpkg.dev/schemas/skills-v1.json',
       name: 'global',
       description: 'Globally installed skills for this machine',
       skills: {},
@@ -356,10 +356,10 @@ export async function installRuntime({ silent = false } = {}) {
   if (!fs.existsSync(configToml)) {
     const initialConfig = [
       '# SPM Configuration',
-      '# https://spm.dev/docs/config',
+      '# https://skillpkg.dev/docs/config',
       '',
       '# Registry',
-      'registry = "https://registry.spm.dev"',
+      'registry = "https://registry.skillpkg.dev"',
       '',
       '# Auth (set by `spm login`)',
       '# auth_token = ""',

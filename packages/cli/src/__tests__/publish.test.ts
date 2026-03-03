@@ -80,7 +80,7 @@ let mockToken: string | null = 'test-token-123';
 
 vi.mock('../lib/config.js', () => ({
   loadConfig: () => ({
-    registry: 'https://registry.spm.dev/api/v1',
+    registry: 'https://registry.skillpkg.dev/api/v1',
     token: mockToken,
   }),
 }));
@@ -219,7 +219,7 @@ describe('publish command', () => {
     mockPublishSkill.mockResolvedValue({
       name: 'my-skill',
       version: '1.0.0',
-      url: 'https://spm.dev/skills/my-skill',
+      url: 'https://skillpkg.dev/skills/my-skill',
       trust_tier: 'registered',
       signed: false,
     });
@@ -232,7 +232,7 @@ describe('publish command', () => {
 
     const output = mockLog.mock.calls.map((call: unknown[]) => call[0]).join('\n');
     expect(output).toContain('Published my-skill@1.0.0');
-    expect(output).toContain('https://spm.dev/skills/my-skill');
+    expect(output).toContain('https://skillpkg.dev/skills/my-skill');
   });
 
   it('handles 409 version conflict', async () => {

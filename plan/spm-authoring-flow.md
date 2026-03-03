@@ -130,7 +130,7 @@ data-viz/
 
 ```json
 {
-  "$schema": "https://spm.dev/schemas/manifest-v1.json",
+  "$schema": "https://skillpkg.dev/schemas/manifest-v1.json",
   "name": "data-viz",
   "version": "0.1.0",
   "description": "Create publication-quality charts and dashboards from data files. Triggers on: charts, visualization, dashboard, plots, graphs, data display, histogram, scatter plot, bar chart.",
@@ -499,7 +499,7 @@ Signing with Sigstore...
   ✓ Recorded on Rekor transparency log
   ✓ Sigstore bundle created (.sigstore)
 
-Uploading to registry.spm.dev...
+Uploading to registry.skillpkg.dev...
   ████████████████████████████████ 100%
   ✓ Package uploaded (.skl)
   ✓ Sigstore bundle uploaded (.sigstore)
@@ -512,12 +512,12 @@ Registry processing (server-side security)...
 ╭──────────────────────────────────────────────╮
 │  ✅ data-viz@1.0.0 published!                 │
 │                                              │
-│  📦 https://spm.dev/skills/data-viz          │
+│  📦 https://skillpkg.dev/skills/data-viz          │
 │  📊 Security scan: pending                   │
 │                                              │
 │  Install: spm install data-viz               │
-│  Badge:  [![spm](https://spm.dev/badge/      │
-│           data-viz)](https://spm.dev/...)     │
+│  Badge:  [![spm](https://skillpkg.dev/badge/      │
+│           data-viz)](https://skillpkg.dev/...)     │
 ╰──────────────────────────────────────────────╯
 ```
 
@@ -613,7 +613,7 @@ Category check...
   ? Confirm category: data-viz (Y/change) _
 ```
 
-4. **Final category is stored in the registry** and used for browse/filter on spm.dev
+4. **Final category is stored in the registry** and used for browse/filter on skillpkg.dev
 
 **Tags remain free-form** — authors write whatever tags they want in manifest.json. Tags power search; categories power browse.
 

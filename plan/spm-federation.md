@@ -32,7 +32,7 @@ With federation:
 │                                                          │
 │          ┌──────────────────┐                            │
 │          │  Public Registry  │                            │
-│          │  registry.spm.dev │                            │
+│          │  registry.skillpkg.dev │                            │
 │          └────────┬─────────┘                            │
 │           ┌───────┼───────┐                              │
 │           │       │       │                              │
@@ -83,7 +83,7 @@ The public registry is the hub. Private registries pull from it.
 │  └── data-viz@1.2.0              (mirrored from public)  │
 │                                                          │
 │  Sync config:                                            │
-│  ├── Upstream: registry.spm.dev                          │
+│  ├── Upstream: registry.skillpkg.dev                          │
 │  ├── Mode: selective (allowlist)                         │
 │  ├── Schedule: every 6 hours                             │
 │  └── Auto-approve: trust_level >= "verified"             │
@@ -100,7 +100,7 @@ federation:
   role: spoke # This registry pulls from a hub
 
   upstream:
-    url: https://registry.spm.dev/api/v1
+    url: https://registry.skillpkg.dev/api/v1
     auth: none # Public registry, no auth needed
 
   sync:
@@ -297,14 +297,14 @@ Instead of running a full registry, companies can run a thin proxy that adds pri
 │        ├── Is "pdf" a private skill? ──── Yes ──► Serve│
 │        │                                     from local│
 │        │                                               │
-│        └── No ──► Forward to registry.spm.dev          │
+│        └── No ──► Forward to registry.skillpkg.dev          │
 │                   Cache response                       │
 │                   Serve to user                        │
 │                                                        │
 │  Config: ~/.spm/config.json                            │
 │  {                                                     │
 │    "registry": "https://spm-proxy.internal:3000",      │
-│    "fallback": "https://registry.spm.dev"              │
+│    "fallback": "https://registry.skillpkg.dev"              │
 │  }                                                     │
 └────────────────────────────────────────────────────────┘
 ```
@@ -317,7 +317,7 @@ const httpProxy = require('http-proxy-middleware');
 const app = express();
 
 const PRIVATE_SKILLS_DIR = '/opt/spm/private-skills/';
-const PUBLIC_REGISTRY = 'https://registry.spm.dev';
+const PUBLIC_REGISTRY = 'https://registry.skillpkg.dev';
 
 // Check local first, then proxy to public
 app.get('/api/v1/skills/:name', (req, res, next) => {
@@ -415,7 +415,7 @@ The public registry controls access to public skills. Private registries control
 ┌─────────────────────────────────────────────────────────┐
 │           Who Controls Access?                           │
 │                                                         │
-│  Public registry (registry.spm.dev):                    │
+│  Public registry (registry.skillpkg.dev):                    │
 │    → Open to everyone. No auth for read/install.        │
 │    → Auth only required for publishing.                 │
 │    → SPM team manages this.                             │
@@ -451,7 +451,7 @@ The token is stored per-registry:
 {
   "registries": {
     "default": {
-      "url": "https://registry.spm.dev/api/v1",
+      "url": "https://registry.skillpkg.dev/api/v1",
       "auth": null
     },
     "@acme": {
@@ -478,7 +478,7 @@ When the CLI fetches a scoped skill, it attaches the correct auth:
 
 ```
 # Unauthenticated (public)
-GET https://registry.spm.dev/api/v1/skills/data-viz/1.0.0/download
+GET https://registry.skillpkg.dev/api/v1/skills/data-viz/1.0.0/download
 
 # Authenticated (private)
 GET https://spm.acme.com/api/v1/skills/@acme/internal-tool/1.0.0/download
@@ -532,7 +532,7 @@ Different scopes resolve to different registries. No federation protocol needed 
 // ~/.spm/config.json
 {
   "registries": {
-    "default": "https://registry.spm.dev/api/v1",
+    "default": "https://registry.skillpkg.dev/api/v1",
     "@acme": "https://spm.acme.com/api/v1",
     "@partner": "https://spm.partner.io/api/v1"
   }
@@ -541,14 +541,14 @@ Different scopes resolve to different registries. No federation protocol needed 
 
 ```bash
 # Install routes to the right registry automatically
-$ spm install data-viz              # → registry.spm.dev
+$ spm install data-viz              # → registry.skillpkg.dev
 $ spm install @acme/internal-tool   # → spm.acme.com
 $ spm install @partner/connector    # → spm.partner.io
 
 # Search can span registries
 $ spm search "report" --all-registries
 
-  Public (registry.spm.dev):
+  Public (registry.skillpkg.dev):
     📦 report-builder v1.2.0 (★4.5, 2.1k downloads)
     📦 pdf-report v1.0.0 (★4.2, 890 downloads)
 
@@ -579,7 +579,7 @@ def resolve_registry(skill_name: str) -> str:
         )
 
     # Default registry
-    return registries.get("default", "https://registry.spm.dev/api/v1")
+    return registries.get("default", "https://registry.skillpkg.dev/api/v1")
 ```
 
 ---
@@ -593,7 +593,7 @@ For performance and compliance (data residency), SPM can have read-only mirrors.
 │                  Mirror Topology                          │
 │                                                          │
 │     ┌──────────┐                                        │
-│     │  Primary  │ registry.spm.dev (US-East)             │
+│     │  Primary  │ registry.skillpkg.dev (US-East)             │
 │     │  Registry │ Source of truth for all writes          │
 │     └────┬─────┘                                        │
 │          │                                               │
@@ -616,7 +616,7 @@ For performance and compliance (data residency), SPM can have read-only mirrors.
 # Mirror config
 mirror:
   role: mirror
-  primary: https://registry.spm.dev
+  primary: https://registry.skillpkg.dev
   region: eu-west-1
 
   sync:
@@ -631,7 +631,7 @@ mirror:
     database: postgres://mirror-eu.rds.amazonaws.com/spm
 
   read_only: true # This mirror never accepts publishes
-  redirect_writes: https://registry.spm.dev
+  redirect_writes: https://registry.skillpkg.dev
 ```
 
 ---
@@ -661,7 +661,7 @@ $ spm install @acme/internal-report
 
   Resolving dependencies...
     @acme/internal-report@3.0.0  ← spm.acme.com
-    ├── pdf@1.0.0                ← registry.spm.dev (public)
+    ├── pdf@1.0.0                ← registry.skillpkg.dev (public)
     ├── @acme/branding@2.1.0     ← spm.acme.com (private)
     └── @partner/data-feed@1.0.0 ← spm.partner.io
 

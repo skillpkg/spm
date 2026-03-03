@@ -109,7 +109,7 @@ $ spm register
 │     https://github.com/login/oauth/authorize?            │
 │       client_id=spm_abc123&                              │
 │       scope=read:user,user:email&                        │
-│       redirect_uri=https://registry.spm.dev/auth/cb      │
+│       redirect_uri=https://registry.skillpkg.dev/auth/cb      │
 │                                                          │
 │  2. User authorizes SPM                                  │
 │                                                          │
@@ -233,7 +233,7 @@ $ spm terms accept
   │     - Suspend accounts that violate these terms   │
   │     - Remove skills that fail security review     │
   │                                                  │
-  │  Full terms: https://spm.dev/publisher-terms      │
+  │  Full terms: https://skillpkg.dev/publisher-terms      │
   └──────────────────────────────────────────────────┘
 
   ? I accept the Publisher Terms (type "accept"): accept
@@ -299,7 +299,7 @@ $ spm token create
 ```json
 // ~/.spm/credentials.json (encrypted at rest)
 {
-  "registry": "https://registry.spm.dev",
+  "registry": "https://registry.skillpkg.dev",
   "auth": {
     "type": "oauth",
     "provider": "github",
@@ -490,7 +490,7 @@ Affected skills:
 You may appeal this decision within 30 days:
   spm appeal --reason "explanation"
 
-Or contact: security@spm.dev
+Or contact: security@skillpkg.dev
 ```
 
 ---

@@ -29,9 +29,9 @@ describe('App', () => {
     expect(screen.getByText('Avg review time')).toBeInTheDocument();
   });
 
-  it('shows admin@spm.dev email', () => {
+  it('shows admin@skillpkg.dev email', () => {
     render(<App />);
-    expect(screen.getByText('admin@spm.dev')).toBeInTheDocument();
+    expect(screen.getByText('admin@skillpkg.dev')).toBeInTheDocument();
   });
 
   it('shows Back to registry link', () => {

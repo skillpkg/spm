@@ -57,7 +57,7 @@ vi.mock('../lib/api-client.js', () => ({
 // -- Mock config --
 vi.mock('../lib/config.js', () => ({
   loadConfig: () => ({
-    registry: 'https://registry.spm.dev/api/v1',
+    registry: 'https://registry.skillpkg.dev/api/v1',
     token: null,
   }),
   getConfigDir: () => '/tmp/test-spm',

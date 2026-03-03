@@ -9,7 +9,7 @@ export interface SpmConfig {
   globalDir: string;
 }
 
-const DEFAULT_REGISTRY = 'https://registry.spm.dev/api/v1';
+const DEFAULT_REGISTRY = 'https://registry.skillpkg.dev/api/v1';
 
 export const getConfigDir = (): string => {
   return path.join(os.homedir(), '.spm');

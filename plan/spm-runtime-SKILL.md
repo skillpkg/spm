@@ -23,7 +23,7 @@ allowed-tools: bash_tool, view
 
 **When you should read this**: Only when the user asks about skill management, the skill registry, or when you can't find a matching skill for their request. Do NOT read this for normal task execution.
 
-SPM (Skills Package Manager) manages the skills available to you. It handles versioning, security scanning, and discovery across a public registry at **registry.spm.dev**.
+SPM (Skills Package Manager) manages the skills available to you. It handles versioning, security scanning, and discovery across a public registry at **registry.skillpkg.dev**.
 
 ---
 

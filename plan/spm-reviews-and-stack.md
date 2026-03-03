@@ -809,7 +809,7 @@ PHASE 1 — MVP (3-4 weeks, was 2 months):
   DB: Neon (skills, versions, users, analytics_events)
   Storage: R2 (packages + sigstore bundles)
   Hosting: Fly.io (1 machine)
-  Domain: spm.dev
+  Domain: skillpkg.dev
 
   NOT yet: reviews, web UI, federation, bulk import tool
 

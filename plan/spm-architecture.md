@@ -95,7 +95,7 @@ my-skill-1.2.0.skl
 
 ```json
 {
-  "$schema": "https://spm.dev/schemas/manifest-v1.json",
+  "$schema": "https://skillpkg.dev/schemas/manifest-v1.json",
   "name": "data-viz",
   "version": "1.2.0",
   "description": "Create publication-quality charts and dashboards from data files. Triggers on: data visualization, chart creation, dashboard, plot, graph, histogram, scatter plot.",
@@ -168,7 +168,7 @@ The registry is the central hub — a searchable catalog of published skills wit
 
 Full API specification: **spm-registry-api.md**
 
-Base URL: `https://registry.spm.dev/api/v1`
+Base URL: `https://registry.skillpkg.dev/api/v1`
 
 ```
 Auth:
@@ -699,7 +699,7 @@ from mcp.types import Tool, TextContent
 import httpx
 
 app = Server("spm-registry")
-REGISTRY_URL = "https://registry.spm.dev/api/v1"
+REGISTRY_URL = "https://registry.skillpkg.dev/api/v1"
 
 @app.tool()
 async def spm_search(query: str, category: str = None,
@@ -755,9 +755,9 @@ async def spm_install(name: str, version: str = "latest"):
 
 **Admin panel access model:**
 
-- Runs on **separate domain**: `admin.spm.dev` (independent Cloudflare Pages deploy)
+- Runs on **separate domain**: `admin.skillpkg.dev` (independent Cloudflare Pages deploy)
 - Public site shows "Admin" nav link only when `GET /auth/whoami` returns `role: "admin"`
-- Link opens `admin.spm.dev` in same tab — shared auth (same JWT works on both origins)
+- Link opens `admin.skillpkg.dev` in same tab — shared auth (same JWT works on both origins)
 - First admin set manually in DB (`UPDATE users SET role = 'admin' WHERE username = '...'`)
 - Subsequent admins promoted via admin panel or `PATCH /admin/users/:username/role`
 - Admin routes enforce: JWT validity → JWT admin claim → DB role verification (defense-in-depth)
@@ -1222,11 +1222,11 @@ $ spm validate
 $ spm publish
   Packing gantt-chart@1.0.0...
   Signing with sigstore (GitHub: almog)...
-  Uploading to registry.spm.dev...
+  Uploading to registry.skillpkg.dev...
   Running security scan...
   ✓ Static analysis passed
   ✓ Prompt injection scan passed
-  ✓ Published! https://spm.dev/skills/gantt-chart
+  ✓ Published! https://skillpkg.dev/skills/gantt-chart
 
 === User: Finding and using the skill ===
 

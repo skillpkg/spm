@@ -143,7 +143,7 @@ If cached and checksum matches → skip download (Phase 2).
 #### 1.3 Query Registry for Version Resolution
 
 ```http
-GET https://registry.spm.dev/api/v1/skills/data-viz/resolve?range=^1.2.0
+GET https://registry.skillpkg.dev/api/v1/skills/data-viz/resolve?range=^1.2.0
 
 Response:
 {
@@ -151,9 +151,9 @@ Response:
   "requested": "^1.2.0",
   "resolved": "1.2.3",           // Highest matching version
   "available": ["1.0.0", "1.1.0", "1.2.0", "1.2.1", "1.2.2", "1.2.3", "2.0.0-beta.1"],
-  "download_url": "https://registry.spm.dev/api/v1/skills/data-viz/1.2.3/download",
+  "download_url": "https://registry.skillpkg.dev/api/v1/skills/data-viz/1.2.3/download",
   "checksum": "sha256:a1b2c3d4e5f6...",
-  "signature_url": "https://registry.spm.dev/api/v1/skills/data-viz/1.2.3/signature",
+  "signature_url": "https://registry.skillpkg.dev/api/v1/skills/data-viz/1.2.3/signature",
   "dependencies": {
     "skills": {
       "frontend-design": ">=1.0.0"
@@ -778,7 +778,7 @@ async function linkToAgentPlatforms(name, storeDir) {
   "dependencies": {
     "data-viz": {
       "version": "1.2.3",
-      "resolved": "https://registry.spm.dev/api/v1/skills/data-viz/1.2.3/download",
+      "resolved": "https://registry.skillpkg.dev/api/v1/skills/data-viz/1.2.3/download",
       "checksum": "sha256:a1b2c3d4e5f6...",
       "signer": "almog@example.com",
       "signed_at": "2026-02-20T10:00:00Z",
@@ -788,7 +788,7 @@ async function linkToAgentPlatforms(name, storeDir) {
     },
     "frontend-design": {
       "version": "1.4.1",
-      "resolved": "https://registry.spm.dev/api/v1/skills/frontend-design/1.4.1/download",
+      "resolved": "https://registry.skillpkg.dev/api/v1/skills/frontend-design/1.4.1/download",
       "checksum": "sha256:f6e5d4c3b2a1...",
       "signer": "anthropic-official@anthropic.com",
       "signed_at": "2026-02-18T10:00:00Z",

@@ -949,7 +949,7 @@ export default function AdminPanel() {
           </a>
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <span style={{ fontFamily: MONO, fontSize: 12, color: C.textMuted }}>admin@spm.dev</span>
+          <span style={{ fontFamily: MONO, fontSize: 12, color: C.textMuted }}>admin@skillpkg.dev</span>
           <a href="#" style={{ fontFamily: SANS, fontSize: 13, color: C.textDim, textDecoration: "none" }}>← Back to registry</a>
         </div>
       </nav>

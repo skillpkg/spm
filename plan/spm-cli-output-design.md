@@ -91,7 +91,7 @@ $ spm install data-viz
 $ spm install data-viz --verbose
 
   Resolving data-viz...
-    Registry: https://registry.spm.dev
+    Registry: https://registry.skillpkg.dev
     Latest matching ^1.2.0: 1.2.3
     Published: 2026-02-15 by @almog (Verified)
 
@@ -186,7 +186,7 @@ $ spm publish
   ✓ Signed by almog@github
 
   ✓ Published my-skill@1.0.0
-    https://spm.dev/skills/my-skill
+    https://skillpkg.dev/skills/my-skill
 ```
 
 ### Multi-step progress (spm install with deps)
@@ -396,7 +396,7 @@ $ spm publish
   ◐ Publishing to registry...
   ✓ Published my-skill@1.0.0
 
-  https://spm.dev/skills/my-skill
+  https://skillpkg.dev/skills/my-skill
 ```
 
 ### Blocked
@@ -473,10 +473,10 @@ All errors follow the same structure: icon + title + detail + hint.
 ```
   ✗ Could not reach registry
 
-    https://registry.spm.dev is not responding (timeout after 10s)
+    https://registry.skillpkg.dev is not responding (timeout after 10s)
 
     💡 Check your internet connection, or try again later.
-       Status: https://status.spm.dev
+       Status: https://status.skillpkg.dev
 ```
 
 ### Auth error
@@ -654,7 +654,7 @@ $ spm whoami
     Trust tier: ✓✓ Verified
     Registered: 2026-01-15 (6 weeks ago)
     Published:  7 skills
-    Registry:   https://registry.spm.dev
+    Registry:   https://registry.skillpkg.dev
 ```
 
 ### spm whoami (not logged in)
@@ -676,7 +676,7 @@ $ spm whoami
   "trust_tier": "verified",
   "registered_at": "2026-01-15T00:00:00Z",
   "skills_published": 7,
-  "registry": "https://registry.spm.dev"
+  "registry": "https://registry.skillpkg.dev"
 }
 ```
 

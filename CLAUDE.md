@@ -7,7 +7,7 @@ A package manager for AI agent skills. Monorepo with four packages.
 - `packages/shared/` — Zod schemas, types, constants (imported by all other packages)
 - `packages/api/` — Hono registry API (deploys to Cloudflare Workers)
 - `packages/cli/` — `spm` CLI (publishes to npm)
-- `packages/web/` — spm.dev React app (deploys to Cloudflare Pages)
+- `packages/web/` — skillpkg.dev React app (deploys to Cloudflare Pages)
 - `migrations/` — Neon Postgres SQL migrations
 - `plan/` — Full spec docs. READ THESE before implementing a feature.
 

@@ -752,7 +752,7 @@ fastify.post(
       published: true,
       name: manifest.name,
       version: manifest.version,
-      url: `https://spm.dev/skills/${manifest.name}`,
+      url: `https://skillpkg.dev/skills/${manifest.name}`,
       scan_status: 'pending',
     });
   },
@@ -849,7 +849,7 @@ fastify.get('/api/v1/skills/:name/resolve', async (req, res) => {
     requested: range,
     resolved: resolved.version,
     available: allVersions,
-    download_url: `https://registry.spm.dev/api/v1/skills/${name}/${resolved.version}/download`,
+    download_url: `https://registry.skillpkg.dev/api/v1/skills/${name}/${resolved.version}/download`,
     checksum: resolved.checksum,
     signed: resolved.signed,
     signer: resolved.signer_identity,
@@ -979,7 +979,7 @@ The MCP server that lets agents search the registry runs as a separate service:
 │                                             │
 │  Option A: Hosted by SPM (recommended)      │
 │  ┌─────────────────────────────────────┐    │
-│  │  https://mcp.spm.dev/sse            │    │
+│  │  https://mcp.skillpkg.dev/sse            │    │
 │  │  Runs on same infra as registry     │    │
 │  │  Talks to registry API internally   │    │
 │  │  User adds to agent MCP connectors │    │
@@ -1091,7 +1091,7 @@ $ spm config set registry https://spm.yourcompany.com/api/v1
 // ~/.spm/config.json
 {
   "registries": {
-    "default": "https://registry.spm.dev/api/v1",
+    "default": "https://registry.skillpkg.dev/api/v1",
     "@mycompany": "https://spm.mycompany.com/api/v1",
     "@partner": "https://spm.partner.io/api/v1"
   }

@@ -6,7 +6,7 @@ import { registerSearchTool } from './tools/search.js';
 import { registerInfoTool } from './tools/info.js';
 import { registerCategoriesTool } from './tools/categories.js';
 
-const DEFAULT_REGISTRY_URL = 'https://registry.spm.dev/api/v1';
+const DEFAULT_REGISTRY_URL = 'https://registry.skillpkg.dev/api/v1';
 
 const main = async (): Promise<void> => {
   const baseUrl = process.env['SPM_REGISTRY_URL'] ?? DEFAULT_REGISTRY_URL;

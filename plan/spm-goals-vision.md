@@ -134,7 +134,7 @@ USE:                                    AVOID:
 "Publish your skill"                    "Push to the registry"
 "Browse skills"                         "Browse the registry"
 "The SPM ecosystem"                     "The SPM registry"
-"spm.dev" (the website)                 "The skill hub"
+"skillpkg.dev" (the website)                 "The skill hub"
 "Skill catalog" / "skill library"       "Artifact repository"
 "Skill author"                          "Package maintainer"
 "Find skills"                           "Search the index"

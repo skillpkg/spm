@@ -45,7 +45,7 @@ packages/
   shared/   — Zod schemas, types, constants
   api/      — Registry API (Cloudflare Workers)
   cli/      — spm CLI (npm package)
-  web/      — spm.dev (Cloudflare Pages)
+  web/      — skillpkg.dev (Cloudflare Pages)
 migrations/ — Neon Postgres SQL migrations
 plan/       — Full spec docs
 ```

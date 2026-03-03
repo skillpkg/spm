@@ -501,7 +501,7 @@ Export complete: 2.3 GB total
 {
   "format_version": "1.0",
   "exported_at": "2026-06-15T10:00:00Z",
-  "source": "https://registry.spm.dev",
+  "source": "https://registry.skillpkg.dev",
   "stats": {
     "skills": 1247,
     "versions": 5891,

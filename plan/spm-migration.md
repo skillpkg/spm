@@ -482,7 +482,7 @@ class ManifestGenerator:
         frontmatter = parse_frontmatter(content)
 
         manifest = {
-            "$schema": "https://spm.dev/schemas/manifest-v1.json",
+            "$schema": "https://skillpkg.dev/schemas/manifest-v1.json",
             "name": frontmatter.get("name", skill_dir.name),
             "version": "1.0.0",
             "description": frontmatter.get("description", ""),
@@ -872,7 +872,7 @@ $ spm import --from ./skills/ --org @myteam
   ╭──────────────────────────────────────────────────────╮
   │  ✅ Imported 30 skills to @myteam                     │
   │                                                      │
-  │  Browse: https://spm.dev/@myteam                     │
+  │  Browse: https://skillpkg.dev/@myteam                     │
   │  Report: ./spm-import-report.json                    │
   │  Fix remaining: spm import --fix ./spm-import-report │
   ╰──────────────────────────────────────────────────────╯
@@ -889,7 +889,7 @@ $ spm import --from ./skills/ --org @bigco
   spm-onboard handles parallel scanning, batch uploads,
   resumable state, and bulk import tokens.
 
-  See: https://spm.dev/docs/bulk-import
+  See: https://skillpkg.dev/docs/bulk-import
 ```
 
 ### 11.3 Import Sources
@@ -1022,7 +1022,7 @@ Every bulk import generates a detailed report for review:
       "category": "devops",
       "detected_deps": ["boto3"],
       "scan_status": "pending",
-      "url": "https://spm.dev/@vercel/edge-deploy"
+      "url": "https://skillpkg.dev/@vercel/edge-deploy"
     }
   ],
 

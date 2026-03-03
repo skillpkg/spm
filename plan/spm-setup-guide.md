@@ -60,11 +60,11 @@ wrangler deploy          # deploys to spm-api.<your-subdomain>.workers.dev
 
 **Custom domain (optional):**
 
-If you own `spm.dev` or similar, add a custom route in the Cloudflare dashboard under Workers → Routes, or in `wrangler.toml`:
+If you own `skillpkg.dev` or similar, add a custom route in the Cloudflare dashboard under Workers → Routes, or in `wrangler.toml`:
 
 ```toml
 routes = [
-  { pattern = "api.spm.dev/*", zone_name = "spm.dev" }
+  { pattern = "api.skillpkg.dev/*", zone_name = "skillpkg.dev" }
 ]
 ```
 
@@ -160,7 +160,7 @@ More than enough for development. Scale plan is $19/mo when you need it.
 **Setup:**
 
 1. Create account at https://resend.com (free)
-2. Add and verify your domain (e.g., `spm.dev`):
+2. Add and verify your domain (e.g., `skillpkg.dev`):
    - Add the DNS records Resend provides (SPF, DKIM, DMARC)
    - Wait for verification (usually < 5 minutes)
 3. Create an API key in the dashboard
@@ -179,7 +179,7 @@ await fetch('https://api.resend.com/emails', {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    from: 'SPM <noreply@spm.dev>',
+    from: 'SPM <noreply@skillpkg.dev>',
     to: user.email,
     subject: 'Verify your SPM account',
     html: verificationEmailHtml,
