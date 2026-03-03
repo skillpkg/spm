@@ -6,7 +6,7 @@ on:
 
 # Cancel in-progress deploys for the same branch
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

@@ -8,8 +8,9 @@ on:
   workflow_call:
 
 # Cancel in-progress runs for the same branch/PR
+# Use a fixed name so reusable workflow_call doesn't inherit caller's group
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: quality-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
