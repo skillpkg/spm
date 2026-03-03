@@ -16,7 +16,7 @@ bucket_name = "spm-packages"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "<RATE_LIMIT_KV_ID>" # Replace with: wrangler kv namespace create RATE_LIMIT
+id = "134b73cb8a544ed8b32e2fd1a3ca0123"
 
 [env.staging]
 name = "spm-api-staging"
