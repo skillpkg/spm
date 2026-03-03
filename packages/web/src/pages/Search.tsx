@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
   SKILLS_DB,
@@ -8,9 +8,43 @@ import {
   SORT_OPTIONS,
   type SkillFull,
 } from '../data/mock';
-import { TrustBadge } from '@spm/ui';
+import { TrustBadge, type TrustTier } from '@spm/ui';
+import { searchSkills, type SearchResultItem } from '../lib/api';
 
-const SearchResultRow = ({ skill }: { skill: SkillFull }) => {
+interface DisplaySkill {
+  name: string;
+  version: string;
+  desc: string;
+  author: string;
+  trust: TrustTier;
+  downloads: string;
+  rating: string;
+  tags?: string[];
+}
+
+const apiResultToDisplay = (s: SearchResultItem): DisplaySkill => ({
+  name: s.name,
+  version: s.version,
+  desc: s.description,
+  author: s.author.username,
+  trust: s.author.trust_tier as TrustTier,
+  downloads: s.downloads >= 1000 ? `${(s.downloads / 1000).toFixed(1)}k` : String(s.downloads),
+  rating: s.rating_avg != null ? String(s.rating_avg) : '--',
+  tags: s.tags,
+});
+
+const mockToDisplay = (s: SkillFull): DisplaySkill => ({
+  name: s.name,
+  version: s.version,
+  desc: s.desc,
+  author: s.author,
+  trust: s.trust,
+  downloads: s.downloads,
+  rating: s.rating ?? '--',
+  tags: s.tags,
+});
+
+const SearchResultRow = ({ skill }: { skill: DisplaySkill }) => {
   return (
     <Link to={`/skills/${skill.name}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div
@@ -132,20 +166,65 @@ export const Search = () => {
   );
   const [trustFilter, setTrustFilter] = useState('All');
   const [sort, setSort] = useState('relevance');
+  const [apiResults, setApiResults] = useState<DisplaySkill[] | null>(null);
+  const [totalResults, setTotalResults] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const searchResults = queryParam.trim()
-    ? SKILLS_DB.filter(
-        (s) =>
-          s.name.includes(queryParam.toLowerCase()) ||
-          s.desc.toLowerCase().includes(queryParam.toLowerCase()) ||
-          s.author.includes(queryParam.toLowerCase()) ||
-          s.tags?.some((t) => t.includes(queryParam.toLowerCase())),
-      )
-    : SKILLS_DB;
+  // Fetch from API when filters change
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
 
-  const filtered = searchResults
-    .filter((s) => category === 'All' || s.category === CATEGORY_SLUGS[category])
-    .filter((s) => trustFilter === 'All' || s.trust === trustFilter.toLowerCase());
+    const params: Record<string, string | number> = {};
+    if (queryParam.trim()) params.q = queryParam.trim();
+    if (category !== 'All') params.category = CATEGORY_SLUGS[category] ?? category;
+    if (trustFilter !== 'All') params.trust = trustFilter.toLowerCase();
+    if (sort !== 'relevance') params.sort = sort;
+    params.per_page = 50;
+
+    searchSkills(params)
+      .then((data) => {
+        if (cancelled) return;
+        setApiResults(data.results.map(apiResultToDisplay));
+        setTotalResults(data.total);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // Fallback to mock data
+        setApiResults(null);
+        setTotalResults(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [queryParam, category, trustFilter, sort]);
+
+  // Use API results if available, otherwise fall back to mock filtering
+  const filtered: DisplaySkill[] =
+    apiResults !== null
+      ? apiResults
+      : (() => {
+          const searchResults = queryParam.trim()
+            ? SKILLS_DB.filter(
+                (s) =>
+                  s.name.includes(queryParam.toLowerCase()) ||
+                  s.desc.toLowerCase().includes(queryParam.toLowerCase()) ||
+                  s.author.includes(queryParam.toLowerCase()) ||
+                  s.tags?.some((t) => t.includes(queryParam.toLowerCase())),
+              )
+            : SKILLS_DB;
+
+          return searchResults
+            .filter((s) => category === 'All' || s.category === CATEGORY_SLUGS[category])
+            .filter((s) => trustFilter === 'All' || s.trust === trustFilter.toLowerCase())
+            .map(mockToDisplay);
+        })();
+
+  const displayTotal = totalResults ?? filtered.length;
 
   return (
     <div
@@ -252,7 +331,7 @@ export const Search = () => {
                 color: 'var(--color-text-secondary)',
               }}
             >
-              {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+              {displayTotal} result{displayTotal !== 1 ? 's' : ''}
             </span>
             {queryParam && (
               <span

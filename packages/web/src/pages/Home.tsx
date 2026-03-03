@@ -8,10 +8,13 @@ import {
   CATEGORIES,
   SEARCH_SUGGESTIONS,
   ALL_SKILLS,
+  type SkillSummary,
+  type Category,
 } from '../data/mock';
 import { SkillCard } from '../components/SkillCard';
 import { SkillRow } from '../components/SkillRow';
 import { TrustBadge } from '@spm/ui';
+import { getTrending, getCategories, type TrendingSkill, type CategoryItem } from '../lib/api';
 
 type TrendingTab = 'featured' | 'rising' | 'most-installed' | 'new';
 
@@ -22,6 +25,29 @@ const TABS: { id: TrendingTab; label: string }[] = [
   { id: 'new', label: 'New' },
 ];
 
+const formatDownloads = (n: number): string => {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+};
+
+const trendingToSummary = (s: TrendingSkill): SkillSummary => ({
+  name: s.name,
+  version: s.version ?? '0.0.0',
+  desc: s.description,
+  author: s.author.username,
+  trust: s.author.trust_tier as SkillSummary['trust'],
+  downloads: formatDownloads(s.downloads),
+  weeklyGrowth: s.weekly_growth_pct ? `+${s.weekly_growth_pct}%` : undefined,
+  rating: s.rating_avg != null ? String(s.rating_avg) : undefined,
+});
+
+const apiCategoryToCategory = (c: CategoryItem): Category => ({
+  name: c.display,
+  slug: c.slug,
+  icon: c.icon,
+  count: c.count,
+});
+
 export const Home = () => {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -29,8 +55,71 @@ export const Home = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
+  // API state for trending tabs
+  const [featuredSkills, setFeaturedSkills] = useState<SkillSummary[]>(FEATURED);
+  const [risingSkills, setRisingSkills] = useState<SkillSummary[]>(RISING);
+  const [mostInstalledSkills, setMostInstalledSkills] = useState<SkillSummary[]>(MOST_INSTALLED);
+  const [newSkills, setNewSkills] = useState<SkillSummary[]>(NEW_THIS_WEEK);
+  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
+  const [loadingTrending, setLoadingTrending] = useState(false);
+
+  // Fetch trending data on mount and tab change
+  useEffect(() => {
+    let cancelled = false;
+    const apiTab = trendingTab === 'most-installed' ? 'most_installed' : trendingTab;
+    setLoadingTrending(true);
+
+    getTrending(apiTab)
+      .then((data) => {
+        if (cancelled) return;
+        const mapped = data.skills.map(trendingToSummary);
+        if (mapped.length === 0) {
+          setLoadingTrending(false);
+          return;
+        }
+        switch (trendingTab) {
+          case 'featured':
+            setFeaturedSkills(mapped);
+            break;
+          case 'rising':
+            setRisingSkills(mapped);
+            break;
+          case 'most-installed':
+            setMostInstalledSkills(mapped);
+            break;
+          case 'new':
+            setNewSkills(mapped);
+            break;
+        }
+      })
+      .catch(() => {
+        // Fallback: keep mock data (already initialized)
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingTrending(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [trendingTab]);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    getCategories()
+      .then((data) => {
+        if (data.categories.length > 0) {
+          setCategories(data.categories.map(apiCategoryToCategory));
+        }
+      })
+      .catch(() => {
+        // Fallback: keep mock categories
+      });
+  }, []);
+
+  const allSkills = [...featuredSkills, ...risingSkills, ...newSkills];
   const filtered = query.trim()
-    ? ALL_SKILLS.filter(
+    ? allSkills.filter(
         (s) =>
           s.name.includes(query.toLowerCase()) ||
           (s.desc || '').toLowerCase().includes(query.toLowerCase()) ||
@@ -348,7 +437,7 @@ export const Home = () => {
               {trendingTab === 'featured' && (
                 <div>
                   <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
-                    {FEATURED.map((s, i) => (
+                    {featuredSkills.slice(0, 3).map((s, i) => (
                       <SkillCard key={s.name} skill={s} rank={i} />
                     ))}
                   </div>
@@ -390,7 +479,7 @@ export const Home = () => {
                       overflow: 'hidden',
                     }}
                   >
-                    {RISING.slice(0, 3).map((s) => (
+                    {risingSkills.slice(0, 3).map((s) => (
                       <SkillRow key={s.name} skill={s} showGrowth />
                     ))}
                   </div>
@@ -417,7 +506,7 @@ export const Home = () => {
                       overflow: 'hidden',
                     }}
                   >
-                    {RISING.map((s) => (
+                    {risingSkills.map((s) => (
                       <SkillRow key={s.name} skill={s} showGrowth />
                     ))}
                   </div>
@@ -444,7 +533,7 @@ export const Home = () => {
                       overflow: 'hidden',
                     }}
                   >
-                    {MOST_INSTALLED.map((s, i) => (
+                    {mostInstalledSkills.map((s, i) => (
                       <Link
                         key={s.name}
                         to={`/skills/${s.name}`}
@@ -542,7 +631,7 @@ export const Home = () => {
                       overflow: 'hidden',
                     }}
                   >
-                    {NEW_THIS_WEEK.map((s) => (
+                    {newSkills.map((s) => (
                       <SkillRow key={s.name} skill={s} showDaysAgo />
                     ))}
                   </div>
@@ -584,7 +673,7 @@ export const Home = () => {
                 </Link>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {CATEGORIES.map((cat) => (
+                {categories.map((cat) => (
                   <Link
                     key={cat.name}
                     to={`/search?category=${cat.slug}`}

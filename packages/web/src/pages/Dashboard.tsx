@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   AUTHOR,
@@ -7,6 +7,11 @@ import {
   RECENT_ACTIVITY,
   PUBLISH_HISTORY,
   AGENT_BREAKDOWN,
+  type Author,
+  type Skill,
+  type WeeklyData,
+  type ActivityEvent,
+  type AgentStat,
 } from './dashboard/mock-data';
 import {
   ActivityItem,
@@ -20,13 +25,7 @@ import {
 import { SkillRow } from './dashboard/SkillRow';
 import { PublishRow } from './dashboard/PublishRow';
 import { TrustProgress } from './dashboard/TrustProgress';
-
-const TABS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'skills', label: `Skills (${MY_SKILLS.length})` },
-  { id: 'publishes', label: 'Publish history' },
-  { id: 'analytics', label: 'Analytics' },
-];
+import { getAuthorStats, searchSkills, type AuthorStatsResponse } from '../lib/api';
 
 const cardStyle: React.CSSProperties = {
   background: 'var(--color-bg-card)',
@@ -88,7 +87,21 @@ const PublishTableHeader = () => (
   </div>
 );
 
-const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
+interface OverviewTabProps {
+  onViewAllSkills: () => void;
+  skills: Skill[];
+  activity: ActivityEvent[];
+  trustTier: TrustTier;
+  agents: AgentStat[];
+}
+
+const OverviewTab = ({
+  onViewAllSkills,
+  skills: skillsList,
+  activity,
+  trustTier: tier,
+  agents,
+}: OverviewTabProps) => (
   <div style={{ display: 'flex', gap: 20 }}>
     {/* Main column */}
     <div style={{ flex: 1, minWidth: 0 }}>
@@ -127,7 +140,7 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
         </div>
         <div style={cardStyle}>
           <SkillsTableHeader />
-          {MY_SKILLS.map((s) => (
+          {skillsList.map((s) => (
             <SkillRow key={s.name} skill={s} />
           ))}
         </div>
@@ -148,7 +161,7 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
           Recent activity
         </h2>
         <div style={{ ...cardStyle, padding: '6px 18px' }}>
-          {RECENT_ACTIVITY.map((item, i) => (
+          {activity.map((item, i) => (
             <ActivityItem key={i} item={item} />
           ))}
         </div>
@@ -157,7 +170,7 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
 
     {/* Sidebar */}
     <aside style={{ width: 240, flexShrink: 0 }}>
-      <TrustProgress currentTier={AUTHOR.trust} />
+      <TrustProgress currentTier={tier} />
 
       {/* Agent breakdown */}
       <div style={{ ...cardStyle, padding: '18px 20px', marginTop: 14 }}>
@@ -182,13 +195,13 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
             marginBottom: 14,
           }}
         >
-          {AGENT_BREAKDOWN.map((a) => (
+          {agents.map((a) => (
             <BarSegment key={a.agent} pct={a.pct} color={a.color} label={a.agent} />
           ))}
         </div>
         {/* Legend */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {AGENT_BREAKDOWN.map((a) => (
+          {agents.map((a) => (
             <div
               key={a.agent}
               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
@@ -253,10 +266,10 @@ const OverviewTab = ({ onViewAllSkills }: { onViewAllSkills: () => void }) => (
   </div>
 );
 
-const SkillsTab = () => (
+const SkillsTab = ({ skills: skillsList }: { skills: Skill[] }) => (
   <div style={cardStyle}>
     <SkillsTableHeader />
-    {MY_SKILLS.map((s) => (
+    {skillsList.map((s) => (
       <SkillRow key={s.name} skill={s} />
     ))}
   </div>
@@ -308,8 +321,20 @@ const PublishHistoryTab = () => {
   );
 };
 
-const AnalyticsTab = () => {
-  const maxDownloads = Math.max(...WEEKLY_TREND.map((d) => d.downloads));
+interface AnalyticsTabProps {
+  trend: WeeklyData[];
+  skills: Skill[];
+  author: Author;
+  agents: AgentStat[];
+}
+
+const AnalyticsTab = ({
+  trend,
+  skills: skillsList,
+  author: authorData,
+  agents,
+}: AnalyticsTabProps) => {
+  const maxDownloads = Math.max(...trend.map((d) => d.downloads));
 
   return (
     <div>
@@ -317,9 +342,9 @@ const AnalyticsTab = () => {
       <div style={{ ...cardStyle, padding: '20px 24px', marginBottom: 20 }}>
         <div style={sectionTitle}>Weekly downloads</div>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 120 }}>
-          {WEEKLY_TREND.map((w, i) => {
+          {trend.map((w, i) => {
             const barHeight = (w.downloads / maxDownloads) * 100;
-            const isLast = i === WEEKLY_TREND.length - 1;
+            const isLast = i === trend.length - 1;
             return (
               <div
                 key={i}
@@ -370,8 +395,8 @@ const AnalyticsTab = () => {
       {/* Per-skill breakdown */}
       <div style={{ ...cardStyle, padding: '20px 24px', marginBottom: 20 }}>
         <div style={sectionTitle}>Downloads by skill</div>
-        {MY_SKILLS.map((skill) => {
-          const pct = Math.round((skill.downloads / AUTHOR.totalDownloads) * 100);
+        {skillsList.map((skill) => {
+          const pct = Math.round((skill.downloads / (authorData.totalDownloads || 1)) * 100);
           return (
             <div key={skill.name} style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -420,7 +445,7 @@ const AnalyticsTab = () => {
       {/* Agent breakdown (bigger version) */}
       <div style={{ ...cardStyle, padding: '20px 24px' }}>
         <div style={sectionTitle}>Installs by agent platform</div>
-        {AGENT_BREAKDOWN.map((a) => (
+        {agents.map((a) => (
           <div key={a.agent} style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
               <span
@@ -461,12 +486,109 @@ const AnalyticsTab = () => {
   );
 };
 
+const AGENT_COLORS: Record<string, string> = {
+  'claude-code': 'var(--color-accent)',
+  cursor: 'var(--color-blue)',
+  codex: 'var(--color-purple)',
+  windsurf: 'var(--color-yellow)',
+};
+
 export const Dashboard = () => {
   const [tab, setTab] = useState('overview');
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const username = user?.username ?? AUTHOR.username;
   const trustTier = (user?.trust_tier as TrustTier) ?? AUTHOR.trust;
   const trustCfg = TRUST_CONFIG[trustTier] ?? TRUST_CONFIG[AUTHOR.trust];
+
+  // API-driven state with mock fallback
+  const [authorStats, setAuthorStats] = useState<Author>(AUTHOR);
+  const [skills, setSkills] = useState<Skill[]>(MY_SKILLS);
+  const [weeklyTrend, setWeeklyTrend] = useState<WeeklyData[]>(WEEKLY_TREND);
+  const [recentActivity, setRecentActivity] = useState<ActivityEvent[]>(RECENT_ACTIVITY);
+  const [agentBreakdown, setAgentBreakdown] = useState<AgentStat[]>(AGENT_BREAKDOWN);
+
+  useEffect(() => {
+    if (!username || !token) return;
+    let cancelled = false;
+
+    // Fetch author stats
+    getAuthorStats(username, token)
+      .then((data) => {
+        if (cancelled) return;
+        setAuthorStats({
+          ...AUTHOR,
+          username,
+          totalDownloads: data.total_downloads,
+          weeklyDownloads: data.weekly_downloads,
+          avgRating: data.rating_avg,
+          totalReviews: data.total_reviews,
+        });
+        if (data.weekly_trend.length > 0) {
+          setWeeklyTrend(
+            data.weekly_trend.map((w) => ({
+              week: w.week,
+              downloads: w.downloads,
+            })),
+          );
+        }
+        if (data.agent_breakdown.length > 0) {
+          setAgentBreakdown(
+            data.agent_breakdown.map((a) => ({
+              agent: a.agent,
+              pct: a.percentage,
+              color: AGENT_COLORS[a.agent.toLowerCase()] ?? 'var(--color-text-dim)',
+            })),
+          );
+        }
+        if (data.recent_activity.length > 0) {
+          setRecentActivity(
+            data.recent_activity.map((a) => ({
+              type: a.type as ActivityEvent['type'],
+              skill: a.skill,
+              version: a.version,
+              date: a.date.split('T')[0],
+              detail: a.version ? `Published ${a.version}` : a.type,
+            })),
+          );
+        }
+      })
+      .catch(() => {
+        // Fallback: keep mock data
+      });
+
+    // Fetch user's skills
+    searchSkills({ q: '', per_page: 50 })
+      .then((data) => {
+        if (cancelled) return;
+        const mySkills = data.results
+          .filter((s) => s.author.username === username)
+          .map((s) => ({
+            name: s.name,
+            version: s.version,
+            category: s.category,
+            desc: s.description,
+            downloads: s.downloads,
+            weeklyDownloads: s.weekly_downloads,
+            weeklyGrowth: '',
+            rating: s.rating_avg ?? 0,
+            reviews: s.rating_count ?? 0,
+            trust: s.author.trust_tier as TrustTier,
+            published: s.published_at?.split('T')[0] ?? '',
+            updated: s.updated_at?.split('T')[0] ?? '',
+            status: 'published',
+          }));
+        if (mySkills.length > 0) {
+          setSkills(mySkills);
+        }
+      })
+      .catch(() => {
+        // Fallback: keep mock data
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [username, token]);
 
   return (
     <div style={{ maxWidth: 980, margin: '0 auto', padding: '28px 32px 64px' }}>
@@ -529,14 +651,14 @@ export const Dashboard = () => {
       <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
         <StatBox
           label="Total downloads"
-          value={`${(AUTHOR.totalDownloads / 1000).toFixed(1)}k`}
-          sub={`\u2191 ${AUTHOR.weeklyDownloads.toLocaleString()} this week`}
+          value={`${(authorStats.totalDownloads / 1000).toFixed(1)}k`}
+          sub={`\u2191 ${authorStats.weeklyDownloads.toLocaleString()} this week`}
         />
-        <StatBox label="Skills published" value={MY_SKILLS.length} />
+        <StatBox label="Skills published" value={skills.length} />
         <StatBox
           label="Avg rating"
-          value={`\u2605 ${AUTHOR.avgRating}`}
-          sub={`${AUTHOR.totalReviews} reviews`}
+          value={`\u2605 ${authorStats.avgRating}`}
+          sub={`${authorStats.totalReviews} reviews`}
           color="var(--color-yellow)"
         />
         <div
@@ -559,18 +681,42 @@ export const Dashboard = () => {
           >
             Weekly trend
           </div>
-          <MiniChart data={WEEKLY_TREND.map((d) => ({ value: d.downloads }))} />
+          <MiniChart data={weeklyTrend.map((d) => ({ value: d.downloads }))} />
         </div>
       </div>
 
       {/* Tabs */}
-      <Tabs tabs={TABS} active={tab} onChange={setTab} />
+      <Tabs
+        tabs={[
+          { id: 'overview', label: 'Overview' },
+          { id: 'skills', label: `Skills (${skills.length})` },
+          { id: 'publishes', label: 'Publish history' },
+          { id: 'analytics', label: 'Analytics' },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
 
       {/* Tab content */}
-      {tab === 'overview' && <OverviewTab onViewAllSkills={() => setTab('skills')} />}
-      {tab === 'skills' && <SkillsTab />}
+      {tab === 'overview' && (
+        <OverviewTab
+          onViewAllSkills={() => setTab('skills')}
+          skills={skills}
+          activity={recentActivity}
+          trustTier={trustTier}
+          agents={agentBreakdown}
+        />
+      )}
+      {tab === 'skills' && <SkillsTab skills={skills} />}
       {tab === 'publishes' && <PublishHistoryTab />}
-      {tab === 'analytics' && <AnalyticsTab />}
+      {tab === 'analytics' && (
+        <AnalyticsTab
+          trend={weeklyTrend}
+          skills={skills}
+          author={authorStats}
+          agents={agentBreakdown}
+        />
+      )}
     </div>
   );
 };

@@ -1,11 +1,87 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { SKILLS_DB } from '../data/mock';
-import { TrustBadge } from '@spm/ui';
+import { TrustBadge, type TrustTier } from '@spm/ui';
+import { getAuthorProfile, type AuthorProfileResponse } from '../lib/api';
+
+interface AuthorDisplaySkill {
+  name: string;
+  version: string;
+  desc: string;
+  trust: TrustTier;
+  downloads: string;
+  rating: string;
+}
 
 export const AuthorProfile = () => {
   const { username } = useParams<{ username: string }>();
+  const [loading, setLoading] = useState(true);
+  const [authorData, setAuthorData] = useState<AuthorProfileResponse | null>(null);
 
-  const authorSkills = SKILLS_DB.filter((s) => s.author === username);
+  useEffect(() => {
+    if (!username) return;
+    let cancelled = false;
+    setLoading(true);
+
+    getAuthorProfile(username)
+      .then((data) => {
+        if (!cancelled) setAuthorData(data);
+      })
+      .catch(() => {
+        // Fallback to mock data
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [username]);
+
+  // Build display data from API or mock
+  const authorSkills: AuthorDisplaySkill[] = authorData
+    ? authorData.skills.map((s) => ({
+        name: s.name,
+        version: s.version,
+        desc: s.description ?? '',
+        trust: authorData.trust_tier as TrustTier,
+        downloads: s.downloads >= 1000 ? s.downloads.toLocaleString() : String(s.downloads),
+        rating: s.rating_avg != null ? String(s.rating_avg) : '--',
+      }))
+    : SKILLS_DB.filter((s) => s.author === username).map((s) => ({
+        name: s.name,
+        version: s.version,
+        desc: s.desc,
+        trust: s.trust,
+        downloads: s.downloads,
+        rating: s.rating ?? '--',
+      }));
+
+  const primaryTrust: TrustTier =
+    (authorData?.trust_tier as TrustTier) ?? (authorSkills[0]?.trust || 'registered');
+  const totalDownloads = authorData
+    ? authorData.total_downloads
+    : authorSkills.reduce((sum, s) => {
+        const num = parseInt(s.downloads.replace(/,/g, ''), 10);
+        return sum + (isNaN(num) ? 0 : num);
+      }, 0);
+
+  if (loading) {
+    return (
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '64px 32px', textAlign: 'center' }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 15,
+            color: 'var(--color-text-muted)',
+          }}
+        >
+          Loading author profile...
+        </div>
+      </div>
+    );
+  }
 
   if (authorSkills.length === 0) {
     return (
@@ -34,12 +110,6 @@ export const AuthorProfile = () => {
       </div>
     );
   }
-
-  const primaryTrust = authorSkills[0].trust;
-  const totalDownloads = authorSkills.reduce((sum, s) => {
-    const num = parseInt(s.downloads.replace(/,/g, ''), 10);
-    return sum + (isNaN(num) ? 0 : num);
-  }, 0);
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 32px 32px' }}>
