@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { FLAGGED_QUEUE, REPORTS, USER_ERRORS } from '../data/mock';
 import { Badge, Tabs } from '@spm/ui';
 import { useAuth } from '@spm/web-auth';
 import { FlaggedQueue } from '../components/FlaggedQueue';
@@ -10,27 +9,12 @@ import { ReportsTab } from '../components/ReportsTab';
 import { ErrorsTab } from '../components/ErrorsTab';
 
 const TABS = [
-  {
-    id: 'flagged',
-    label: 'Review Queue',
-    count: FLAGGED_QUEUE.length,
-    countColor: 'yellow',
-  },
+  { id: 'flagged', label: 'Review Queue' },
   { id: 'skills', label: 'Skills' },
   { id: 'analytics', label: 'Scan Analytics' },
   { id: 'trust', label: 'Users' },
-  {
-    id: 'reports',
-    label: 'Reports',
-    count: REPORTS.filter((r) => r.status === 'open').length,
-    countColor: 'yellow',
-  },
-  {
-    id: 'errors',
-    label: 'Errors',
-    count: USER_ERRORS.filter((e) => e.status === 'open').length,
-    countColor: 'red',
-  },
+  { id: 'reports', label: 'Reports' },
+  { id: 'errors', label: 'Errors' },
 ];
 
 export const AdminPanel = () => {

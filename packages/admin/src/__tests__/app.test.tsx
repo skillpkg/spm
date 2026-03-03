@@ -1,7 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AdminPanel } from '../pages/AdminPanel';
-import { FLAGGED_QUEUE, REPORTS } from '../data/mock';
 
 vi.mock('@spm/web-auth', () => ({
   useAuth: vi.fn().mockReturnValue({
@@ -15,6 +14,23 @@ vi.mock('@spm/web-auth', () => ({
   }),
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   SignIn: () => <div>Sign In</div>,
+}));
+
+vi.mock('../lib/api', () => ({
+  getQueue: vi.fn().mockResolvedValue({ queue: [], total: 0 }),
+  getAdminStats: vi.fn().mockResolvedValue({
+    publishes: { total: 0, published: 0, blocked: 0, rejected: 0 },
+    scans: { passed: 0, flagged: 0, blocked: 0, manual_approved: 0 },
+    queue_depth: 0,
+    open_reports: 0,
+    open_errors: 0,
+    users_by_trust: {},
+    total_skills: 0,
+    total_users: 0,
+    total_downloads: 0,
+  }),
+  approveQueueItem: vi.fn(),
+  rejectQueueItem: vi.fn(),
 }));
 
 const renderPanel = () =>
@@ -45,10 +61,16 @@ describe('AdminPanel', () => {
     expect(screen.getByText('ADMIN')).toBeInTheDocument();
   });
 
-  it('shows FlaggedQueue content by default', () => {
+  it('shows FlaggedQueue loading state by default', () => {
     renderPanel();
-    expect(screen.getByText('In queue')).toBeInTheDocument();
-    expect(screen.getByText('Avg review time')).toBeInTheDocument();
+    expect(screen.getByText('Loading review queue...')).toBeInTheDocument();
+  });
+
+  it('shows FlaggedQueue content after loading', async () => {
+    renderPanel();
+    await waitFor(() => {
+      expect(screen.getByText('In queue')).toBeInTheDocument();
+    });
   });
 
   it('shows username in nav', () => {
@@ -62,19 +84,8 @@ describe('AdminPanel', () => {
     expect(link).toBeInTheDocument();
   });
 
-  it('renders Review Queue tab with count badge', () => {
+  it('shows Sign out button', () => {
     renderPanel();
-    const expectedCount = FLAGGED_QUEUE.length;
-    const tabButton = screen.getByText('Review Queue').closest('button');
-    expect(tabButton).toBeInTheDocument();
-    expect(tabButton!.textContent).toContain(String(expectedCount));
-  });
-
-  it('renders Reports tab with count badge', () => {
-    renderPanel();
-    const expectedCount = REPORTS.filter((r) => r.status === 'open').length;
-    const tabButton = screen.getByText('Reports').closest('button');
-    expect(tabButton).toBeInTheDocument();
-    expect(tabButton!.textContent).toContain(String(expectedCount));
+    expect(screen.getByText('Sign out')).toBeInTheDocument();
   });
 });

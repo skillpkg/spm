@@ -1,211 +1,172 @@
-import { useState } from 'react';
-import { FLAGGED_QUEUE, SCAN_STATS } from '../data/mock';
-import { Badge, Button, Card, StatBox, TRUST_CONFIG, TrustBadge } from '@spm/ui';
+import { useState, useCallback } from 'react';
+import { useAuth } from '@spm/web-auth';
+import { Badge, Button, Card, StatBox, TrustBadge } from '@spm/ui';
+import {
+  getQueue,
+  approveQueueItem,
+  rejectQueueItem,
+  getAdminStats,
+  type QueueItem,
+} from '../lib/api';
+import { useAdminData } from '../lib/useAdminData';
+import { LoadingState, ErrorState, EmptyState } from './DataState';
+import type { TrustTier } from '@spm/ui';
 
 export const FlaggedQueue = () => {
+  const { token } = useAuth();
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  const fpRate =
-    SCAN_STATS.held > 0 ? ((SCAN_STATS.falsePositives / SCAN_STATS.held) * 100).toFixed(0) : '0';
+  const fetchQueue = useCallback((t: string) => getQueue(t), []);
+  const fetchStats = useCallback((t: string) => getAdminStats(t), []);
+
+  const { data: queueData, isLoading, error, refetch } = useAdminData(fetchQueue);
+  const { data: stats } = useAdminData(fetchStats);
+
+  const handleApprove = async (item: QueueItem) => {
+    if (!token) return;
+    await approveQueueItem(token, item.id, 'Approved via admin panel');
+    refetch();
+  };
+
+  const handleReject = async (item: QueueItem) => {
+    if (!token) return;
+    await rejectQueueItem(token, item.id, 'Rejected via admin panel');
+    refetch();
+  };
+
+  if (isLoading) return <LoadingState message="Loading review queue..." />;
+  if (error) return <ErrorState message={error} onRetry={refetch} />;
+
+  const queue = queueData?.queue ?? [];
 
   return (
     <div>
       {/* Stats row */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-        <StatBox label="In queue" value={FLAGGED_QUEUE.length} color="yellow" />
-        <StatBox label="Avg review time" value="4.2h" />
-        <StatBox label="False positive rate" value={`${fpRate}%`} />
+        <StatBox label="In queue" value={stats?.queue_depth ?? queue.length} color="yellow" />
+        <StatBox label="Open reports" value={stats?.open_reports ?? 0} />
+        <StatBox label="Total scans blocked" value={stats?.scans.blocked ?? 0} color="red" />
       </div>
 
       {/* Queue items */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {FLAGGED_QUEUE.map((item) => (
-          <Card key={item.id}>
-            {/* Header */}
-            <div
-              onClick={() => setExpanded(expanded === item.id ? null : item.id)}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '14px 18px',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 15,
-                    color: 'var(--color-cyan)',
-                    fontWeight: 600,
-                  }}
-                >
-                  {item.skill}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    color: 'var(--color-text-faint)',
-                  }}
-                >
-                  {item.version}
-                </span>
-                <Badge label={`@${item.author}`} color="text-secondary" />
-                <TrustBadge tier={item.authorTrust} />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--color-text-muted)',
-                  }}
-                >
-                  {item.age} ago
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--color-text-faint)',
-                  }}
-                >
-                  {expanded === item.id ? '\u25B2' : '\u25BC'}
-                </span>
-              </div>
-            </div>
+        {queue.map((item) => {
+          const trustTier = (item.author.trust_tier || 'registered') as TrustTier;
 
-            {/* Flags summary */}
-            <div style={{ display: 'flex', gap: 8, padding: '0 18px 12px', flexWrap: 'wrap' }}>
-              {item.flags.map((f, i) => (
-                <span
-                  key={i}
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    padding: '2px 10px',
-                    borderRadius: 4,
-                    backgroundColor:
-                      f.confidence > 0.8 ? 'rgba(239,68,68,0.1)' : 'rgba(251,191,36,0.1)',
-                    color: f.confidence > 0.8 ? 'var(--color-red)' : 'var(--color-yellow)',
-                  }}
-                >
-                  L{f.layer}: {f.type} ({(f.confidence * 100).toFixed(0)}%)
-                </span>
-              ))}
-            </div>
-
-            {/* Expanded detail */}
-            {expanded === item.id && (
+          return (
+            <Card key={item.id}>
+              {/* Header */}
               <div
+                onClick={() => setExpanded(expanded === item.id ? null : item.id)}
                 style={{
-                  borderTop: '1px solid var(--color-border-default)',
-                  padding: '16px 18px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '14px 18px',
+                  cursor: 'pointer',
                 }}
               >
-                {/* Flagged excerpt */}
-                <div style={{ marginBottom: 16 }}>
-                  <div
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span
                     style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: 12,
-                      color: 'var(--color-text-muted)',
-                      marginBottom: 6,
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 15,
+                      color: 'var(--color-cyan)',
+                      fontWeight: 600,
                     }}
                   >
-                    Flagged content ({item.lineRef})
-                  </div>
-                  <div
+                    {item.skill}
+                  </span>
+                  <span
                     style={{
                       fontFamily: 'var(--font-mono)',
                       fontSize: 12,
-                      lineHeight: 1.6,
-                      padding: '12px 14px',
-                      background: 'var(--color-bg)',
-                      border: '1px solid rgba(239,68,68,0.1)',
-                      borderLeft: '3px solid var(--color-red)',
-                      borderRadius: '0 6px 6px 0',
-                      color: 'var(--color-text-secondary)',
+                      color: 'var(--color-text-faint)',
                     }}
                   >
-                    {item.excerpt}
-                  </div>
+                    {item.version}
+                  </span>
+                  <Badge label={`@${item.author.username}`} color="text-secondary" />
+                  <TrustBadge tier={trustTier} />
                 </div>
-
-                {/* Flag details */}
-                <div style={{ marginBottom: 16 }}>
-                  <div
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span
                     style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: 12,
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
                       color: 'var(--color-text-muted)',
-                      marginBottom: 6,
                     }}
                   >
-                    Scan details
-                  </div>
-                  {item.flags.map((f, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
-                        color: 'var(--color-text-secondary)',
-                        padding: '6px 0',
-                        borderBottom:
-                          i < item.flags.length - 1 ? '1px solid rgba(26,29,39,0.25)' : 'none',
-                      }}
-                    >
-                      <span style={{ color: 'var(--color-yellow)' }}>Layer {f.layer}</span> &middot;{' '}
-                      {f.detail}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Metadata */}
-                <div
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--color-text-muted)',
-                    marginBottom: 16,
-                  }}
-                >
-                  Size: {item.size} &middot; Files: {item.files} &middot; Submitted:{' '}
-                  {item.submitted}
-                </div>
-
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <Button
-                    label={`${TRUST_CONFIG.official.checks.charAt(0)} Approve`}
-                    color="accent"
-                  />
-                  <Button label={'\u2717 Reject'} color="red" />
-                  <Button label="View full SKILL.md" color="blue" />
-                  <Button label="Contact author" color="text-dim" />
+                    {new Date(item.submitted_at).toLocaleDateString()}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      color: 'var(--color-text-faint)',
+                    }}
+                  >
+                    {expanded === item.id ? '\u25B2' : '\u25BC'}
+                  </span>
                 </div>
               </div>
-            )}
-          </Card>
-        ))}
+
+              {/* Flags summary */}
+              <div style={{ display: 'flex', gap: 8, padding: '0 18px 12px', flexWrap: 'wrap' }}>
+                {item.flags.map((f, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      padding: '2px 10px',
+                      borderRadius: 4,
+                      backgroundColor:
+                        (f.confidence ?? 0) > 0.8 ? 'rgba(239,68,68,0.1)' : 'rgba(251,191,36,0.1)',
+                      color: (f.confidence ?? 0) > 0.8 ? 'var(--color-red)' : 'var(--color-yellow)',
+                    }}
+                  >
+                    L{f.layer}: {f.type} ({((f.confidence ?? 0) * 100).toFixed(0)}%)
+                  </span>
+                ))}
+              </div>
+
+              {/* Expanded detail */}
+              {expanded === item.id && (
+                <div
+                  style={{
+                    borderTop: '1px solid var(--color-border-default)',
+                    padding: '16px 18px',
+                  }}
+                >
+                  {/* Metadata */}
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      color: 'var(--color-text-muted)',
+                      marginBottom: 16,
+                    }}
+                  >
+                    {item.size_bytes != null && (
+                      <>Size: {(item.size_bytes / 1024).toFixed(0)} KB &middot; </>
+                    )}
+                    Submitted: {item.submitted_at}
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Button label="Approve" color="accent" onClick={() => handleApprove(item)} />
+                    <Button label="Reject" color="red" onClick={() => handleReject(item)} />
+                  </div>
+                </div>
+              )}
+            </Card>
+          );
+        })}
       </div>
 
-      {FLAGGED_QUEUE.length === 0 && (
-        <div
-          style={{
-            padding: '48px 0',
-            textAlign: 'center',
-            fontFamily: 'var(--font-sans)',
-            fontSize: 15,
-            color: 'var(--color-text-dim)',
-          }}
-        >
-          Queue empty — all skills reviewed
-        </div>
-      )}
+      {queue.length === 0 && <EmptyState message="Queue empty -- all skills reviewed" />}
     </div>
   );
 };

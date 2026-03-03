@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { USERS_ADMIN } from '../data/mock';
+import { useState, useCallback } from 'react';
+import { useAuth } from '@spm/web-auth';
 import {
   Badge,
   Button,
@@ -8,32 +8,55 @@ import {
   FilterTag,
   SearchInput,
   StatBox,
-  StatusBadge,
   TRUST_CONFIG,
   type TrustTier,
 } from '@spm/ui';
+import { getAdminUsers, updateUserRole, type AdminUserItem } from '../lib/api';
+import { useAdminData } from '../lib/useAdminData';
+import { LoadingState, ErrorState } from './DataState';
 
 export const UsersTab = () => {
+  const { token } = useAuth();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [trustFilter, setTrustFilter] = useState('all');
   const [confirmAction, setConfirmAction] = useState<{
     username: string;
-    action: 'grant' | 'revoke' | 'suspend';
+    action: 'grant' | 'revoke';
   } | null>(null);
 
-  const filtered = USERS_ADMIN.filter(
-    (u) =>
-      !search ||
-      u.username.includes(search.toLowerCase()) ||
-      u.email.includes(search.toLowerCase()),
-  )
-    .filter((u) => roleFilter === 'all' || u.role === roleFilter)
-    .filter((u) => statusFilter === 'all' || u.status === statusFilter)
-    .filter((u) => trustFilter === 'all' || u.trust === trustFilter);
+  const fetchUsers = useCallback(
+    (t: string) =>
+      getAdminUsers(t, { trust: trustFilter !== 'all' ? trustFilter : undefined, per_page: 100 }),
+    [trustFilter],
+  );
+  const { data, isLoading, error, refetch } = useAdminData(fetchUsers, [trustFilter]);
 
-  const adminCount = USERS_ADMIN.filter((u) => u.role === 'admin').length;
+  const handleConfirmAction = async () => {
+    if (!token || !confirmAction) return;
+    const newRole = confirmAction.action === 'grant' ? 'admin' : 'user';
+    const reason =
+      confirmAction.action === 'grant' ? 'Promoted via admin panel' : 'Revoked via admin panel';
+    await updateUserRole(token, confirmAction.username, newRole as 'admin' | 'user', reason);
+    setConfirmAction(null);
+    refetch();
+  };
+
+  if (isLoading) return <LoadingState message="Loading users..." />;
+  if (error) return <ErrorState message={error} onRetry={refetch} />;
+
+  const allUsers = data?.results ?? [];
+
+  const filtered = allUsers
+    .filter(
+      (u) =>
+        !search ||
+        u.username.toLowerCase().includes(search.toLowerCase()) ||
+        (u.email ?? '').toLowerCase().includes(search.toLowerCase()),
+    )
+    .filter((u) => roleFilter === 'all' || u.role === roleFilter);
+
+  const adminCount = allUsers.filter((u) => u.role === 'admin').length;
 
   const activeFilters: {
     key: string;
@@ -50,19 +73,6 @@ export const UsersTab = () => {
       clear: () => setRoleFilter('all'),
     });
   }
-  if (statusFilter !== 'all') {
-    const colorMap: Record<string, string> = {
-      active: 'accent',
-      flagged: 'yellow',
-      suspended: 'red',
-    };
-    activeFilters.push({
-      key: 'status',
-      label: statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1),
-      color: colorMap[statusFilter] ?? 'text-dim',
-      clear: () => setStatusFilter('all'),
-    });
-  }
   if (trustFilter !== 'all') {
     const cfg = TRUST_CONFIG[trustFilter as TrustTier];
     activeFilters.push({
@@ -73,24 +83,14 @@ export const UsersTab = () => {
     });
   }
 
-  const isDestructive = confirmAction?.action === 'revoke' || confirmAction?.action === 'suspend';
+  const isDestructive = confirmAction?.action === 'revoke';
 
   return (
     <div>
       {/* Stats */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-        <StatBox label="Total users" value={USERS_ADMIN.length} />
+        <StatBox label="Total users" value={data?.total ?? allUsers.length} />
         <StatBox label="Admins" value={adminCount} color="red" />
-        <StatBox
-          label="Active"
-          value={USERS_ADMIN.filter((u) => u.status === 'active').length}
-          color="accent"
-        />
-        <StatBox
-          label="Flagged"
-          value={USERS_ADMIN.filter((u) => u.status === 'flagged').length}
-          color="yellow"
-        />
       </div>
 
       {/* Search + dropdown filters */}
@@ -119,18 +119,6 @@ export const UsersTab = () => {
             { value: 'user', label: 'Users' },
           ]}
           onChange={setRoleFilter}
-        />
-
-        <FilterDropdown
-          label="Status"
-          value={statusFilter}
-          options={[
-            { value: 'all', label: 'All status' },
-            { value: 'active', label: 'Active', color: 'accent' },
-            { value: 'flagged', label: 'Flagged', color: 'yellow' },
-            { value: 'suspended', label: 'Suspended', color: 'red' },
-          ]}
-          onChange={setStatusFilter}
         />
 
         <FilterDropdown
@@ -164,7 +152,6 @@ export const UsersTab = () => {
             <span
               onClick={() => {
                 setRoleFilter('all');
-                setStatusFilter('all');
                 setTrustFilter('all');
               }}
               style={{
@@ -186,7 +173,7 @@ export const UsersTab = () => {
               marginLeft: 'auto',
             }}
           >
-            {filtered.length} of {USERS_ADMIN.length}
+            {filtered.length} of {allUsers.length}
           </span>
         </div>
       )}
@@ -228,12 +215,6 @@ export const UsersTab = () => {
                   <strong style={{ color: 'var(--color-cyan)' }}>@{confirmAction.username}</strong>?
                 </>
               )}
-              {confirmAction.action === 'suspend' && (
-                <>
-                  Suspend{' '}
-                  <strong style={{ color: 'var(--color-cyan)' }}>@{confirmAction.username}</strong>?
-                </>
-              )}
             </div>
             <div
               style={{
@@ -249,7 +230,7 @@ export const UsersTab = () => {
             <Button
               label="Confirm"
               color={isDestructive ? 'red' : 'accent'}
-              onClick={() => setConfirmAction(null)}
+              onClick={handleConfirmAction}
             />
             <Button label="Cancel" color="text-dim" onClick={() => setConfirmAction(null)} />
           </div>
@@ -261,7 +242,7 @@ export const UsersTab = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '120px 160px 90px 65px 85px 70px 70px 65px 1fr',
+            gridTemplateColumns: '120px 160px 90px 65px 85px 80px 1fr',
             gap: 6,
             padding: '8px 14px',
             borderBottom: '1px solid var(--color-border-default)',
@@ -278,146 +259,126 @@ export const UsersTab = () => {
           <span>Role</span>
           <span>Trust</span>
           <span>Joined</span>
-          <span>Active</span>
-          <span>Status</span>
           <span style={{ textAlign: 'right' }}>Actions</span>
         </div>
-        {filtered.map((user) => (
-          <div
-            key={user.username}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '120px 160px 90px 65px 85px 70px 70px 65px 1fr',
-              gap: 6,
-              padding: '10px 14px',
-              borderBottom: '1px solid rgba(26,29,39,0.25)',
-              alignItems: 'center',
-            }}
-          >
-            <span
+        {filtered.map((user: AdminUserItem) => {
+          const trustTier = user.trust_tier as TrustTier;
+          const cfg = TRUST_CONFIG[trustTier];
+
+          return (
+            <div
+              key={user.username}
               style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 13,
-                color: 'var(--color-cyan)',
-                fontWeight: 500,
+                display: 'grid',
+                gridTemplateColumns: '120px 160px 90px 65px 85px 80px 1fr',
+                gap: 6,
+                padding: '10px 14px',
+                borderBottom: '1px solid rgba(26,29,39,0.25)',
+                alignItems: 'center',
               }}
             >
-              @{user.username}
-            </span>
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 11,
-                color: 'var(--color-text-dim)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {user.email}
-            </span>
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 11,
-                color: 'var(--color-blue)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {user.github}
-            </span>
-            {user.role === 'admin' ? (
-              <Badge label="ADMIN" color="red" />
-            ) : (
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 13,
+                  color: 'var(--color-cyan)',
+                  fontWeight: 500,
+                }}
+              >
+                @{user.username}
+              </span>
               <span
                 style={{
                   fontFamily: 'var(--font-mono)',
                   fontSize: 11,
-                  color: 'var(--color-text-faint)',
+                  color: 'var(--color-text-dim)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                user
+                {user.email ?? '--'}
               </span>
-            )}
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 11,
-                color: TRUST_CONFIG[user.trust].color,
-              }}
-            >
-              {TRUST_CONFIG[user.trust].checks} {TRUST_CONFIG[user.trust].label}
-            </span>
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 11,
-                color: 'var(--color-text-muted)',
-              }}
-            >
-              {user.joined.slice(5)}
-            </span>
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 11,
-                color: 'var(--color-text-muted)',
-              }}
-            >
-              {user.lastActive.slice(5)}
-            </span>
-            <StatusBadge status={user.status} />
-            <div
-              style={{
-                display: 'flex',
-                gap: 4,
-                justifyContent: 'flex-end',
-                flexWrap: 'wrap',
-              }}
-            >
-              {user.role === 'user' ? (
-                <Button
-                  label="Make admin"
-                  color="red"
-                  small
-                  onClick={() =>
-                    setConfirmAction({
-                      username: user.username,
-                      action: 'grant',
-                    })
-                  }
-                />
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  color: 'var(--color-blue)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {user.github_login ?? '--'}
+              </span>
+              {user.role === 'admin' ? (
+                <Badge label="ADMIN" color="red" />
               ) : (
-                <Button
-                  label="Revoke admin"
-                  color="yellow"
-                  small
-                  onClick={() =>
-                    setConfirmAction({
-                      username: user.username,
-                      action: 'revoke',
-                    })
-                  }
-                />
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 11,
+                    color: 'var(--color-text-faint)',
+                  }}
+                >
+                  user
+                </span>
               )}
-              {user.status !== 'suspended' && (
-                <Button
-                  label="Suspend"
-                  color="red"
-                  small
-                  onClick={() =>
-                    setConfirmAction({
-                      username: user.username,
-                      action: 'suspend',
-                    })
-                  }
-                />
-              )}
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  color: cfg?.color ?? 'var(--color-text-dim)',
+                }}
+              >
+                {cfg?.checks ?? '--'} {cfg?.label ?? trustTier}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  color: 'var(--color-text-muted)',
+                }}
+              >
+                {user.created_at.slice(0, 10).slice(5)}
+              </span>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 4,
+                  justifyContent: 'flex-end',
+                  flexWrap: 'wrap',
+                }}
+              >
+                {user.role === 'user' ? (
+                  <Button
+                    label="Make admin"
+                    color="red"
+                    small
+                    onClick={() =>
+                      setConfirmAction({
+                        username: user.username,
+                        action: 'grant',
+                      })
+                    }
+                  />
+                ) : (
+                  <Button
+                    label="Revoke admin"
+                    color="yellow"
+                    small
+                    onClick={() =>
+                      setConfirmAction({
+                        username: user.username,
+                        action: 'revoke',
+                      })
+                    }
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </Card>
     </div>
   );

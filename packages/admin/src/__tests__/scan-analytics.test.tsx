@@ -1,40 +1,65 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { ScanAnalytics } from '../components/ScanAnalytics';
-import { SCAN_STATS } from '../data/mock';
+
+vi.mock('@spm/web-auth', () => ({
+  useAuth: vi.fn().mockReturnValue({
+    user: { username: 'admin', is_admin: true },
+    token: 'fake-jwt',
+    isLoading: false,
+    isAuthenticated: true,
+    isAdmin: true,
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}));
+
+vi.mock('../lib/api', () => ({
+  getAdminStats: vi.fn().mockResolvedValue({
+    publishes: { total: 847, published: 791, blocked: 38, rejected: 18 },
+    scans: { passed: 791, flagged: 18, blocked: 38, manual_approved: 6 },
+    queue_depth: 3,
+    open_reports: 2,
+    open_errors: 2,
+    users_by_trust: { official: 1, verified: 12, scanned: 45, registered: 180 },
+    total_skills: 156,
+    total_users: 238,
+    total_downloads: 85000,
+  }),
+}));
 
 describe('ScanAnalytics', () => {
-  it('renders "Total publishes" stat with value 847', () => {
+  it('renders "Total publishes" stat', async () => {
     render(<ScanAnalytics />);
-    expect(screen.getByText('Total publishes')).toBeInTheDocument();
-    expect(screen.getByText(String(SCAN_STATS.total))).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Total publishes')).toBeInTheDocument();
+      expect(screen.getByText('847')).toBeInTheDocument();
+    });
   });
 
-  it('renders "Passed" stat with value 791', () => {
+  it('renders "Published" stat', async () => {
     render(<ScanAnalytics />);
-    // "Passed" appears in both the stat box label and the outcome breakdown legend
-    const passedElements = screen.getAllByText('Passed');
-    expect(passedElements.length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText(String(SCAN_STATS.passed))).toBeInTheDocument();
+    await waitFor(() => {
+      const publishedElements = screen.getAllByText('Published');
+      expect(publishedElements.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('791').length).toBeGreaterThanOrEqual(1);
+    });
   });
 
-  it('renders "Blocked" stat with value 38', () => {
+  it('renders "Blocked" stat', async () => {
     render(<ScanAnalytics />);
-    // "Blocked" also appears in both stat box and outcome breakdown
-    const blockedElements = screen.getAllByText('Blocked');
-    expect(blockedElements.length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText(String(SCAN_STATS.blocked))).toBeInTheDocument();
+    await waitFor(() => {
+      const blockedElements = screen.getAllByText('Blocked');
+      expect(blockedElements.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('38').length).toBeGreaterThanOrEqual(1);
+    });
   });
 
-  it('renders "Outcome breakdown" section with percentages', () => {
+  it('renders registry totals', async () => {
     render(<ScanAnalytics />);
-    expect(screen.getByText('Outcome breakdown')).toBeInTheDocument();
-    // Verify computed breakdown percentages are rendered in the legend.
-    // Some percentages may also appear in the block rate chart, so use getAllByText.
-    const passRate = ((SCAN_STATS.passed / SCAN_STATS.total) * 100).toFixed(1);
-    const blockRate = ((SCAN_STATS.blocked / SCAN_STATS.total) * 100).toFixed(1);
-    const holdRate = ((SCAN_STATS.held / SCAN_STATS.total) * 100).toFixed(1);
-    expect(screen.getAllByText(`${passRate}%`).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(`${blockRate}%`).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(`${holdRate}%`).length).toBeGreaterThanOrEqual(1);
+    await waitFor(() => {
+      expect(screen.getByText('Registry totals')).toBeInTheDocument();
+      expect(screen.getByText('156')).toBeInTheDocument();
+      expect(screen.getByText('238')).toBeInTheDocument();
+    });
   });
 });

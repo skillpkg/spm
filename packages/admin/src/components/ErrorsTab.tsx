@@ -1,5 +1,9 @@
-import { USER_ERRORS } from '../data/mock';
+import { useCallback } from 'react';
+import { useAuth } from '@spm/web-auth';
 import { Badge, Button, Card, StatBox, StatusBadge } from '@spm/ui';
+import { getAdminErrors, updateError } from '../lib/api';
+import { useAdminData } from '../lib/useAdminData';
+import { LoadingState, ErrorState, EmptyState } from './DataState';
 
 const TYPE_COLORS: Record<string, string> = {
   install_fail: 'red',
@@ -10,30 +14,43 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export const ErrorsTab = () => {
-  const openErrors = USER_ERRORS.filter((e) => e.status === 'open');
-  const uniqueTypes = [...new Set(USER_ERRORS.map((e) => e.type))];
+  const { token } = useAuth();
+
+  const fetchErrors = useCallback((t: string) => getAdminErrors(t), []);
+  const { data, isLoading, error, refetch } = useAdminData(fetchErrors);
+
+  const handleStatusChange = async (id: string, status: string, resolution?: string) => {
+    if (!token) return;
+    await updateError(token, id, status, resolution);
+    refetch();
+  };
+
+  if (isLoading) return <LoadingState message="Loading errors..." />;
+  if (error) return <ErrorState message={error} onRetry={refetch} />;
+
+  const errors = data?.errors ?? [];
+  const openErrors = errors.filter((e) => e.status === 'open');
+  const investigatingCount = errors.filter((e) => e.status === 'investigating').length;
+  const totalOccurrences = errors.reduce((sum, e) => sum + e.count, 0);
+  const uniqueTypes = [...new Set(errors.map((e) => e.type))];
 
   return (
     <div>
       {/* Stats */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
         <StatBox label="Open errors" value={openErrors.length} color="red" />
-        <StatBox
-          label="Investigating"
-          value={USER_ERRORS.filter((e) => e.status === 'investigating').length}
-          color="blue"
-        />
-        <StatBox
-          label="Total occurrences"
-          value={USER_ERRORS.reduce((sum, e) => sum + e.count, 0)}
-          color="yellow"
-        />
+        <StatBox label="Investigating" value={investigatingCount} color="blue" />
+        <StatBox label="Total occurrences" value={totalOccurrences} color="yellow" />
         <StatBox label="Error types" value={uniqueTypes.length} />
       </div>
 
+      {errors.length === 0 && (
+        <EmptyState message="No errors reported yet. Error telemetry will appear here when the CLI sends error reports." />
+      )}
+
       {/* Error cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {USER_ERRORS.map((err) => {
+        {errors.map((err) => {
           const typeColor = TYPE_COLORS[err.type] ?? 'text-dim';
 
           return (
@@ -76,7 +93,7 @@ export const ErrorsTab = () => {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {err.lastSeen.includes('T') ? err.lastSeen.slice(11, 16) : err.lastSeen}
+                  {err.last_seen.includes('T') ? err.last_seen.slice(11, 16) : err.last_seen}
                 </span>
               </div>
 
@@ -87,7 +104,6 @@ export const ErrorsTab = () => {
                   fontSize: 12,
                   padding: '8px 12px',
                   background: 'var(--color-bg)',
-                  border: `1px solid color-mix(in srgb, var(--color-${typeColor}) 10%, transparent)`,
                   borderLeft: `3px solid var(--color-${typeColor})`,
                   borderRadius: '0 6px 6px 0',
                   color: 'var(--color-text-secondary)',
@@ -95,10 +111,10 @@ export const ErrorsTab = () => {
                   overflowX: 'auto',
                 }}
               >
-                {err.error}
+                {err.message}
               </div>
 
-              {/* Context */}
+              {/* Context + actions */}
               <div
                 style={{
                   display: 'flex',
@@ -115,29 +131,43 @@ export const ErrorsTab = () => {
                     gap: 12,
                   }}
                 >
-                  {err.user && <span>User: @{err.user}</span>}
-                  {err.skill && <span>Skill: {err.skill}</span>}
+                  {err.affected_skill && <span>Skill: {err.affected_skill}</span>}
                   <span>
                     First:{' '}
-                    {err.firstSeen.includes('T') ? err.firstSeen.slice(0, 10) : err.firstSeen}
+                    {err.first_seen.includes('T') ? err.first_seen.slice(0, 10) : err.first_seen}
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  {err.status === 'resolved' || err.status === 'wontfix' ? (
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 12,
-                        color: 'var(--color-text-dim)',
-                      }}
-                    >
-                      {err.resolution}
-                    </span>
-                  ) : (
+                  {err.status === 'open' && (
                     <>
-                      <Button label="Investigate" color="blue" small />
-                      <Button label="Resolve" color="accent" small />
-                      <Button label="Won't fix" color="text-dim" small />
+                      <Button
+                        label="Investigate"
+                        color="blue"
+                        small
+                        onClick={() => handleStatusChange(err.id, 'investigating')}
+                      />
+                      <Button
+                        label="Resolve"
+                        color="accent"
+                        small
+                        onClick={() => handleStatusChange(err.id, 'resolved', 'Resolved')}
+                      />
+                    </>
+                  )}
+                  {err.status === 'investigating' && (
+                    <>
+                      <Button
+                        label="Resolve"
+                        color="accent"
+                        small
+                        onClick={() => handleStatusChange(err.id, 'resolved', 'Resolved')}
+                      />
+                      <Button
+                        label="Won't fix"
+                        color="text-dim"
+                        small
+                        onClick={() => handleStatusChange(err.id, 'wontfix', 'Will not fix')}
+                      />
                     </>
                   )}
                 </div>

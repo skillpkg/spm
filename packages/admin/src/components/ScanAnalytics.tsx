@@ -1,28 +1,38 @@
-import { SCAN_STATS } from '../data/mock';
+import { useCallback } from 'react';
 import { Card, StatBox } from '@spm/ui';
+import { getAdminStats } from '../lib/api';
+import { useAdminData } from '../lib/useAdminData';
+import { LoadingState, ErrorState } from './DataState';
 
 export const ScanAnalytics = () => {
-  const passRate = ((SCAN_STATS.passed / SCAN_STATS.total) * 100).toFixed(1);
-  const blockRate = ((SCAN_STATS.blocked / SCAN_STATS.total) * 100).toFixed(1);
-  const holdRate = ((SCAN_STATS.held / SCAN_STATS.total) * 100).toFixed(1);
+  const fetchStats = useCallback((t: string) => getAdminStats(t), []);
+  const { data: stats, isLoading, error, refetch } = useAdminData(fetchStats);
 
-  const maxPublish = Math.max(...SCAN_STATS.weeklyPublishes);
+  if (isLoading) return <LoadingState message="Loading scan analytics..." />;
+  if (error) return <ErrorState message={error} onRetry={refetch} />;
+  if (!stats) return <LoadingState />;
+
+  const totalScans =
+    stats.scans.passed + stats.scans.flagged + stats.scans.blocked + stats.scans.manual_approved;
+  const passRate = totalScans > 0 ? ((stats.scans.passed / totalScans) * 100).toFixed(1) : '0.0';
+  const blockRate = totalScans > 0 ? ((stats.scans.blocked / totalScans) * 100).toFixed(1) : '0.0';
+  const holdRate = totalScans > 0 ? ((stats.scans.flagged / totalScans) * 100).toFixed(1) : '0.0';
 
   return (
     <div>
       {/* Top stats */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-        <StatBox label="Total publishes" value={SCAN_STATS.total} />
-        <StatBox label="Passed" value={SCAN_STATS.passed} color="accent" />
-        <StatBox label="Blocked" value={SCAN_STATS.blocked} color="red" />
-        <StatBox label="Held for review" value={SCAN_STATS.held} color="yellow" />
-        <StatBox label="False positives" value={SCAN_STATS.falsePositives} color="orange" />
-        <StatBox label="Avg scan time" value={SCAN_STATS.avgScanTime} />
+        <StatBox label="Total publishes" value={stats.publishes.total} />
+        <StatBox label="Published" value={stats.publishes.published} color="accent" />
+        <StatBox label="Blocked" value={stats.publishes.blocked} color="red" />
+        <StatBox label="Rejected" value={stats.publishes.rejected} color="yellow" />
+        <StatBox label="Scans passed" value={stats.scans.passed} color="accent" />
+        <StatBox label="Queue depth" value={stats.queue_depth} color="orange" />
       </div>
 
       {/* Charts row */}
       <div style={{ display: 'flex', gap: 16 }}>
-        {/* Weekly publishes */}
+        {/* Users by trust */}
         <Card style={{ flex: 1, padding: '18px 22px' }}>
           <div
             style={{
@@ -33,57 +43,40 @@ export const ScanAnalytics = () => {
               marginBottom: 14,
             }}
           >
-            Weekly publishes
+            Users by trust tier
           </div>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 100 }}>
-            {SCAN_STATS.weeklyPublishes.map((v, i) => {
-              const h = (v / maxPublish) * 80;
-              const isLast = i === SCAN_STATS.weeklyPublishes.length - 1;
-              return (
-                <div
-                  key={i}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {Object.entries(stats.users_by_trust).map(([tier, count]) => (
+              <div
+                key={tier}
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
+                <span
                   style={{
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 4,
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    color: 'var(--color-text-secondary)',
+                    textTransform: 'capitalize',
                   }}
                 >
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 10,
-                      color: 'var(--color-text-muted)',
-                    }}
-                  >
-                    {v}
-                  </span>
-                  <div
-                    style={{
-                      width: '100%',
-                      maxWidth: 40,
-                      borderRadius: '3px 3px 0 0',
-                      height: h,
-                      background: isLast ? 'var(--color-accent)' : 'rgba(16,185,129,0.35)',
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 9,
-                      color: 'var(--color-text-faint)',
-                    }}
-                  >
-                    W{i + 1}
-                  </span>
-                </div>
-              );
-            })}
+                  {tier}
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 13,
+                    color: 'var(--color-text-primary)',
+                    fontWeight: 600,
+                  }}
+                >
+                  {count}
+                </span>
+              </div>
+            ))}
           </div>
         </Card>
 
-        {/* Block rate trend */}
+        {/* Totals */}
         <Card style={{ flex: 1, padding: '18px 22px' }}>
           <div
             style={{
@@ -94,129 +87,171 @@ export const ScanAnalytics = () => {
               marginBottom: 14,
             }}
           >
-            Block rate (%)
+            Registry totals
           </div>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 100 }}>
-            {SCAN_STATS.blockRate.map((v, i) => {
-              const h = (v / 8) * 80;
-              const isLast = i === SCAN_STATS.blockRate.length - 1;
-              return (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 10,
-                      color: 'var(--color-text-muted)',
-                    }}
-                  >
-                    {v}%
-                  </span>
-                  <div
-                    style={{
-                      width: '100%',
-                      maxWidth: 40,
-                      borderRadius: '3px 3px 0 0',
-                      height: h,
-                      background: isLast ? 'var(--color-red)' : 'rgba(239,68,68,0.35)',
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 9,
-                      color: 'var(--color-text-faint)',
-                    }}
-                  >
-                    W{i + 1}
-                  </span>
-                </div>
-              );
-            })}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                Total skills
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 14,
+                  color: 'var(--color-accent)',
+                  fontWeight: 600,
+                }}
+              >
+                {stats.total_skills}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                Total users
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 14,
+                  color: 'var(--color-cyan)',
+                  fontWeight: 600,
+                }}
+              >
+                {stats.total_users}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                Total downloads
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 14,
+                  color: 'var(--color-text-primary)',
+                  fontWeight: 600,
+                }}
+              >
+                {stats.total_downloads}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                Open reports
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 14,
+                  color: 'var(--color-yellow)',
+                  fontWeight: 600,
+                }}
+              >
+                {stats.open_reports}
+              </span>
+            </div>
           </div>
         </Card>
       </div>
 
       {/* Outcome breakdown */}
-      <Card style={{ marginTop: 16, padding: '18px 22px' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 14,
-            fontWeight: 600,
-            color: 'var(--color-text-primary)',
-            marginBottom: 14,
-          }}
-        >
-          Outcome breakdown
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            height: 24,
-            borderRadius: 6,
-            overflow: 'hidden',
-            marginBottom: 14,
-          }}
-        >
+      {totalScans > 0 && (
+        <Card style={{ marginTop: 16, padding: '18px 22px' }}>
           <div
-            style={{ width: `${passRate}%`, background: 'var(--color-accent)' }}
-            title={`Passed: ${passRate}%`}
-          />
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 14,
+              fontWeight: 600,
+              color: 'var(--color-text-primary)',
+              marginBottom: 14,
+            }}
+          >
+            Scan outcome breakdown
+          </div>
           <div
-            style={{ width: `${holdRate}%`, background: 'var(--color-yellow)' }}
-            title={`Held: ${holdRate}%`}
-          />
-          <div
-            style={{ width: `${blockRate}%`, background: 'var(--color-red)' }}
-            title={`Blocked: ${blockRate}%`}
-          />
-        </div>
-        <div style={{ display: 'flex', gap: 20 }}>
-          {[
-            { label: 'Passed', pct: passRate, color: 'var(--color-accent)' },
-            { label: 'Held', pct: holdRate, color: 'var(--color-yellow)' },
-            { label: 'Blocked', pct: blockRate, color: 'var(--color-red)' },
-          ].map((r) => (
-            <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 2,
-                  background: r.color,
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 12,
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
-                {r.label}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                  color: 'var(--color-text-dim)',
-                }}
-              >
-                {r.pct}%
-              </span>
-            </div>
-          ))}
-        </div>
-      </Card>
+            style={{
+              display: 'flex',
+              height: 24,
+              borderRadius: 6,
+              overflow: 'hidden',
+              marginBottom: 14,
+            }}
+          >
+            <div
+              style={{ width: `${passRate}%`, background: 'var(--color-accent)' }}
+              title={`Passed: ${passRate}%`}
+            />
+            <div
+              style={{ width: `${holdRate}%`, background: 'var(--color-yellow)' }}
+              title={`Flagged: ${holdRate}%`}
+            />
+            <div
+              style={{ width: `${blockRate}%`, background: 'var(--color-red)' }}
+              title={`Blocked: ${blockRate}%`}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 20 }}>
+            {[
+              { label: 'Passed', pct: passRate, color: 'var(--color-accent)' },
+              { label: 'Flagged', pct: holdRate, color: 'var(--color-yellow)' },
+              { label: 'Blocked', pct: blockRate, color: 'var(--color-red)' },
+            ].map((r) => (
+              <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 2,
+                    background: r.color,
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 12,
+                    color: 'var(--color-text-secondary)',
+                  }}
+                >
+                  {r.label}
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    color: 'var(--color-text-dim)',
+                  }}
+                >
+                  {r.pct}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
