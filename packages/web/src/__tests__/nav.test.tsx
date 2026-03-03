@@ -21,6 +21,7 @@ const unauthenticatedState = {
   token: null,
   isLoading: false,
   isAuthenticated: false,
+  isAdmin: false,
   signIn: vi.fn(),
   signOut: vi.fn(),
 };
@@ -37,6 +38,7 @@ const authenticatedState = {
   token: 'fake-token',
   isLoading: false,
   isAuthenticated: true,
+  isAdmin: false,
   signIn: vi.fn(),
   signOut: vi.fn(),
 };
@@ -48,6 +50,7 @@ const adminState = {
     username: 'adminuser',
     is_admin: true,
   },
+  isAdmin: true,
 };
 
 beforeEach(() => {

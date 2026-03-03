@@ -22,6 +22,7 @@ const authState = (overrides: Partial<ReturnType<typeof useAuth>> = {}) => ({
   token: 'fake-token',
   isLoading: false,
   isAuthenticated: true,
+  isAdmin: false,
   signIn: vi.fn(),
   signOut: vi.fn(),
   ...overrides,
