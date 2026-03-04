@@ -178,7 +178,8 @@ export const Home = () => {
             marginTop: 0,
           }}
         >
-          200+ skills &middot; 8 categories &middot; 37+ agent platforms
+          {categories.reduce((sum, c) => sum + c.count, 0)} skills &middot;{' '}
+          {categories.length} categories
         </p>
 
         <div style={{ width: '100%', maxWidth: 600, position: 'relative' }}>
