@@ -55,7 +55,10 @@ export const pollToken = async (deviceCode: string): Promise<TokenResponse> => {
   const res = await fetch(`${API_URL}/auth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ device_code: deviceCode }),
+    body: JSON.stringify({
+      device_code: deviceCode,
+      grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+    }),
   });
   if (res.status === 428) {
     throw new AuthPendingError();
