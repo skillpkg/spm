@@ -65,7 +65,10 @@ describe('pollToken', () => {
     expect(mockFetch).toHaveBeenCalledWith('http://localhost:8787/auth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ device_code: 'dc_123', grant_type: 'urn:ietf:params:oauth:grant-type:device_code' }),
+      body: JSON.stringify({
+        device_code: 'dc_123',
+        grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+      }),
     });
   });
 

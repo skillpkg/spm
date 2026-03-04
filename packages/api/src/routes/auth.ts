@@ -200,15 +200,18 @@ authRoutes.get('/auth/whoami', authed, async (c) => {
     .where(eq(skills.ownerId, user.id));
 
   return c.json({
-    id: user.id,
-    username: user.username,
-    github_login: user.githubLogin,
-    email: user.email,
-    trust_tier: user.trustTier,
-    role: user.role,
-    skills_published: skillsCount?.count ?? 0,
-    total_downloads: downloadCount?.count ?? 0,
-    created_at: user.createdAt.toISOString(),
+    user: {
+      id: user.id,
+      username: user.username,
+      github_login: user.githubLogin,
+      email: user.email,
+      trust_tier: user.trustTier,
+      role: user.role,
+      is_admin: user.role === 'admin',
+      skills_published: skillsCount?.count ?? 0,
+      total_downloads: downloadCount?.count ?? 0,
+      created_at: user.createdAt.toISOString(),
+    },
   });
 });
 

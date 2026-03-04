@@ -57,7 +57,6 @@ const SkillsTableHeader = () => (
   </div>
 );
 
-
 interface OverviewTabProps {
   onViewAllSkills: () => void;
   skills: Skill[];

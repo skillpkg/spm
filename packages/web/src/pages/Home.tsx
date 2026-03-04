@@ -178,8 +178,8 @@ export const Home = () => {
             marginTop: 0,
           }}
         >
-          {categories.reduce((sum, c) => sum + c.count, 0)} skills &middot;{' '}
-          {categories.length} categories
+          {categories.reduce((sum, c) => sum + c.count, 0)} skills &middot; {categories.length}{' '}
+          categories
         </p>
 
         <div style={{ width: '100%', maxWidth: 600, position: 'relative' }}>
