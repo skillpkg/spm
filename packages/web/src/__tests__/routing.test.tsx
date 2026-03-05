@@ -2,9 +2,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute';
-import { Home } from '../pages/Home';
+import { Home } from '../pages/home';
 import { Search } from '../pages/Search';
-import { SkillDetail } from '../pages/SkillDetail';
+import { SkillDetail } from '../pages/skill-detail';
 import { AuthorProfile } from '../pages/AuthorProfile';
 import { Dashboard } from '../pages/Dashboard';
 import { SignIn } from '../pages/SignIn';
@@ -23,7 +23,7 @@ vi.mock('../pages/Home', () => ({
 vi.mock('../pages/Search', () => ({
   Search: () => <div data-testid="page-search">Search Page</div>,
 }));
-vi.mock('../pages/SkillDetail', () => ({
+vi.mock('../pages/skill-detail', () => ({
   SkillDetail: () => <div data-testid="page-skill-detail">SkillDetail Page</div>,
 }));
 vi.mock('../pages/SignIn', () => ({

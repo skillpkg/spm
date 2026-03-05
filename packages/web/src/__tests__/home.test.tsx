@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { Home } from '../pages/Home';
+import { Home } from '../pages/home';
 import { CATEGORIES } from '../data/constants';
 import { getTrending, getCategories } from '../lib/api';
 

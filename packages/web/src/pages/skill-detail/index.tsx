@@ -1,0 +1,150 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { getSkill } from '../../lib/api';
+import { type SkillFull, apiToSkillFull } from './types';
+import { SkillHero } from './SkillHero';
+import { ReadmeTab } from './ReadmeTab';
+import { VersionsTab } from './VersionsTab';
+import { SecurityTab } from './SecurityTab';
+import { SkillSidebar } from './SkillSidebar';
+
+export const SkillDetail = () => {
+  const { name } = useParams<{ name: string }>();
+  const [activeTab, setActiveTab] = useState<'readme' | 'versions' | 'security'>('readme');
+  const [apiSkill, setApiSkill] = useState<SkillFull | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!name) return;
+    let cancelled = false;
+    setLoading(true);
+
+    getSkill(name)
+      .then((data) => {
+        if (cancelled) return;
+        setApiSkill(apiToSkillFull(data));
+      })
+      .catch(() => {
+        // On error: leave apiSkill null, show "Skill not found"
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [name]);
+
+  const skill = apiSkill;
+
+  if (loading) {
+    return (
+      <div style={{ maxWidth: 1060, margin: '0 auto', padding: '64px 32px', textAlign: 'center' }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 15,
+            color: 'var(--color-text-muted)',
+          }}
+        >
+          Loading skill...
+        </div>
+      </div>
+    );
+  }
+
+  if (!skill) {
+    return (
+      <div style={{ maxWidth: 1060, margin: '0 auto', padding: '64px 32px', textAlign: 'center' }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 20,
+            color: 'var(--color-text-dim)',
+            marginBottom: 16,
+          }}
+        >
+          Skill not found
+        </div>
+        <Link
+          to="/"
+          style={{
+            color: 'var(--color-accent)',
+            textDecoration: 'none',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 14,
+          }}
+        >
+          Back to registry
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: 1060, margin: '0 auto', padding: '0 32px 60px' }}>
+      {/* Breadcrumb */}
+      <div style={{ padding: '16px 0', fontFamily: 'var(--font-sans)', fontSize: 13 }}>
+        <Link to="/" style={{ color: 'var(--color-text-dim)', textDecoration: 'none' }}>
+          Registry
+        </Link>
+        <span style={{ color: 'var(--color-text-faint)', margin: '0 8px' }}>/</span>
+        <span style={{ color: 'var(--color-text-secondary)' }}>{skill.name}</span>
+      </div>
+
+      <SkillHero skill={skill} />
+
+      {/* Content: tabs + sidebar */}
+      <div style={{ display: 'flex', gap: 24 }}>
+        {/* Main content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Tabs */}
+          <div
+            style={{
+              display: 'flex',
+              gap: 0,
+              borderBottom: '1px solid var(--color-border-default)',
+              marginBottom: 20,
+            }}
+          >
+            {(
+              [
+                { id: 'readme' as const, label: 'README' },
+                { id: 'versions' as const, label: `Versions (${skill.versions?.length || 0})` },
+                { id: 'security' as const, label: 'Security' },
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  padding: '10px 18px',
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  borderBottom:
+                    activeTab === tab.id ? '2px solid #10b981' : '2px solid transparent',
+                  color: activeTab === tab.id ? '#e2e8f0' : '#64748b',
+                  marginBottom: -1,
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab content */}
+          {activeTab === 'readme' && <ReadmeTab skill={skill} />}
+          {activeTab === 'versions' && <VersionsTab skill={skill} />}
+          {activeTab === 'security' && <SecurityTab skill={skill} />}
+        </div>
+
+        <SkillSidebar skill={skill} />
+      </div>
+    </div>
+  );
+};

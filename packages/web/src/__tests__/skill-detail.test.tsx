@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { SkillDetail } from '../pages/SkillDetail';
+import { SkillDetail } from '../pages/skill-detail';
 import { getSkill } from '../lib/api';
 
 vi.mock('../lib/api', () => ({
