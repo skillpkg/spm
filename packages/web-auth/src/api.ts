@@ -10,6 +10,7 @@ export interface AuthUser {
 }
 
 export interface UserProfile {
+  token?: string;
   user: AuthUser;
 }
 

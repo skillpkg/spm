@@ -44,7 +44,12 @@ export const AuthProvider = ({ children, storageKey = DEFAULT_TOKEN_KEY }: AuthP
 
     whoami(savedToken)
       .then((profile) => {
-        setToken(savedToken);
+        // Use refreshed token from whoami if available (keeps claims in sync with DB)
+        const activeToken = profile.token ?? savedToken;
+        if (profile.token) {
+          localStorage.setItem(storageKey, activeToken);
+        }
+        setToken(activeToken);
         setUser(profile.user);
       })
       .catch(() => {

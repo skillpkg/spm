@@ -199,7 +199,14 @@ authRoutes.get('/auth/whoami', authed, async (c) => {
     )
     .where(eq(skills.ownerId, user.id));
 
+  // Issue a fresh JWT with current DB claims (role may have changed)
+  const freshToken = await signJwt(
+    { sub: user.id, username: user.username, role: user.role },
+    c.env.JWT_SECRET,
+  );
+
   return c.json({
+    token: freshToken,
     user: {
       id: user.id,
       username: user.username,
