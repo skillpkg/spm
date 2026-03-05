@@ -15,6 +15,27 @@ export interface AuthState {
 const AuthContext = createContext<AuthState | null>(null);
 
 const DEFAULT_TOKEN_KEY = 'spm_token';
+const AUTH_COOKIE = 'spm_auth';
+const COOKIE_DOMAIN = '.skillpkg.dev';
+
+const isProductionHost = () => window.location.hostname.endsWith('skillpkg.dev');
+
+const setAuthCookie = (token: string) => {
+  if (isProductionHost()) {
+    document.cookie = `${AUTH_COOKIE}=${token}; domain=${COOKIE_DOMAIN}; path=/; secure; samesite=lax; max-age=604800`;
+  }
+};
+
+const getAuthCookie = (): string | null => {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${AUTH_COOKIE}=([^;]*)`));
+  return match ? match[1] : null;
+};
+
+const clearAuthCookie = () => {
+  if (isProductionHost()) {
+    document.cookie = `${AUTH_COOKIE}=; domain=${COOKIE_DOMAIN}; path=/; max-age=0`;
+  }
+};
 
 export interface AuthProviderProps {
   children: ReactNode;
@@ -33,10 +54,12 @@ export const AuthProvider = ({ children, storageKey = DEFAULT_TOKEN_KEY }: AuthP
     if (hash.startsWith('#token=')) {
       const hashToken = hash.slice(7);
       localStorage.setItem(storageKey, hashToken);
+      setAuthCookie(hashToken);
       window.history.replaceState(null, '', window.location.pathname);
     }
 
-    const savedToken = localStorage.getItem(storageKey);
+    // Try localStorage first, then fall back to shared cookie
+    const savedToken = localStorage.getItem(storageKey) ?? getAuthCookie();
     if (!savedToken) {
       setIsLoading(false);
       return;
@@ -48,6 +71,7 @@ export const AuthProvider = ({ children, storageKey = DEFAULT_TOKEN_KEY }: AuthP
         const activeToken = profile.token ?? savedToken;
         if (profile.token) {
           localStorage.setItem(storageKey, activeToken);
+          setAuthCookie(activeToken);
         }
         setToken(activeToken);
         setUser(profile.user);
@@ -63,6 +87,7 @@ export const AuthProvider = ({ children, storageKey = DEFAULT_TOKEN_KEY }: AuthP
   const signIn = useCallback(
     (newToken: string, newUser: AuthUser) => {
       localStorage.setItem(storageKey, newToken);
+      setAuthCookie(newToken);
       setToken(newToken);
       setUser(newUser);
     },
@@ -74,6 +99,7 @@ export const AuthProvider = ({ children, storageKey = DEFAULT_TOKEN_KEY }: AuthP
       apiLogout(token).catch(() => {});
     }
     localStorage.removeItem(storageKey);
+    clearAuthCookie();
     setToken(null);
     setUser(null);
     navigate('/');
