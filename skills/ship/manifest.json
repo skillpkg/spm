@@ -1,0 +1,26 @@
+{
+  "name": "ship",
+  "version": "1.0.0",
+  "description": "Language-agnostic quality pipeline that auto-discovers project tools (formatter, linter, build, tests), runs them all, fixes failures, then commits with conventional commits and pushes.",
+  "categories": ["code-quality", "productivity"],
+  "keywords": [
+    "ship",
+    "commit",
+    "push",
+    "conventional-commits",
+    "quality",
+    "pipeline",
+    "format",
+    "lint",
+    "test",
+    "ci"
+  ],
+  "license": "MIT",
+  "authors": [{ "name": "Almog Ben David" }],
+  "agents": {
+    "platforms": ["*"],
+    "requires_tools": ["bash", "file_read"],
+    "min_context": "standard"
+  },
+  "spm": { "manifest_version": 1 }
+}
