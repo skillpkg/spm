@@ -63,6 +63,17 @@ export const Footer = () => {
           Docs
         </Link>
         <a
+          href="mailto:support@skillpkg.dev"
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 12,
+            color: 'var(--color-text-muted)',
+            textDecoration: 'none',
+          }}
+        >
+          Contact
+        </a>
+        <a
           href="https://github.com/almog27/spm"
           target="_blank"
           rel="noopener noreferrer"
