@@ -17,7 +17,7 @@ vi.mock('../../../web-auth/src/AuthContext', () => ({
 }));
 
 // Mock page components to avoid rendering full trees with further dependencies
-vi.mock('../pages/Home', () => ({
+vi.mock('../pages/home', () => ({
   Home: () => <div data-testid="page-home">Home Page</div>,
 }));
 vi.mock('../pages/Search', () => ({
@@ -29,7 +29,7 @@ vi.mock('../pages/skill-detail', () => ({
 vi.mock('../pages/SignIn', () => ({
   SignIn: () => <div data-testid="page-signin">SignIn Page</div>,
 }));
-vi.mock('../pages/Dashboard', () => ({
+vi.mock('../pages/dashboard', () => ({
   Dashboard: () => <div data-testid="page-dashboard">Dashboard Page</div>,
 }));
 vi.mock('../pages/Docs', () => ({
