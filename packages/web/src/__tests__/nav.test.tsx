@@ -108,7 +108,10 @@ describe('Nav', () => {
 
     const adminLink = screen.getByText('Admin');
     expect(adminLink).toBeInTheDocument();
-    expect(adminLink.closest('a')).toHaveAttribute('href', 'https://admin.skillpkg.dev');
+    expect(adminLink.closest('a')).toHaveAttribute(
+      'href',
+      'https://admin.skillpkg.dev#token=fake-token',
+    );
   });
 
   it('does not show Admin link for non-admin users', () => {

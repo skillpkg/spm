@@ -11,7 +11,7 @@ export const Nav = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const { isAuthenticated, user, signOut, isLoading } = useAuth();
+  const { isAuthenticated, user, token, signOut, isLoading } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,7 +162,7 @@ export const Nav = ({
             </Link>
             {user.is_admin && (
               <a
-                href="https://admin.skillpkg.dev"
+                href={`https://admin.skillpkg.dev${token ? `#token=${token}` : ''}`}
                 style={{
                   fontFamily: 'var(--font-sans)',
                   fontSize: 14,

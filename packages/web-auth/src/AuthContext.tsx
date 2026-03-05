@@ -28,6 +28,14 @@ export const AuthProvider = ({ children, storageKey = DEFAULT_TOKEN_KEY }: AuthP
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check for token passed via URL hash (cross-subdomain auth)
+    const hash = window.location.hash;
+    if (hash.startsWith('#token=')) {
+      const hashToken = hash.slice(7);
+      localStorage.setItem(storageKey, hashToken);
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+
     const savedToken = localStorage.getItem(storageKey);
     if (!savedToken) {
       setIsLoading(false);
