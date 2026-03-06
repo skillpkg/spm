@@ -15,6 +15,7 @@ import {
   users,
   publishAttempts,
   downloads,
+  skillCollaborators,
 } from '../db/schema.js';
 import { validateSkillName, checkNameSimilarity } from '../services/names.js';
 import { uploadPackage, uploadBundle } from '../services/r2.js';
@@ -584,6 +585,19 @@ skillsRoutes.get('/skills/:name', async (c) => {
     .where(eq(users.id, skill.ownerId))
     .limit(1);
 
+  // Fetch all collaborators for multi-author support
+  const authorRows = await db
+    .select({
+      username: users.username,
+      githubLogin: users.githubLogin,
+      trustTier: users.trustTier,
+      role: skillCollaborators.role,
+    })
+    .from(skillCollaborators)
+    .innerJoin(users, eq(users.id, skillCollaborators.userId))
+    .where(eq(skillCollaborators.skillId, skill.id))
+    .orderBy(skillCollaborators.role); // 'collaborator' before 'owner' alphabetically, but we sort in response
+
   const latestVersion = versionRows[0];
   const latestManifest = latestVersion?.manifest as Record<string, unknown> | undefined;
 
@@ -629,6 +643,24 @@ skillsRoutes.get('/skills/:name', async (c) => {
       github_login: author?.githubLogin ?? '',
       trust_tier: author?.trustTier ?? 'registered',
     },
+    authors:
+      authorRows.length > 0
+        ? authorRows
+            .sort((a, b) => (a.role === 'owner' ? -1 : b.role === 'owner' ? 1 : 0))
+            .map((a) => ({
+              username: a.username,
+              github_login: a.githubLogin ?? '',
+              trust_tier: a.trustTier,
+              role: a.role,
+            }))
+        : [
+            {
+              username: author?.username ?? 'unknown',
+              github_login: author?.githubLogin ?? '',
+              trust_tier: author?.trustTier ?? 'registered',
+              role: 'owner',
+            },
+          ],
     repository: skill.repository,
     license: skill.license,
     deprecated: skill.deprecated,
@@ -653,6 +685,43 @@ skillsRoutes.get('/skills/:name', async (c) => {
     created_at: skill.createdAt.toISOString(),
     updated_at: skill.updatedAt.toISOString(),
   });
+});
+
+// ── GET /skills/:name/downloads — daily download counts (30 days) ──
+
+skillsRoutes.get('/skills/:name/downloads', async (c) => {
+  const db = c.get('db');
+  const name = c.req.param('name');
+
+  const [skill] = await db
+    .select({ id: skills.id })
+    .from(skills)
+    .where(eq(skills.name, name))
+    .limit(1);
+
+  if (!skill) {
+    return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+  }
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const rows = await db
+    .select({
+      date: sql<string>`DATE(${downloads.downloadedAt})`.as('date'),
+      count: count(),
+    })
+    .from(downloads)
+    .innerJoin(versions, eq(versions.id, downloads.versionId))
+    .where(
+      and(
+        eq(versions.skillId, skill.id),
+        sql`${downloads.downloadedAt} >= ${thirtyDaysAgo.toISOString()}`,
+      ),
+    )
+    .groupBy(sql`DATE(${downloads.downloadedAt})`)
+    .orderBy(sql`DATE(${downloads.downloadedAt})`);
+
+  return c.json({ name, days: rows });
 });
 
 // ── GET /skills/:name/:version — get specific version ──

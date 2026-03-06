@@ -354,6 +354,45 @@ adminRoutes.get('/admin/skills', zValidator('query', AdminSkillsQuerySchema), as
   });
 });
 
+// ── GET /admin/skills/:name/versions/:version — version detail ──
+
+adminRoutes.get('/admin/skills/:name/versions/:version', async (c) => {
+  const db = c.get('db');
+  const name = c.req.param('name');
+  const version = c.req.param('version');
+
+  const [skill] = await db
+    .select({ id: skills.id, name: skills.name })
+    .from(skills)
+    .where(eq(skills.name, name))
+    .limit(1);
+
+  if (!skill) {
+    return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+  }
+
+  const [ver] = await db
+    .select()
+    .from(versions)
+    .where(and(eq(versions.skillId, skill.id), eq(versions.version, version)))
+    .limit(1);
+
+  if (!ver) {
+    return c.json(createApiError('VERSION_NOT_FOUND'), ERROR_CODES.VERSION_NOT_FOUND.status);
+  }
+
+  return c.json({
+    name: skill.name,
+    version: ver.version,
+    readme_md: ver.readmeMd,
+    manifest: ver.manifest,
+    published_at: ver.publishedAt.toISOString(),
+    yanked: ver.yanked,
+    signed: ver.sigstoreBundleKey != null,
+    size_bytes: ver.sizeBytes,
+  });
+});
+
 // ── POST /admin/skills/:name/yank — admin-initiated yank ──
 
 const AdminYankSchema = z.object({
@@ -411,6 +450,88 @@ adminRoutes.post('/admin/skills/:name/yank', zValidator('json', AdminYankSchema)
     yanked: true,
     reason: body.reason,
     yanked_at: new Date().toISOString(),
+  });
+});
+
+// ── POST /admin/skills/:name/block — block a skill ──
+
+const BlockSchema = z.object({
+  reason: z.string().min(1),
+});
+
+adminRoutes.post('/admin/skills/:name/block', zValidator('json', BlockSchema), async (c) => {
+  const db = c.get('db');
+  const jwt = c.get('jwtPayload');
+  const name = c.req.param('name');
+  const body = c.req.valid('json');
+
+  const [skill] = await db
+    .select({ id: skills.id, status: skills.status })
+    .from(skills)
+    .where(eq(skills.name, name))
+    .limit(1);
+
+  if (!skill) {
+    return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+  }
+
+  if (skill.status === 'blocked') {
+    return c.json({ name, status: 'blocked', message: 'Skill is already blocked' });
+  }
+
+  await db
+    .update(skills)
+    .set({ status: 'blocked', updatedAt: new Date() })
+    .where(eq(skills.id, skill.id));
+
+  await audit(
+    db,
+    jwt.sub,
+    'admin.block',
+    { skill: name, reason: body.reason },
+    { skillId: skill.id },
+  );
+
+  return c.json({
+    name,
+    status: 'blocked',
+    reason: body.reason,
+    blocked_at: new Date().toISOString(),
+  });
+});
+
+// ── POST /admin/skills/:name/unblock — unblock a skill ──
+
+adminRoutes.post('/admin/skills/:name/unblock', async (c) => {
+  const db = c.get('db');
+  const jwt = c.get('jwtPayload');
+  const name = c.req.param('name');
+
+  const [skill] = await db
+    .select({ id: skills.id, status: skills.status })
+    .from(skills)
+    .where(eq(skills.name, name))
+    .limit(1);
+
+  if (!skill) {
+    return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+  }
+
+  if (skill.status !== 'blocked') {
+    return c.json({ name, status: skill.status, message: 'Skill is not blocked' });
+  }
+
+  await db
+    .update(skills)
+    .set({ status: 'published', updatedAt: new Date() })
+    .where(eq(skills.id, skill.id));
+
+  await audit(db, jwt.sub, 'admin.unblock', { skill: name }, { skillId: skill.id });
+
+  return c.json({
+    name,
+    status: 'published',
+    unblocked_at: new Date().toISOString(),
   });
 });
 

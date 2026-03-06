@@ -474,6 +474,292 @@ describe('POST /admin/skills/:name/yank', () => {
   });
 });
 
+// ── GET /admin/skills/:name/versions/:version ──
+
+describe('GET /admin/skills/:name/versions/:version', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns 404 for unknown skill', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const mockDb = createSequenceMockDb([
+      [{ role: 'admin' }], // adminGuard
+      [], // skill lookup — empty
+    ]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/nonexistent/versions/1.0.0',
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 404 for unknown version', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const mockDb = createSequenceMockDb([
+      [{ role: 'admin' }], // adminGuard
+      [{ id: 'skill-1', name: 'test-skill' }], // skill lookup
+      [], // version lookup — empty
+    ]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/test-skill/versions/9.9.9',
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns version detail', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const publishedAt = new Date('2026-02-01T00:00:00Z');
+    const mockDb = createSequenceMockDb([
+      [{ role: 'admin' }], // adminGuard
+      [{ id: 'skill-1', name: 'test-skill' }], // skill lookup
+      [
+        {
+          version: '1.0.0',
+          readmeMd: '# Test Skill',
+          manifest: { name: 'test-skill', version: '1.0.0' },
+          publishedAt,
+          yanked: false,
+          sigstoreBundleKey: 'bundle-key',
+          sizeBytes: 1234,
+        },
+      ], // version lookup
+    ]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/test-skill/versions/1.0.0',
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Json;
+    expect(body.name).toBe('test-skill');
+    expect(body.version).toBe('1.0.0');
+    expect(body.readme_md).toBe('# Test Skill');
+    expect(body.signed).toBe(true);
+    expect(body.size_bytes).toBe(1234);
+  });
+});
+
+// ── POST /admin/skills/:name/block ──
+
+describe('POST /admin/skills/:name/block', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns 404 for unknown skill', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const mockDb = createSequenceMockDb([
+      [{ role: 'admin' }], // adminGuard
+      [], // skill lookup — empty
+    ]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/nonexistent/block',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: 'malicious content' }),
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(404);
+  });
+
+  it('blocks a published skill', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const mockDb = createSequenceMockDb([
+      [{ role: 'admin' }], // adminGuard
+      [{ id: 'skill-1', status: 'published' }], // skill lookup
+      [], // update skill
+      [], // audit insert
+    ]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/bad-skill/block',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: 'Contains malware' }),
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Json;
+    expect(body.status).toBe('blocked');
+    expect(body.reason).toBe('Contains malware');
+  });
+
+  it('returns already blocked message', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const mockDb = createSequenceMockDb([
+      [{ role: 'admin' }], // adminGuard
+      [{ id: 'skill-1', status: 'blocked' }], // skill lookup — already blocked
+    ]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/bad-skill/block',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: 'duplicate block' }),
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Json;
+    expect(body.message).toBe('Skill is already blocked');
+  });
+
+  it('requires reason field', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const mockDb = createAdminMockDb([]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/bad-skill/block',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(400);
+  });
+});
+
+// ── POST /admin/skills/:name/unblock ──
+
+describe('POST /admin/skills/:name/unblock', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns 404 for unknown skill', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const mockDb = createSequenceMockDb([
+      [{ role: 'admin' }], // adminGuard
+      [], // skill lookup — empty
+    ]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/nonexistent/unblock',
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(404);
+  });
+
+  it('unblocks a blocked skill', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const mockDb = createSequenceMockDb([
+      [{ role: 'admin' }], // adminGuard
+      [{ id: 'skill-1', status: 'blocked' }], // skill lookup
+      [], // update skill
+      [], // audit insert
+    ]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/blocked-skill/unblock',
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Json;
+    expect(body.status).toBe('published');
+  });
+
+  it('returns not blocked message for published skill', async () => {
+    const { adminRoutes } = await import('../routes/admin.js');
+    const mockDb = createSequenceMockDb([
+      [{ role: 'admin' }], // adminGuard
+      [{ id: 'skill-1', status: 'published' }], // skill lookup — not blocked
+    ]);
+    const app = createTestApp(mockDb);
+    app.route('/', adminRoutes);
+
+    const token = await makeAdminToken();
+    const res = await app.request(
+      '/admin/skills/good-skill/unblock',
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      TEST_BINDINGS,
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Json;
+    expect(body.message).toBe('Skill is not blocked');
+  });
+});
+
 // ── GET /admin/users ──
 
 describe('GET /admin/users', () => {
