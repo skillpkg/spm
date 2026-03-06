@@ -62,7 +62,10 @@ trendingRoutes.get('/trending', zValidator('query', TrendingQuerySchema), async 
           .from(skills)
           .where(
             existingIds.length > 0
-              ? sql`${skills.id} NOT IN (${sql.join(existingIds.map((id) => sql`${id}`), sql`, `)})`
+              ? sql`${skills.id} NOT IN (${sql.join(
+                  existingIds.map((id) => sql`${id}`),
+                  sql`, `,
+                )})`
               : sql`true`,
           )
           .orderBy(desc(skills.createdAt))

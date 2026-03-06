@@ -612,8 +612,9 @@ skillsRoutes.get('/skills/:name', async (c) => {
         signed: latestVersion.sigstoreBundleKey != null,
         signer_identity: (latestManifest?.security as Record<string, unknown> | undefined)
           ?.signer_identity as string | undefined,
-        scan_status: ((latestManifest?.security as Record<string, unknown> | undefined)
-          ?.scan_status as string) ?? 'pending',
+        scan_status:
+          ((latestManifest?.security as Record<string, unknown> | undefined)
+            ?.scan_status as string) ?? 'pending',
         scan_layers: (latestManifest?.security as Record<string, unknown> | undefined)
           ?.scan_layers as Array<{ layer: number; status: string }> | undefined,
       }

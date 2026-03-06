@@ -165,7 +165,9 @@ authRoutes.post('/auth/token', async (c) => {
           email: ghUser.email,
           // Auto-promote to verified if still registered and email is now verified
           ...(hasVerifiedEmail
-            ? { trustTier: sql`CASE WHEN ${users.trustTier} = 'registered' THEN 'verified' ELSE ${users.trustTier} END` }
+            ? {
+                trustTier: sql`CASE WHEN ${users.trustTier} = 'registered' THEN 'verified' ELSE ${users.trustTier} END`,
+              }
             : {}),
           updatedAt: new Date(),
         },

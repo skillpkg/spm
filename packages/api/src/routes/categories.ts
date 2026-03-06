@@ -20,7 +20,7 @@ categoriesRoutes.get('/categories', async (c) => {
   );
 
   // Handle both array and { rows: [...] } formats from different Drizzle drivers
-  const rawRows = Array.isArray(result) ? result : (result as { rows: unknown[] }).rows ?? [];
+  const rawRows = Array.isArray(result) ? result : ((result as { rows: unknown[] }).rows ?? []);
   const countMap = new Map<string, number>();
   for (const row of rawRows as Array<{ cat: string; count: number }>) {
     countMap.set(row.cat, row.count);

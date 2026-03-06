@@ -44,9 +44,8 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
               marginTop: 6,
             }}
           >
-            Signing happens automatically during{' '}
-            <code style={{ fontSize: 12 }}>spm publish</code> when Sigstore is reachable.
-            Re-publish a new version to sign it.
+            Signing happens automatically during <code style={{ fontSize: 12 }}>spm publish</code>{' '}
+            when Sigstore is reachable. Re-publish a new version to sign it.
           </div>
         </div>
       )}
