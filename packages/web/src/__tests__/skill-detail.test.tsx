@@ -1,18 +1,24 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { SkillDetail } from '../pages/skill-detail';
-import { getSkill } from '../lib/api';
+import { getSkill, getSkillDownloads } from '../lib/api';
 
 vi.mock('../lib/api', () => ({
   getSkill: vi.fn(),
+  getSkillDownloads: vi.fn(),
 }));
 
 const mockedGetSkill = vi.mocked(getSkill);
+const mockedGetSkillDownloads = vi.mocked(getSkillDownloads);
 
 const mockPdfSkill = {
   name: 'pdf',
   description: 'Read, create, merge, split, and fill PDF documents',
   author: { username: 'anthropic', github_login: 'anthropic', trust_tier: 'official' },
+  authors: [
+    { username: 'anthropic', github_login: 'anthropic', trust_tier: 'official', role: 'owner' },
+    { username: 'bob', github_login: 'bob', trust_tier: 'registered', role: 'collaborator' },
+  ],
   categories: ['documents'],
   tags: ['documents', 'forms', 'ocr'],
   platforms: ['all'],
@@ -51,6 +57,7 @@ const renderSkillDetail = (name: string) =>
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockedGetSkillDownloads.mockResolvedValue({ name: 'pdf', days: [] });
 });
 
 describe('SkillDetail', () => {
@@ -90,6 +97,28 @@ describe('SkillDetail', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Skill not found')).toBeInTheDocument();
+    });
+  });
+
+  it('renders multiple author links', async () => {
+    mockedGetSkill.mockResolvedValue(mockPdfSkill);
+    renderSkillDetail('pdf');
+
+    await waitFor(() => {
+      const authorLinks = screen.getAllByText(/@anthropic/);
+      expect(authorLinks.length).toBeGreaterThan(0);
+      const bobLinks = screen.getAllByText(/@bob/);
+      expect(bobLinks.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('renders category badges', async () => {
+    mockedGetSkill.mockResolvedValue(mockPdfSkill);
+    renderSkillDetail('pdf');
+
+    await waitFor(() => {
+      const matches = screen.getAllByText('documents');
+      expect(matches.length).toBeGreaterThan(0);
     });
   });
 

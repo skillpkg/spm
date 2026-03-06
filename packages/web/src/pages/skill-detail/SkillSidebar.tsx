@@ -1,9 +1,39 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { TRUST_CONFIG } from '@spm/ui';
+import { TRUST_CONFIG, Sparkline } from '@spm/ui';
+import { getSkillDownloads, type SkillDownloadsDay } from '../../lib/api';
 import { type SkillFull, cardStyle } from './types';
 
+const buildSparklineData = (days: SkillDownloadsDay[]): number[] => {
+  const counts = new Map<string, number>();
+  for (const d of days) counts.set(d.date, d.count);
+
+  const result: number[] = [];
+  const now = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    const key = date.toISOString().split('T')[0];
+    result.push(counts.get(key) ?? 0);
+  }
+  return result;
+};
+
 export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
-  const trustInfo = TRUST_CONFIG[skill.trust];
+  const [sparklineData, setSparklineData] = useState<number[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSkillDownloads(skill.name)
+      .then((res) => {
+        if (!cancelled) setSparklineData(buildSparklineData(res.days));
+      })
+      .catch(() => {
+        // Sparkline is non-critical; silently skip on error
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [skill.name]);
 
   return (
     <aside style={{ width: 220, flexShrink: 0 }}>
@@ -19,7 +49,6 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
               color: '#fbbf24',
             },
             { label: 'License', value: skill.license },
-            { label: 'Size', value: skill.size },
           ].map((row) => (
             <div
               key={row.label}
@@ -50,9 +79,24 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
               </span>
             </div>
           ))}
+          {sparklineData && (
+            <div style={{ paddingTop: 8 }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 10,
+                  color: 'var(--color-text-muted)',
+                  marginBottom: 4,
+                }}
+              >
+                Last 30 days
+              </div>
+              <Sparkline data={sparklineData} width={192} height={32} color="#10b981" />
+            </div>
+          )}
         </div>
 
-        {/* Author */}
+        {/* Authors */}
         <div style={cardStyle}>
           <div
             style={{
@@ -64,44 +108,69 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
               letterSpacing: '0.05em',
             }}
           >
-            Author
+            {skill.authors.length > 1 ? 'Authors' : 'Author'}
           </div>
-          <Link
-            to={`/authors/${skill.author}`}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}
-          >
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 6,
-                background: 'var(--color-bg-hover)',
-                border: '1px solid var(--color-border-default)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                color: 'var(--color-text-dim)',
-              }}
-            >
-              {skill.author[0].toUpperCase()}
-            </div>
-            <div>
-              <div
+          {skill.authors.map((a) => {
+            const aTrust = TRUST_CONFIG[a.trust];
+            return (
+              <Link
+                key={a.username}
+                to={`/authors/${a.username}`}
                 style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 13,
-                  color: 'var(--color-text-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  textDecoration: 'none',
+                  marginBottom: 8,
                 }}
               >
-                @{skill.author}
-              </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: trustInfo.color }}>
-                {trustInfo.checks} {trustInfo.label}
-              </div>
-            </div>
-          </Link>
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 6,
+                    background: 'var(--color-bg-hover)',
+                    border: '1px solid var(--color-border-default)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    color: 'var(--color-text-dim)',
+                  }}
+                >
+                  {a.username[0].toUpperCase()}
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 13,
+                      color: 'var(--color-text-primary)',
+                    }}
+                  >
+                    @{a.username}
+                    {a.role !== 'owner' && (
+                      <span
+                        style={{
+                          fontSize: 10,
+                          color: 'var(--color-text-muted)',
+                          marginLeft: 4,
+                        }}
+                      >
+                        {a.role}
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: aTrust.color }}
+                  >
+                    {aTrust.checks} {aTrust.label}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
 
         {/* Links */}
@@ -118,26 +187,42 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
           >
             Links
           </div>
-          <div
+          {skill.repo && (
+            <a
+              href={skill.repo}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 13,
+                color: 'var(--color-blue)',
+                padding: '4px 0',
+                display: 'block',
+                textDecoration: 'none',
+              }}
+            >
+              Repository
+            </a>
+          )}
+          <a
+            href={
+              skill.repo
+                ? `${skill.repo}/issues`
+                : `/report?skill=${encodeURIComponent(skill.name)}`
+            }
+            target={skill.repo ? '_blank' : undefined}
+            rel={skill.repo ? 'noopener noreferrer' : undefined}
             style={{
               fontFamily: 'var(--font-sans)',
               fontSize: 13,
               color: 'var(--color-blue)',
               padding: '4px 0',
-            }}
-          >
-            Repository
-          </div>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 13,
-              color: 'var(--color-blue)',
-              padding: '4px 0',
+              display: 'block',
+              textDecoration: 'none',
             }}
           >
             Report issue
-          </div>
+          </a>
         </div>
 
         {/* Dependencies */}

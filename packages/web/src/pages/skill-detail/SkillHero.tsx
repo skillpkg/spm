@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { CopyButton, TrustBadge } from '@spm/ui';
 import { type SkillFull } from './types';
 
@@ -37,7 +38,18 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
           v{skill.version}
         </span>
         <span style={{ fontSize: 13, color: 'var(--color-text-faint)' }}>
-          by <span style={{ color: 'var(--color-text-secondary)' }}>@{skill.author}</span>
+          by{' '}
+          {skill.authors.map((a, i) => (
+            <span key={a.username}>
+              {i > 0 && ', '}
+              <Link
+                to={`/authors/${a.username}`}
+                style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+              >
+                @{a.username}
+              </Link>
+            </span>
+          ))}
         </span>
         <TrustBadge tier={skill.trust} size="lg" />
       </div>
@@ -54,6 +66,28 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
       >
         {skill.desc}
       </p>
+      {skill.categories.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+          {skill.categories.map((cat) => (
+            <Link
+              key={cat}
+              to={`/search?category=${encodeURIComponent(cat)}`}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                padding: '3px 8px',
+                borderRadius: 4,
+                background: 'var(--color-accent)',
+                color: 'var(--color-bg)',
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              {cat}
+            </Link>
+          ))}
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {skill.tags?.map((t) => (
           <span

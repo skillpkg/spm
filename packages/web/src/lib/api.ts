@@ -99,6 +99,7 @@ export interface SkillDetailResponse {
   name: string;
   description: string;
   author: { username: string; github_login: string; trust_tier: string };
+  authors?: Array<{ username: string; github_login: string; trust_tier: string; role: string }>;
   categories: string[];
   tags?: string[];
   platforms?: string[];
@@ -190,6 +191,21 @@ export interface AuthorProfileResponse {
 
 export const getAuthorProfile = (username: string): Promise<AuthorProfileResponse> =>
   apiFetch(`/authors/${encodeURIComponent(username)}`);
+
+// -- Skill Downloads (sparkline) --
+
+export interface SkillDownloadsDay {
+  date: string;
+  count: number;
+}
+
+export interface SkillDownloadsResponse {
+  name: string;
+  days: SkillDownloadsDay[];
+}
+
+export const getSkillDownloads = (name: string): Promise<SkillDownloadsResponse> =>
+  apiFetch(`/skills/${encodeURIComponent(name)}/downloads`);
 
 // -- Author Stats (auth required) --
 

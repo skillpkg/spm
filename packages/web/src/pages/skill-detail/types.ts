@@ -13,6 +13,7 @@ export interface SkillFull {
   desc: string;
   longDesc: string;
   author: string;
+  authors: Array<{ username: string; trust: TrustTier; role: string }>;
   trust: TrustTier;
   downloads: string;
   weeklyDownloads: string;
@@ -21,7 +22,6 @@ export interface SkillFull {
   license: string;
   published: string;
   updated: string;
-  size: string;
   platforms: string[];
   categories: string[];
   tags?: string[];
@@ -52,6 +52,19 @@ export const apiToSkillFull = (data: SkillDetailResponse): SkillFull => ({
   desc: data.description,
   longDesc: data.description,
   author: data.author.username,
+  authors: data.authors
+    ? data.authors.map((a) => ({
+        username: a.username,
+        trust: a.trust_tier as TrustTier,
+        role: a.role,
+      }))
+    : [
+        {
+          username: data.author.username,
+          trust: data.author.trust_tier as TrustTier,
+          role: 'owner',
+        },
+      ],
   trust: data.author.trust_tier as SkillFull['trust'],
   downloads: formatDownloads(data.downloads ?? 0),
   weeklyDownloads: formatDownloads(data.weekly_downloads ?? 0),
@@ -60,7 +73,6 @@ export const apiToSkillFull = (data: SkillDetailResponse): SkillFull => ({
   license: data.license ?? 'Unknown',
   published: data.created_at?.split('T')[0] ?? '',
   updated: data.updated_at?.split('T')[0] ?? '',
-  size: '--',
   platforms: data.platforms ?? ['all'],
   categories: data.categories,
   tags: data.tags,
