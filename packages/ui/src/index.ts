@@ -34,3 +34,4 @@ export {
   type ActivityEvent,
   type ActivityItemProps,
 } from './components/ActivityItem/ActivityItem';
+export { Sparkline, type SparklineProps } from './components/Sparkline/Sparkline';
