@@ -3,6 +3,12 @@ name: Deploy
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_all:
+        description: 'Deploy all services (API + Web + Admin)'
+        type: boolean
+        default: true
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -45,7 +51,7 @@ jobs:
   deploy-api:
     name: Deploy API Worker
     needs: [quality, changes]
-    if: needs.changes.outputs.api == 'true'
+    if: needs.changes.outputs.api == 'true' || contains(github.event.head_commit.message, '[deploy all]') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +70,7 @@ jobs:
   deploy-web:
     name: Deploy Web
     needs: [quality, changes]
-    if: needs.changes.outputs.web == 'true'
+    if: needs.changes.outputs.web == 'true' || contains(github.event.head_commit.message, '[deploy all]') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -85,7 +91,7 @@ jobs:
   deploy-admin:
     name: Deploy Admin
     needs: [quality, changes]
-    if: needs.changes.outputs.admin == 'true'
+    if: needs.changes.outputs.admin == 'true' || contains(github.event.head_commit.message, '[deploy all]') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
