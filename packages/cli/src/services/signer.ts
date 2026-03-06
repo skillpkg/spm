@@ -115,3 +115,35 @@ export const signPackage = async (packagePath: string): Promise<SignResult | nul
     return null;
   }
 };
+
+/**
+ * Sign a .skl package file using Sigstore with interactive browser-based OIDC.
+ *
+ * Opens the user's browser for OAuth authentication (Fulcio + Rekor).
+ * Intended for local (non-CI) use when the --sign flag is provided.
+ *
+ * Returns null if signing fails — signing should never block publish.
+ */
+export const signPackageInteractive = async (packagePath: string): Promise<SignResult | null> => {
+  try {
+    const fileBuffer = await readFile(packagePath);
+
+    const { sign } = await import('sigstore');
+
+    const bundle = await sign(fileBuffer);
+
+    // sigstore.sign() returns a SerializedBundle (JSON-ready object)
+    // which is structurally identical to what bundleToJSON() produces
+    const serialized = bundle as unknown as SerializedBundle;
+    const bundleJson = JSON.stringify(serialized);
+    const signerIdentity = extractSignerIdentity(serialized);
+
+    return {
+      bundle: bundleJson,
+      signerIdentity,
+    };
+  } catch {
+    // Signing failure should never block publish
+    return null;
+  }
+};

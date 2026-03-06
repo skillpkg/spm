@@ -10,7 +10,7 @@ import type { Manifest } from '@spm/shared';
 import { icons, c, log, logJson, logError, withSpinner, getCurrentMode } from '../lib/output.js';
 import { loadConfig } from '../lib/config.js';
 import { createApiClient, ApiClientError } from '../lib/api-client.js';
-import { signPackage } from '../services/signer.js';
+import { signPackage, signPackageInteractive } from '../services/signer.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -87,7 +87,8 @@ export const registerPublishCommand = (program: Command): void => {
     .option('--dry-run', 'Pack and validate without publishing')
     .option('--force', 'Skip confirmation prompts')
     .option('--json', 'Output machine-readable JSON')
-    .action(async (opts: { dryRun?: boolean; force?: boolean; json?: boolean }) => {
+    .option('--sign', 'Sign package with Sigstore (opens browser for authentication)')
+    .action(async (opts: { dryRun?: boolean; force?: boolean; json?: boolean; sign?: boolean }) => {
       const mode = getCurrentMode();
 
       // 1. Check auth
@@ -191,7 +192,7 @@ export const registerPublishCommand = (program: Command): void => {
         return;
       }
 
-      // 7. Sign the package (CI only — requires OIDC identity token)
+      // 7. Sign the package (CI auto-signs, or local with --sign flag)
       let signatureBundle: string | null = null;
       let signerIdentity: string | null = null;
       const isCI = !!(process.env.CI || process.env.GITHUB_ACTIONS || process.env.GITLAB_CI);
@@ -212,6 +213,23 @@ export const registerPublishCommand = (program: Command): void => {
           }
         } catch {
           log(`${icons.warning} ${c.warn('Signing unavailable in this CI environment')}`);
+        }
+      } else if (opts.sign) {
+        try {
+          log(`${icons.lock} Opening browser for Sigstore authentication...`);
+          const signResult = await withSpinner('Signing with Sigstore...', () =>
+            signPackageInteractive(packResult.sklPath),
+          );
+
+          if (signResult) {
+            signatureBundle = signResult.bundle;
+            signerIdentity = signResult.signerIdentity;
+            log(`${icons.success} Signed by ${c.trust(signResult.signerIdentity)} (Sigstore)`);
+          } else {
+            log(`${icons.warning} ${c.warn('Signing failed — publishing unsigned')}`);
+          }
+        } catch {
+          log(`${icons.warning} ${c.warn('Signing failed — publishing unsigned')}`);
         }
       }
 

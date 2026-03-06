@@ -49,8 +49,10 @@ vi.mock('../lib/output.js', () => ({
 
 // -- Mock signer --
 const mockSignPackage = vi.fn();
+const mockSignPackageInteractive = vi.fn();
 vi.mock('../services/signer.js', () => ({
   signPackage: (...args: unknown[]) => mockSignPackage(...args),
+  signPackageInteractive: (...args: unknown[]) => mockSignPackageInteractive(...args),
 }));
 
 // -- Mock verifier --
@@ -527,5 +529,206 @@ describe('install command with verification', () => {
 
     const result = await mockVerifyPackage('/path/to/skill.skl', '');
     expect(result.verified).toBe(false);
+  });
+});
+
+// ============================================
+// PUBLISH WITH --sign FLAG (interactive)
+// ============================================
+
+describe('publish command with --sign flag', () => {
+  const originalCI = process.env.CI;
+  const originalGHA = process.env.GITHUB_ACTIONS;
+  const originalGLCI = process.env.GITLAB_CI;
+
+  beforeEach(() => {
+    delete process.env.CI;
+    delete process.env.GITHUB_ACTIONS;
+    delete process.env.GITLAB_CI;
+    mockOutputMode = 'default';
+    mockToken = 'test-token-123';
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    if (originalCI === undefined) {
+      delete process.env.CI;
+    } else {
+      process.env.CI = originalCI;
+    }
+    if (originalGHA === undefined) {
+      delete process.env.GITHUB_ACTIONS;
+    } else {
+      process.env.GITHUB_ACTIONS = originalGHA;
+    }
+    if (originalGLCI === undefined) {
+      delete process.env.GITLAB_CI;
+    } else {
+      process.env.GITLAB_CI = originalGLCI;
+    }
+  });
+
+  const validManifest = JSON.stringify({
+    name: 'my-skill',
+    version: '1.0.0',
+    description: 'A test skill for unit testing purposes here',
+    categories: ['data-viz'],
+  });
+
+  const buildProgram = async () => {
+    const { registerPublishCommand } = await import('../commands/publish.js');
+    const program = new Command();
+    program.exitOverride();
+    registerPublishCommand(program);
+    return program;
+  };
+
+  it('calls signPackageInteractive when --sign flag is used', async () => {
+    mockReadFile.mockImplementation((filePath: unknown) => {
+      const p = String(filePath);
+      if (p.endsWith('manifest.json')) {
+        return Promise.resolve(validManifest);
+      }
+      return Promise.resolve(Buffer.from('fake-skl-content'));
+    });
+
+    mockClassifySkill.mockResolvedValue({
+      suggested_categories: ['data-viz'],
+      confidence: 0.95,
+    });
+
+    mockSignPackageInteractive.mockResolvedValue({
+      bundle: '{"mediaType":"interactive-bundle"}',
+      signerIdentity: 'dev@github.com',
+    });
+
+    mockPublishSkill.mockResolvedValue({
+      name: 'my-skill',
+      version: '1.0.0',
+      url: 'https://skillpkg.dev/skills/my-skill',
+      trust_tier: 'registered',
+      signed: true,
+    });
+
+    const program = await buildProgram();
+    await program.parseAsync(['node', 'spm', 'publish', '--sign']);
+
+    expect(mockSignPackageInteractive).toHaveBeenCalled();
+    expect(mockSignPackage).not.toHaveBeenCalled();
+    expect(mockPublishSkill).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ name: 'my-skill' }),
+      '{"mediaType":"interactive-bundle"}',
+    );
+
+    const output = mockLog.mock.calls.map((call: unknown[]) => call[0]).join('\n');
+    expect(output).toContain('Opening browser for Sigstore authentication');
+    expect(output).toContain('Signed by');
+    expect(output).toContain('dev@github.com');
+  });
+
+  it('handles interactive signing failure gracefully', async () => {
+    mockReadFile.mockImplementation((filePath: unknown) => {
+      const p = String(filePath);
+      if (p.endsWith('manifest.json')) {
+        return Promise.resolve(validManifest);
+      }
+      return Promise.resolve(Buffer.from('fake-skl-content'));
+    });
+
+    mockClassifySkill.mockResolvedValue({
+      suggested_categories: ['data-viz'],
+      confidence: 0.95,
+    });
+
+    mockSignPackageInteractive.mockResolvedValue(null);
+
+    mockPublishSkill.mockResolvedValue({
+      name: 'my-skill',
+      version: '1.0.0',
+      url: 'https://skillpkg.dev/skills/my-skill',
+      trust_tier: 'registered',
+      signed: false,
+    });
+
+    const program = await buildProgram();
+    await program.parseAsync(['node', 'spm', 'publish', '--sign']);
+
+    expect(mockPublishSkill).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ name: 'my-skill' }),
+      null,
+    );
+
+    const output = mockLog.mock.calls.map((call: unknown[]) => call[0]).join('\n');
+    expect(output).toContain('Signing failed');
+    expect(output).toContain('Published my-skill@1.0.0');
+  });
+
+  it('handles interactive signing exception gracefully', async () => {
+    mockReadFile.mockImplementation((filePath: unknown) => {
+      const p = String(filePath);
+      if (p.endsWith('manifest.json')) {
+        return Promise.resolve(validManifest);
+      }
+      return Promise.resolve(Buffer.from('fake-skl-content'));
+    });
+
+    mockClassifySkill.mockResolvedValue({
+      suggested_categories: ['data-viz'],
+      confidence: 0.95,
+    });
+
+    mockSignPackageInteractive.mockRejectedValue(new Error('Browser timeout'));
+
+    mockPublishSkill.mockResolvedValue({
+      name: 'my-skill',
+      version: '1.0.0',
+      url: 'https://skillpkg.dev/skills/my-skill',
+      trust_tier: 'registered',
+      signed: false,
+    });
+
+    const program = await buildProgram();
+    await program.parseAsync(['node', 'spm', 'publish', '--sign']);
+
+    expect(mockPublishSkill).toHaveBeenCalled();
+
+    const output = mockLog.mock.calls.map((call: unknown[]) => call[0]).join('\n');
+    expect(output).toContain('Signing failed');
+  });
+
+  it('does not sign when --sign flag is omitted and not in CI', async () => {
+    mockReadFile.mockImplementation((filePath: unknown) => {
+      const p = String(filePath);
+      if (p.endsWith('manifest.json')) {
+        return Promise.resolve(validManifest);
+      }
+      return Promise.resolve(Buffer.from('fake-skl-content'));
+    });
+
+    mockClassifySkill.mockResolvedValue({
+      suggested_categories: ['data-viz'],
+      confidence: 0.95,
+    });
+
+    mockPublishSkill.mockResolvedValue({
+      name: 'my-skill',
+      version: '1.0.0',
+      url: 'https://skillpkg.dev/skills/my-skill',
+      trust_tier: 'registered',
+      signed: false,
+    });
+
+    const program = await buildProgram();
+    await program.parseAsync(['node', 'spm', 'publish']);
+
+    expect(mockSignPackage).not.toHaveBeenCalled();
+    expect(mockSignPackageInteractive).not.toHaveBeenCalled();
+    expect(mockPublishSkill).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ name: 'my-skill' }),
+      null,
+    );
   });
 });
