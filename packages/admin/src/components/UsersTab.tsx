@@ -11,7 +11,7 @@ import {
   TRUST_CONFIG,
   type TrustTier,
 } from '@spm/ui';
-import { getAdminUsers, updateUserRole, type AdminUserItem } from '../lib/api';
+import { getAdminUsers, updateUserRole, updateUserTrust, type AdminUserItem } from '../lib/api';
 import { useAdminData } from '../lib/useAdminData';
 import { LoadingState, ErrorState } from './DataState';
 
@@ -23,6 +23,11 @@ export const UsersTab = () => {
   const [confirmAction, setConfirmAction] = useState<{
     username: string;
     action: 'grant' | 'revoke';
+  } | null>(null);
+  const [trustAction, setTrustAction] = useState<{
+    username: string;
+    currentTier: TrustTier;
+    newTier: TrustTier;
   } | null>(null);
 
   const fetchUsers = useCallback(
@@ -42,6 +47,18 @@ export const UsersTab = () => {
     refetch();
   };
 
+  const handleTrustChange = async () => {
+    if (!token || !trustAction) return;
+    await updateUserTrust(
+      token,
+      trustAction.username,
+      trustAction.newTier,
+      `Changed from ${trustAction.currentTier} to ${trustAction.newTier} via admin panel`,
+    );
+    setTrustAction(null);
+    refetch();
+  };
+
   if (isLoading) return <LoadingState message="Loading users..." />;
   if (error) return <ErrorState message={error} onRetry={refetch} />;
 
@@ -57,6 +74,12 @@ export const UsersTab = () => {
     .filter((u) => roleFilter === 'all' || u.role === roleFilter);
 
   const adminCount = allUsers.filter((u) => u.role === 'admin').length;
+  const trustCounts = {
+    official: allUsers.filter((u) => u.trust_tier === 'official').length,
+    verified: allUsers.filter((u) => u.trust_tier === 'verified').length,
+    scanned: allUsers.filter((u) => u.trust_tier === 'scanned').length,
+    registered: allUsers.filter((u) => u.trust_tier === 'registered').length,
+  };
 
   const activeFilters: {
     key: string;
@@ -88,9 +111,13 @@ export const UsersTab = () => {
   return (
     <div>
       {/* Stats */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
         <StatBox label="Total users" value={data?.total ?? allUsers.length} />
         <StatBox label="Admins" value={adminCount} color="red" />
+        <StatBox label="Official" value={trustCounts.official} color="var(--color-accent)" />
+        <StatBox label="Verified" value={trustCounts.verified} color="var(--color-accent)" />
+        <StatBox label="Scanned" value={trustCounts.scanned} color="var(--color-blue)" />
+        <StatBox label="Registered" value={trustCounts.registered} color="var(--color-text-dim)" />
       </div>
 
       {/* Search + dropdown filters */}
@@ -237,6 +264,51 @@ export const UsersTab = () => {
         </div>
       )}
 
+      {/* Trust tier confirmation */}
+      {trustAction && (
+        <div
+          style={{
+            padding: '14px 18px',
+            marginBottom: 14,
+            border: '1px solid rgba(16,185,129,0.2)',
+            borderRadius: 10,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            background: 'rgba(16,185,129,0.05)',
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 14,
+                color: 'var(--color-text-primary)',
+                marginBottom: 2,
+              }}
+            >
+              Change <strong style={{ color: 'var(--color-cyan)' }}>@{trustAction.username}</strong>{' '}
+              trust tier from{' '}
+              <strong>{trustAction.currentTier}</strong> to{' '}
+              <strong style={{ color: 'var(--color-accent)' }}>{trustAction.newTier}</strong>?
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                color: 'var(--color-text-muted)',
+              }}
+            >
+              Logged in audit trail
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button label="Confirm" color="accent" onClick={handleTrustChange} />
+            <Button label="Cancel" color="text-dim" onClick={() => setTrustAction(null)} />
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <Card>
         <div
@@ -348,8 +420,38 @@ export const UsersTab = () => {
                   gap: 4,
                   justifyContent: 'flex-end',
                   flexWrap: 'wrap',
+                  alignItems: 'center',
                 }}
               >
+                <select
+                  value={trustTier}
+                  onChange={(e) => {
+                    const newTier = e.target.value as TrustTier;
+                    if (newTier !== trustTier) {
+                      setTrustAction({
+                        username: user.username,
+                        currentTier: trustTier,
+                        newTier,
+                      });
+                    }
+                  }}
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 11,
+                    background: 'var(--color-bg-card)',
+                    color: cfg?.color ?? 'var(--color-text-dim)',
+                    border: '1px solid var(--color-border-default)',
+                    borderRadius: 4,
+                    padding: '3px 6px',
+                    cursor: 'pointer',
+                    outline: 'none',
+                  }}
+                >
+                  <option value="registered">Registered</option>
+                  <option value="scanned">Scanned</option>
+                  <option value="verified">Verified</option>
+                  <option value="official">Official</option>
+                </select>
                 {user.role === 'user' ? (
                   <Button
                     label="Make admin"

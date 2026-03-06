@@ -28,6 +28,14 @@ interface GitHubUser {
   email: string | null;
 }
 
+interface GitHubEmail {
+  email: string;
+  primary: boolean;
+  verified: boolean;
+}
+
+const GITHUB_USER_EMAILS_URL = 'https://api.github.com/user/emails';
+
 const GITHUB_DEVICE_CODE_URL = 'https://github.com/login/device/code';
 const GITHUB_ACCESS_TOKEN_URL = 'https://github.com/login/oauth/access_token';
 const GITHUB_USER_URL = 'https://api.github.com/user';
@@ -121,6 +129,24 @@ authRoutes.post('/auth/token', async (c) => {
   const ghUser = (await ghUserRes.json()) as GitHubUser;
   const db = c.get('db' as never) as AppEnv['Variables']['db'];
 
+  // Check if user has a verified primary email on GitHub
+  let hasVerifiedEmail = false;
+  try {
+    const emailsRes = await fetch(GITHUB_USER_EMAILS_URL, {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+        Accept: 'application/json',
+        'User-Agent': 'spm-registry',
+      },
+    });
+    if (emailsRes.ok) {
+      const emails = (await emailsRes.json()) as GitHubEmail[];
+      hasVerifiedEmail = emails.some((e) => e.primary && e.verified);
+    }
+  } catch {
+    // Non-critical — default to registered tier
+  }
+
   try {
     // Upsert user — insert if new, update github info if existing
     const [user] = await db
@@ -130,12 +156,17 @@ authRoutes.post('/auth/token', async (c) => {
         githubId: String(ghUser.id),
         githubLogin: ghUser.login,
         email: ghUser.email,
+        trustTier: hasVerifiedEmail ? 'verified' : 'registered',
       })
       .onConflictDoUpdate({
         target: users.githubId,
         set: {
           githubLogin: ghUser.login,
           email: ghUser.email,
+          // Auto-promote to verified if still registered and email is now verified
+          ...(hasVerifiedEmail
+            ? { trustTier: sql`CASE WHEN ${users.trustTier} = 'registered' THEN 'verified' ELSE ${users.trustTier} END` }
+            : {}),
           updatedAt: new Date(),
         },
       })
