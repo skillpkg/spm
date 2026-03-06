@@ -639,6 +639,7 @@ skillsRoutes.get('/skills/:name', async (c) => {
     weekly_downloads: weeklyDlCount.total,
     tags: tagRows.map((t) => t.tag),
     platforms: platformRows.map((p) => p.platform),
+    readme_md: latestVersion?.readmeMd ?? null,
     latest_version: latestVersion?.version ?? null,
     dependencies: latestManifest?.dependencies ?? null,
     security: securityInfo,
