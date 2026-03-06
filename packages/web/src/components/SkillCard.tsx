@@ -73,7 +73,7 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
                   color: 'var(--color-text-faint)',
                 }}
               >
-                {skill.version}
+                v{skill.version}
               </span>
             </div>
             <span

@@ -51,7 +51,7 @@ export const SkillRow = ({
               marginLeft: 6,
             }}
           >
-            {skill.version}
+            v{skill.version}
           </span>
         </div>
         <div

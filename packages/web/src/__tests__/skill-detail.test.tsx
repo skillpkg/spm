@@ -59,7 +59,7 @@ describe('SkillDetail', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'pdf' })).toBeInTheDocument();
-      expect(screen.getByText('2.0.3')).toBeInTheDocument();
+      expect(screen.getByText('v2.0.3')).toBeInTheDocument();
     });
   });
 

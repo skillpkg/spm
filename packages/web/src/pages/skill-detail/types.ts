@@ -25,6 +25,7 @@ export interface SkillFull {
   platforms: string[];
   categories: string[];
   tags?: string[];
+  readmeMd: string | null;
   versions: SkillVersion[];
   dependencies: {
     skills: string[];
@@ -63,6 +64,7 @@ export const apiToSkillFull = (data: SkillDetailResponse): SkillFull => ({
   platforms: data.platforms ?? ['all'],
   categories: data.categories,
   tags: data.tags,
+  readmeMd: data.readme_md ?? null,
   versions: data.versions.map((v) => ({
     v: v.version,
     date: v.published_at?.split('T')[0] ?? '',

@@ -31,10 +31,13 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
           style={{
             fontFamily: 'var(--font-mono)',
             fontSize: 15,
-            color: 'var(--color-text-faint)',
+            color: 'var(--color-accent)',
           }}
         >
-          {skill.version}
+          v{skill.version}
+        </span>
+        <span style={{ fontSize: 13, color: 'var(--color-text-faint)' }}>
+          by <span style={{ color: 'var(--color-text-secondary)' }}>@{skill.author}</span>
         </span>
         <TrustBadge tier={skill.trust} size="lg" />
       </div>
