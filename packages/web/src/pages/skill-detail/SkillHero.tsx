@@ -16,7 +16,7 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
     }}
   >
     <div style={{ flex: 1 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
         <h1
           style={{
             fontFamily: 'var(--font-mono)',
@@ -37,21 +37,21 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
         >
           v{skill.version}
         </span>
-        <span style={{ fontSize: 13, color: 'var(--color-text-faint)' }}>
-          by{' '}
-          {skill.authors.map((a, i) => (
-            <span key={a.username}>
-              {i > 0 && ', '}
-              <Link
-                to={`/authors/${a.username}`}
-                style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
-              >
-                @{a.username}
-              </Link>
-            </span>
-          ))}
-        </span>
         <TrustBadge tier={skill.trust} size="lg" />
+      </div>
+      <div style={{ fontSize: 13, color: 'var(--color-text-primary)', marginBottom: 8 }}>
+        <span style={{ color: 'var(--color-text-faint)' }}>by </span>
+        {skill.authors.map((a, i) => (
+          <span key={a.username}>
+            {i > 0 && ', '}
+            <Link
+              to={`/authors/${a.username}`}
+              style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+            >
+              @{a.username}
+            </Link>
+          </span>
+        ))}
       </div>
       <p
         style={{
@@ -67,7 +67,7 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
         {skill.desc}
       </p>
       {skill.categories.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
           {skill.categories.map((cat) => (
             <Link
               key={cat}

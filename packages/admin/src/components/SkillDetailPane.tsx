@@ -32,7 +32,7 @@ const buildSparklineData = (days: SkillDownloadsDay[]): number[] => {
   return result;
 };
 
-type DetailTab = 'readme' | 'definition' | 'security';
+type DetailTab = 'readme' | 'skill-content' | 'definition' | 'security';
 
 export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
   const { token } = useAuth();
@@ -284,7 +284,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                   ).map((a, i, arr) => (
                     <span key={a.username}>
                       <a
-                        href={`https://github.com/${a.github_login}`}
+                        href={`${WEB_URL}/authors/${a.username}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
@@ -294,6 +294,19 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                         }}
                       >
                         @{a.username}
+                      </a>
+                      <a
+                        href={`https://github.com/${a.github_login}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: 'var(--color-text-faint)',
+                          textDecoration: 'none',
+                          marginLeft: 4,
+                          fontSize: 10,
+                        }}
+                      >
+                        (GitHub)
                       </a>
                       {a.role !== 'owner' && (
                         <span
@@ -409,6 +422,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
             {(
               [
                 { id: 'readme' as const, label: 'README' },
+                { id: 'skill-content' as const, label: 'Skill Content' },
                 { id: 'definition' as const, label: 'Definition' },
                 { id: 'security' as const, label: 'Security' },
               ] as const
@@ -499,6 +513,39 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                     }}
                   >
                     No README available
+                  </span>
+                )}
+              </div>
+            </Card>
+          )}
+
+          {/* Skill Content tab — full SKILL.md for admin review */}
+          {activeTab === 'skill-content' && (
+            <Card>
+              <div style={{ padding: '14px 18px' }}>
+                {versionData?.readme_md ? (
+                  <pre
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      color: 'var(--color-text-dim)',
+                      lineHeight: 1.6,
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      margin: 0,
+                    }}
+                  >
+                    {versionData.readme_md}
+                  </pre>
+                ) : (
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      color: 'var(--color-text-faint)',
+                    }}
+                  >
+                    No skill content available for this version.
                   </span>
                 )}
               </div>
@@ -603,7 +650,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                             />
                             <span style={{ color: 'var(--color-text-dim)' }}>{layer}</span>
                             <span style={{ color: 'var(--color-text-faint)', marginLeft: 'auto' }}>
-                              {i === 0 ? 'active' : 'pending'}
+                              {i === 0 ? 'active' : 'not yet available'}
                             </span>
                           </div>
                         ),
@@ -885,8 +932,11 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
               </h3>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {detail.categories.map((cat) => (
-                  <span
+                  <a
                     key={cat}
+                    href={`${WEB_URL}/search?category=${encodeURIComponent(cat)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{
                       fontFamily: 'var(--font-mono)',
                       fontSize: 11,
@@ -894,10 +944,11 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                       borderRadius: 4,
                       background: 'var(--color-accent)',
                       color: 'var(--color-bg)',
+                      textDecoration: 'none',
                     }}
                   >
                     {cat}
-                  </span>
+                  </a>
                 ))}
               </div>
             </div>
