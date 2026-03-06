@@ -16,7 +16,7 @@ name: my-skill
 version: 1.0.0
 description: A brief description
 author: your-username
-category: coding
+categories: [code-quality, testing]
 tags: [typescript, testing]
 ---
 
@@ -40,7 +40,7 @@ Instructions for the agent go here...`,
     step: '5',
     title: 'Publish',
     content:
-      'Push your skill to the registry. It will go through the 3-layer security scan automatically.',
+      'Push your skill to the registry. It will be security-scanned and signed with Sigstore automatically.',
     code: '$ spm publish',
   },
 ];

@@ -26,14 +26,28 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
           &#x2713; Signed by {skill.security.signer} (Sigstore OIDC)
         </div>
       ) : (
-        <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 13,
-            color: 'var(--color-yellow)',
-          }}
-        >
-          &#x26A0; Unsigned — author has not set up Sigstore signing
+        <div>
+          <div
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 13,
+              color: 'var(--color-yellow)',
+            }}
+          >
+            &#x26A0; Unsigned — this version was published without a signature
+          </div>
+          <div
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 12,
+              color: 'var(--color-text-dim)',
+              marginTop: 6,
+            }}
+          >
+            Signing happens automatically during{' '}
+            <code style={{ fontSize: 12 }}>spm publish</code> when Sigstore is reachable.
+            Re-publish a new version to sign it.
+          </div>
         </div>
       )}
     </div>
