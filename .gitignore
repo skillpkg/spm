@@ -28,5 +28,8 @@ Thumbs.db
 # Testing
 coverage/
 
+# Skills (author in separate repos)
+skills/
+
 # Logs
 *.log
