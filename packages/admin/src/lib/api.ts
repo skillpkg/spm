@@ -281,7 +281,6 @@ export interface SkillVersionResponse {
   name: string;
   version: string;
   readme_md: string | null;
-  skill_md: string | null;
   manifest: Record<string, unknown>;
   published_at: string;
   yanked: boolean;

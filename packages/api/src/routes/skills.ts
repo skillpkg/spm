@@ -259,7 +259,6 @@ skillsRoutes.post('/skills', authed, async (c) => {
 
   // Insert version
   const readmeField = formData.get('readme');
-  const skillMdField = formData.get('skill_md');
   await db.insert(versions).values({
     skillId,
     version,
@@ -268,7 +267,6 @@ skillsRoutes.post('/skills', authed, async (c) => {
     versionPatch: patch,
     manifest: manifest as unknown as Record<string, unknown>,
     readmeMd: typeof readmeField === 'string' ? readmeField : undefined,
-    skillMd: typeof skillMdField === 'string' ? skillMdField : undefined,
     sizeBytes: packageData.byteLength,
     checksumSha256: checksum,
     sklStorageKey: storageKey,

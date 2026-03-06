@@ -263,7 +263,6 @@ export const createApiClient = (config?: ApiClientConfig) => {
       sklBuffer: ArrayBuffer,
       manifest: Manifest,
       signature?: string | null,
-      skillMd?: string | null,
     ): Promise<PublishResponse> => {
       const url = `${registry}/skills`;
       const formData = new FormData();
@@ -271,9 +270,6 @@ export const createApiClient = (config?: ApiClientConfig) => {
       formData.append('manifest', JSON.stringify(manifest));
       if (signature) {
         formData.append('signature', signature);
-      }
-      if (skillMd) {
-        formData.append('skill_md', skillMd);
       }
 
       const h: Record<string, string> = {
