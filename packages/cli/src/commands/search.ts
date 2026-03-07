@@ -64,6 +64,7 @@ export const registerSearchCommand = (program: Command): void => {
     .option('--trust <tier>', 'minimum trust tier')
     .option('--platform <name>', 'filter by platform')
     .option('--sort <field>', 'sort by: relevance, downloads, rating, updated, new', 'relevance')
+    .option('--security <level>', 'filter by security level (full, partial, any)', 'any')
     .option('--page <n>', 'page number', '1')
     .option('--per-page <n>', 'results per page', '20')
     .action(
@@ -74,6 +75,7 @@ export const registerSearchCommand = (program: Command): void => {
           trust?: string;
           platform?: string;
           sort?: string;
+          security?: string;
           page?: string;
           perPage?: string;
         },
@@ -94,6 +96,7 @@ export const registerSearchCommand = (program: Command): void => {
         if (opts.category) params.category = opts.category;
         if (opts.trust) params.trust = opts.trust;
         if (opts.platform) params.platform = opts.platform;
+        if (opts.security && opts.security !== 'any') params.security = opts.security;
 
         const data = await withSpinner<SearchResponse>(
           'Searching registry...',
@@ -145,6 +148,7 @@ export const registerSearchCommand = (program: Command): void => {
         if (opts.category) filterParts.push(`category=${opts.category}`);
         if (opts.trust) filterParts.push(`trust\u2265${opts.trust}`);
         if (opts.platform) filterParts.push(`platform=${opts.platform}`);
+        if (opts.security && opts.security !== 'any') filterParts.push(`security=${opts.security}`);
 
         const sortLabel =
           opts.sort !== 'relevance'

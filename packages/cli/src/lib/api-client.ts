@@ -263,6 +263,7 @@ export const createApiClient = (config?: ApiClientConfig) => {
       sklBuffer: ArrayBuffer,
       manifest: Manifest,
       signature?: string | null,
+      options?: { skipSecurity?: boolean },
     ): Promise<PublishResponse> => {
       const url = `${registry}/skills`;
       const formData = new FormData();
@@ -277,6 +278,9 @@ export const createApiClient = (config?: ApiClientConfig) => {
       };
       if (token) {
         h['Authorization'] = `Bearer ${token}`;
+      }
+      if (options?.skipSecurity) {
+        h['X-Skip-Security'] = 'true';
       }
 
       const res = await fetch(url, {

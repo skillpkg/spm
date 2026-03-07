@@ -88,200 +88,225 @@ export const registerPublishCommand = (program: Command): void => {
     .option('--force', 'Skip confirmation prompts')
     .option('--json', 'Output machine-readable JSON')
     .option('--sign', 'Sign package with Sigstore (opens browser for authentication)')
-    .action(async (opts: { dryRun?: boolean; force?: boolean; json?: boolean; sign?: boolean }) => {
-      const mode = getCurrentMode();
+    .option('--no-security', 'Skip advanced security scanning (Layer 2 & 3)')
+    .action(
+      async (opts: {
+        dryRun?: boolean;
+        force?: boolean;
+        json?: boolean;
+        sign?: boolean;
+        security?: boolean;
+      }) => {
+        const mode = getCurrentMode();
 
-      // 1. Check auth
-      const config = loadConfig();
-      if (!config.token) {
-        logError(
-          'Not authenticated',
-          'You must be logged in to publish skills.',
-          `Run ${c.cmd('spm login')} to authenticate with GitHub.`,
-        );
-        process.exitCode = 1;
-        return;
-      }
-
-      const api = createApiClient(config);
-
-      // 2. Read and validate manifest
-      let manifest: Manifest;
-      try {
-        manifest = await readManifest();
-      } catch (err) {
-        if (err instanceof Error && err.message.includes('ENOENT')) {
+        // 1. Check auth
+        const config = loadConfig();
+        if (!config.token) {
           logError(
-            'No manifest.json found',
-            'This directory does not contain a skill manifest.',
-            `Run ${c.cmd('spm init')} to create one.`,
+            'Not authenticated',
+            'You must be logged in to publish skills.',
+            `Run ${c.cmd('spm login')} to authenticate with GitHub.`,
           );
-        } else {
-          logError(
-            'Invalid manifest.json',
-            err instanceof Error ? err.message : String(err),
-            'Check your manifest.json against the schema.',
-          );
+          process.exitCode = 1;
+          return;
         }
-        process.exitCode = 1;
-        return;
-      }
 
-      // 3. Check git status
-      const dirty = await isGitDirty();
-      if (dirty && mode !== 'silent' && mode !== 'json') {
-        log(`${icons.warning} ${c.warn('Git working tree has uncommitted changes')}`);
-        log('');
-      }
+        const api = createApiClient(config);
+        const skipSecurity = opts.security === false;
 
-      // 4. Pack the skill
-      let packResult: { sklPath: string; fileCount: number; sizeBytes: number };
-      try {
-        log(`${icons.package} Packing ${c.name(manifest.name)}@${c.version(manifest.version)}...`);
-        packResult = await withSpinner(`Packed (${manifest.name})`, () => packSkill(manifest));
-        log(
-          `${icons.success} Packed (${packResult.fileCount} files, ${formatBytes(packResult.sizeBytes)})`,
-        );
-      } catch (err) {
-        logError('Failed to pack skill', err instanceof Error ? err.message : String(err));
-        process.exitCode = 1;
-        return;
-      }
-
-      log('');
-
-      // 5. Category check
-      try {
-        log('\ud83c\udff7  Category check...');
-        const classification = await withSpinner('Classifying skill...', () =>
-          api.classifySkill({ name: manifest.name, description: manifest.description }),
-        );
-
-        const suggested = classification.suggested_categories;
-        const manifestCats = manifest.categories;
-        const matches =
-          suggested.length > 0 &&
-          manifestCats.includes(suggested[0] as (typeof manifestCats)[number]);
-        if (matches) {
-          log(`${icons.success} Detected: ${c.name(suggested.join(', '))} \u2014 matches manifest`);
-        } else {
+        // 1b. Warn about --no-security
+        if (skipSecurity && mode !== 'silent') {
           log(
-            `${icons.warning} Detected: ${c.name(suggested.join(', '))} \u2014 manifest says ${c.name(manifestCats.join(', '))}`,
+            `${icons.warning} ${c.warn('Publishing without full security scan — skill will show partial security status')}`,
           );
+          log('');
         }
-      } catch {
-        // Classification is optional; if it fails, continue
-        log(`${icons.warning} Category classification unavailable, skipping`);
-      }
 
-      log('');
-
-      // 6. Dry run — stop here
-      if (opts.dryRun) {
-        log(`${icons.info} Dry run complete. No changes published.`);
-        if (mode === 'json') {
-          logJson({
-            command: 'publish',
-            status: 'dry_run',
-            name: manifest.name,
-            version: manifest.version,
-            files: packResult.fileCount,
-            size: packResult.sizeBytes,
-          });
-        }
-        return;
-      }
-
-      // 7. Sign the package (CI auto-signs, or local with --sign flag)
-      let signatureBundle: string | null = null;
-      let signerIdentity: string | null = null;
-      const isCI = !!(process.env.CI || process.env.GITHUB_ACTIONS || process.env.GITLAB_CI);
-
-      if (isCI) {
+        // 2. Read and validate manifest
+        let manifest: Manifest;
         try {
-          log(`${icons.lock} Signing...`);
-          const signResult = await withSpinner('Signing with Sigstore...', () =>
-            signPackage(packResult.sklPath),
+          manifest = await readManifest();
+        } catch (err) {
+          if (err instanceof Error && err.message.includes('ENOENT')) {
+            logError(
+              'No manifest.json found',
+              'This directory does not contain a skill manifest.',
+              `Run ${c.cmd('spm init')} to create one.`,
+            );
+          } else {
+            logError(
+              'Invalid manifest.json',
+              err instanceof Error ? err.message : String(err),
+              'Check your manifest.json against the schema.',
+            );
+          }
+          process.exitCode = 1;
+          return;
+        }
+
+        // 3. Check git status
+        const dirty = await isGitDirty();
+        if (dirty && mode !== 'silent' && mode !== 'json') {
+          log(`${icons.warning} ${c.warn('Git working tree has uncommitted changes')}`);
+          log('');
+        }
+
+        // 4. Pack the skill
+        let packResult: { sklPath: string; fileCount: number; sizeBytes: number };
+        try {
+          log(
+            `${icons.package} Packing ${c.name(manifest.name)}@${c.version(manifest.version)}...`,
+          );
+          packResult = await withSpinner(`Packed (${manifest.name})`, () => packSkill(manifest));
+          log(
+            `${icons.success} Packed (${packResult.fileCount} files, ${formatBytes(packResult.sizeBytes)})`,
+          );
+        } catch (err) {
+          logError('Failed to pack skill', err instanceof Error ? err.message : String(err));
+          process.exitCode = 1;
+          return;
+        }
+
+        log('');
+
+        // 5. Category check
+        try {
+          log('\ud83c\udff7  Category check...');
+          const classification = await withSpinner('Classifying skill...', () =>
+            api.classifySkill({ name: manifest.name, description: manifest.description }),
           );
 
-          if (signResult) {
-            signatureBundle = signResult.bundle;
-            signerIdentity = signResult.signerIdentity;
-            log(`${icons.success} Signed by ${c.trust(signResult.signerIdentity)} (Sigstore)`);
+          const suggested = classification.suggested_categories;
+          const manifestCats = manifest.categories;
+          const matches =
+            suggested.length > 0 &&
+            manifestCats.includes(suggested[0] as (typeof manifestCats)[number]);
+          if (matches) {
+            log(
+              `${icons.success} Detected: ${c.name(suggested.join(', '))} \u2014 matches manifest`,
+            );
           } else {
+            log(
+              `${icons.warning} Detected: ${c.name(suggested.join(', '))} \u2014 manifest says ${c.name(manifestCats.join(', '))}`,
+            );
+          }
+        } catch {
+          // Classification is optional; if it fails, continue
+          log(`${icons.warning} Category classification unavailable, skipping`);
+        }
+
+        log('');
+
+        // 6. Dry run — stop here
+        if (opts.dryRun) {
+          log(`${icons.info} Dry run complete. No changes published.`);
+          if (mode === 'json') {
+            logJson({
+              command: 'publish',
+              status: 'dry_run',
+              name: manifest.name,
+              version: manifest.version,
+              files: packResult.fileCount,
+              size: packResult.sizeBytes,
+            });
+          }
+          return;
+        }
+
+        // 7. Sign the package (CI auto-signs, or local with --sign flag)
+        let signatureBundle: string | null = null;
+        let signerIdentity: string | null = null;
+        const isCI = !!(process.env.CI || process.env.GITHUB_ACTIONS || process.env.GITLAB_CI);
+
+        if (isCI) {
+          try {
+            log(`${icons.lock} Signing...`);
+            const signResult = await withSpinner('Signing with Sigstore...', () =>
+              signPackage(packResult.sklPath),
+            );
+
+            if (signResult) {
+              signatureBundle = signResult.bundle;
+              signerIdentity = signResult.signerIdentity;
+              log(`${icons.success} Signed by ${c.trust(signResult.signerIdentity)} (Sigstore)`);
+            } else {
+              log(`${icons.warning} ${c.warn('Signing unavailable in this CI environment')}`);
+            }
+          } catch {
             log(`${icons.warning} ${c.warn('Signing unavailable in this CI environment')}`);
           }
-        } catch {
-          log(`${icons.warning} ${c.warn('Signing unavailable in this CI environment')}`);
-        }
-      } else if (opts.sign) {
-        try {
-          log(`${icons.lock} Opening browser for Sigstore authentication...`);
-          const signResult = await withSpinner('Signing with Sigstore...', () =>
-            signPackageInteractive(packResult.sklPath),
-          );
+        } else if (opts.sign) {
+          try {
+            log(`${icons.lock} Opening browser for Sigstore authentication...`);
+            const signResult = await withSpinner('Signing with Sigstore...', () =>
+              signPackageInteractive(packResult.sklPath),
+            );
 
-          if (signResult) {
-            signatureBundle = signResult.bundle;
-            signerIdentity = signResult.signerIdentity;
-            log(`${icons.success} Signed by ${c.trust(signResult.signerIdentity)} (Sigstore)`);
-          } else {
+            if (signResult) {
+              signatureBundle = signResult.bundle;
+              signerIdentity = signResult.signerIdentity;
+              log(`${icons.success} Signed by ${c.trust(signResult.signerIdentity)} (Sigstore)`);
+            } else {
+              log(`${icons.warning} ${c.warn('Signing failed — publishing unsigned')}`);
+            }
+          } catch {
             log(`${icons.warning} ${c.warn('Signing failed — publishing unsigned')}`);
           }
-        } catch {
-          log(`${icons.warning} ${c.warn('Signing failed — publishing unsigned')}`);
         }
-      }
 
-      log('');
-
-      // 8. Upload
-      try {
-        const sklBuffer = await readFile(packResult.sklPath);
-
-        const result = await withSpinner('Publishing to registry...', () =>
-          api.publishSkill(sklBuffer.buffer as ArrayBuffer, manifest, signatureBundle),
-        );
-
-        log(`${icons.success} Published ${c.name(manifest.name)}@${c.version(manifest.version)}`);
         log('');
-        log(`${c.url(result.url)}`);
 
-        if (mode === 'json') {
-          logJson({
-            command: 'publish',
-            status: 'success',
-            name: manifest.name,
-            version: manifest.version,
-            url: result.url,
-            trust_tier: result.trust_tier,
-            signed: result.signed || signatureBundle !== null,
-            signer: signerIdentity,
-          });
-        }
-      } catch (err) {
-        if (err instanceof ApiClientError) {
-          if (err.status === 409) {
-            logError(
-              `Version ${manifest.version} already exists`,
-              'Version numbers are immutable once published.',
-              `Bump the version in manifest.json and try again.`,
-            );
-          } else if (err.status === 401) {
-            logError(
-              'Authentication failed',
-              'Your token may have expired.',
-              `Run ${c.cmd('spm login')} to re-authenticate.`,
-            );
-          } else if (err.status === 422) {
-            logError('Publish blocked', err.apiError.message, err.apiError.suggestion);
-          } else {
-            logError('Publish failed', err.apiError.message, err.apiError.suggestion);
+        // 8. Upload
+        try {
+          const sklBuffer = await readFile(packResult.sklPath);
+
+          const result = await withSpinner('Publishing to registry...', () =>
+            api.publishSkill(sklBuffer.buffer as ArrayBuffer, manifest, signatureBundle, {
+              skipSecurity,
+            }),
+          );
+
+          log(`${icons.success} Published ${c.name(manifest.name)}@${c.version(manifest.version)}`);
+          log('');
+          log(`${c.url(result.url)}`);
+
+          if (mode === 'json') {
+            logJson({
+              command: 'publish',
+              status: 'success',
+              name: manifest.name,
+              version: manifest.version,
+              url: result.url,
+              trust_tier: result.trust_tier,
+              signed: result.signed || signatureBundle !== null,
+              signer: signerIdentity,
+              ...(skipSecurity ? { security_level: 'partial' } : {}),
+            });
           }
-        } else {
-          logError('Publish failed', err instanceof Error ? err.message : String(err));
+        } catch (err) {
+          if (err instanceof ApiClientError) {
+            if (err.status === 409) {
+              logError(
+                `Version ${manifest.version} already exists`,
+                'Version numbers are immutable once published.',
+                `Bump the version in manifest.json and try again.`,
+              );
+            } else if (err.status === 401) {
+              logError(
+                'Authentication failed',
+                'Your token may have expired.',
+                `Run ${c.cmd('spm login')} to re-authenticate.`,
+              );
+            } else if (err.status === 422) {
+              logError('Publish blocked', err.apiError.message, err.apiError.suggestion);
+            } else {
+              logError('Publish failed', err.apiError.message, err.apiError.suggestion);
+            }
+          } else {
+            logError('Publish failed', err instanceof Error ? err.message : String(err));
+          }
+          process.exitCode = 1;
         }
-        process.exitCode = 1;
-      }
-    });
+      },
+    );
 };

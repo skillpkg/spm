@@ -16,6 +16,7 @@ import {
   publishAttempts,
   downloads,
   skillCollaborators,
+  scans,
 } from '../db/schema.js';
 import { validateSkillName, checkNameSimilarity } from '../services/names.js';
 import { uploadPackage, uploadBundle } from '../services/r2.js';
@@ -145,7 +146,12 @@ skillsRoutes.post('/skills', authed, async (c) => {
     textFiles = [{ name: 'manifest:description', content: description }];
   }
 
-  const scanResult = await runSecurityPipeline(textFiles);
+  const skipAdvanced = c.req.header('X-Skip-Security') === 'true';
+  const scanResult = await runSecurityPipeline(textFiles, {
+    skipAdvanced,
+    hfApiToken: c.env.HF_API_TOKEN,
+    lakeraApiKey: c.env.LAKERA_API_KEY,
+  });
 
   if (!scanResult.passed) {
     await db.insert(publishAttempts).values({
@@ -259,20 +265,50 @@ skillsRoutes.post('/skills', authed, async (c) => {
 
   // Insert version
   const readmeField = formData.get('readme');
-  await db.insert(versions).values({
-    skillId,
-    version,
-    versionMajor: major,
-    versionMinor: minor,
-    versionPatch: patch,
-    manifest: manifest as unknown as Record<string, unknown>,
-    readmeMd: typeof readmeField === 'string' ? readmeField : undefined,
-    sizeBytes: packageData.byteLength,
-    checksumSha256: checksum,
-    sklStorageKey: storageKey,
-    sigstoreBundleKey,
-    signerIdentity,
-  });
+  const [insertedVersion] = await db
+    .insert(versions)
+    .values({
+      skillId,
+      version,
+      versionMajor: major,
+      versionMinor: minor,
+      versionPatch: patch,
+      manifest: manifest as unknown as Record<string, unknown>,
+      readmeMd: typeof readmeField === 'string' ? readmeField : undefined,
+      sizeBytes: packageData.byteLength,
+      checksumSha256: checksum,
+      sklStorageKey: storageKey,
+      sigstoreBundleKey,
+      signerIdentity,
+    })
+    .returning({ id: versions.id });
+
+  // Write scan results to scans table
+  for (const layerResult of scanResult.layers) {
+    await db.insert(scans).values({
+      versionId: insertedVersion.id,
+      layer: layerResult.layer,
+      status:
+        layerResult.status === 'passed'
+          ? 'passed'
+          : layerResult.status === 'blocked'
+            ? 'blocked'
+            : 'flagged',
+      confidence: layerResult.confidence,
+      details: {
+        name: layerResult.name,
+        blocked: layerResult.blocked,
+        warnings: layerResult.warnings,
+        status: layerResult.status,
+      },
+    });
+  }
+
+  // Update scan_security_level on skills table
+  await db
+    .update(skills)
+    .set({ scanSecurityLevel: scanResult.securityLevel })
+    .where(eq(skills.id, skillId));
 
   // Upsert tags
   const tags = manifest.keywords ?? [];
@@ -298,15 +334,17 @@ skillsRoutes.post('/skills', authed, async (c) => {
 
   return c.json(
     {
-      status: 'published',
+      status: scanResult.securityLevel === 'flagged' ? 'flagged' : 'published',
       name,
       version,
       url: `/api/v1/skills/${name}/${version}`,
       checksum_sha256: checksum,
+      security_level: scanResult.securityLevel,
       scans: scanResult.layers.map((l) => ({
-        layer: l.name,
-        passed: l.passed,
-        warnings: l.warnings,
+        layer: l.layer,
+        name: l.name,
+        status: l.status,
+        confidence: l.confidence,
       })),
       warnings: scanResult.findings
         .filter((f) => f.severity === 'warn')
@@ -329,6 +367,7 @@ const SearchQuerySchema = z.object({
   category: z.string().optional(),
   trust: z.string().optional(),
   platform: z.string().optional(),
+  security: z.enum(['full', 'partial', 'any']).optional().default('any'),
   sort: z
     .enum(['relevance', 'downloads', 'rating', 'updated', 'new'])
     .optional()
@@ -340,7 +379,7 @@ const SearchQuerySchema = z.object({
 skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) => {
   const db = c.get('db');
   const params = c.req.valid('query');
-  const { q, category, trust, platform, sort, page, per_page } = params;
+  const { q, category, trust, platform, security, sort, page, per_page } = params;
   const offset = (page - 1) * per_page;
 
   // Build WHERE conditions
@@ -385,6 +424,10 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
         )`,
       );
     }
+  }
+
+  if (security && security !== 'any') {
+    conditions.push(eq(skills.scanSecurityLevel, security));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -620,19 +663,33 @@ skillsRoutes.get('/skills/:name', async (c) => {
       ),
     );
 
-  // Build security info from latest version
-  const securityInfo = latestVersion
-    ? {
-        signed: latestVersion.sigstoreBundleKey != null,
-        signer_identity: (latestManifest?.security as Record<string, unknown> | undefined)
-          ?.signer_identity as string | undefined,
-        scan_status:
-          ((latestManifest?.security as Record<string, unknown> | undefined)
-            ?.scan_status as string) ?? 'pending',
-        scan_layers: (latestManifest?.security as Record<string, unknown> | undefined)
-          ?.scan_layers as Array<{ layer: number; status: string }> | undefined,
-      }
-    : null;
+  // Build security info from scans table
+  let securityInfo = null;
+  if (latestVersion) {
+    const scanRows = await db
+      .select()
+      .from(scans)
+      .where(eq(scans.versionId, latestVersion.id))
+      .orderBy(scans.layer);
+
+    const scanLayers = scanRows.map((s) => {
+      const details = s.details as Record<string, unknown> | null;
+      return {
+        layer: s.layer,
+        name: (details?.name as string) ?? `Layer ${s.layer}`,
+        status: details?.status ?? s.status,
+        confidence: s.confidence,
+      };
+    });
+
+    securityInfo = {
+      signed: latestVersion.sigstoreBundleKey != null,
+      signer_identity: latestVersion.signerIdentity ?? undefined,
+      scan_status: skill.scanSecurityLevel === 'unscanned' ? 'pending' : skill.scanSecurityLevel,
+      scan_security_level: skill.scanSecurityLevel,
+      scan_layers: scanLayers.length > 0 ? scanLayers : undefined,
+    };
+  }
 
   return c.json({
     name: skill.name,

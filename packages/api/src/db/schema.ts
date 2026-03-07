@@ -81,6 +81,7 @@ export const skills = pgTable(
     deprecatedMsg: text('deprecated_msg'),
     ratingAvg: real('rating_avg').default(0),
     ratingCount: integer('rating_count').default(0),
+    scanSecurityLevel: text('scan_security_level').notNull().default('unscanned'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -88,6 +89,7 @@ export const skills = pgTable(
     index('idx_skills_name').on(table.name),
     index('idx_skills_categories').on(table.categories),
     index('idx_skills_owner').on(table.ownerId),
+    index('idx_skills_security_level').on(table.scanSecurityLevel),
   ],
 );
 

@@ -63,4 +63,56 @@ describe('ScanAnalytics', () => {
       expect(screen.getByText('238')).toBeInTheDocument();
     });
   });
+
+  it('renders per-layer stat boxes with placeholder values when no layer data', async () => {
+    renderWithQuery(<ScanAnalytics />);
+    await waitFor(() => {
+      expect(screen.getByText('L1 pass rate')).toBeInTheDocument();
+      expect(screen.getByText('L2 flag rate')).toBeInTheDocument();
+      expect(screen.getByText('L3 flag rate')).toBeInTheDocument();
+      expect(screen.getByText('Partial scans')).toBeInTheDocument();
+      // Without scans_by_layer data, values should be "--"
+      const dashes = screen.getAllByText('--');
+      expect(dashes.length).toBe(4);
+    });
+  });
+});
+
+describe('ScanAnalytics with per-layer data', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders computed per-layer rates when scans_by_layer is provided', async () => {
+    const { getAdminStats } = await import('../lib/api');
+    vi.mocked(getAdminStats).mockResolvedValueOnce({
+      publishes: { total: 100, published: 90, blocked: 5, rejected: 5 },
+      scans: { passed: 90, flagged: 5, blocked: 5, manual_approved: 0 },
+      scans_by_layer: {
+        l1: { passed: 95, flagged: 0, blocked: 5 },
+        l2: { passed: 85, flagged: 10, blocked: 0 },
+        l3: { passed: 90, flagged: 5, blocked: 0 },
+        partial: 8,
+      },
+      queue_depth: 2,
+      open_reports: 1,
+      open_errors: 0,
+      users_by_trust: { registered: 50 },
+      total_skills: 100,
+      total_users: 50,
+      total_downloads: 5000,
+    });
+
+    renderWithQuery(<ScanAnalytics />);
+    await waitFor(() => {
+      expect(screen.getByText('L1 pass rate')).toBeInTheDocument();
+      expect(screen.getByText('95.0%')).toBeInTheDocument();
+      expect(screen.getByText('L2 flag rate')).toBeInTheDocument();
+      expect(screen.getByText('10.5%')).toBeInTheDocument();
+      expect(screen.getByText('L3 flag rate')).toBeInTheDocument();
+      expect(screen.getByText('5.3%')).toBeInTheDocument();
+      expect(screen.getByText('Partial scans')).toBeInTheDocument();
+      expect(screen.getByText('8')).toBeInTheDocument();
+    });
+  });
 });

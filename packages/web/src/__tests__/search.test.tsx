@@ -22,6 +22,7 @@ const searchResults = [
     rating_avg: 4.9,
     rating_count: 342,
     signed: true,
+    scan_security_level: 'full',
     published_at: '2026-01-10T00:00:00Z',
     updated_at: '2026-02-20T00:00:00Z',
   },
@@ -37,6 +38,7 @@ const searchResults = [
     rating_avg: 4.8,
     rating_count: 142,
     signed: true,
+    scan_security_level: 'partial',
     published_at: '2025-11-01T00:00:00Z',
     updated_at: '2026-02-15T00:00:00Z',
   },
@@ -104,5 +106,14 @@ describe('Search', () => {
     expect(labels).toContain('Highest rated');
     expect(labels).toContain('Recently updated');
     expect(labels).toContain('Newest');
+  });
+
+  it('shows Security filter section with options', () => {
+    renderSearch();
+
+    const headings = screen.getAllByText('Security');
+    expect(headings.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Full scan')).toBeInTheDocument();
+    expect(screen.getByText('Partial')).toBeInTheDocument();
   });
 });

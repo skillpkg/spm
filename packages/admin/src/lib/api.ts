@@ -261,6 +261,14 @@ export interface SkillDetailAuthor {
   role: string;
 }
 
+export interface ScanLayer {
+  layer: number;
+  name: string;
+  status: string;
+  confidence?: number | null;
+  detail?: string;
+}
+
 export interface SkillDetailResponse {
   name: string;
   description: string;
@@ -271,6 +279,8 @@ export interface SkillDetailResponse {
   status: string;
   deprecated: boolean;
   scan_status: string | null;
+  scan_security_level?: string;
+  scan_layers?: ScanLayer[];
   created_at: string;
   updated_at: string;
   versions: SkillDetailVersion[];
@@ -354,6 +364,12 @@ export interface AdminStatsResponse {
     flagged: number;
     blocked: number;
     manual_approved: number;
+  };
+  scans_by_layer?: {
+    l1: { passed: number; flagged: number; blocked: number };
+    l2: { passed: number; flagged: number; blocked: number };
+    l3: { passed: number; flagged: number; blocked: number };
+    partial: number;
   };
   queue_depth: number;
   open_reports: number;

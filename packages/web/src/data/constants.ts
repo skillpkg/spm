@@ -1,4 +1,4 @@
-import { type TrustTier } from '@spm/ui';
+import { type TrustTier, type SecurityLevel } from '@spm/ui';
 
 export type { TrustTier };
 
@@ -8,6 +8,7 @@ export interface SkillSummary {
   desc: string;
   author: string;
   trust: TrustTier;
+  securityLevel?: SecurityLevel;
   downloads: string;
   weeklyGrowth?: string;
   rating?: string;

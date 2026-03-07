@@ -1,4 +1,4 @@
-import { type TrustTier } from '@spm/ui';
+import { type TrustTier, type SecurityLevel } from '@spm/ui';
 import { type SkillDetailResponse } from '../../lib/api';
 
 export interface SkillVersion {
@@ -36,7 +36,8 @@ export interface SkillFull {
     signed: boolean;
     signer?: string;
     scanned: string;
-    layers: string[];
+    level: SecurityLevel;
+    layers: Array<{ layer: number; name: string; status: string; confidence: number | null }>;
   };
   repo: string;
 }
@@ -91,11 +92,14 @@ export const apiToSkillFull = (data: SkillDetailResponse): SkillFull => ({
     signed: data.security?.signed ?? false,
     signer: data.security?.signer_identity,
     scanned: data.security?.scan_status ?? 'unknown',
+    level: (data.security?.scan_security_level as SecurityLevel) ?? 'unscanned',
     layers:
-      data.security?.scan_layers?.map(
-        (l) =>
-          `Layer ${l.layer}: ${l.status}${l.confidence != null ? ` (${l.confidence})` : ''}${l.detail ? ` - ${l.detail}` : ''}`,
-      ) ?? [],
+      data.security?.scan_layers?.map((l) => ({
+        layer: l.layer,
+        name: l.name ?? `Layer ${l.layer}`,
+        status: l.status,
+        confidence: l.confidence ?? null,
+      })) ?? [],
   },
   repo: data.repository ?? '',
 });

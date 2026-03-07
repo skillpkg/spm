@@ -7,6 +7,19 @@ import { loadConfig } from '../lib/config.js';
 
 // -- Types for API responses --
 
+interface ScanLayer {
+  layer: number;
+  name: string;
+  status: string;
+  confidence: number | null;
+}
+
+interface SkillSecurity {
+  scan_status?: string;
+  scan_security_level?: string;
+  scan_layers?: ScanLayer[];
+}
+
 interface SkillVersion {
   version: string;
   created_at: string;
@@ -33,6 +46,7 @@ interface SkillDetail {
   repository?: string;
   published_at: string;
   versions: SkillVersion[];
+  security?: SkillSecurity;
 }
 
 // -- Formatters --
@@ -75,6 +89,20 @@ const formatPlatforms = (platforms: string[]): string => {
     return 'all';
   }
   return platforms.join(', ');
+};
+
+const formatSecurityLevel = (security?: SkillSecurity): string => {
+  if (!security?.scan_security_level) return c.dim('Unscanned');
+  const level = security.scan_security_level;
+  const layers = security.scan_layers ?? [];
+  const passedCount = layers.filter((l) => l.status === 'passed').length;
+  const totalCount = 3;
+
+  if (level === 'full') return c.trust(`Full (${passedCount}/${totalCount} layers)`);
+  if (level === 'partial') return c.warn(`Partial (${passedCount}/${totalCount} layers)`);
+  if (level === 'flagged') return c.err(`Flagged`);
+  if (level === 'blocked') return c.err(`Blocked`);
+  return c.dim('Unscanned');
 };
 
 // -- Command --
@@ -153,6 +181,9 @@ export const registerInfoCommand = (program: Command): void => {
       if (skill.repository) {
         log(`  ${'Repository:'.padEnd(13)}${c.url(skill.repository)}`);
       }
+
+      // Security level
+      log(`  ${'Security:'.padEnd(13)}${formatSecurityLevel(skill.security)}`);
 
       // Trust details
       log('');

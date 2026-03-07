@@ -64,6 +64,7 @@ export interface SearchResultItem {
   rating_avg: number | null;
   rating_count: number | null;
   signed: boolean;
+  scan_security_level?: string;
   license?: string;
   published_at: string;
   updated_at: string;
@@ -116,7 +117,14 @@ export interface SkillDetailResponse {
     signed: boolean;
     signer_identity?: string;
     scan_status: string;
-    scan_layers?: Array<{ layer: number; status: string; detail?: string; confidence?: number }>;
+    scan_security_level?: string;
+    scan_layers?: Array<{
+      layer: number;
+      name: string;
+      status: string;
+      confidence?: number | null;
+      detail?: string;
+    }>;
   } | null;
   versions: SkillVersionInfo[];
   dependencies?: {

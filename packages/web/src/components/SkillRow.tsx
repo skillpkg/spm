@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type SkillSummary } from '../data/constants';
-import { TrustBadge } from '@spm/ui';
+import { TrustBadge, SecurityBadge } from '@spm/ui';
 
 export const SkillRow = ({
   skill,
@@ -80,6 +80,7 @@ export const SkillRow = ({
           }}
         >
           <TrustBadge tier={skill.trust} showLabel={false} />
+          {skill.securityLevel && <SecurityBadge level={skill.securityLevel} showLabel={false} />}
           <span style={{ minWidth: 50, textAlign: 'right' }}>&#x2B07; {skill.downloads}</span>
           {showGrowth && skill.weeklyGrowth && (
             <span style={{ color: 'var(--color-accent)', minWidth: 40, textAlign: 'right' }}>

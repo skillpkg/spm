@@ -8,6 +8,7 @@ import {
   blockSkill,
   unblockSkill,
   type SkillDownloadsDay,
+  type ScanLayer,
 } from '../lib/api';
 import {
   adminSkillDetailQuery,
@@ -18,6 +19,42 @@ import { useSearchParamsState } from '../lib/useSearchParamsState';
 
 const WEB_URL = import.meta.env.VITE_WEB_URL || 'https://skillpkg.dev';
 const README_COLLAPSED_LINES = 15;
+
+const layerStatusColor = (status: string): string => {
+  switch (status) {
+    case 'passed':
+      return '#10b981';
+    case 'flagged':
+      return '#f59e0b';
+    case 'blocked':
+      return '#ef4444';
+    case 'skipped':
+    default:
+      return 'var(--color-text-faint)';
+  }
+};
+
+const securityLevelColor = (level?: string | null): string => {
+  switch (level) {
+    case 'full':
+      return '#10b981';
+    case 'partial':
+      return '#f59e0b';
+    case 'flagged':
+      return '#f97316';
+    case 'blocked':
+      return '#ef4444';
+    case 'unscanned':
+    default:
+      return 'var(--color-text-faint)';
+  }
+};
+
+const defaultScanLayers: ScanLayer[] = [
+  { layer: 1, name: 'Static Analysis', status: 'skipped' },
+  { layer: 2, name: 'ML Classification', status: 'skipped' },
+  { layer: 3, name: 'Lakera Guard', status: 'skipped' },
+];
 
 const buildSparklineData = (days: SkillDownloadsDay[]): number[] => {
   const counts = new Map<string, number>();
@@ -516,7 +553,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
             <Card>
               <div style={{ padding: '14px 18px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {/* Scan status */}
+                  {/* Security level */}
                   <div>
                     <span
                       style={{
@@ -526,17 +563,36 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                         color: 'var(--color-text-primary)',
                       }}
                     >
-                      Scan Status
+                      Security Level
                     </span>
                     <div
                       style={{
                         marginTop: 6,
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
-                        color: 'var(--color-text-dim)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
                       }}
                     >
-                      {detail.scan_status ?? 'unknown'}
+                      <span
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          background: securityLevelColor(detail.scan_security_level),
+                          display: 'inline-block',
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: securityLevelColor(detail.scan_security_level),
+                          textTransform: 'capitalize',
+                        }}
+                      >
+                        {detail.scan_security_level ?? detail.scan_status ?? 'unknown'}
+                      </span>
                     </div>
                   </div>
 
@@ -553,36 +609,62 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                       Security Layers
                     </span>
                     <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {['Layer 1: Static Analysis', 'Layer 2: LLM Review', 'Layer 3: Sandbox'].map(
-                        (layer, i) => (
-                          <div
-                            key={i}
+                      {(detail.scan_layers && detail.scan_layers.length > 0
+                        ? detail.scan_layers
+                        : defaultScanLayers
+                      ).map((layer) => (
+                        <div
+                          key={layer.layer}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: 12,
+                          }}
+                        >
+                          <span
                             style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 8,
-                              fontFamily: 'var(--font-mono)',
-                              fontSize: 12,
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              background: layerStatusColor(layer.status),
+                              display: 'inline-block',
                             }}
+                          />
+                          <span style={{ color: 'var(--color-text-dim)' }}>
+                            L{layer.layer}: {layer.name}
+                          </span>
+                          <span
+                            style={{ color: layerStatusColor(layer.status), marginLeft: 'auto' }}
                           >
-                            <span
-                              style={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: '50%',
-                                background: i === 0 ? '#10b981' : 'var(--color-text-faint)',
-                                display: 'inline-block',
-                              }}
-                            />
-                            <span style={{ color: 'var(--color-text-dim)' }}>{layer}</span>
-                            <span style={{ color: 'var(--color-text-faint)', marginLeft: 'auto' }}>
-                              {i === 0 ? 'active' : 'not yet available'}
-                            </span>
-                          </div>
-                        ),
-                      )}
+                            {layer.status}
+                            {layer.confidence != null &&
+                              ` (${(layer.confidence * 100).toFixed(0)}%)`}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
+
+                  {/* Approve/Block for flagged skills */}
+                  {detail.scan_security_level === 'flagged' && detail.status !== 'blocked' && (
+                    <div
+                      style={{
+                        marginTop: 4,
+                        display: 'flex',
+                        gap: 8,
+                      }}
+                    >
+                      <Button label="Approve" color="green" small onClick={handleUnblock} />
+                      <Button
+                        label="Block"
+                        color="red"
+                        small
+                        onClick={() => setShowBlockConfirm(true)}
+                      />
+                    </div>
+                  )}
 
                   {/* Signature info */}
                   <div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type SkillSummary } from '../data/constants';
-import { TrustBadge } from '@spm/ui';
+import { TrustBadge, SecurityBadge } from '@spm/ui';
 
 const ACCENT_COLORS = ['#10b981', '#3b82f6', '#a78bfa'];
 
@@ -86,7 +86,10 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
               by @{skill.author}
             </span>
           </div>
-          <TrustBadge tier={skill.trust} />
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <TrustBadge tier={skill.trust} />
+            {skill.securityLevel && <SecurityBadge level={skill.securityLevel} showLabel={false} />}
+          </div>
         </div>
 
         <p

@@ -8,6 +8,8 @@ export type Bindings = {
   R2_BUCKET: R2Bucket;
   RATE_LIMIT_KV: KVNamespace;
   ENVIRONMENT: string;
+  HF_API_TOKEN?: string;
+  LAKERA_API_KEY?: string;
 };
 
 export type JwtPayload = {

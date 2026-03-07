@@ -36,7 +36,12 @@ const mockPdfSkill = {
     signed: true,
     signer_identity: 'anthropic@github',
     scan_status: 'passed',
-    scan_layers: [{ layer: 1, status: 'clean' }],
+    scan_security_level: 'full',
+    scan_layers: [
+      { layer: 1, name: 'Static Analysis', status: 'passed', confidence: null },
+      { layer: 2, name: 'ML Classification', status: 'passed', confidence: 0.02 },
+      { layer: 3, name: 'Lakera Guard', status: 'passed', confidence: null },
+    ],
   },
   versions: [
     { version: '2.0.3', published_at: '2026-02-20T00:00:00Z' },

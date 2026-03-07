@@ -1,4 +1,35 @@
+import { SecurityBadge } from '@spm/ui';
 import { type SkillFull, cardStyle } from './types';
+
+const layerStatusIcon = (status: string) => {
+  switch (status) {
+    case 'passed':
+    case 'clean':
+      return { symbol: '\u2713', color: 'var(--color-accent)' };
+    case 'flagged':
+      return { symbol: '\u26A0', color: '#eab308' };
+    case 'blocked':
+      return { symbol: '\u2717', color: '#ef4444' };
+    default:
+      return { symbol: '\u2014', color: 'var(--color-text-faint)' };
+  }
+};
+
+const layerStatusLabel = (status: string, confidence: number | null) => {
+  switch (status) {
+    case 'passed':
+    case 'clean':
+      return 'passed';
+    case 'flagged':
+      return confidence != null
+        ? `flagged (confidence: ${Math.round(confidence * 100)}%)`
+        : 'flagged';
+    case 'blocked':
+      return 'blocked';
+    default:
+      return 'skipped';
+  }
+};
 
 export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
   <div style={{ paddingTop: 4, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -55,53 +86,31 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
     <div style={{ ...cardStyle, marginBottom: 0 }}>
       <div
         style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 13,
-          fontWeight: 600,
-          color: 'var(--color-text-primary)',
-          marginBottom: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 12,
         }}
       >
-        &#x1F6E1; Security Scan
-      </div>
-      <div
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 13,
-          color:
-            skill.security.scanned === 'passed'
-              ? 'var(--color-accent)'
-              : skill.security.scanned === 'flagged'
-                ? '#ef4444'
-                : 'var(--color-text-dim)',
-          marginBottom: 10,
-        }}
-      >
-        Status: {skill.security.scanned}
+        <div
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--color-text-primary)',
+          }}
+        >
+          &#x1F6E1; Security Scan
+        </div>
+        <SecurityBadge level={skill.security.level} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {skill.security.layers && skill.security.layers.length > 0 ? (
-          skill.security.layers.map((layer, i) => (
-            <div
-              key={i}
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 13,
-                color: 'var(--color-accent)',
-              }}
-            >
-              &#x2713; {layer}
-            </div>
-          ))
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              { name: 'Layer 1: Static Analysis', active: true },
-              { name: 'Layer 2: LLM Review', active: false },
-              { name: 'Layer 3: Sandbox', active: false },
-            ].map((layer) => (
+        {skill.security.layers.length > 0 ? (
+          skill.security.layers.map((layer) => {
+            const icon = layerStatusIcon(layer.status);
+            return (
               <div
-                key={layer.name}
+                key={layer.layer}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -110,22 +119,25 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
                   fontSize: 13,
                 }}
               >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    background: layer.active ? 'var(--color-accent)' : 'var(--color-text-faint)',
-                    display: 'inline-block',
-                    flexShrink: 0,
-                  }}
-                />
-                <span style={{ color: 'var(--color-text-dim)' }}>{layer.name}</span>
-                <span style={{ color: 'var(--color-text-faint)', marginLeft: 'auto' }}>
-                  {layer.active ? 'active' : 'not yet available'}
+                <span style={{ color: icon.color, flexShrink: 0 }}>{icon.symbol}</span>
+                <span style={{ color: 'var(--color-text-dim)' }}>
+                  Layer {layer.layer}: {layer.name}
+                </span>
+                <span style={{ color: icon.color, marginLeft: 'auto' }}>
+                  {layerStatusLabel(layer.status, layer.confidence)}
                 </span>
               </div>
-            ))}
+            );
+          })
+        ) : (
+          <div
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 13,
+              color: 'var(--color-text-faint)',
+            }}
+          >
+            No scan data available
           </div>
         )}
       </div>

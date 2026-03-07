@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { CATEGORY_NAMES, CATEGORY_SLUGS, TRUST_TIERS, SORT_OPTIONS } from '../data/constants';
-import { TrustBadge, type TrustTier } from '@spm/ui';
+import { TrustBadge, SecurityBadge, type TrustTier, type SecurityLevel } from '@spm/ui';
 import { type SearchResultItem } from '../lib/api';
 import { searchSkillsQuery } from './search/queries';
 
@@ -12,6 +12,7 @@ interface DisplaySkill {
   desc: string;
   author: string;
   trust: TrustTier;
+  securityLevel: SecurityLevel;
   downloads: string;
   rating: string;
   tags?: string[];
@@ -23,6 +24,7 @@ const apiResultToDisplay = (s: SearchResultItem): DisplaySkill => ({
   desc: s.description,
   author: s.author.username,
   trust: s.author.trust_tier as TrustTier,
+  securityLevel: (s.scan_security_level as SecurityLevel) ?? 'unscanned',
   downloads: s.downloads >= 1000 ? `${(s.downloads / 1000).toFixed(1)}k` : String(s.downloads),
   rating: s.rating_avg != null ? String(s.rating_avg) : '--',
   tags: s.tags,
@@ -67,6 +69,7 @@ const SearchResultRow = ({ skill }: { skill: DisplaySkill }) => {
               {skill.version}
             </span>
             <TrustBadge tier={skill.trust} />
+            <SecurityBadge level={skill.securityLevel} showLabel={false} />
           </div>
           <div
             style={{
@@ -149,11 +152,13 @@ export const Search = () => {
       : (Object.entries(CATEGORY_SLUGS).find(([, slug]) => slug === categoryParam)?.[0] ?? 'All'),
   );
   const [trustFilter, setTrustFilter] = useState('All');
+  const [securityFilter, setSecurityFilter] = useState('Any');
   const [sort, setSort] = useState('relevance');
   const params: Record<string, string | number> = { per_page: 50 };
   if (queryParam.trim()) params.q = queryParam.trim();
   if (category !== 'All') params.category = CATEGORY_SLUGS[category] ?? category;
   if (trustFilter !== 'All') params.trust = trustFilter.toLowerCase();
+  if (securityFilter !== 'Any') params.security = securityFilter.toLowerCase().replace(' ', '');
   if (sort !== 'relevance') params.sort = sort;
 
   const { data: searchData } = useQuery(searchSkillsQuery(params));
@@ -218,6 +223,33 @@ export const Search = () => {
                 style={sidebarItemStyle(trustFilter === tier)}
               >
                 {tier}
+              </div>
+            ))}
+          </div>
+
+          {/* Security filter */}
+          <div style={{ marginBottom: 28 }}>
+            <h3
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 12,
+                fontWeight: 600,
+                color: 'var(--color-text-dim)',
+                marginBottom: 10,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginTop: 0,
+              }}
+            >
+              Security
+            </h3>
+            {['Any', 'Full scan', 'Partial'].map((opt) => (
+              <div
+                key={opt}
+                onClick={() => setSecurityFilter(opt)}
+                style={sidebarItemStyle(securityFilter === opt)}
+              >
+                {opt}
               </div>
             ))}
           </div>
@@ -316,7 +348,7 @@ export const Search = () => {
         </div>
 
         {/* Active filters */}
-        {(category !== 'All' || trustFilter !== 'All') && (
+        {(category !== 'All' || trustFilter !== 'All' || securityFilter !== 'Any') && (
           <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
             {category !== 'All' && (
               <span
@@ -354,6 +386,25 @@ export const Search = () => {
                 }}
               >
                 {trustFilter} <span style={{ fontSize: 10 }}>&#x2715;</span>
+              </span>
+            )}
+            {securityFilter !== 'Any' && (
+              <span
+                onClick={() => setSecurityFilter('Any')}
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 12,
+                  padding: '4px 10px',
+                  borderRadius: 20,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  background: 'rgba(16,185,129,0.08)',
+                  color: '#10b981',
+                }}
+              >
+                {securityFilter} <span style={{ fontSize: 10 }}>&#x2715;</span>
               </span>
             )}
           </div>

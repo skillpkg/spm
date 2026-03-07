@@ -18,16 +18,36 @@ export const ScanAnalytics = () => {
   const blockRate = totalScans > 0 ? ((stats.scans.blocked / totalScans) * 100).toFixed(1) : '0.0';
   const holdRate = totalScans > 0 ? ((stats.scans.flagged / totalScans) * 100).toFixed(1) : '0.0';
 
+  const byLayer = stats.scans_by_layer;
+  const l1Total = byLayer ? byLayer.l1.passed + byLayer.l1.flagged + byLayer.l1.blocked : 0;
+  const l1PassRate =
+    byLayer && l1Total > 0 ? `${((byLayer.l1.passed / l1Total) * 100).toFixed(1)}%` : '--';
+  const l2Total = byLayer ? byLayer.l2.passed + byLayer.l2.flagged + byLayer.l2.blocked : 0;
+  const l2FlagRate =
+    byLayer && l2Total > 0 ? `${((byLayer.l2.flagged / l2Total) * 100).toFixed(1)}%` : '--';
+  const l3Total = byLayer ? byLayer.l3.passed + byLayer.l3.flagged + byLayer.l3.blocked : 0;
+  const l3FlagRate =
+    byLayer && l3Total > 0 ? `${((byLayer.l3.flagged / l3Total) * 100).toFixed(1)}%` : '--';
+  const partialScans = byLayer ? String(byLayer.partial) : '--';
+
   return (
     <div>
       {/* Top stats */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         <StatBox label="Total publishes" value={stats.publishes.total} />
         <StatBox label="Published" value={stats.publishes.published} color="accent" />
         <StatBox label="Blocked" value={stats.publishes.blocked} color="red" />
         <StatBox label="Rejected" value={stats.publishes.rejected} color="yellow" />
         <StatBox label="Scans passed" value={stats.scans.passed} color="accent" />
         <StatBox label="Queue depth" value={stats.queue_depth} color="orange" />
+      </div>
+
+      {/* Per-layer stats */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+        <StatBox label="L1 pass rate" value={l1PassRate} color="accent" />
+        <StatBox label="L2 flag rate" value={l2FlagRate} color="yellow" />
+        <StatBox label="L3 flag rate" value={l3FlagRate} color="yellow" />
+        <StatBox label="Partial scans" value={partialScans} color="orange" />
       </div>
 
       {/* Charts row */}
