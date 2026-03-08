@@ -1,0 +1,5 @@
+# SPM Admin Panel — no indexing
+# https://admin.skillpkg.dev
+
+User-agent: *
+Disallow: /

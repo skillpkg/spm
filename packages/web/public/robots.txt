@@ -8,7 +8,7 @@ Allow: /search
 Allow: /authors/*
 Allow: /categories
 
-Disallow: /admin/*
 Disallow: /dashboard/*
+Disallow: /signin
 
 Sitemap: https://skillpkg.dev/sitemap.xml
