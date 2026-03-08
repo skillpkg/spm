@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import chalk from 'chalk';
 import { getOutputMode, setOutputMode } from './lib/output.js';
+
+const banner = `
+  ${chalk.cyan('╔═╗')}${chalk.blueBright('╔═╗')}${chalk.blue('╔╦╗')}
+  ${chalk.cyan('╚═╗')}${chalk.blueBright('╠═╝')}${chalk.blue('║║║')}  ${chalk.dim('Skills Package Manager')}
+  ${chalk.cyan('╚═╝')}${chalk.blueBright('╩')}  ${chalk.blue('╩ ╩')}  ${chalk.dim('https://skillpkg.dev')}
+`;
+
 import { registerLoginCommand } from './commands/login.js';
 import { registerLogoutCommand } from './commands/logout.js';
 import { registerWhoamiCommand } from './commands/whoami.js';
@@ -33,6 +41,7 @@ program
   .option('--json', 'Output machine-readable JSON')
   .option('--no-color', 'Disable colored output')
   .option('--registry <url>', 'Use a custom registry URL')
+  .addHelpText('beforeAll', banner)
   .hook('preAction', (thisCommand) => {
     const opts = thisCommand.opts() as { verbose?: boolean; silent?: boolean; json?: boolean };
     setOutputMode(getOutputMode(opts));
