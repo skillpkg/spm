@@ -4,11 +4,11 @@ Tracked issues and planned work that isn't yet implemented.
 
 ---
 
-## ~~1. Logo~~ MOSTLY DONE
+## ~~1. Logo~~ DONE
 
-### Remaining: GitHub Social Preview
+Logo added to web nav, admin nav, hero section, favicons, CLI banner, and repo assets.
 
-Set the repository's social preview image (shown when sharing links on Twitter, Slack, Discord, etc.):
+### Remaining: GitHub Social Preview (manual)
 
 1. Go to **github.com/almog27/spm** > **Settings** (top nav)
 2. Scroll to **Social preview** section
@@ -16,44 +16,37 @@ Set the repository's social preview image (shown when sharing links on Twitter, 
 4. Upload `assets/logo-dark.png` (dark background version — works best on social cards)
 5. Click **Save**
 
-**Recommended dimensions:** 1280x640px (2:1 ratio). The current `logo-dark.png` is 512x512 — consider creating a wider banner version with "SPM — Skills Package Manager" text alongside the logo for better social card appearance.
-
-**Optional: Create a proper social banner**
-- 1280x640px PNG with dark background (#080a0f)
-- Logo on the left, "SPM" gradient text + tagline "Skills Package Manager for AI Agents" on the right
-- Include URL: skillpkg.dev
-
-## ~~2. Imported / Community Skills — Author Handling~~ DONE
-
-Decision documented: Placeholder users approach. One user per org, idempotent creation, `is_placeholder` + `imported_from` columns. See git history for full design.
+**Optional:** Create a 1280x640px banner with logo + "SPM — Skills Package Manager for AI Agents" + skillpkg.dev
 
 ---
 
-## 3. Publish SPM on npm
+## ~~2. Imported / Community Skills — Author Handling~~ DONE
+
+Decision documented: Placeholder users approach. One user per org, `is_placeholder` + `imported_from` columns.
+
+---
+
+## 3. Publish CLI to npm
 
 **Priority:** High
 
-Publish the `spm` CLI package to npm so users can install it globally with `npm install -g spm`.
+Publish the `spm` CLI package to npm so users can install it globally.
 
 ### TODO:
 
 - Finalize package name — check if `spm` is available on npm, fallback to `@spm/cli` or `skillpkg`
 - Set up `package.json` for publishing (name, version, bin, files, repository, license)
-- Add `"bin": { "spm": "./dist/index.js" }` entry
 - Ensure `tsup` build output is correct for CLI execution (shebang, permissions)
 - Add prepublish script (`pnpm build`)
 - Publish workflow: manual or CI-triggered npm publish
-- Add `.npmignore` or `files` field to exclude test/source files
 - Test install flow: `npm install -g spm && spm --help`
 
 ---
 
-## 4. Skills MCP Server — Verify & Document
+## 4. MCP Server — Verify & Document
 
 **Priority:** Medium
 **Package:** `packages/mcp/`
-
-Verify the MCP server works end-to-end, add documentation, and test with real queries.
 
 ### Verify:
 
@@ -63,89 +56,37 @@ Verify the MCP server works end-to-end, add documentation, and test with real qu
 
 ### Documentation needed:
 
-- README in `packages/mcp/` with:
-  - What it does (search SPM registry from any MCP-compatible AI agent)
-  - Installation: `npm install -g @spm/mcp` or local path
-  - Configuration for Claude Desktop (`claude_desktop_config.json` snippet)
-  - Configuration for claude CLI (`.claude/mcp.json` snippet)
-  - Available tools and example queries
-- Add to main project README
-
-### Test scenarios:
-
-- "Find me a skill that does PDF manipulation"
-- "What categories are available?"
-- "Show me details about the pdf skill"
-- "Find skills by anthropic"
+- README in `packages/mcp/` with config snippets for Claude Desktop and claude CLI
+- Publish to npm as `@spm/mcp`
 
 ---
 
 ## 5. Import Skills from External Sources
 
 **Priority:** High
-**Depends on:** Issue #2 (Author handling strategy)
+**Depends on:** Issue #2 (Author handling — DONE)
 
-Import existing skills/tools from Vercel, Anthropic, and other sources to bootstrap the SPM registry with valuable content.
-
-### Sources to import from:
-
-- **Anthropic** — official skill definitions (if available)
-- **Vercel** — AI SDK tools, integrations
-- **Community** — popular GitHub repos that define agent tools/skills
+Import existing skills from Vercel, Anthropic, and community sources to bootstrap the registry.
 
 ### Pipeline design:
 
-- Script/CLI command to import: `spm admin import --source github --repo org/repo`
-- Parse source format (SKILL.md, tool definitions, package.json) into SPM manifest
-- Create `.skl` package from source
-- Publish to registry under the source org's author name
-- Tag with `imported: true` metadata
-- Run through security scanner (Layer 1 at minimum)
+- Script/CLI command: `spm admin import --source github --repo org/repo`
+- Parse source format into SPM manifest, create `.skl`, publish under source org's author
+- Run through security scanner (Layer 1 minimum)
 
 ### Considerations:
 
-- License compliance — only import permissively licensed skills (MIT, Apache-2.0)
-- Attribution — preserve original author, link back to source repo
-- Versioning — how to track upstream updates? Pin to import-time version or sync?
-- Quality — curate imports vs. bulk import everything
-- Deduplication — avoid importing the same skill twice from different forks
+- License compliance (MIT, Apache-2.0 only)
+- Attribution — preserve original author, link to source repo
+- Deduplication — avoid importing same skill from different forks
 
 ---
 
-## 6. robots.txt and AI Agent Discoverability
+## ~~6. robots.txt and AI Agent Discoverability~~ DONE
 
-**Priority:** Medium
-
-Add `robots.txt` and `llms.txt` to the web app so search engines and AI agents can discover and understand the registry.
-
-### Files to add:
-
-- **`robots.txt`** — Standard crawler directives (allow public pages, disallow admin/dashboard)
-- **`llms.txt`** — Emerging standard for AI agent discoverability (see llmstxt.org). Describes what the site offers in a format optimized for LLMs.
-
-### robots.txt content:
-
-- Allow: `/`, `/skills/*`, `/search`, `/authors/*`, `/categories`
-- Disallow: `/admin/*`, `/dashboard/*`
-- Sitemap: link to `sitemap.xml` (generate dynamically or on build)
-
-### llms.txt content:
-
-- What SPM is (skills package manager for AI agents)
-- How to search/browse skills
-- Link to MCP server for programmatic access
-- Available categories and how skills work
-- API endpoint for agents that want to query directly
-
-### Optional — sitemap.xml:
-
-- Dynamic sitemap listing all published skills, categories, and author profiles
-- Could be an API route (`/sitemap.xml`) or generated at build time
-
-### Implementation:
-
-- Add static files to `packages/web/public/`
-- For dynamic sitemap, add an API route in `packages/api/`
+- Web: `robots.txt` (blocks AI crawlers, points to MCP), `llms.txt` (MCP-first), favicon
+- Admin: `robots.txt` (blocks all)
+- API: `/robots.txt` route (blocks AI crawlers), `/sitemap.xml` dynamic route from DB
 
 ---
 
@@ -153,20 +94,104 @@ Add `robots.txt` and `llms.txt` to the web app so search engines and AI agents c
 
 **Priority:** Medium
 
-Allow admins to trigger a security re-scan of any published skill directly from the admin panel.
+### TODO:
 
-### Use cases:
+- `POST /admin/skills/:name/rescan` endpoint
+- "Re-scan" button in admin UI skill detail + list actions
+- Fetch `.skl` from R2, run through Layer 1/2/3, update `scan_status`
+- Audit log: who triggered re-scan and result
+- Bulk re-scan option (all skills matching a filter)
+- "Scanning..." status indicator in UI
 
-- Scanner rules were updated — re-scan existing skills against new patterns
-- A skill was manually approved but needs re-evaluation after policy change
-- Bulk re-scan all skills after a Layer 2/3 scanner is deployed
-- Spot-check a reported skill without waiting for a new publish
+---
+
+## 8. Admin Block/Unblock Skills
+
+**Priority:** Medium
+
+DB `status` column exists but endpoints and UI are missing.
 
 ### TODO:
 
-- **API endpoint:** `POST /admin/skills/:name/rescan` — triggers the security pipeline on the latest (or specified) version
-- **Admin UI:** Add "Re-scan" button to skill detail pane and skill list actions
-- **Pipeline:** Fetch `.skl` from R2, run through Layer 1 (regex) + Layer 2/3 if available, update `scan_status`
-- **Audit log:** Record who triggered the re-scan and the result
-- **Bulk action:** Option to re-scan all skills matching a filter (e.g., all `passed` skills, all skills by a specific author)
-- **Status indicator:** Show "Scanning..." state in UI while scan is in progress
+- `POST /admin/skills/:name/block` endpoint
+- `POST /admin/skills/:name/unblock` endpoint
+- Admin UI buttons with confirmation modals
+- Audit log for block/unblock actions
+
+---
+
+## 9. Admin User Role Management
+
+**Priority:** Medium
+
+JWT includes `role` claim and `adminGuard` middleware works. Missing management endpoints.
+
+### TODO:
+
+- `PATCH /admin/users/:username/role` endpoint
+- Admin UI for promoting/revoking admin access
+- Audit log for role changes
+
+---
+
+## 10. Multi-Author Support
+
+**Priority:** Medium
+
+DB migration (004) and `skillCollaborators` Drizzle schema exist. API/UI not wired up.
+
+### TODO:
+
+- `GET /skills/:name` response includes `authors[]` field
+- Web UI shows multiple authors with roles on skill detail page
+- Admin UI shows author list with roles
+
+---
+
+## 11. Downloads Sparkline API & UI
+
+**Priority:** Medium
+
+### TODO:
+
+- `GET /skills/:name/downloads` endpoint (30-day daily buckets)
+- `Sparkline` component in `packages/ui/`
+- Web skill detail sidebar integration
+- Admin detail pane integration
+
+---
+
+## 12. Security Enhancements
+
+**Priority:** Medium
+
+### TODO:
+
+- `SecurityBadge` shared component (green/yellow/red/gray shields)
+- `spm publish --no-security` flag (skip Layer 2/3, Layer 1 always runs)
+- `spm search --security=full|partial|any` filter
+- Web search sidebar: security level filter
+- Version-specific admin endpoint: `GET /admin/skills/:name/versions/:version`
+
+---
+
+## 13. Post-Launch / Low Priority
+
+### Email Notifications
+
+- Resend integration for: publish success/held/blocked, review queue, trust tier promotions
+
+### Distribution
+
+- Homebrew formula (`spm.rb` with auto-bootstrap)
+- Shell completions (bash, zsh, fish)
+
+### GitHub Proxy Installs
+
+- `spm install github:owner/repo/skill-name` syntax
+- Install skills directly from GitHub without registry entry
+
+### Documentation
+
+- Improve root `README.md` (getting started, feature highlights)
+- Add package-level READMEs (`packages/admin/`, `packages/ui/`, `packages/web-auth/`)

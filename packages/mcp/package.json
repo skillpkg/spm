@@ -3,11 +3,31 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "description": "MCP server for the SPM skills registry — search, browse, and query AI agent skills",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/almog27/spm",
+    "directory": "packages/mcp"
+  },
+  "homepage": "https://skillpkg.dev",
+  "keywords": [
+    "spm",
+    "mcp",
+    "skills",
+    "ai",
+    "agents",
+    "model-context-protocol"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "spm-mcp": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
