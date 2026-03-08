@@ -144,7 +144,7 @@ describe('admin routes — auth guard', () => {
   });
 
   it('rejects unauthenticated requests with 401', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createChainableMock();
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -154,7 +154,7 @@ describe('admin routes — auth guard', () => {
   });
 
   it('rejects non-admin users with 403', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createChainableMock();
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -171,7 +171,7 @@ describe('admin routes — auth guard', () => {
   });
 
   it('allows admin users through', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     // The adminGuard first query returns admin role, subsequent queries return counts
     const mockDb = createAdminMockDb([{ total: 0 }]);
     const app = createTestApp(mockDb);
@@ -197,7 +197,7 @@ describe('GET /admin/queue', () => {
   });
 
   it('returns empty queue', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createAdminMockDb([]);
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -218,7 +218,7 @@ describe('GET /admin/queue', () => {
   });
 
   it('accepts sort and status query params', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createAdminMockDb([]);
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -244,7 +244,7 @@ describe('POST /admin/queue/:id/approve', () => {
   });
 
   it('returns 404 for non-existent scan', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     // adminGuard check, then scan lookup returns empty
     const mockDb = createSequenceMockDb([[{ role: 'admin' }], []]);
     const app = createTestApp(mockDb);
@@ -268,7 +268,7 @@ describe('POST /admin/queue/:id/approve', () => {
   });
 
   it('approves a scan entry', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'scan-1', versionId: 'ver-1', status: 'flagged' }], // scan lookup
@@ -310,7 +310,7 @@ describe('POST /admin/queue/:id/reject', () => {
   });
 
   it('rejects a scan entry', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'scan-1', versionId: 'ver-1' }], // scan lookup
@@ -347,7 +347,7 @@ describe('POST /admin/queue/:id/reject', () => {
   });
 
   it('requires reason field', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createAdminMockDb([]);
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -378,7 +378,7 @@ describe('GET /admin/skills', () => {
   });
 
   it('returns paginated skills list', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ total: 0 }], // count
@@ -412,7 +412,7 @@ describe('POST /admin/skills/:name/yank', () => {
   });
 
   it('returns 404 for unknown skill', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [], // skill lookup — empty
@@ -438,7 +438,7 @@ describe('POST /admin/skills/:name/yank', () => {
   });
 
   it('yanks a version as admin without ownership', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'skill-1' }], // skill lookup
@@ -482,7 +482,7 @@ describe('GET /admin/skills/:name/versions/:version', () => {
   });
 
   it('returns 404 for unknown skill', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [], // skill lookup — empty
@@ -503,7 +503,7 @@ describe('GET /admin/skills/:name/versions/:version', () => {
   });
 
   it('returns 404 for unknown version', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'skill-1', name: 'test-skill' }], // skill lookup
@@ -525,7 +525,7 @@ describe('GET /admin/skills/:name/versions/:version', () => {
   });
 
   it('returns version detail', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const publishedAt = new Date('2026-02-01T00:00:00Z');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
@@ -572,7 +572,7 @@ describe('POST /admin/skills/:name/block', () => {
   });
 
   it('returns 404 for unknown skill', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [], // skill lookup — empty
@@ -598,7 +598,7 @@ describe('POST /admin/skills/:name/block', () => {
   });
 
   it('blocks a published skill', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'skill-1', status: 'published' }], // skill lookup
@@ -629,7 +629,7 @@ describe('POST /admin/skills/:name/block', () => {
   });
 
   it('returns already blocked message', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'skill-1', status: 'blocked' }], // skill lookup — already blocked
@@ -657,7 +657,7 @@ describe('POST /admin/skills/:name/block', () => {
   });
 
   it('requires reason field', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createAdminMockDb([]);
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -688,7 +688,7 @@ describe('POST /admin/skills/:name/unblock', () => {
   });
 
   it('returns 404 for unknown skill', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [], // skill lookup — empty
@@ -710,7 +710,7 @@ describe('POST /admin/skills/:name/unblock', () => {
   });
 
   it('unblocks a blocked skill', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'skill-1', status: 'blocked' }], // skill lookup
@@ -736,7 +736,7 @@ describe('POST /admin/skills/:name/unblock', () => {
   });
 
   it('returns not blocked message for published skill', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'skill-1', status: 'published' }], // skill lookup — not blocked
@@ -768,7 +768,7 @@ describe('GET /admin/users', () => {
   });
 
   it('returns paginated users list', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ total: 0 }], // count
@@ -793,7 +793,7 @@ describe('GET /admin/users', () => {
   });
 
   it('filters by trust tier', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ total: 0 }], // count
@@ -823,7 +823,7 @@ describe('PATCH /admin/users/:username/trust', () => {
   });
 
   it('returns 404 for unknown user', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [], // user lookup — empty
@@ -849,7 +849,7 @@ describe('PATCH /admin/users/:username/trust', () => {
   });
 
   it('updates user trust tier', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'user-1', trustTier: 'registered' }], // user lookup
@@ -883,7 +883,7 @@ describe('PATCH /admin/users/:username/trust', () => {
   });
 
   it('rejects invalid trust tier', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createAdminMockDb([]);
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -914,7 +914,7 @@ describe('PATCH /admin/users/:username/role', () => {
   });
 
   it('promotes user to admin', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'user-1', role: 'user' }], // user lookup
@@ -945,7 +945,7 @@ describe('PATCH /admin/users/:username/role', () => {
   });
 
   it('revokes admin access', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'user-1', role: 'admin' }], // user lookup
@@ -984,7 +984,7 @@ describe('GET /admin/reports', () => {
   });
 
   it('returns paginated reports', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ total: 0 }], // count
@@ -1009,7 +1009,7 @@ describe('GET /admin/reports', () => {
   });
 
   it('filters by status', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([[{ role: 'admin' }], [{ total: 0 }], []]);
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -1035,7 +1035,7 @@ describe('PATCH /admin/reports/:id', () => {
   });
 
   it('returns 404 for unknown report', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }],
       [], // report lookup — empty
@@ -1062,7 +1062,7 @@ describe('PATCH /admin/reports/:id', () => {
   });
 
   it('updates report status', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createSequenceMockDb([
       [{ role: 'admin' }], // adminGuard
       [{ id: 'report-1', skillId: 'skill-1' }], // report lookup
@@ -1105,7 +1105,7 @@ describe('GET /admin/errors', () => {
   });
 
   it('returns empty errors list (stub)', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createAdminMockDb([]);
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -1134,7 +1134,7 @@ describe('PATCH /admin/errors/:id', () => {
   });
 
   it('returns 404 (no errors table)', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createAdminMockDb([]);
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);
@@ -1165,7 +1165,7 @@ describe('GET /admin/stats', () => {
   });
 
   it('returns dashboard stats', async () => {
-    const { adminRoutes } = await import('../routes/admin.js');
+    const { adminRoutes } = await import('../routes/admin/index.js');
     const mockDb = createAdminMockDb([{ total: 0 }]);
     const app = createTestApp(mockDb);
     app.route('/', adminRoutes);

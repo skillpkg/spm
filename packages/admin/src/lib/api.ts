@@ -108,6 +108,25 @@ export const yankSkill = (
     body: JSON.stringify({ version, reason, notify_author: true }),
   });
 
+// -- Rescan --
+
+export interface RescanResult {
+  name: string;
+  version: string;
+  security_level: string;
+  passed: boolean;
+  blocked: number;
+  warnings: number;
+  layers: ScanLayer[];
+  rescanned_at: string;
+}
+
+export const rescanSkill = (token: string, name: string, version?: string): Promise<RescanResult> =>
+  apiFetch(`/admin/skills/${encodeURIComponent(name)}/rescan`, token, {
+    method: 'POST',
+    body: JSON.stringify(version ? { version } : {}),
+  });
+
 // -- Users --
 
 export interface AdminUserItem {

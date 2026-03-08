@@ -7,6 +7,7 @@ import {
   yankSkill,
   blockSkill,
   unblockSkill,
+  rescanSkill,
   type SkillDownloadsDay,
   type ScanLayer,
 } from '../lib/api';
@@ -89,6 +90,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
   const [yankReason, setYankReason] = useState('');
   const [showBlockConfirm, setShowBlockConfirm] = useState(false);
   const [blockReason, setBlockReason] = useState('');
+  const [rescanning, setRescanning] = useState(false);
 
   const {
     data: detail,
@@ -141,6 +143,17 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
     if (!token) return;
     await unblockSkill(token, skillName);
     queryClient.invalidateQueries({ queryKey: ['admin', 'skillDetail', skillName] });
+  };
+
+  const handleRescan = async () => {
+    if (!token || rescanning) return;
+    setRescanning(true);
+    try {
+      await rescanSkill(token, skillName);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'skillDetail', skillName] });
+    } finally {
+      setRescanning(false);
+    }
   };
 
   if (loading) {
@@ -594,6 +607,16 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                         {detail.scan_security_level ?? detail.scan_status ?? 'unknown'}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Re-scan button */}
+                  <div>
+                    <Button
+                      label={rescanning ? 'Scanning...' : 'Re-scan'}
+                      color="default"
+                      small
+                      onClick={handleRescan}
+                    />
                   </div>
 
                   {/* Scan layers */}

@@ -10,7 +10,7 @@ import { resolveRoutes } from './resolve.js';
 import { reviewsRoutes } from './reviews.js';
 import { authorsRoutes } from './authors.js';
 import { reportsRoutes } from './reports.js';
-import { adminRoutes } from './admin.js';
+import { adminRoutes } from './admin/index.js';
 
 export const createRouter = () => {
   const router = new Hono<AppEnv>();
