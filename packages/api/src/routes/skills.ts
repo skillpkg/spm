@@ -140,7 +140,7 @@ skillsRoutes.post('/skills', authed, async (c) => {
     );
   }
 
-  // Similarity check against existing names
+  // Similarity check against existing names (skip for admin imports)
   const allSkills = await db.select({ name: skills.name }).from(skills);
   const existingNames = allSkills.map((s) => s.name);
 
@@ -148,7 +148,7 @@ skillsRoutes.post('/skills', authed, async (c) => {
     name,
     existingNames.filter((n) => n !== name),
   );
-  if (similarCheck.similar) {
+  if (similarCheck.similar && !publishAs) {
     await db.insert(publishAttempts).values({
       userId,
       skillName: name,
