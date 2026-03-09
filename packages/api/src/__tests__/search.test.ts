@@ -61,6 +61,18 @@ describe('buildSearchQuery', () => {
     expect(result).not.toBeNull();
     expect(result!.raw).toBe('hello:* & world:*');
   });
+
+  it('should split hyphenated terms into separate words', () => {
+    const result = buildSearchQuery('hugging-face-jobs');
+    expect(result).not.toBeNull();
+    expect(result!.raw).toBe('hugging:* & face:* & jobs:*');
+  });
+
+  it('should handle mixed hyphens and spaces', () => {
+    const result = buildSearchQuery('deploy-to vercel');
+    expect(result).not.toBeNull();
+    expect(result!.raw).toBe('deploy:* & to:* & vercel:*');
+  });
 });
 
 // ── buildSearchCondition tests ──

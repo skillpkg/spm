@@ -4,10 +4,13 @@ import type { SQL } from 'drizzle-orm';
 /**
  * Sanitize a search term for use in Postgres tsquery.
  * Strips characters that are special to tsquery syntax.
+ * Hyphens are converted to spaces so "hugging-face-jobs" becomes
+ * three separate AND-ed terms instead of being interpreted as
+ * PostgreSQL's NOT operator.
  */
 const sanitizeTerm = (term: string): string =>
   term
-    .replace(/[&|!():*<>'\\]/g, ' ')
+    .replace(/[&|!():*<>'"\\-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
