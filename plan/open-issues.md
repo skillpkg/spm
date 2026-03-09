@@ -20,10 +20,7 @@ Logo added to web nav, admin nav, hero section, favicons, CLI banner, and repo a
 
 ---
 
-## 2. Imported / Community Skills — Author Handling
-
-**Priority:** High
-**Status:** Decision documented, **NOT yet implemented in code**
+## ~~2. Imported / Community Skills — Author Handling~~ DONE
 
 ### Schema changes needed:
 
@@ -46,13 +43,11 @@ Two-layer approach — trust tiers + transparent provenance:
 - **Distinction**: "Verified" + "Imported" tag makes it clear: trustworthy code, but we imported it — the org didn't publish it themselves
 - **Claim flow**: if the real org joins SPM, they claim the placeholder account → "Imported" tag disappears, becomes a normal `verified` publisher
 
-### Logic to implement:
+All implemented: schema, placeholder users, X-Publish-As, UI badges, read-only constraints. 22 skills imported.
 
-- Import script: create placeholder user per org (idempotent), publish under that user
-- Trust tier: `verified` for known orgs (anthropic, vercel), `scanned` for unknown community sources
-- UI: show "Imported from [source]" badge alongside trust tier badge when `imported_from` is set
-- Read-only constraints: placeholder-owned skills cannot be yanked/updated via API
-- Claim flow (future): real user proves org ownership → placeholder merged into their account
+### Remaining (future): Claim Flow
+
+- Real user proves org ownership → placeholder merged into their account
 
 ---
 
@@ -95,7 +90,7 @@ Publish the `spm` CLI package to npm so users can install it globally.
 
 **Priority:** High
 **Depends on:** Issue #2 (Author handling — DONE)
-**Status:** Phase 1 DONE — script built, 22 skills ready to import
+**Status:** Phase 1 DONE — 23 skills imported to production
 
 ### Phase 1 (DONE): First-party imports
 
@@ -118,17 +113,74 @@ pnpm exec tsx scripts/import-skills.ts --api-url https://registry.skillpkg.dev -
 
 **API support:** Admin users can set `X-Imported-From` header on publish to mark skills as imported.
 
-### Phase 2 (TODO): Generic GitHub importer
+### Phase 1.5 (TODO): HuggingFace import
 
-- Import any `owner/repo` that follows the SKILL.md format
-- Pull from skills.sh (200+ ranked) and skillsmp.com (400K+) directories
-- `spm admin import --source github --repo org/repo`
+Same script, new source. 10 skills focused on AI/ML (datasets, model training, evaluation, Gradio, jobs, etc.).
+
+- Add `huggingface/skills` source to `scripts/import-skills.ts`
+- Placeholder user: `huggingface` with `verified` trust tier (known org)
+- Maps to `ai_ml` and `data_analysis` categories
+- Brings total to ~33 skills, fills a category we currently have zero coverage in
+
+**Skills:** hugging-face-datasets, hugging-face-dataset-viewer, hugging-face-model-trainer, hugging-face-evaluation, hugging-face-jobs, hugging-face-trackio, huggingface-gradio, hf-cli, hugging-face-paper-publisher, hugging-face-tool-builder
+
+### Phase 2 (TODO): Curated community import from skills.sh
+
+**Approach:** Quality-gated import, NOT bulk scraping.
+
+**Steps:**
+1. Scrape skills.sh ranked list → extract repo URLs
+2. For each repo, check GitHub stars via API
+3. Filter: stars > 50, has valid SKILL.md, permissive license (MIT/Apache-2.0)
+4. **Show count + list** → "Found X skills matching criteria" — review before importing
+5. Import with `scanned` trust tier (community source, not known orgs)
+6. Deduplicate against existing skills (skip if name already exists)
+
+**Skip:** skillsmp.com — 400K+ entries, mostly GitHub scraping noise. Not worth the scan resources.
+
+**Note:** skills.sh "install" numbers are unreliable (468K for a week-old skill?). Use GitHub stars as quality proxy instead.
 
 ### Considerations:
 
 - License compliance (MIT, Apache-2.0 only)
 - Attribution — preserve original author, link to source repo
 - Deduplication — avoid importing same skill from different forks
+
+---
+
+## 14. Security Scanning — Competitive Research & Improvements
+
+**Priority:** Medium
+**Context:** Research from skills.sh security approach (March 2025)
+
+### skills.sh uses 3 external scanners:
+
+| Scanner | What it checks |
+|---|---|
+| **Socket** | Supply chain: license, dependencies, code quality, maintenance |
+| **Snyk** | Prompt injection, command injection, data exfiltration, credentials |
+| **Gen Agent Trust Hub** | URL scanning, antivirus, AI analysis (Gemini-powered) |
+
+Each scanner shows PASS/WARN/FAIL badge on skill detail page, linking to a detailed findings page.
+
+### Key stat: Snyk found 13.4% of skills (534/3984) had critical security issues
+
+### Open-source tools to evaluate:
+
+- `github.com/snyk/agent-scan` — Snyk's open-source skill scanner
+- `github.com/cisco-ai-defense/skill-scanner` — Cisco AI Defense scanner
+
+### What SPM could adopt:
+
+- **Per-scanner detail pages** — drill into Layer 1/2/3 results individually instead of inline
+- **Third-party scanner integration** — run Snyk agent-scan or Cisco scanner as Layer 2/3 alongside our regex + ML pipeline
+- **"Installed On" metric** — skills.sh shows which AI agents use each skill (codex, cline, copilot, etc.) — novel concept for adoption tracking
+
+### UI ideas from skills.sh skill detail page:
+
+- Security scanners as sidebar cards with color-coded PASS/WARN/FAIL badges
+- Relative timestamps ("4 days ago" vs absolute dates)
+- "Installed On" section showing agent adoption counts
 
 ---
 

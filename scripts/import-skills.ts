@@ -9,6 +9,7 @@
  * Sources:
  *   - anthropics/skills (17 skills)
  *   - vercel-labs/agent-skills (5 skills)
+ *   - huggingface/skills (10 skills)
  */
 
 import { execFileSync } from 'node:child_process';
@@ -54,6 +55,13 @@ const SOURCES: SkillSource[] = [
     trustTier: 'verified',
     skillsDir: 'skills',
   },
+  {
+    owner: 'huggingface',
+    repo: 'skills',
+    org: 'Hugging Face',
+    trustTier: 'verified',
+    skillsDir: 'skills',
+  },
 ];
 
 // Map skill names to SPM categories based on keywords
@@ -82,6 +90,17 @@ const CATEGORY_MAP: Record<string, string> = {
   'react-best-practices': 'frontend',
   'react-native-skills': 'frontend',
   'web-design-guidelines': 'frontend',
+  // HuggingFace skills
+  'hugging-face-datasets': 'data-viz',
+  'hugging-face-dataset-viewer': 'data-viz',
+  'hugging-face-model-trainer': 'backend',
+  'hugging-face-evaluation': 'testing',
+  'hugging-face-jobs': 'infra',
+  'hugging-face-trackio': 'data-viz',
+  'huggingface-gradio': 'frontend',
+  'hf-cli': 'productivity',
+  'hugging-face-paper-publisher': 'documents',
+  'hugging-face-tool-builder': 'backend',
 };
 
 // ── GitHub helpers ──
@@ -138,7 +157,9 @@ interface SkillFrontmatter {
 }
 
 const parseFrontmatter = (content: string): { frontmatter: SkillFrontmatter; body: string } => {
-  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  // Normalize CRLF → LF before parsing
+  const normalized = content.replace(/\r\n/g, '\n');
+  const match = normalized.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
   if (!match) {
     throw new Error('No YAML frontmatter found');
   }
