@@ -880,7 +880,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
               {/* Re-scan */}
               <Button
                 label={rescanning ? 'Scanning...' : 'Re-scan Security'}
-                color="default"
+                color="cyan"
                 small
                 onClick={handleRescan}
               />
