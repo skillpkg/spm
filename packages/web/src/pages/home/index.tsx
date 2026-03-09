@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { type SkillSummary, type Category } from '../../data/constants';
 import { type TrendingSkill, type CategoryItem } from '../../lib/api';
@@ -33,6 +34,7 @@ const apiCategoryToCategory = (c: CategoryItem): Category => ({
 export const Home = () => {
   const [query, setQuery] = useState('');
   const [trendingTab, setTrendingTab] = useState<TrendingTab>('featured');
+  const navigate = useNavigate();
 
   const { data: featuredData } = useQuery(trendingQuery('featured'));
   const { data: risingData } = useQuery(trendingQuery('rising'));
@@ -46,20 +48,20 @@ export const Home = () => {
   const newSkills = newData?.skills.map(trendingToSummary) ?? [];
   const categories = categoriesData?.categories.map(apiCategoryToCategory) ?? [];
 
-  const allSkills = [...featuredSkills, ...risingSkills, ...newSkills];
-  const filtered = query.trim()
-    ? allSkills.filter(
-        (s) =>
-          s.name.includes(query.toLowerCase()) ||
-          (s.desc || '').toLowerCase().includes(query.toLowerCase()) ||
-          s.author.includes(query.toLowerCase()),
-      )
-    : null;
-
   const totalSkills = categoriesData?.total_skills ?? 0;
 
   // Suppress lint warning — trendingTab drives which cached query is displayed, not fetched
   void trendingTab;
+
+  const handleQueryChange = (q: string) => {
+    setQuery(q);
+  };
+
+  const handleSubmit = () => {
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+    }
+  };
 
   return (
     <div>
@@ -67,23 +69,21 @@ export const Home = () => {
         totalSkills={totalSkills}
         totalCategories={categories.length}
         query={query}
-        setQuery={setQuery}
-        filtered={filtered}
+        setQuery={handleQueryChange}
+        onSubmit={handleSubmit}
       />
 
-      {!filtered && (
-        <section style={{ maxWidth: 920, margin: '0 auto', padding: '0 32px 60px' }}>
-          <TrendingTabs
-            trendingTab={trendingTab}
-            setTrendingTab={setTrendingTab}
-            featuredSkills={featuredSkills}
-            risingSkills={risingSkills}
-            mostInstalledSkills={mostInstalledSkills}
-            newSkills={newSkills}
-          />
-          <CategoryGrid categories={categories} />
-        </section>
-      )}
+      <section style={{ maxWidth: 920, margin: '0 auto', padding: '0 32px 60px' }}>
+        <TrendingTabs
+          trendingTab={trendingTab}
+          setTrendingTab={setTrendingTab}
+          featuredSkills={featuredSkills}
+          risingSkills={risingSkills}
+          mostInstalledSkills={mostInstalledSkills}
+          newSkills={newSkills}
+        />
+        <CategoryGrid categories={categories} />
+      </section>
     </div>
   );
 };
