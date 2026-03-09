@@ -216,8 +216,8 @@ skillsRoutes.post('/skills', authed, async (c) => {
   let skillId: string;
 
   if (existingSkill) {
-    // Verify ownership
-    if (existingSkill.ownerId !== userId) {
+    // Verify ownership (admins with X-Publish-As can transfer ownership)
+    if (existingSkill.ownerId !== userId && !publishAs) {
       return c.json(
         createApiError('FORBIDDEN', { message: 'You do not own this skill' }),
         ERROR_CODES.FORBIDDEN.status,
@@ -225,12 +225,13 @@ skillsRoutes.post('/skills', authed, async (c) => {
     }
     skillId = existingSkill.id;
 
-    // Update mutable fields
+    // Update mutable fields (transfer ownership if admin is re-publishing)
     await db
       .update(skills)
       .set({
         description,
         categories,
+        ownerId: userId,
         repository: manifest.urls?.repository ?? existingSkill.repository,
         license: manifest.license ?? existingSkill.license,
         updatedAt: new Date(),
