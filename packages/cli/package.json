@@ -1,10 +1,10 @@
 {
-  "name": "@spm/cli",
-  "version": "0.0.1",
-  "private": true,
+  "name": "@skillpkg/cli",
+  "version": "0.1.0",
   "type": "module",
   "description": "Skills Package Manager — install, manage, and publish AI agent skills",
   "license": "MIT",
+  "author": "almog27",
   "repository": {
     "type": "git",
     "url": "https://github.com/almog27/spm",
@@ -17,7 +17,11 @@
     "ai",
     "agents",
     "package-manager",
-    "cli"
+    "cli",
+    "claude",
+    "cursor",
+    "codex",
+    "mcp"
   ],
   "bin": {
     "spm": "./dist/index.js"
@@ -26,9 +30,13 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -39,7 +47,6 @@
     "@sigstore/protobuf-specs": "^0.5.0",
     "@sigstore/sign": "^4.1.0",
     "@sigstore/verify": "^3.1.0",
-    "@spm/shared": "workspace:^",
     "chalk": "^5.4.0",
     "cli-table3": "^0.6.5",
     "commander": "^13.0.0",
@@ -53,6 +60,7 @@
     "toml": "3"
   },
   "devDependencies": {
+    "@spm/shared": "workspace:^",
     "@types/semver": "^7.7.1",
     "@types/tar": "^7.0.87",
     "tsup": "^8.3.0",

@@ -54,17 +54,25 @@ All implemented: schema, placeholder users, X-Publish-As, UI badges, read-only c
 ## 3. Publish CLI to npm
 
 **Priority:** High
+**Status:** Package ready — needs npm org creation + first publish
 
-Publish the `spm` CLI package to npm so users can install it globally.
+Package name: `@skillpkg/cli` (binary: `spm`)
+Install: `npm install -g @skillpkg/cli` → run as `spm`
 
-### TODO:
+### Done:
 
-- Finalize package name — check if `spm` is available on npm, fallback to `@spm/cli` or `skillpkg`
-- Set up `package.json` for publishing (name, version, bin, files, repository, license)
-- Ensure `tsup` build output is correct for CLI execution (shebang, permissions)
-- Add prepublish script (`pnpm build`)
-- Publish workflow: manual or CI-triggered npm publish
-- Test install flow: `npm install -g spm && spm --help`
+- ~~Finalize package name~~ — `@skillpkg/cli` (matches skillpkg.dev domain)
+- ~~Set up `package.json` for publishing~~ — name, version 0.1.0, bin, files, publishConfig, author
+- ~~Ensure `tsup` build output is correct~~ — shebang via banner, `@spm/shared` bundled (noExternal)
+- ~~Add prepublish script~~ — `prepublishOnly: pnpm build`
+- ~~Test build~~ — 232KB self-contained, runs correctly, 208 tests passing
+
+### Remaining (manual):
+
+1. Create `skillpkg` org on [npmjs.com/org/create](https://www.npmjs.com/org/create) (free)
+2. `npm login` on your machine
+3. `cd packages/cli && npm publish` (first publish)
+4. Optional: CI-triggered npm publish workflow
 
 ---
 
@@ -129,6 +137,7 @@ Same script, new source. 10 skills focused on AI/ML (datasets, model training, e
 **Approach:** Quality-gated import, NOT bulk scraping.
 
 **Steps:**
+
 1. Scrape skills.sh ranked list → extract repo URLs
 2. For each repo, check GitHub stars via API
 3. Filter: stars > 50, has valid SKILL.md, permissive license (MIT/Apache-2.0)
@@ -155,11 +164,11 @@ Same script, new source. 10 skills focused on AI/ML (datasets, model training, e
 
 ### skills.sh uses 3 external scanners:
 
-| Scanner | What it checks |
-|---|---|
-| **Socket** | Supply chain: license, dependencies, code quality, maintenance |
-| **Snyk** | Prompt injection, command injection, data exfiltration, credentials |
-| **Gen Agent Trust Hub** | URL scanning, antivirus, AI analysis (Gemini-powered) |
+| Scanner                 | What it checks                                                      |
+| ----------------------- | ------------------------------------------------------------------- |
+| **Socket**              | Supply chain: license, dependencies, code quality, maintenance      |
+| **Snyk**                | Prompt injection, command injection, data exfiltration, credentials |
+| **Gen Agent Trust Hub** | URL scanning, antivirus, AI analysis (Gemini-powered)               |
 
 Each scanner shows PASS/WARN/FAIL badge on skill detail page, linking to a detailed findings page.
 

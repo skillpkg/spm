@@ -145,9 +145,6 @@ importers:
       '@sigstore/verify':
         specifier: ^3.1.0
         version: 3.1.0
-      '@spm/shared':
-        specifier: workspace:^
-        version: link:../shared
       chalk:
         specifier: ^5.4.0
         version: 5.6.2
@@ -182,6 +179,9 @@ importers:
         specifier: '3'
         version: 3.0.0
     devDependencies:
+      '@spm/shared':
+        specifier: workspace:^
+        version: link:../shared
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
