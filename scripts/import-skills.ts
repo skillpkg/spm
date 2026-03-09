@@ -91,16 +91,16 @@ const CATEGORY_MAP: Record<string, string> = {
   'react-native-skills': 'frontend',
   'web-design-guidelines': 'frontend',
   // HuggingFace skills
-  'hugging-face-datasets': 'data-viz',
-  'hugging-face-dataset-viewer': 'data-viz',
-  'hugging-face-model-trainer': 'backend',
-  'hugging-face-evaluation': 'testing',
+  'hugging-face-datasets': 'data-analysis',
+  'hugging-face-dataset-viewer': 'data-analysis',
+  'hugging-face-model-trainer': 'ai-ml',
+  'hugging-face-evaluation': 'ai-ml',
   'hugging-face-jobs': 'infra',
-  'hugging-face-trackio': 'data-viz',
+  'hugging-face-trackio': 'ai-ml',
   'huggingface-gradio': 'frontend',
   'hf-cli': 'productivity',
   'hugging-face-paper-publisher': 'documents',
-  'hugging-face-tool-builder': 'backend',
+  'hugging-face-tool-builder': 'ai-ml',
 };
 
 // ── GitHub helpers ──

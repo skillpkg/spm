@@ -1,6 +1,8 @@
 export const CATEGORIES = [
   'documents',
   'data-viz',
+  'data-analysis',
+  'ai-ml',
   'frontend',
   'backend',
   'infra',
@@ -25,7 +27,17 @@ export const CATEGORY_INFO: Record<
   'data-viz': {
     display: 'Data & Visualization',
     icon: '📊',
-    description: 'Charts, dashboards, CSV/JSON, analytics',
+    description: 'Charts, dashboards, CSV/JSON, visualization',
+  },
+  'data-analysis': {
+    display: 'Data Analysis',
+    icon: '🔍',
+    description: 'Datasets, querying, transformation, analytics',
+  },
+  'ai-ml': {
+    display: 'AI & Machine Learning',
+    icon: '🤖',
+    description: 'Model training, evaluation, ML pipelines, LLMs',
   },
   frontend: { display: 'Frontend', icon: '🎨', description: 'UI, React, HTML/CSS, design systems' },
   backend: {

@@ -120,7 +120,7 @@ describe('categories routes — GET /categories', () => {
       categories: Array<{ slug: string; display: string; count: number; icon: string }>;
     };
 
-    expect(body.categories).toHaveLength(10);
+    expect(body.categories).toHaveLength(12);
 
     // Verify all CATEGORIES are present
     const slugs = body.categories.map((c) => c.slug);
@@ -454,7 +454,7 @@ describe('categories routes — edge cases', () => {
     };
 
     // All categories should be present with count 0
-    expect(body.categories).toHaveLength(10);
+    expect(body.categories).toHaveLength(12);
     for (const cat of body.categories) {
       expect(cat.count).toBe(0);
     }

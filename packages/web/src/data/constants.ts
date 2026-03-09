@@ -27,6 +27,8 @@ export const CATEGORY_NAMES = [
   'All',
   'Documents',
   'Data & Visualization',
+  'Data Analysis',
+  'AI & Machine Learning',
   'Frontend',
   'Backend',
   'Infrastructure',
@@ -39,6 +41,8 @@ export const CATEGORY_NAMES = [
 export const CATEGORY_SLUGS: Record<string, string> = {
   Documents: 'documents',
   'Data & Visualization': 'data-viz',
+  'Data Analysis': 'data-analysis',
+  'AI & Machine Learning': 'ai-ml',
   Frontend: 'frontend',
   Backend: 'backend',
   Infrastructure: 'infra',
