@@ -243,7 +243,7 @@ export const Search = () => {
             >
               Security
             </h3>
-            {['Any', 'Full scan', 'Partial'].map((opt) => (
+            {['Any', 'Verified', 'Partial'].map((opt) => (
               <div
                 key={opt}
                 onClick={() => setSecurityFilter(opt)}

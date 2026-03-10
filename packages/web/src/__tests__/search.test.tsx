@@ -89,7 +89,7 @@ describe('Search', () => {
 
     expect(screen.getByText('Trust tier')).toBeInTheDocument();
     expect(screen.getByText('Official')).toBeInTheDocument();
-    expect(screen.getByText('Verified')).toBeInTheDocument();
+    expect(screen.getAllByText('Verified').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Scanned')).toBeInTheDocument();
   });
 
@@ -113,7 +113,7 @@ describe('Search', () => {
 
     const headings = screen.getAllByText('Security');
     expect(headings.length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('Full scan')).toBeInTheDocument();
-    expect(screen.getByText('Partial')).toBeInTheDocument();
+    expect(screen.getAllByText('Verified').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Partial').length).toBeGreaterThanOrEqual(1);
   });
 });
