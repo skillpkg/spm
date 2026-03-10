@@ -636,8 +636,8 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                       Security Layers
                     </span>
                     <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {(detail.security?.scan_layers && detail.security?.scan_layers.length > 0
-                        ? detail.security?.scan_layers
+                      {(detail.security?.scan_layers && detail.security.scan_layers.length > 0
+                        ? detail.security.scan_layers
                         : defaultScanLayers
                       ).map((layer) => (
                         <div
