@@ -8,6 +8,7 @@ import {
   blockSkill,
   unblockSkill,
   rescanSkill,
+  approveSkill,
   type SkillDownloadsDay,
   type ScanLayer,
 } from '../lib/api';
@@ -158,6 +159,12 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
     } finally {
       setRescanning(false);
     }
+  };
+
+  const handleApprove = async () => {
+    if (!token) return;
+    await approveSkill(token, skillName);
+    queryClient.invalidateQueries({ queryKey: ['admin', 'skillDetail', skillName] });
   };
 
   if (loading) {
@@ -674,8 +681,8 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                     </div>
                   </div>
 
-                  {/* Approve/Block for flagged skills */}
-                  {detail.security?.scan_security_level === 'flagged' && detail.status !== 'blocked' && (
+                  {/* Approve/Block for flagged or blocked scans */}
+                  {(detail.security?.scan_security_level === 'flagged' || detail.security?.scan_security_level === 'blocked') && (
                     <div
                       style={{
                         marginTop: 4,
@@ -683,7 +690,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                         gap: 8,
                       }}
                     >
-                      <Button label="Approve" color="green" small onClick={handleUnblock} />
+                      <Button label="Approve" color="green" small onClick={handleApprove} />
                       <Button
                         label="Block"
                         color="red"

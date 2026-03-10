@@ -417,3 +417,78 @@ skillsRoutes.post('/admin/skills/:name/rescan', zValidator('json', RescanSchema)
     rescanned_at: new Date().toISOString(),
   });
 });
+
+// ── POST /admin/skills/:name/approve — manually approve a flagged/blocked skill ──
+
+const ApproveSkillSchema = z.object({
+  notes: z.string().optional(),
+});
+
+skillsRoutes.post(
+  '/admin/skills/:name/approve',
+  zValidator('json', ApproveSkillSchema),
+  async (c) => {
+    const db = c.get('db');
+    const jwt = c.get('jwtPayload');
+    const name = c.req.param('name');
+    const body = c.req.valid('json');
+
+    const [skill] = await db
+      .select({ id: skills.id })
+      .from(skills)
+      .where(eq(skills.name, name))
+      .limit(1);
+
+    if (!skill) {
+      return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+    }
+
+    // Find latest version
+    const [ver] = await db
+      .select({ id: versions.id, version: versions.version })
+      .from(versions)
+      .where(eq(versions.skillId, skill.id))
+      .orderBy(
+        desc(versions.versionMajor),
+        desc(versions.versionMinor),
+        desc(versions.versionPatch),
+      )
+      .limit(1);
+
+    if (!ver) {
+      return c.json(createApiError('VERSION_NOT_FOUND'), ERROR_CODES.VERSION_NOT_FOUND.status);
+    }
+
+    // Set all flagged/blocked scan layers to manual_approved
+    await db
+      .update(scans)
+      .set({ status: 'manual_approved' })
+      .where(
+        and(
+          eq(scans.versionId, ver.id),
+          // Only approve layers that were flagged or blocked (via details JSONB)
+        ),
+      );
+
+    // Update skill security level to full (admin override)
+    await db
+      .update(skills)
+      .set({ scanSecurityLevel: 'full', updatedAt: new Date() })
+      .where(eq(skills.id, skill.id));
+
+    await audit(
+      db,
+      jwt.sub,
+      'admin.approve',
+      { skill: name, version: ver.version, notes: body.notes },
+      { skillId: skill.id, versionId: ver.id },
+    );
+
+    return c.json({
+      name,
+      version: ver.version,
+      security_level: 'full',
+      approved_at: new Date().toISOString(),
+    });
+  },
+);

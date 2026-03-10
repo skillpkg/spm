@@ -127,6 +127,16 @@ export const rescanSkill = (token: string, name: string, version?: string): Prom
     body: JSON.stringify(version ? { version } : {}),
   });
 
+export const approveSkill = (
+  token: string,
+  name: string,
+  notes?: string,
+): Promise<{ name: string; version: string; security_level: string; approved_at: string }> =>
+  apiFetch(`/admin/skills/${encodeURIComponent(name)}/approve`, token, {
+    method: 'POST',
+    body: JSON.stringify({ notes }),
+  });
+
 // -- Users --
 
 export interface AdminUserItem {
