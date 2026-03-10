@@ -140,7 +140,7 @@ export const CLI = () => (
           border: '1px solid var(--color-border-default)',
         }}
       >
-        <span style={{ color: 'var(--color-text-muted)' }}>$ </span>npm install -g @spm/cli
+        <span style={{ color: 'var(--color-text-muted)' }}>$ </span>npm install -g @skillpkg/cli
       </div>
     </div>
 

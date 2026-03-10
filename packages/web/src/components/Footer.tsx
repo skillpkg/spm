@@ -49,7 +49,7 @@ export const Footer = () => {
         <code
           style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}
         >
-          npm i -g spm
+          npm i -g @skillpkg/cli
         </code>
         <Link
           to="/docs"
@@ -72,19 +72,6 @@ export const Footer = () => {
           }}
         >
           Contact
-        </a>
-        <a
-          href="https://github.com/almog27/spm"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 12,
-            color: 'var(--color-text-muted)',
-            textDecoration: 'none',
-          }}
-        >
-          GitHub
         </a>
       </div>
     </footer>
