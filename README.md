@@ -2,9 +2,12 @@
 
 **SPM is how you find, install, and share Agent Skills.**
 
-The [Agent Skills standard](https://agentskills.io) defines the format. SPM solves distribution.
+🌐 **[skillpkg.dev](https://skillpkg.dev)** — Browse skills, search the registry, view security scans
 
 ```bash
+# Install the CLI
+npm install -g @skillpkg/cli
+
 # Install a skill — all your agents can now use it
 spm install data-viz
 
@@ -24,6 +27,13 @@ spm publish
 - **Manage** versions, dependencies, and security
 
 Works with Claude Code, Cursor, Copilot, Codex, and 30+ agent platforms that support the Agent Skills standard.
+
+## Links
+
+- **Website:** [skillpkg.dev](https://skillpkg.dev)
+- **CLI:** [`@skillpkg/cli`](https://www.npmjs.com/package/@skillpkg/cli)
+- **API:** `registry.skillpkg.dev`
+- **Docs:** [skillpkg.dev/docs](https://skillpkg.dev/docs)
 
 ## Stack
 

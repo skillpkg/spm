@@ -3,6 +3,11 @@ name: Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '*.md'
+      - 'plan/**'
+      - '.github/CODEOWNERS'
+      - 'LICENSE'
   workflow_dispatch:
     inputs:
       deploy_all:
