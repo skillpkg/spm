@@ -152,7 +152,15 @@ export const Docs = () => (
         <Link to="/cli" style={{ color: 'var(--color-accent)', textDecoration: 'none' }}>
           CLI reference
         </Link>{' '}
-        or open an issue on <span style={{ color: 'var(--color-blue)' }}>GitHub</span>.
+        or open an issue on{' '}
+        <a
+          href="https://github.com/almog27/spm/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: 'var(--color-accent)', textDecoration: 'none' }}
+        >
+          GitHub
+        </a>.
       </div>
     </div>
   </div>
