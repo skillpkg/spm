@@ -32,6 +32,7 @@ spm publish
 - **Install** them with one command, linked to all your agents
 - **Share** skills you've built with the community
 - **Manage** versions, dependencies, and security
+- **MCP Server** — let AI agents search and discover skills directly via [Model Context Protocol](https://modelcontextprotocol.io)
 
 Works with Claude Code, Cursor, Copilot, Codex, and 30+ agent platforms that support the Agent Skills standard.
 
@@ -63,6 +64,7 @@ packages/
   api/      — Registry API (Cloudflare Workers)
   cli/      — spm CLI (npm package)
   web/      — skillpkg.dev (Cloudflare Pages)
+  mcp/      — MCP server (search, info, categories tools)
 migrations/ — Neon Postgres SQL migrations
 plan/       — Full spec docs
 ```
