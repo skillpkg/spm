@@ -298,9 +298,13 @@ export interface SkillDetailResponse {
   imported_from?: string;
   status: string;
   deprecated: boolean;
-  scan_status: string | null;
-  scan_security_level?: string;
-  scan_layers?: ScanLayer[];
+  security?: {
+    signed: boolean;
+    signer_identity?: string;
+    scan_status: string;
+    scan_security_level: string;
+    scan_layers?: ScanLayer[];
+  };
   created_at: string;
   updated_at: string;
   versions: SkillDetailVersion[];

@@ -52,13 +52,16 @@ const baseDetail: SkillDetailResponse = {
   ],
   status: 'active',
   deprecated: false,
-  scan_status: 'passed',
-  scan_security_level: 'full',
-  scan_layers: [
-    { layer: 1, name: 'Static Analysis', status: 'passed', confidence: null },
-    { layer: 2, name: 'ML Classification', status: 'passed', confidence: 0.02 },
-    { layer: 3, name: 'Lakera Guard', status: 'passed', confidence: null },
-  ],
+  security: {
+    signed: true,
+    scan_status: 'passed',
+    scan_security_level: 'full',
+    scan_layers: [
+      { layer: 1, name: 'Static Analysis', status: 'passed', confidence: null },
+      { layer: 2, name: 'ML Classification', status: 'passed', confidence: 0.02 },
+      { layer: 3, name: 'Lakera Guard', status: 'passed', confidence: null },
+    ],
+  },
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-01-01T00:00:00Z',
   versions: [
@@ -135,12 +138,16 @@ describe('SkillDetailPane Security Tab', () => {
   it('renders flagged layers with approve/block buttons', async () => {
     mockGetSkillDetail.mockResolvedValue({
       ...baseDetail,
-      scan_security_level: 'flagged',
-      scan_layers: [
-        { layer: 1, name: 'Static Analysis', status: 'passed', confidence: null },
-        { layer: 2, name: 'ML Classification', status: 'flagged', confidence: 0.82 },
-        { layer: 3, name: 'Lakera Guard', status: 'passed', confidence: null },
-      ],
+      security: {
+        signed: true,
+        scan_status: 'flagged',
+        scan_security_level: 'flagged',
+        scan_layers: [
+          { layer: 1, name: 'Static Analysis', status: 'passed', confidence: null },
+          { layer: 2, name: 'ML Classification', status: 'flagged', confidence: 0.82 },
+          { layer: 3, name: 'Lakera Guard', status: 'passed', confidence: null },
+        ],
+      },
     });
 
     renderWithQuery(<SkillDetailPane skillName="test-skill" />);
@@ -161,8 +168,7 @@ describe('SkillDetailPane Security Tab', () => {
   it('shows default layers when no scan_layers provided', async () => {
     mockGetSkillDetail.mockResolvedValue({
       ...baseDetail,
-      scan_security_level: undefined,
-      scan_layers: undefined,
+      security: undefined,
     });
 
     renderWithQuery(<SkillDetailPane skillName="test-skill" />);

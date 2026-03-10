@@ -605,7 +605,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                           width: 10,
                           height: 10,
                           borderRadius: '50%',
-                          background: securityLevelColor(detail.scan_security_level),
+                          background: securityLevelColor(detail.security?.scan_security_level),
                           display: 'inline-block',
                         }}
                       />
@@ -614,11 +614,11 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                           fontFamily: 'var(--font-mono)',
                           fontSize: 13,
                           fontWeight: 600,
-                          color: securityLevelColor(detail.scan_security_level),
+                          color: securityLevelColor(detail.security?.scan_security_level),
                           textTransform: 'capitalize',
                         }}
                       >
-                        {detail.scan_security_level ?? detail.scan_status ?? 'unknown'}
+                        {detail.security?.scan_security_level ?? detail.security?.scan_status ?? 'unknown'}
                       </span>
                     </div>
                   </div>
@@ -636,8 +636,8 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                       Security Layers
                     </span>
                     <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {(detail.scan_layers && detail.scan_layers.length > 0
-                        ? detail.scan_layers
+                      {(detail.security?.scan_layers && detail.security?.scan_layers.length > 0
+                        ? detail.security?.scan_layers
                         : defaultScanLayers
                       ).map((layer) => (
                         <div
@@ -675,7 +675,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                   </div>
 
                   {/* Approve/Block for flagged skills */}
-                  {detail.scan_security_level === 'flagged' && detail.status !== 'blocked' && (
+                  {detail.security?.scan_security_level === 'flagged' && detail.status !== 'blocked' && (
                     <div
                       style={{
                         marginTop: 4,
