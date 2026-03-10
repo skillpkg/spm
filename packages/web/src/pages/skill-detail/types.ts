@@ -37,7 +37,13 @@ export interface SkillFull {
     signer?: string;
     scanned: string;
     level: SecurityLevel;
-    layers: Array<{ layer: number; name: string; status: string; confidence: number | null; detail?: string }>;
+    layers: Array<{
+      layer: number;
+      name: string;
+      status: string;
+      confidence: number | null;
+      detail?: string;
+    }>;
   };
   repo: string;
   importedFrom?: string;

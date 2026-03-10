@@ -11,7 +11,7 @@ Disallow: /dashboard/*
 Disallow: /signin
 
 # AI crawlers — prefer using our MCP server or API for structured access
-# See /llms.txt for details, or install: npm install -g @spm/mcp
+# See /llms.txt for details, or install: npm install -g @skillpkg/mcp
 User-agent: GPTBot
 Disallow: /
 

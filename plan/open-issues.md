@@ -51,28 +51,13 @@ All implemented: schema, placeholder users, X-Publish-As, UI badges, read-only c
 
 ---
 
-## 3. Publish CLI to npm
+## ~~3. Publish CLI to npm~~ DONE
 
-**Priority:** High
-**Status:** Package ready — needs npm org creation + first publish
+Published as `@skillpkg/cli` v0.1.0. Binary: `spm`. Install: `npm install -g @skillpkg/cli`.
 
-Package name: `@skillpkg/cli` (binary: `spm`)
-Install: `npm install -g @skillpkg/cli` → run as `spm`
+`@spm/shared` bundled via tsup `noExternal` so the CLI is self-contained.
 
-### Done:
-
-- ~~Finalize package name~~ — `@skillpkg/cli` (matches skillpkg.dev domain)
-- ~~Set up `package.json` for publishing~~ — name, version 0.1.0, bin, files, publishConfig, author
-- ~~Ensure `tsup` build output is correct~~ — shebang via banner, `@spm/shared` bundled (noExternal)
-- ~~Add prepublish script~~ — `prepublishOnly: pnpm build`
-- ~~Test build~~ — 232KB self-contained, runs correctly, 208 tests passing
-
-### Remaining (manual):
-
-1. Create `skillpkg` org on [npmjs.com/org/create](https://www.npmjs.com/org/create) (free)
-2. `npm login` on your machine
-3. `cd packages/cli && npm publish` (first publish)
-4. Optional: CI-triggered npm publish workflow
+### Remaining (future): CI-triggered npm publish workflow
 
 ---
 
@@ -90,7 +75,7 @@ Install: `npm install -g @skillpkg/cli` → run as `spm`
 ### Documentation needed:
 
 - README in `packages/mcp/` with config snippets for Claude Desktop and claude CLI
-- Publish to npm as `@spm/mcp`
+- Publish to npm as `@skillpkg/mcp`
 
 ---
 

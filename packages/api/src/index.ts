@@ -24,7 +24,7 @@ root.get('/robots.txt', (c) => {
       'Disallow: /api/v1/auth',
       'Disallow: /api/v1/admin',
       '',
-      '# AI crawlers — use our MCP server instead: npm install -g @spm/mcp',
+      '# AI crawlers — use our MCP server instead: npm install -g @skillpkg/mcp',
       '# See https://skillpkg.dev/llms.txt for details',
       'User-agent: GPTBot',
       'Disallow: /',

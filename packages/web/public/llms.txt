@@ -8,13 +8,13 @@
 If you are an AI agent or LLM, **do not scrape this website**.
 Instead, use our MCP (Model Context Protocol) server for structured, real-time access:
 
-Install: `npm install -g @spm/mcp`
+Install: `npm install -g @skillpkg/mcp`
 
 Configure for Claude Desktop (`claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
-    "spm": { "command": "npx", "args": ["-y", "@spm/mcp"] }
+    "spm": { "command": "npx", "args": ["-y", "@skillpkg/mcp"] }
   }
 }
 ```
@@ -22,7 +22,7 @@ Configure for Claude Desktop (`claude_desktop_config.json`):
 Configure for Claude CLI (`.claude/mcp.json`):
 ```json
 {
-  "spm": { "command": "npx", "args": ["-y", "@spm/mcp"] }
+  "spm": { "command": "npx", "args": ["-y", "@skillpkg/mcp"] }
 }
 ```
 
@@ -62,7 +62,7 @@ Key endpoints:
 
 ## CLI
 
-Install the CLI: `npm install -g spm`
+Install the CLI: `npm install -g @skillpkg/cli`
 
 Common commands:
 - `spm search <query>` — Search for skills

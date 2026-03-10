@@ -160,7 +160,8 @@ export const Docs = () => (
           style={{ color: 'var(--color-accent)', textDecoration: 'none' }}
         >
           GitHub
-        </a>.
+        </a>
+        .
       </div>
     </div>
   </div>
