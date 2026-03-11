@@ -51,9 +51,7 @@ export const scanWithLakera = async (
   const data = (await res.json()) as LakeraResponse;
 
   if (data.flagged) {
-    const flaggedLabels = data.payload
-      ? [...new Set(data.payload.flatMap((p) => p.labels))]
-      : [];
+    const flaggedLabels = data.payload ? [...new Set(data.payload.flatMap((p) => p.labels))] : [];
 
     findings.push({
       category: 'lakera_guard',

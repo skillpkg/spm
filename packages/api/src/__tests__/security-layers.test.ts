@@ -236,7 +236,14 @@ describe('Layer 3 — Lakera Guard', () => {
         JSON.stringify({
           flagged: true,
           payload: [
-            { start: 0, end: 10, text: 'malicious', detector_type: 'pi', labels: ['prompt_injection'], message_id: 0 },
+            {
+              start: 0,
+              end: 10,
+              text: 'malicious',
+              detector_type: 'pi',
+              labels: ['prompt_injection'],
+              message_id: 0,
+            },
           ],
         }),
         { status: 200 },
@@ -416,7 +423,16 @@ describe('Security pipeline — advanced layers', () => {
         new Response(
           JSON.stringify({
             flagged: true,
-            payload: [{ start: 0, end: 5, text: 'test', detector_type: 'pi', labels: ['prompt_injection'], message_id: 0 }],
+            payload: [
+              {
+                start: 0,
+                end: 5,
+                text: 'test',
+                detector_type: 'pi',
+                labels: ['prompt_injection'],
+                message_id: 0,
+              },
+            ],
           }),
           { status: 200 },
         ),

@@ -61,21 +61,10 @@ Published as `@skillpkg/cli` v0.1.0. Binary: `spm`. Install: `npm install -g @sk
 
 ---
 
-## 4. MCP Server — Verify & Document
+## ~~4. MCP Server — Verify & Document~~ DONE
 
-**Priority:** Medium
-**Package:** `packages/mcp/`
-
-### Verify:
-
-- Confirm `spm_search`, `spm_info`, `spm_categories` tools work via stdio transport
-- Test with a real MCP client (Claude Desktop, claude CLI)
-- Ensure it connects to the live API (not mock data)
-
-### Documentation needed:
-
-- README in `packages/mcp/` with config snippets for Claude Desktop and claude CLI
-- Publish to npm as `@skillpkg/mcp`
+Published as `@skillpkg/mcp` v0.1.1. Tested with Claude Desktop and Claude Code against live API.
+README with setup docs for Claude Code, Claude Desktop, and Cursor.
 
 ---
 
@@ -238,6 +227,47 @@ API endpoint, `Sparkline` component in `@spm/ui`, web sidebar and admin detail p
 
 All published skills are fully scanned (Layer 1/2/3). No opt-out — simpler and safer.
 Dropped `--no-security` flag and security filter (no partial scans = nothing to filter).
+
+---
+
+## 15. Admin Overview — Live Stats
+
+**Priority:** Medium
+**Status:** Placeholder UI created
+
+### TODO:
+
+- Connect `OverviewTab` to `getAdminStats` API (endpoint exists, response shape defined)
+- Display real data: total skills, total users, total downloads, queue depth
+- "Requires Attention" section: live queue depth, open reports, open errors, blocked skills
+- Publishing breakdown card with segmented bar (published / blocked / rejected)
+- Security scanning card with pass/block/flag rates
+- Users by trust tier distribution with segmented bar
+
+### Depends on:
+
+- Admin stats API returning real data from production DB
+
+---
+
+## 16. Admin Analytics Dashboard
+
+**Priority:** Medium
+**Status:** Not started
+
+### TODO:
+
+- Time-series charts: publishes per day/week, downloads over time, new users
+- Scan trends: pass/fail rates over time, L1/L2/L3 breakdown trends
+- Top skills by downloads, most flagged skills, most reported skills
+- User growth chart, trust tier transitions over time
+- Exportable reports (CSV download)
+- Date range picker for all charts
+
+### Depends on:
+
+- New API endpoints for time-series data (`GET /admin/analytics/publishes?period=7d`)
+- Charting library (recharts or similar)
 
 ---
 
