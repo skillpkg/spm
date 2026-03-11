@@ -79,15 +79,6 @@ export const AuthorProfile = () => {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 32px 32px' }}>
-      {/* Breadcrumb */}
-      <div style={{ padding: '16px 0', fontFamily: 'var(--font-sans)', fontSize: 13 }}>
-        <Link to="/" style={{ color: 'var(--color-text-dim)', textDecoration: 'none' }}>
-          Registry
-        </Link>
-        <span style={{ color: 'var(--color-text-faint)', margin: '0 8px' }}>/</span>
-        <span style={{ color: 'var(--color-text-secondary)' }}>@{username}</span>
-      </div>
-
       {/* Author header */}
       <div
         style={{

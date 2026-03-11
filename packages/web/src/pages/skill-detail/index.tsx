@@ -62,15 +62,6 @@ export const SkillDetail = () => {
 
   return (
     <div style={{ maxWidth: 1060, margin: '0 auto', padding: '0 32px 60px' }}>
-      {/* Breadcrumb */}
-      <div style={{ padding: '16px 0', fontFamily: 'var(--font-sans)', fontSize: 13 }}>
-        <Link to="/" style={{ color: 'var(--color-text-dim)', textDecoration: 'none' }}>
-          Registry
-        </Link>
-        <span style={{ color: 'var(--color-text-faint)', margin: '0 8px' }}>/</span>
-        <span style={{ color: 'var(--color-text-secondary)' }}>{skill.name}</span>
-      </div>
-
       <SkillHero skill={skill} />
 
       {/* Content: tabs + sidebar */}
