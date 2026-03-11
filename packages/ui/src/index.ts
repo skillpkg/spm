@@ -40,3 +40,18 @@ export {
   type SecurityBadgeProps,
   type SecurityLevel,
 } from './components/SecurityBadge/SecurityBadge';
+
+// Layout
+export {
+  Sidebar,
+  type SidebarProps,
+  type SidebarSection,
+  type SidebarItem,
+} from './components/Sidebar/Sidebar';
+export { SidebarLayout, type SidebarLayoutProps } from './components/SidebarLayout/SidebarLayout';
+export { TopBar, type TopBarProps } from './components/TopBar/TopBar';
+export {
+  Breadcrumb,
+  type BreadcrumbProps,
+  type BreadcrumbItem,
+} from './components/Breadcrumb/Breadcrumb';
