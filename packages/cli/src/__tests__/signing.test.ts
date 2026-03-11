@@ -536,7 +536,7 @@ describe('install command with verification', () => {
 // PUBLISH WITH --sign FLAG (interactive)
 // ============================================
 
-describe('publish command with --sign flag', () => {
+describe('publish command signing (default on)', () => {
   const originalCI = process.env.CI;
   const originalGHA = process.env.GITHUB_ACTIONS;
   const originalGLCI = process.env.GITLAB_CI;
@@ -583,7 +583,7 @@ describe('publish command with --sign flag', () => {
     return program;
   };
 
-  it('calls signPackageInteractive when --sign flag is used', async () => {
+  it('signs by default when publishing locally (no CI)', async () => {
     mockReadFile.mockImplementation((filePath: unknown) => {
       const p = String(filePath);
       if (p.endsWith('manifest.json')) {
@@ -611,7 +611,7 @@ describe('publish command with --sign flag', () => {
     });
 
     const program = await buildProgram();
-    await program.parseAsync(['node', 'spm', 'publish', '--sign']);
+    await program.parseAsync(['node', 'spm', 'publish']);
 
     expect(mockSignPackageInteractive).toHaveBeenCalled();
     expect(mockSignPackage).not.toHaveBeenCalled();
@@ -652,7 +652,7 @@ describe('publish command with --sign flag', () => {
     });
 
     const program = await buildProgram();
-    await program.parseAsync(['node', 'spm', 'publish', '--sign']);
+    await program.parseAsync(['node', 'spm', 'publish']);
 
     expect(mockPublishSkill).toHaveBeenCalledWith(
       expect.anything(),
@@ -690,7 +690,7 @@ describe('publish command with --sign flag', () => {
     });
 
     const program = await buildProgram();
-    await program.parseAsync(['node', 'spm', 'publish', '--sign']);
+    await program.parseAsync(['node', 'spm', 'publish']);
 
     expect(mockPublishSkill).toHaveBeenCalled();
 
@@ -698,7 +698,7 @@ describe('publish command with --sign flag', () => {
     expect(output).toContain('Signing failed');
   });
 
-  it('does not sign when --sign flag is omitted and not in CI', async () => {
+  it('does not sign when --no-sign flag is used', async () => {
     mockReadFile.mockImplementation((filePath: unknown) => {
       const p = String(filePath);
       if (p.endsWith('manifest.json')) {
@@ -721,7 +721,7 @@ describe('publish command with --sign flag', () => {
     });
 
     const program = await buildProgram();
-    await program.parseAsync(['node', 'spm', 'publish']);
+    await program.parseAsync(['node', 'spm', 'publish', '--no-sign']);
 
     expect(mockSignPackage).not.toHaveBeenCalled();
     expect(mockSignPackageInteractive).not.toHaveBeenCalled();

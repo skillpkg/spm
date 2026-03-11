@@ -87,8 +87,8 @@ export const registerPublishCommand = (program: Command): void => {
     .option('--dry-run', 'Pack and validate without publishing')
     .option('--force', 'Skip confirmation prompts')
     .option('--json', 'Output machine-readable JSON')
-    .option('--sign', 'Sign package with Sigstore (opens browser for authentication)')
-    .action(async (opts: { dryRun?: boolean; force?: boolean; json?: boolean; sign?: boolean }) => {
+    .option('--no-sign', 'Skip Sigstore signing (publishes unsigned)')
+    .action(async (opts: { dryRun?: boolean; force?: boolean; json?: boolean; sign: boolean }) => {
       const mode = getCurrentMode();
 
       // 1. Check auth
@@ -192,12 +192,14 @@ export const registerPublishCommand = (program: Command): void => {
         return;
       }
 
-      // 7. Sign the package (CI auto-signs, or local with --sign flag)
+      // 7. Sign the package (CI auto-signs, local signs by default, --no-sign to skip)
       let signatureBundle: string | null = null;
       let signerIdentity: string | null = null;
       const isCI = !!(process.env.CI || process.env.GITHUB_ACTIONS || process.env.GITLAB_CI);
 
-      if (isCI) {
+      if (!opts.sign) {
+        log(`${icons.warning} ${c.warn('Skipping signing (--no-sign)')}`);
+      } else if (isCI) {
         try {
           log(`${icons.lock} Signing...`);
           const signResult = await withSpinner('Signing with Sigstore...', () =>
@@ -214,7 +216,7 @@ export const registerPublishCommand = (program: Command): void => {
         } catch {
           log(`${icons.warning} ${c.warn('Signing unavailable in this CI environment')}`);
         }
-      } else if (opts.sign) {
+      } else {
         try {
           log(`${icons.lock} Opening browser for Sigstore authentication...`);
           const signResult = await withSpinner('Signing with Sigstore...', () =>
