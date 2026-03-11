@@ -144,6 +144,31 @@ export interface ReportResponse {
   report_id: string;
 }
 
+export interface SignResponse {
+  name: string;
+  version: string;
+  signed: boolean;
+  signer_identity?: string;
+  signed_at: string;
+}
+
+export interface RescanResponse {
+  name: string;
+  version: string;
+  security_level: string;
+  passed: boolean;
+  blocked: string[];
+  warnings: string[];
+  layers: Array<{
+    layer: number;
+    name: string;
+    status: string;
+    confidence: number;
+    error?: string;
+  }>;
+  rescanned_at: string;
+}
+
 const isApiError = (body: unknown): body is ApiError => {
   return typeof body === 'object' && body !== null && 'error' in body && 'message' in body;
 };
@@ -269,7 +294,26 @@ export const createApiClient = (config?: ApiClientConfig) => {
       formData.append('package', new Blob([sklBuffer]), 'skill.skl');
       formData.append('manifest', JSON.stringify(manifest));
       if (signature) {
-        formData.append('signature', signature);
+        const bundleBlob = new Blob([signature], { type: 'application/json' });
+        formData.append('sigstore_bundle', bundleBlob, 'bundle.sigstore');
+        // Extract signer identity from bundle if possible
+        try {
+          const parsed = JSON.parse(signature);
+          const vm = parsed.verificationMaterial;
+          let certB64: string | undefined;
+          if (vm?.certificate?.rawBytes) certB64 = vm.certificate.rawBytes;
+          else if (vm?.x509CertificateChain?.certificates?.[0]?.rawBytes)
+            certB64 = vm.x509CertificateChain.certificates[0].rawBytes;
+          if (certB64) {
+            const decoded = Buffer.from(certB64, 'base64').toString('utf-8');
+            const emailMatch = /[\w.-]+@[\w.-]+\.\w+/.exec(decoded);
+            const uriMatch = /https:\/\/github\.com\/[\w./-]+/.exec(decoded);
+            const identity = emailMatch?.[0] ?? uriMatch?.[0];
+            if (identity) formData.append('signer_identity', identity);
+          }
+        } catch {
+          // Best-effort identity extraction
+        }
       }
 
       const h: Record<string, string> = {
@@ -320,6 +364,46 @@ export const createApiClient = (config?: ApiClientConfig) => {
 
     reportSkill: (name: string, body: { reason: string; detail?: string }) =>
       request<ReportResponse>('POST', `/skills/${encodeURIComponent(name)}/report`, body),
+
+    // -- Sign & Rescan --
+    signSkill: async (
+      name: string,
+      version: string,
+      bundle: string,
+      signerIdentity?: string,
+    ): Promise<SignResponse> => {
+      const url = `${registry}/skills/${encodeURIComponent(name)}/sign`;
+      const formData = new FormData();
+      formData.append('version', version);
+      const bundleBlob = new Blob([bundle], { type: 'application/json' });
+      formData.append('sigstore_bundle', bundleBlob, 'bundle.sigstore');
+      if (signerIdentity) {
+        formData.append('signer_identity', signerIdentity);
+      }
+
+      const h: Record<string, string> = { 'User-Agent': 'spm-cli/0.0.1' };
+      if (token) h['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(url, { method: 'POST', headers: h, body: formData });
+
+      if (!res.ok) {
+        let errorBody: unknown;
+        try {
+          errorBody = await res.json();
+        } catch {
+          errorBody = { error: 'unknown', message: res.statusText };
+        }
+        if (isApiError(errorBody)) throw new ApiClientError(res.status, errorBody);
+        throw new ApiClientError(res.status, { error: 'unknown', message: res.statusText });
+      }
+
+      return (await res.json()) as SignResponse;
+    },
+
+    rescanSkill: (name: string, version?: string) =>
+      request<RescanResponse>('POST', `/skills/${encodeURIComponent(name)}/rescan`, {
+        ...(version ? { version } : {}),
+      }),
 
     // -- Resolution --
     resolve: (skills: ResolveRequest['skills'], platform?: string) =>
