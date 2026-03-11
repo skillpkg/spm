@@ -27,6 +27,8 @@ import { registerYankCommand } from './commands/yank.js';
 import { registerDeprecateCommand } from './commands/deprecate.js';
 import { registerReportCommand } from './commands/report.js';
 import { registerVerifyCommand } from './commands/verify.js';
+import { registerSignCommand } from './commands/sign.js';
+import { registerRescanCommand } from './commands/rescan.js';
 
 const program = new Command();
 
@@ -74,6 +76,8 @@ registerReportCommand(program);
 
 // -- Security commands --
 registerVerifyCommand(program);
+registerSignCommand(program);
+registerRescanCommand(program);
 
 // -- Agent commands --
 registerAgentsCommand(program);
