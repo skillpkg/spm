@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { TopBar, Breadcrumb, type BreadcrumbItem } from '@spm/ui';
-import { useAuth } from '../context/AuthContext';
 
 const ROUTE_LABELS: Record<string, string> = {
   '/': 'Home',
@@ -101,49 +100,6 @@ const TopBarSearch = () => {
   );
 };
 
-const UserAvatar = () => {
-  const { isAuthenticated, user } = useAuth();
-  const navigate = useNavigate();
-
-  if (!isAuthenticated || !user) return null;
-
-  return (
-    <button
-      type="button"
-      onClick={() => navigate('/dashboard')}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        padding: 0,
-      }}
-    >
-      <img
-        src={`https://github.com/${user.username}.png?size=28`}
-        alt={user.username}
-        style={{
-          width: 24,
-          height: 24,
-          borderRadius: '50%',
-          border: '1px solid var(--color-border-default)',
-        }}
-      />
-      <span
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 12,
-          color: 'var(--color-text-secondary)',
-        }}
-      >
-        {user.username}
-      </span>
-    </button>
-  );
-};
-
 export const AppTopBar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
   const { pathname } = useLocation();
 
@@ -151,7 +107,6 @@ export const AppTopBar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
     <TopBar
       left={<Breadcrumb items={deriveBreadcrumbs(pathname)} />}
       center={<TopBarSearch />}
-      right={<UserAvatar />}
       onMenuClick={onMenuClick}
     />
   );
