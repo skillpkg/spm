@@ -42,13 +42,14 @@ const renderPanel = () =>
   );
 
 describe('AdminPanel', () => {
-  it('renders Admin Panel heading', () => {
+  it('renders Admin Panel in breadcrumb', () => {
     renderPanel();
     expect(screen.getByText('Admin Panel')).toBeInTheDocument();
   });
 
-  it('renders all 6 tab labels', () => {
+  it('renders all 7 navigation items in sidebar', () => {
     renderPanel();
+    expect(screen.getAllByText('Overview').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Review Queue')).toBeInTheDocument();
     expect(screen.getByText('Skills')).toBeInTheDocument();
     expect(screen.getByText('Scan Analytics')).toBeInTheDocument();
@@ -57,35 +58,33 @@ describe('AdminPanel', () => {
     expect(screen.getByText('Errors')).toBeInTheDocument();
   });
 
-  it('renders ADMIN badge in nav', () => {
+  it('renders ADMIN badge in sidebar', () => {
     renderPanel();
     expect(screen.getByText('ADMIN')).toBeInTheDocument();
   });
 
-  it('shows FlaggedQueue loading state by default', () => {
+  it('shows Overview content by default', () => {
     renderPanel();
-    expect(screen.getByText('Loading review queue...')).toBeInTheDocument();
+    expect(screen.getByText('Platform Overview')).toBeInTheDocument();
   });
 
-  it('shows FlaggedQueue content after loading', async () => {
+  it('shows coming soon placeholders on overview', () => {
     renderPanel();
-    await waitFor(() => {
-      expect(screen.getByText('In queue')).toBeInTheDocument();
-    });
+    expect(screen.getAllByText(/Coming Soon/).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('shows username in nav', () => {
+  it('shows username in sidebar footer', () => {
     renderPanel();
-    expect(screen.getByText('admin')).toBeInTheDocument();
+    expect(screen.getByText('@admin')).toBeInTheDocument();
   });
 
-  it('shows skillpkg.dev link', () => {
+  it('shows skillpkg.dev link in sidebar', () => {
     renderPanel();
     const link = screen.getByText((content) => content.includes('skillpkg.dev'));
     expect(link).toBeInTheDocument();
   });
 
-  it('shows Sign out button', () => {
+  it('shows Sign out button in sidebar footer', () => {
     renderPanel();
     expect(screen.getByText('Sign out')).toBeInTheDocument();
   });

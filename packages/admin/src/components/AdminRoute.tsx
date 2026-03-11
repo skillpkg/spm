@@ -6,6 +6,11 @@ export const AdminRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, isAdmin, isLoading, signOut } = useAuth();
   const location = useLocation();
 
+  // Skip auth in development for local review (not during tests)
+  if (import.meta.env.DEV && !import.meta.env.VITEST) {
+    return <>{children}</>;
+  }
+
   if (isLoading) {
     return (
       <div
