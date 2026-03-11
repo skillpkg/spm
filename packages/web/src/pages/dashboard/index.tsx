@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTabParam } from '../../lib/useTabParam';
 import { useAuth } from '../../context/AuthContext';
 import {
   type Author,
@@ -23,7 +23,7 @@ const AGENT_COLORS: Record<string, string> = {
 };
 
 export const Dashboard = () => {
-  const [tab, setTab] = useState('overview');
+  const [tab, setTab] = useTabParam('tab', 'overview');
   const { user, token } = useAuth();
   const username = user?.username ?? 'unknown';
   const trustTier = (user?.trust_tier as TrustTier) ?? 'registered';

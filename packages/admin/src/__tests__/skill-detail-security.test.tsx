@@ -1,5 +1,5 @@
 import { screen, waitFor } from '@testing-library/react';
-import { renderWithQuery } from './helpers';
+import { renderWithQueryAndRouter } from './helpers';
 import { SkillDetailPane } from '../components/SkillDetailPane';
 import { type SkillDetailResponse } from '../lib/api';
 
@@ -93,7 +93,7 @@ describe('SkillDetailPane Security Tab', () => {
   });
 
   it('renders security level when scan_layers are provided', async () => {
-    renderWithQuery(<SkillDetailPane skillName="test-skill" />);
+    renderWithQueryAndRouter(<SkillDetailPane skillName="test-skill" />);
     await waitFor(() => {
       expect(screen.getByText('test-skill')).toBeInTheDocument();
     });
@@ -107,7 +107,7 @@ describe('SkillDetailPane Security Tab', () => {
   });
 
   it('renders scan layer data with status and confidence', async () => {
-    renderWithQuery(<SkillDetailPane skillName="test-skill" />);
+    renderWithQueryAndRouter(<SkillDetailPane skillName="test-skill" />);
     await waitFor(() => {
       expect(screen.getByText('test-skill')).toBeInTheDocument();
     });
@@ -123,7 +123,7 @@ describe('SkillDetailPane Security Tab', () => {
   });
 
   it('shows confidence percentage for layers with confidence', async () => {
-    renderWithQuery(<SkillDetailPane skillName="test-skill" />);
+    renderWithQueryAndRouter(<SkillDetailPane skillName="test-skill" />);
     await waitFor(() => {
       expect(screen.getByText('test-skill')).toBeInTheDocument();
     });
@@ -150,7 +150,7 @@ describe('SkillDetailPane Security Tab', () => {
       },
     });
 
-    renderWithQuery(<SkillDetailPane skillName="test-skill" />);
+    renderWithQueryAndRouter(<SkillDetailPane skillName="test-skill" />);
     await waitFor(() => {
       expect(screen.getByText('test-skill')).toBeInTheDocument();
     });
@@ -171,7 +171,7 @@ describe('SkillDetailPane Security Tab', () => {
       security: undefined,
     });
 
-    renderWithQuery(<SkillDetailPane skillName="test-skill" />);
+    renderWithQueryAndRouter(<SkillDetailPane skillName="test-skill" />);
     await waitFor(() => {
       expect(screen.getByText('test-skill')).toBeInTheDocument();
     });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@spm/web-auth';
+import { useTabParam } from '../lib/useTabParam';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge, Button, Card, Sparkline, TRUST_CONFIG, type TrustTier } from '@spm/ui';
 import {
@@ -76,14 +77,12 @@ const buildSparklineData = (days: SkillDownloadsDay[]): number[] => {
   return result;
 };
 
-type DetailTab = 'readme' | 'definition' | 'security';
-
 export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
   const { token } = useAuth();
   const queryClient = useQueryClient();
   const { set } = useSearchParamsState();
   const [readmeExpanded, setReadmeExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<DetailTab>('readme');
+  const [activeTab, setActiveTab] = useTabParam('skill_tab', 'readme');
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [versionLoading, setVersionLoading] = useState(false);
   const [manualVersionData, setManualVersionData] = useState<{
@@ -625,7 +624,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                           textTransform: 'capitalize',
                         }}
                       >
-                        {detail.security?.scan_security_level ?? detail.security?.scan_status ?? 'unknown'}
+                        {detail.security?.scan_security_level ??
+                          detail.security?.scan_status ??
+                          'unknown'}
                       </span>
                     </div>
                   </div>
@@ -682,7 +683,8 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                   </div>
 
                   {/* Approve/Block for flagged or blocked scans */}
-                  {(detail.security?.scan_security_level === 'flagged' || detail.security?.scan_security_level === 'blocked') && (
+                  {(detail.security?.scan_security_level === 'flagged' ||
+                    detail.security?.scan_security_level === 'blocked') && (
                     <div
                       style={{
                         marginTop: 4,

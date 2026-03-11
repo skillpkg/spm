@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTabParam } from '../../lib/useTabParam';
 import { useQuery } from '@tanstack/react-query';
 import { skillDetailQuery } from './queries';
 import { apiToSkillFull } from './types';
@@ -11,7 +11,7 @@ import { SkillSidebar } from './SkillSidebar';
 
 export const SkillDetail = () => {
   const { name } = useParams<{ name: string }>();
-  const [activeTab, setActiveTab] = useState<'readme' | 'versions' | 'security'>('readme');
+  const [activeTab, setActiveTab] = useTabParam('tab', 'readme');
 
   const { data: apiData, isLoading } = useQuery(skillDetailQuery(name ?? ''));
   const skill = apiData ? apiToSkillFull(apiData) : null;

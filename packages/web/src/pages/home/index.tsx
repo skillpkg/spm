@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTabParam } from '../../lib/useTabParam';
 import { useQuery } from '@tanstack/react-query';
 import { type SkillSummary, type Category } from '../../data/constants';
 import { type TrendingSkill, type CategoryItem } from '../../lib/api';
@@ -33,7 +34,7 @@ const apiCategoryToCategory = (c: CategoryItem): Category => ({
 
 export const Home = () => {
   const [query, setQuery] = useState('');
-  const [trendingTab, setTrendingTab] = useState<TrendingTab>('featured');
+  const [trendingTab, setTrendingTab] = useTabParam('trending', 'featured');
   const navigate = useNavigate();
 
   const { data: featuredData } = useQuery(trendingQuery('featured'));
@@ -75,7 +76,7 @@ export const Home = () => {
 
       <section style={{ maxWidth: 920, margin: '0 auto', padding: '0 32px 60px' }}>
         <TrendingTabs
-          trendingTab={trendingTab}
+          trendingTab={trendingTab as TrendingTab}
           setTrendingTab={setTrendingTab}
           featuredSkills={featuredSkills}
           risingSkills={risingSkills}
