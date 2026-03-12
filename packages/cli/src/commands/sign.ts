@@ -108,11 +108,20 @@ export const registerSignCommand = (program: Command): void => {
       const targets: Array<{ name: string; version: string }> = [];
 
       if (opts.all) {
-        // Fetch user's skills and find unsigned versions
+        // Fetch skills and find unsigned versions
         try {
-          log(`${icons.info} Fetching your published skills...`);
           const whoami = await api.whoami();
-          const searchResult = await api.searchSkills({ author: whoami.username, per_page: 100 });
+          const isAdmin = whoami.is_admin;
+
+          if (isAdmin) {
+            log(`${icons.info} Admin mode — fetching all unsigned skills in registry...`);
+          } else {
+            log(`${icons.info} Fetching your published skills...`);
+          }
+
+          // Admin: fetch all skills; regular user: only their own
+          const searchParams = isAdmin ? { per_page: 100 } : { author: whoami.username, per_page: 100 };
+          const searchResult = await api.searchSkills(searchParams);
 
           for (const skill of searchResult.results) {
             if (!skill.signed) {
@@ -121,7 +130,7 @@ export const registerSignCommand = (program: Command): void => {
           }
 
           if (targets.length === 0) {
-            log(`${icons.success} All your published skills are already signed.`);
+            log(`${icons.success} All skills are already signed.`);
             return;
           }
 

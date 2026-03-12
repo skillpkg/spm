@@ -45,6 +45,7 @@ interface WhoamiResponse {
   username: string;
   github_username: string;
   trust_tier: string;
+  is_admin: boolean;
   registered_at: string;
   skills_published: number;
 }
