@@ -48,7 +48,7 @@ const extractSANFromCertBytes = (certB64: string): string => {
   try {
     const decoded = Buffer.from(certB64, 'base64').toString('utf-8');
     // Look for email-like patterns in the cert
-    const emailMatch = /[\w.-]+@[\w.-]+\.\w+/.exec(decoded);
+    const emailMatch = /[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}/.exec(decoded);
     if (emailMatch) {
       return emailMatch[0];
     }

@@ -306,7 +306,7 @@ export const createApiClient = (config?: ApiClientConfig) => {
             certB64 = vm.x509CertificateChain.certificates[0].rawBytes;
           if (certB64) {
             const decoded = Buffer.from(certB64, 'base64').toString('utf-8');
-            const emailMatch = /[\w.-]+@[\w.-]+\.\w+/.exec(decoded);
+            const emailMatch = /[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}/.exec(decoded);
             const uriMatch = /https:\/\/github\.com\/[\w./-]+/.exec(decoded);
             const identity = emailMatch?.[0] ?? uriMatch?.[0];
             if (identity) formData.append('signer_identity', identity);
