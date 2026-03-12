@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { eq, ne, and, or, ilike, desc, sql, count } from 'drizzle-orm';
+import { eq, ne, and, or, ilike, desc, sql, count, inArray } from 'drizzle-orm';
 import { compareTwoStrings } from 'string-similarity';
 import { ManifestSchema, ERROR_CODES, createApiError, TRUST_TIERS } from '@spm/shared';
 import type { Manifest } from '@spm/shared';
@@ -540,78 +540,140 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
     .limit(per_page)
     .offset(offset);
 
-  // Enrich each result
-  const results = await Promise.all(
-    rows.map(async (row) => {
-      const [latestVersion] = await db
-        .select()
-        .from(versions)
-        .where(and(eq(versions.skillId, row.id), eq(versions.yanked, false)))
-        .orderBy(
-          desc(versions.versionMajor),
-          desc(versions.versionMinor),
-          desc(versions.versionPatch),
-        )
-        .limit(1);
+  // Batch-enrich all results (avoids N+1 queries)
+  const skillIds = rows.map((r) => r.id);
+  const ownerIds = [...new Set(rows.map((r) => r.ownerId).filter(Boolean))] as string[];
 
-      const tagRows = await db
-        .select({ tag: skillTags.tag })
-        .from(skillTags)
-        .where(eq(skillTags.skillId, row.id));
+  // Batch: latest version per skill (using DISTINCT ON)
+  const latestVersionRows =
+    skillIds.length > 0
+      ? await db
+          .select()
+          .from(versions)
+          .where(and(inArray(versions.skillId, skillIds), eq(versions.yanked, false)))
+          .orderBy(
+            versions.skillId,
+            desc(versions.versionMajor),
+            desc(versions.versionMinor),
+            desc(versions.versionPatch),
+          )
+      : [];
+  const latestVersionMap = new Map<string, (typeof latestVersionRows)[0]>();
+  for (const v of latestVersionRows) {
+    if (!latestVersionMap.has(v.skillId)) latestVersionMap.set(v.skillId, v);
+  }
 
-      const platformRows = await db
-        .select({ platform: skillPlatforms.platform })
-        .from(skillPlatforms)
-        .where(eq(skillPlatforms.skillId, row.id));
+  // Batch: tags
+  const allTags =
+    skillIds.length > 0
+      ? await db
+          .select({ skillId: skillTags.skillId, tag: skillTags.tag })
+          .from(skillTags)
+          .where(inArray(skillTags.skillId, skillIds))
+      : [];
+  const tagMap = new Map<string, string[]>();
+  for (const t of allTags) {
+    if (!tagMap.has(t.skillId)) tagMap.set(t.skillId, []);
+    tagMap.get(t.skillId)!.push(t.tag);
+  }
 
-      const [author] = await db
-        .select({ username: users.username, trustTier: users.trustTier })
-        .from(users)
-        .where(eq(users.id, row.ownerId))
-        .limit(1);
+  // Batch: platforms
+  const allPlatforms =
+    skillIds.length > 0
+      ? await db
+          .select({ skillId: skillPlatforms.skillId, platform: skillPlatforms.platform })
+          .from(skillPlatforms)
+          .where(inArray(skillPlatforms.skillId, skillIds))
+      : [];
+  const platformMap = new Map<string, string[]>();
+  for (const p of allPlatforms) {
+    if (!platformMap.has(p.skillId)) platformMap.set(p.skillId, []);
+    platformMap.get(p.skillId)!.push(p.platform);
+  }
 
-      const [dlCount] = await db
-        .select({ total: count() })
-        .from(downloads)
-        .innerJoin(versions, eq(versions.id, downloads.versionId))
-        .where(eq(versions.skillId, row.id));
+  // Batch: authors
+  const authorRows =
+    ownerIds.length > 0
+      ? await db
+          .select({ id: users.id, username: users.username, trustTier: users.trustTier })
+          .from(users)
+          .where(inArray(users.id, ownerIds))
+      : [];
+  const authorMap = new Map<string, { username: string; trustTier: string }>();
+  for (const a of authorRows) {
+    authorMap.set(a.id, { username: a.username, trustTier: a.trustTier });
+  }
 
-      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const [weeklyDlCount] = await db
-        .select({ total: count() })
-        .from(downloads)
-        .innerJoin(versions, eq(versions.id, downloads.versionId))
-        .where(
-          and(
-            eq(versions.skillId, row.id),
-            sql`${downloads.downloadedAt} >= ${oneWeekAgo.toISOString()}`,
-          ),
-        );
+  // Batch: download counts
+  const dlCounts =
+    skillIds.length > 0
+      ? await db
+          .select({
+            skillId: versions.skillId,
+            total: count(),
+          })
+          .from(downloads)
+          .innerJoin(versions, eq(versions.id, downloads.versionId))
+          .where(inArray(versions.skillId, skillIds))
+          .groupBy(versions.skillId)
+      : [];
+  const dlMap = new Map<string, number>();
+  for (const d of dlCounts) {
+    dlMap.set(d.skillId, d.total);
+  }
 
-      return {
-        name: row.name,
-        version: latestVersion?.version ?? null,
-        description: row.description,
-        author: {
-          username: author?.username ?? 'unknown',
-          trust_tier: author?.trustTier ?? 'registered',
-        },
-        categories: row.categories,
-        tags: tagRows.map((t) => t.tag),
-        platforms: platformRows.map((p) => p.platform),
-        downloads: dlCount.total,
-        weekly_downloads: weeklyDlCount.total,
-        rating_avg: row.ratingAvg,
-        rating_count: row.ratingCount,
-        signed: latestVersion?.sigstoreBundleKey != null,
-        scan_security_level: row.scanSecurityLevel,
-        license: row.license,
-        deprecated: row.deprecated,
-        published_at: latestVersion?.publishedAt?.toISOString() ?? null,
-        updated_at: row.updatedAt.toISOString(),
-      };
-    }),
-  );
+  // Batch: weekly download counts
+  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const weeklyDlCounts =
+    skillIds.length > 0
+      ? await db
+          .select({
+            skillId: versions.skillId,
+            total: count(),
+          })
+          .from(downloads)
+          .innerJoin(versions, eq(versions.id, downloads.versionId))
+          .where(
+            and(
+              inArray(versions.skillId, skillIds),
+              sql`${downloads.downloadedAt} >= ${oneWeekAgo.toISOString()}`,
+            ),
+          )
+          .groupBy(versions.skillId)
+      : [];
+  const weeklyDlMap = new Map<string, number>();
+  for (const d of weeklyDlCounts) {
+    weeklyDlMap.set(d.skillId, d.total);
+  }
+
+  // Assemble results
+  const results = rows.map((row) => {
+    const latestVersion = latestVersionMap.get(row.id);
+    const author = row.ownerId ? authorMap.get(row.ownerId) : undefined;
+
+    return {
+      name: row.name,
+      version: latestVersion?.version ?? null,
+      description: row.description,
+      author: {
+        username: author?.username ?? 'unknown',
+        trust_tier: author?.trustTier ?? 'registered',
+      },
+      categories: row.categories,
+      tags: tagMap.get(row.id) ?? [],
+      platforms: platformMap.get(row.id) ?? [],
+      downloads: dlMap.get(row.id) ?? 0,
+      weekly_downloads: weeklyDlMap.get(row.id) ?? 0,
+      rating_avg: row.ratingAvg,
+      rating_count: row.ratingCount,
+      signed: latestVersion?.sigstoreBundleKey != null,
+      scan_security_level: row.scanSecurityLevel,
+      license: row.license,
+      deprecated: row.deprecated,
+      published_at: latestVersion?.publishedAt?.toISOString() ?? null,
+      updated_at: row.updatedAt.toISOString(),
+    };
+  });
 
   return c.json({
     results,
