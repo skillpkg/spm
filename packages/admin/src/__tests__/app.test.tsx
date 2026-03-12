@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { renderWithQuery } from './helpers';
 import { AdminPanel } from '../pages/AdminPanel';

@@ -77,7 +77,7 @@ describe('Sidebar', () => {
 
   it('renders mobile overlay when mobileOpen', () => {
     const onClose = vi.fn();
-    const { container } = render(
+    render(
       <Sidebar header={header} sections={sections} mobileOpen onMobileClose={onClose} />,
     );
     const overlay = screen.getByTestId('sidebar-overlay');

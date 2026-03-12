@@ -183,7 +183,7 @@ describe('categories routes — POST /categories/classify', () => {
   });
 
   it('should suggest a sensible category for frontend content', async () => {
-    const { categoriesRoutes: categoriesRoutes } = await import('../routes/categories.js');
+    const { categoriesRoutes: _categoriesRoutes } = await import('../routes/categories.js');
 
     // Create a simple app with mocked auth
     const app = new Hono<AppEnv>();

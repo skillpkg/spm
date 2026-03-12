@@ -342,7 +342,7 @@ describe('name validation — edge cases', () => {
 
   it('should accept exactly 50 character name', () => {
     // "a" + 49 chars = 50 total (start with letter, rest kebab-case)
-    const name = 'a' + '-bc'.repeat(16) + 'x'; // a-bc-bc-bc...-bcx = 50
+    const _name = 'a' + '-bc'.repeat(16) + 'x'; // a-bc-bc-bc...-bcx = 50
     // Let's make a proper 50-char name
     const name50 = 'a' + 'b'.repeat(49);
     expect(name50.length).toBe(50);

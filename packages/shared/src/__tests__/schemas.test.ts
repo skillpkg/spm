@@ -161,12 +161,12 @@ describe('ManifestSchema', () => {
   });
 
   it('rejects manifest with missing name', () => {
-    const { name, ...noName } = minimalManifest;
+    const { name: _name, ...noName } = minimalManifest;
     expect(() => ManifestSchema.parse(noName)).toThrow();
   });
 
   it('rejects manifest with missing version', () => {
-    const { version, ...noVersion } = minimalManifest;
+    const { version: _version, ...noVersion } = minimalManifest;
     expect(() => ManifestSchema.parse(noVersion)).toThrow();
   });
 
@@ -179,7 +179,7 @@ describe('ManifestSchema', () => {
   });
 
   it('rejects manifest with missing description', () => {
-    const { description, ...noDesc } = minimalManifest;
+    const { description: _description, ...noDesc } = minimalManifest;
     expect(() => ManifestSchema.parse(noDesc)).toThrow();
   });
 
