@@ -1,8 +1,18 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
+import updateNotifier from 'update-notifier';
 import { getOutputMode, setOutputMode } from './lib/output.js';
 
 declare const __CLI_VERSION__: string;
+
+// Check for updates (non-blocking, cached for 1 day)
+updateNotifier({
+  pkg: { name: '@skillpkg/cli', version: __CLI_VERSION__ },
+  updateCheckInterval: 1000 * 60 * 60 * 24, // 1 day
+}).notify({
+  message: `Update available: {currentVersion} → {latestVersion}\nRun {updateCommand} to update`,
+  defer: true,
+});
 
 const banner = `
   ${chalk.cyan('╔═╗')}${chalk.blueBright('╔═╗')}${chalk.blue('╔╦╗')}
