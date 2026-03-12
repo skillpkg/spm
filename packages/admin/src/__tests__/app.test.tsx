@@ -75,7 +75,7 @@ describe('AdminPanel', () => {
 
   it('shows username in sidebar footer', () => {
     renderPanel();
-    expect(screen.getByText('@admin')).toBeInTheDocument();
+    expect(screen.getByText('admin')).toBeInTheDocument();
   });
 
   it('shows skillpkg.dev link in sidebar', () => {

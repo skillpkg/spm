@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sidebar, type SidebarSection } from '@spm/ui';
+import { Sidebar, SidebarUserFooter, type SidebarSection } from '@spm/ui';
 import { useAuth } from '../context/AuthContext';
 
 const SpmLogo = () => (
@@ -49,51 +49,7 @@ const SidebarFooter = () => {
     );
   }
 
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <img
-        src={`https://github.com/${user.username}.png?size=28`}
-        alt={user.username}
-        style={{
-          width: 28,
-          height: 28,
-          borderRadius: '50%',
-          border: '1px solid var(--color-border-default)',
-          flexShrink: 0,
-        }}
-      />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 13,
-            color: 'var(--color-text-secondary)',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {user.username}
-        </div>
-      </div>
-      <button
-        type="button"
-        onClick={signOut}
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 12,
-          color: 'var(--color-text-muted)',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '2px 6px',
-          flexShrink: 0,
-        }}
-      >
-        Sign out
-      </button>
-    </div>
-  );
+  return <SidebarUserFooter username={user.username} onSignOut={signOut} />;
 };
 
 const pathToActiveId = (pathname: string): string => {

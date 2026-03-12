@@ -1,4 +1,4 @@
-import { Sidebar, Badge, type SidebarSection } from '@spm/ui';
+import { Sidebar, Badge, SidebarUserFooter, type SidebarSection } from '@spm/ui';
 import { useAuth } from '@spm/web-auth';
 
 const TABS_MAP: Record<string, string> = {
@@ -75,33 +75,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     </div>
   );
 
-  const footer = (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <span
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 12,
-          color: 'var(--color-text-muted)',
-        }}
-      >
-        @{user?.username || 'admin'}
-      </span>
-      <button
-        onClick={signOut}
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 13,
-          color: 'var(--color-text-dim)',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: 0,
-        }}
-      >
-        Sign out
-      </button>
-    </div>
-  );
+  const footer = <SidebarUserFooter username={user?.username || 'admin'} onSignOut={signOut} />;
 
   return <Sidebar header={header} sections={sections} activeId={activeTab} footer={footer} />;
 };

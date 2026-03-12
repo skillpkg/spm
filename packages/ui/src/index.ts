@@ -55,3 +55,7 @@ export {
   type BreadcrumbProps,
   type BreadcrumbItem,
 } from './components/Breadcrumb/Breadcrumb';
+export {
+  SidebarUserFooter,
+  type SidebarUserFooterProps,
+} from './components/SidebarUserFooter/SidebarUserFooter';
