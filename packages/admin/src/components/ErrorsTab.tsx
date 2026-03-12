@@ -1,6 +1,6 @@
 import { useAuth } from '@spm/web-auth';
 import { useQuery } from '@tanstack/react-query';
-import { Badge, Button, Card, StatBox, StatusBadge } from '@spm/ui';
+import { Badge, Button, Card, StatBox, StatusBadge, Text } from '@spm/ui';
 import { updateError } from '../lib/api';
 import { errorsQuery } from './ErrorsTab.queries';
 import { LoadingState, ErrorState, EmptyState } from './DataState';
@@ -73,44 +73,30 @@ export const ErrorsTab = () => {
                 >
                   <Badge label={err.type.replace('_', ' ')} color={typeColor} />
                   <StatusBadge status={err.status} />
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      color: 'var(--color-text-muted)',
-                    }}
-                  >
+                  <Text variant="caption" font="mono" color="muted">
                     &times;{err.count} occurrence
                     {err.count !== 1 ? 's' : ''}
-                  </span>
+                  </Text>
                 </div>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--color-text-muted)',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
+                <Text variant="label" font="mono" color="muted" style={{ whiteSpace: 'nowrap' }}>
                   {err.last_seen.includes('T') ? err.last_seen.slice(11, 16) : err.last_seen}
-                </span>
+                </Text>
               </div>
 
               {/* Error message */}
               <div
                 style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
                   padding: '8px 12px',
                   background: 'var(--color-bg)',
                   borderLeft: `3px solid var(--color-${typeColor})`,
                   borderRadius: '0 6px 6px 0',
-                  color: 'var(--color-text-secondary)',
                   marginBottom: 10,
                   overflowX: 'auto',
                 }}
               >
-                {err.message}
+                <Text variant="caption" font="mono" color="secondary">
+                  {err.message}
+                </Text>
               </div>
 
               {/* Context + actions */}
@@ -121,21 +107,19 @@ export const ErrorsTab = () => {
                   alignItems: 'center',
                 }}
               >
-                <div
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--color-text-muted)',
-                    display: 'flex',
-                    gap: 12,
-                  }}
+                <Text
+                  variant="label"
+                  as="div"
+                  font="mono"
+                  color="muted"
+                  style={{ display: 'flex', gap: 12 }}
                 >
                   {err.affected_skill && <span>Skill: {err.affected_skill}</span>}
                   <span>
                     First:{' '}
                     {err.first_seen.includes('T') ? err.first_seen.slice(0, 10) : err.first_seen}
                   </span>
-                </div>
+                </Text>
                 <div style={{ display: 'flex', gap: 6 }}>
                   {err.status === 'open' && (
                     <>

@@ -1,11 +1,13 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sidebar, SidebarUserFooter, type SidebarSection } from '@spm/ui';
+import { Sidebar, SidebarUserFooter, Text, type SidebarSection } from '@spm/ui';
 import { useAuth } from '../context/AuthContext';
 
 const SpmLogo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
     <img src="/logo-64.png" alt="SPM" style={{ width: 28, height: 28 }} />
-    <span
+    <Text
+      variant="h3"
+      as="span"
       style={{
         fontFamily: "'Alfa Slab One', serif",
         fontSize: 18,
@@ -18,7 +20,7 @@ const SpmLogo = () => (
       }}
     >
       spm
-    </span>
+    </Text>
   </div>
 );
 

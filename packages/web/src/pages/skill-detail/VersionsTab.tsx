@@ -1,3 +1,4 @@
+import { Text } from '@spm/ui';
 import { type SkillFull } from './types';
 
 export const VersionsTab = ({ skill }: { skill: SkillFull }) => (
@@ -13,52 +14,38 @@ export const VersionsTab = ({ skill }: { skill: SkillFull }) => (
           borderBottom: i < (skill.versions?.length ?? 0) - 1 ? '1px solid #1a1d2744' : 'none',
         }}
       >
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 14,
-            fontWeight: 600,
-            minWidth: 60,
-            color: i === 0 ? '#10b981' : '#64748b',
-          }}
+        <Text
+          variant="body"
+          font="mono"
+          weight={600}
+          as="span"
+          style={{ minWidth: 60, color: i === 0 ? '#10b981' : '#64748b' }}
         >
           {v.v}
-        </span>
+        </Text>
         <div>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 13,
-              color: 'var(--color-text-secondary)',
-            }}
-          >
+          <Text variant="body-sm" font="sans" color="secondary" as="div">
             {v.changes}
-          </div>
-          <div
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              color: 'var(--color-text-muted)',
-              marginTop: 4,
-            }}
-          >
+          </Text>
+          <Text variant="label" font="mono" color="muted" as="div" style={{ marginTop: 4 }}>
             {v.date}
-          </div>
+          </Text>
         </div>
         {i === 0 && (
-          <span
+          <Text
+            variant="tiny"
+            font="mono"
+            color="accent"
+            as="span"
             style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 10,
               padding: '2px 8px',
               borderRadius: 4,
               background: 'rgba(16,185,129,0.08)',
-              color: 'var(--color-accent)',
               marginLeft: 'auto',
             }}
           >
             latest
-          </span>
+          </Text>
         )}
       </div>
     ))}

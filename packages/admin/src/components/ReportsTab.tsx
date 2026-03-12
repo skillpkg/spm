@@ -1,6 +1,6 @@
 import { useAuth } from '@spm/web-auth';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Card, PriorityDot, StatBox, StatusBadge, type Priority } from '@spm/ui';
+import { Button, Card, PriorityDot, StatBox, StatusBadge, Text, type Priority } from '@spm/ui';
 import { updateReport } from '../lib/api';
 import { reportsQuery } from './ReportsTab.queries';
 import { LoadingState, ErrorState, EmptyState } from './DataState';
@@ -52,53 +52,37 @@ export const ReportsTab = () => {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <PriorityDot priority={report.priority as Priority} />
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 14,
-                    color: 'var(--color-cyan)',
-                    fontWeight: 500,
-                  }}
+                <Text
+                  variant="body"
+                  font="mono"
+                  weight={500}
+                  style={{ color: 'var(--color-cyan)' }}
                 >
                   {report.skill}
-                </span>
+                </Text>
                 <StatusBadge status={report.status} />
               </div>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: 'var(--color-text-muted)',
-                }}
-              >
+              <Text variant="label" font="mono" color="muted">
                 {report.created_at.slice(0, 10)}
-              </span>
+              </Text>
             </div>
-            <p
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 13,
-                color: 'var(--color-text-secondary)',
-                marginBottom: 10,
-                lineHeight: 1.625,
-                marginTop: 0,
-              }}
+            <Text
+              variant="body-sm"
+              as="p"
+              color="secondary"
+              style={{ marginBottom: 10, lineHeight: 1.625, marginTop: 0 }}
             >
               {report.reason}
-            </p>
+            </Text>
             {report.resolution && (
-              <p
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 12,
-                  color: 'var(--color-text-dim)',
-                  marginBottom: 10,
-                  marginTop: 0,
-                  fontStyle: 'italic',
-                }}
+              <Text
+                variant="caption"
+                as="p"
+                color="dim"
+                style={{ marginBottom: 10, marginTop: 0, fontStyle: 'italic' }}
               >
                 Resolution: {report.resolution}
-              </p>
+              </Text>
             )}
             <div
               style={{
@@ -107,15 +91,9 @@ export const ReportsTab = () => {
                 alignItems: 'center',
               }}
             >
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 12,
-                  color: 'var(--color-text-muted)',
-                }}
-              >
+              <Text variant="caption" color="muted">
                 Reported by {report.reporter ? `@${report.reporter}` : 'anonymous'}
-              </span>
+              </Text>
               <div style={{ display: 'flex', gap: 6 }}>
                 {report.status === 'open' && (
                   <>

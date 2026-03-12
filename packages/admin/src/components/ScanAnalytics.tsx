@@ -1,6 +1,6 @@
 import { useAuth } from '@spm/web-auth';
 import { useQuery } from '@tanstack/react-query';
-import { Card, StatBox } from '@spm/ui';
+import { Card, StatBox, Text } from '@spm/ui';
 import { adminStatsQuery } from './FlaggedQueue.queries';
 import { LoadingState, ErrorState } from './DataState';
 
@@ -54,43 +54,26 @@ export const ScanAnalytics = () => {
       <div style={{ display: 'flex', gap: 16 }}>
         {/* Users by trust */}
         <Card style={{ flex: 1, padding: '18px 22px' }}>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 14,
-              fontWeight: 600,
-              color: 'var(--color-text-primary)',
-              marginBottom: 14,
-            }}
-          >
+          <Text variant="body" as="div" weight={600} color="primary" style={{ marginBottom: 14 }}>
             Users by trust tier
-          </div>
+          </Text>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {Object.entries(stats.users_by_trust).map(([tier, count]) => (
               <div
                 key={tier}
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    color: 'var(--color-text-secondary)',
-                    textTransform: 'capitalize',
-                  }}
+                <Text
+                  variant="caption"
+                  font="mono"
+                  color="secondary"
+                  style={{ textTransform: 'capitalize' }}
                 >
                   {tier}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 13,
-                    color: 'var(--color-text-primary)',
-                    fontWeight: 600,
-                  }}
-                >
+                </Text>
+                <Text variant="body-sm" font="mono" color="primary" weight={600}>
                   {count}
-                </span>
+                </Text>
               </div>
             ))}
           </div>
@@ -98,101 +81,51 @@ export const ScanAnalytics = () => {
 
         {/* Totals */}
         <Card style={{ flex: 1, padding: '18px 22px' }}>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 14,
-              fontWeight: 600,
-              color: 'var(--color-text-primary)',
-              marginBottom: 14,
-            }}
-          >
+          <Text variant="body" as="div" weight={600} color="primary" style={{ marginBottom: 14 }}>
             Registry totals
-          </div>
+          </Text>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
+              <Text variant="body-sm" color="secondary">
                 Total skills
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 14,
-                  color: 'var(--color-accent)',
-                  fontWeight: 600,
-                }}
+              </Text>
+              <Text
+                variant="body"
+                font="mono"
+                weight={600}
+                style={{ color: 'var(--color-accent)' }}
               >
                 {stats.total_skills}
-              </span>
+              </Text>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
+              <Text variant="body-sm" color="secondary">
                 Total users
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 14,
-                  color: 'var(--color-cyan)',
-                  fontWeight: 600,
-                }}
-              >
+              </Text>
+              <Text variant="body" font="mono" weight={600} style={{ color: 'var(--color-cyan)' }}>
                 {stats.total_users}
-              </span>
+              </Text>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
+              <Text variant="body-sm" color="secondary">
                 Total downloads
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 14,
-                  color: 'var(--color-text-primary)',
-                  fontWeight: 600,
-                }}
-              >
+              </Text>
+              <Text variant="body" font="mono" color="primary" weight={600}>
                 {stats.total_downloads}
-              </span>
+              </Text>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
+              <Text variant="body-sm" color="secondary">
                 Open reports
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 14,
-                  color: 'var(--color-yellow)',
-                  fontWeight: 600,
-                }}
+              </Text>
+              <Text
+                variant="body"
+                font="mono"
+                weight={600}
+                style={{ color: 'var(--color-yellow)' }}
               >
                 {stats.open_reports}
-              </span>
+              </Text>
             </div>
           </div>
         </Card>
@@ -201,17 +134,9 @@ export const ScanAnalytics = () => {
       {/* Outcome breakdown */}
       {totalScans > 0 && (
         <Card style={{ marginTop: 16, padding: '18px 22px' }}>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 14,
-              fontWeight: 600,
-              color: 'var(--color-text-primary)',
-              marginBottom: 14,
-            }}
-          >
+          <Text variant="body" as="div" weight={600} color="primary" style={{ marginBottom: 14 }}>
             Scan outcome breakdown
-          </div>
+          </Text>
           <div
             style={{
               display: 'flex',
@@ -249,24 +174,12 @@ export const ScanAnalytics = () => {
                     background: r.color,
                   }}
                 />
-                <span
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 12,
-                    color: 'var(--color-text-secondary)',
-                  }}
-                >
+                <Text variant="caption" color="secondary">
                   {r.label}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    color: 'var(--color-text-dim)',
-                  }}
-                >
+                </Text>
+                <Text variant="caption" font="mono" color="dim">
                   {r.pct}%
-                </span>
+                </Text>
               </div>
             ))}
           </div>

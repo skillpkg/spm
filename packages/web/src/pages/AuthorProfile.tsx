@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { TrustBadge, type TrustTier } from '@spm/ui';
+import { TrustBadge, Text, type TrustTier } from '@spm/ui';
 import { authorProfileQuery } from './author/queries';
 
 interface AuthorDisplaySkill {
@@ -36,15 +36,9 @@ export const AuthorProfile = () => {
   if (loading) {
     return (
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '64px 32px', textAlign: 'center' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 15,
-            color: 'var(--color-text-muted)',
-          }}
-        >
+        <Text variant="h4" font="sans" color="muted" as="div">
           Loading author profile...
-        </div>
+        </Text>
       </div>
     );
   }
@@ -52,16 +46,9 @@ export const AuthorProfile = () => {
   if (authorSkills.length === 0) {
     return (
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '64px 32px', textAlign: 'center' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 20,
-            color: 'var(--color-text-dim)',
-            marginBottom: 16,
-          }}
-        >
+        <Text variant="h2" font="sans" color="dim" as="div" style={{ marginBottom: 16 }}>
           Author not found
-        </div>
+        </Text>
         <Link
           to="/"
           style={{
@@ -92,7 +79,11 @@ export const AuthorProfile = () => {
           marginBottom: 32,
         }}
       >
-        <div
+        <Text
+          variant="h1"
+          font="mono"
+          color="dim"
+          as="div"
           style={{
             width: 64,
             height: 64,
@@ -102,35 +93,25 @@ export const AuthorProfile = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: 'var(--font-mono)',
-            fontSize: 24,
-            color: 'var(--color-text-dim)',
           }}
         >
           {username?.[0]?.toUpperCase() ?? '?'}
-        </div>
+        </Text>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-            <h1
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 20,
-                fontWeight: 700,
-                color: 'var(--color-text-primary)',
-                margin: 0,
-              }}
-            >
+            <Text variant="h2" font="mono" color="primary" as="h1" style={{ margin: 0 }}>
               @{username}
-            </h1>
+            </Text>
             <TrustBadge tier={primaryTrust} size="lg" />
           </div>
-          <div
+          <Text
+            variant="caption"
+            font="mono"
+            color="muted"
+            as="div"
             style={{
               display: 'flex',
               gap: 24,
-              fontFamily: 'var(--font-mono)',
-              fontSize: 12,
-              color: 'var(--color-text-muted)',
               marginTop: 8,
             }}
           >
@@ -138,22 +119,14 @@ export const AuthorProfile = () => {
               {authorSkills.length} skill{authorSkills.length !== 1 ? 's' : ''}
             </span>
             <span>&#x2B07; {totalDownloads.toLocaleString()} total downloads</span>
-          </div>
+          </Text>
         </div>
       </div>
 
       {/* Skills list */}
-      <h2
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 15,
-          fontWeight: 600,
-          color: 'var(--color-text-secondary)',
-          marginBottom: 12,
-        }}
-      >
+      <Text variant="h4" font="sans" color="secondary" as="h2" style={{ marginBottom: 12 }}>
         Published skills
-      </h2>
+      </Text>
       <div
         style={{
           border: '1px solid var(--color-border-default)',
@@ -183,51 +156,43 @@ export const AuthorProfile = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 15,
-                      color: 'var(--color-cyan)',
-                      fontWeight: 600,
-                    }}
+                  <Text
+                    variant="h4"
+                    font="mono"
+                    weight={600}
+                    as="span"
+                    style={{ color: 'var(--color-cyan)' }}
                   >
                     {skill.name}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      color: 'var(--color-text-faint)',
-                    }}
-                  >
+                  </Text>
+                  <Text variant="caption" font="mono" color="faint" as="span">
                     {skill.version}
-                  </span>
+                  </Text>
                   <TrustBadge tier={skill.trust} />
                 </div>
-                <div
+                <Text
+                  variant="caption"
+                  font="mono"
+                  color="muted"
+                  as="div"
                   style={{
                     display: 'flex',
                     gap: 16,
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    color: 'var(--color-text-muted)',
                   }}
                 >
                   <span>&#x2B07; {skill.downloads}</span>
                   <span style={{ color: 'var(--color-yellow)' }}>&#x2605; {skill.rating}</span>
-                </div>
+                </Text>
               </div>
-              <p
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  color: 'var(--color-text-dim)',
-                  lineHeight: 1.6,
-                  margin: 0,
-                }}
+              <Text
+                variant="body-sm"
+                font="sans"
+                color="dim"
+                as="p"
+                style={{ lineHeight: 1.6, margin: 0 }}
               >
                 {skill.desc}
-              </p>
+              </Text>
             </div>
           </Link>
         ))}

@@ -1,3 +1,5 @@
+import { Text } from '@spm/ui';
+
 const steps = [
   {
     step: '1',
@@ -57,29 +59,24 @@ const guidelines = [
 
 export const Publish = () => (
   <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 32px 60px' }}>
-    <h1
-      style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 24,
-        fontWeight: 700,
-        color: 'var(--color-text-primary)',
-        marginBottom: 4,
-        marginTop: 0,
-      }}
+    <Text
+      variant="h1"
+      font="sans"
+      color="primary"
+      as="h1"
+      style={{ marginBottom: 4, marginTop: 0 }}
     >
       Publish a Skill
-    </h1>
-    <p
-      style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 14,
-        color: 'var(--color-text-muted)',
-        marginBottom: 32,
-        marginTop: 0,
-      }}
+    </Text>
+    <Text
+      variant="body"
+      font="sans"
+      color="muted"
+      as="p"
+      style={{ marginBottom: 32, marginTop: 0 }}
     >
       Share your skill with the community in 5 steps.
-    </p>
+    </Text>
 
     {/* Steps */}
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
@@ -94,51 +91,44 @@ export const Publish = () => (
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <div
+            <Text
+              variant="caption"
+              font="mono"
+              color="accent"
+              weight={700}
+              as="div"
               style={{
                 width: 24,
                 height: 24,
                 borderRadius: '50%',
                 background: 'rgba(16,185,129,0.1)',
-                color: 'var(--color-accent)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                fontWeight: 700,
                 flexShrink: 0,
               }}
             >
               {s.step}
-            </div>
-            <span
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 15,
-                fontWeight: 600,
-                color: 'var(--color-text-primary)',
-              }}
-            >
+            </Text>
+            <Text variant="h4" font="sans" color="primary" as="span">
               {s.title}
-            </span>
+            </Text>
           </div>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 13,
-              color: 'var(--color-text-muted)',
-              marginBottom: 12,
-              lineHeight: 1.5,
-            }}
+          <Text
+            variant="body-sm"
+            font="sans"
+            color="muted"
+            as="div"
+            style={{ marginBottom: 12, lineHeight: 1.5 }}
           >
             {s.content}
-          </div>
-          <pre
+          </Text>
+          <Text
+            variant="body-sm"
+            font="mono"
+            color="secondary"
+            as="pre"
             style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 13,
-              color: 'var(--color-text-secondary)',
               padding: '12px 14px',
               background: 'var(--color-bg)',
               border: '1px solid var(--color-border-default)',
@@ -149,24 +139,21 @@ export const Publish = () => (
             }}
           >
             {s.code}
-          </pre>
+          </Text>
         </div>
       ))}
     </div>
 
     {/* Guidelines */}
-    <h2
-      style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 16,
-        fontWeight: 600,
-        color: 'var(--color-text-secondary)',
-        marginBottom: 12,
-        marginTop: 0,
-      }}
+    <Text
+      variant="h3"
+      font="sans"
+      color="secondary"
+      as="h2"
+      style={{ marginBottom: 12, marginTop: 0 }}
     >
       Publishing guidelines
-    </h2>
+    </Text>
     <div
       style={{
         padding: '16px 20px',
@@ -185,21 +172,18 @@ export const Publish = () => (
             borderBottom: i < guidelines.length - 1 ? '1px solid #1a1d2733' : 'none',
           }}
         >
-          <span
-            style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-mono)', fontSize: 12 }}
-          >
+          <Text variant="caption" font="mono" color="accent" as="span">
             &#x2713;
-          </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 13,
-              color: 'var(--color-text-secondary)',
-              lineHeight: 1.5,
-            }}
+          </Text>
+          <Text
+            variant="body-sm"
+            font="sans"
+            color="secondary"
+            as="span"
+            style={{ lineHeight: 1.5 }}
           >
             {g}
-          </span>
+          </Text>
         </div>
       ))}
     </div>

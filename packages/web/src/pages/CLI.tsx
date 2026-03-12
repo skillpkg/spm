@@ -1,3 +1,5 @@
+import { Text } from '@spm/ui';
+
 const commands = [
   {
     name: 'spm install <skill>',
@@ -72,42 +74,38 @@ const commands = [
 
 export const CLI = () => (
   <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 32px 60px' }}>
-    <h1
-      style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 24,
-        fontWeight: 700,
-        color: 'var(--color-text-primary)',
-        marginBottom: 4,
-        marginTop: 0,
-      }}
+    <Text
+      variant="h1"
+      font="sans"
+      color="primary"
+      as="h1"
+      style={{ marginBottom: 4, marginTop: 0 }}
     >
       CLI Reference
-    </h1>
-    <p
-      style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 14,
-        color: 'var(--color-text-muted)',
-        marginBottom: 24,
-        marginTop: 0,
-      }}
+    </Text>
+    <Text
+      variant="body"
+      font="sans"
+      color="muted"
+      as="p"
+      style={{ marginBottom: 24, marginTop: 0 }}
     >
       Complete reference for the{' '}
-      <code
+      <Text
+        variant="body-sm"
+        font="mono"
+        color="accent"
+        as="code"
         style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 13,
-          color: 'var(--color-accent)',
           background: 'rgba(16,185,129,0.08)',
           padding: '2px 6px',
           borderRadius: 4,
         }}
       >
         spm
-      </code>{' '}
+      </Text>{' '}
       command-line tool.
-    </p>
+    </Text>
 
     {/* Install */}
     <div
@@ -119,21 +117,15 @@ export const CLI = () => (
         marginBottom: 24,
       }}
     >
-      <div
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 13,
-          color: 'var(--color-text-muted)',
-          marginBottom: 8,
-        }}
-      >
+      <Text variant="body-sm" font="sans" color="muted" as="div" style={{ marginBottom: 8 }}>
         Install
-      </div>
-      <div
+      </Text>
+      <Text
+        variant="body"
+        font="mono"
+        color="primary"
+        as="div"
         style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 14,
-          color: 'var(--color-text-primary)',
           padding: '10px 14px',
           background: 'var(--color-bg)',
           borderRadius: 6,
@@ -141,22 +133,19 @@ export const CLI = () => (
         }}
       >
         <span style={{ color: 'var(--color-text-muted)' }}>$ </span>npm install -g @skillpkg/cli
-      </div>
+      </Text>
     </div>
 
     {/* Commands */}
-    <h2
-      style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 16,
-        fontWeight: 600,
-        color: 'var(--color-text-secondary)',
-        marginBottom: 14,
-        marginTop: 0,
-      }}
+    <Text
+      variant="h3"
+      font="sans"
+      color="secondary"
+      as="h2"
+      style={{ marginBottom: 14, marginTop: 0 }}
     >
       Commands
-    </h2>
+    </Text>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {commands.map((cmd) => (
         <div
@@ -169,65 +158,55 @@ export const CLI = () => (
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <code
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 14,
-                fontWeight: 600,
-                color: 'var(--color-cyan)',
-              }}
+            <Text
+              variant="body"
+              font="mono"
+              weight={600}
+              as="code"
+              style={{ color: 'var(--color-cyan)' }}
             >
               {cmd.name}
-            </code>
+            </Text>
             {cmd.alias && (
-              <span
+              <Text
+                variant="label"
+                font="mono"
+                color="faint"
+                as="span"
                 style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: 'var(--color-text-faint)',
                   background: 'rgba(255,255,255,0.04)',
                   padding: '2px 6px',
                   borderRadius: 4,
                 }}
               >
                 alias: {cmd.alias}
-              </span>
+              </Text>
             )}
           </div>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 13,
-              color: 'var(--color-text-muted)',
-              marginBottom: cmd.flags.length ? 10 : 0,
-            }}
+          <Text
+            variant="body-sm"
+            font="sans"
+            color="muted"
+            as="div"
+            style={{ marginBottom: cmd.flags.length ? 10 : 0 }}
           >
             {cmd.desc}
-          </div>
+          </Text>
           {cmd.flags.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {cmd.flags.map((f) => (
                 <div key={f.flag} style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
-                  <code
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      color: 'var(--color-yellow)',
-                      minWidth: 180,
-                      flexShrink: 0,
-                    }}
+                  <Text
+                    variant="caption"
+                    font="mono"
+                    as="code"
+                    style={{ color: 'var(--color-yellow)', minWidth: 180, flexShrink: 0 }}
                   >
                     {f.flag}
-                  </code>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: 12,
-                      color: 'var(--color-text-dim)',
-                    }}
-                  >
+                  </Text>
+                  <Text variant="caption" font="sans" color="dim" as="span">
                     {f.desc}
-                  </span>
+                  </Text>
                 </div>
               ))}
             </div>

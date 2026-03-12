@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@spm/web-auth';
 import { useTabParam } from '../lib/useTabParam';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Card, Sparkline, TRUST_CONFIG, type TrustTier } from '@spm/ui';
+import { Badge, Button, Card, Sparkline, Text, TRUST_CONFIG, type TrustTier } from '@spm/ui';
 import {
   getAdminSkillVersion,
   yankSkill,
@@ -169,11 +169,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
   if (loading) {
     return (
       <div style={{ padding: 24, textAlign: 'center' }}>
-        <span
-          style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-text-muted)' }}
-        >
+        <Text variant="body-sm" font="mono" color="muted">
           Loading {skillName}...
-        </span>
+        </Text>
       </div>
     );
   }
@@ -194,12 +192,11 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
             border: '1px solid rgba(239,68,68,0.2)',
             borderRadius: 8,
             background: 'rgba(239,68,68,0.05)',
-            fontFamily: 'var(--font-sans)',
-            fontSize: 13,
-            color: 'var(--color-text-primary)',
           }}
         >
-          {error?.message ?? 'Skill not found'}
+          <Text variant="body-sm" color="primary">
+            {error?.message ?? 'Skill not found'}
+          </Text>
         </div>
       </div>
     );
@@ -235,31 +232,23 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
           <Card>
             <div style={{ padding: '16px 20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 18,
-                    fontWeight: 700,
-                    color: 'var(--color-cyan)',
-                  }}
+                <Text
+                  variant="h3"
+                  font="mono"
+                  weight={700}
+                  style={{ fontSize: 18, color: 'var(--color-cyan)' }}
                 >
                   {detail.name}
-                </span>
+                </Text>
                 {detail.latest_version && (
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 13,
-                      color: 'var(--color-text-muted)',
-                    }}
-                  >
+                  <Text variant="body-sm" font="mono" color="muted">
                     v{detail.latest_version}
-                  </span>
+                  </Text>
                 )}
-                <span
+                <Text
+                  variant="label"
+                  font="mono"
                   style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
                     color: cfg?.color ?? 'var(--color-text-dim)',
                     padding: '2px 8px',
                     border: `1px solid ${cfg?.color ?? 'var(--color-border-default)'}`,
@@ -267,12 +256,12 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                   }}
                 >
                   {cfg?.checks ?? ''} {cfg?.label ?? trustTier}
-                </span>
+                </Text>
                 {detail.deprecated && (
-                  <span
+                  <Text
+                    variant="label"
+                    font="mono"
                     style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
                       color: '#ef4444',
                       padding: '2px 8px',
                       border: '1px solid rgba(239,68,68,0.3)',
@@ -280,7 +269,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                     }}
                   >
                     DEPRECATED
-                  </span>
+                  </Text>
                 )}
                 {detail.imported_from && (
                   <a
@@ -294,13 +283,7 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                 )}
               </div>
               <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 13,
-                    color: 'var(--color-text-muted)',
-                  }}
-                >
+                <Text variant="body-sm" as="span" color="muted">
                   by{' '}
                   {(
                     detail.authors ?? [
@@ -330,63 +313,44 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
-                          color: 'var(--color-text-faint)',
                           textDecoration: 'none',
                           marginLeft: 4,
-                          fontSize: 10,
                         }}
                       >
-                        (GitHub)
+                        <Text variant="tiny" as="span" color="faint">
+                          (GitHub)
+                        </Text>
                       </a>
                       {a.role !== 'owner' && (
-                        <span
-                          style={{ fontSize: 10, color: 'var(--color-text-faint)', marginLeft: 2 }}
-                        >
+                        <Text variant="tiny" as="span" color="faint" style={{ marginLeft: 2 }}>
                           ({a.role})
-                        </span>
+                        </Text>
                       )}
                       {i < arr.length - 1 && ', '}
                     </span>
                   ))}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--color-text-faint)',
-                  }}
-                >
+                </Text>
+                <Text variant="label" font="mono" color="faint">
                   {detail.downloads.toLocaleString()} downloads
-                </span>
+                </Text>
               </div>
               {sparklineData && (
                 <div style={{ marginTop: 8 }}>
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: 10,
-                      color: 'var(--color-text-faint)',
-                      marginBottom: 4,
-                    }}
-                  >
+                  <Text variant="tiny" as="div" color="faint" style={{ marginBottom: 4 }}>
                     Last 30 days
-                  </div>
+                  </Text>
                   <Sparkline data={sparklineData} width={200} height={32} color="#10b981" />
                 </div>
               )}
               {detail.description && (
-                <p
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 13,
-                    color: 'var(--color-text-dim)',
-                    marginTop: 10,
-                    marginBottom: 0,
-                    lineHeight: 1.5,
-                  }}
+                <Text
+                  variant="body-sm"
+                  as="p"
+                  color="dim"
+                  style={{ marginTop: 10, marginBottom: 0, lineHeight: 1.5 }}
                 >
                   {detail.description}
-                </p>
+                </Text>
               )}
             </div>
           </Card>
@@ -394,15 +358,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
           {/* Version selector */}
           {detail.versions.length > 0 && (
             <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <label
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 12,
-                  color: 'var(--color-text-muted)',
-                }}
-              >
+              <Text variant="caption" as="label" color="muted">
                 Version:
-              </label>
+              </Text>
               <select
                 value={selectedVersion ?? detail.latest_version ?? ''}
                 onChange={(e) => handleVersionChange(e.target.value)}
@@ -426,15 +384,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                 ))}
               </select>
               {versionLoading && (
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--color-text-faint)',
-                  }}
-                >
+                <Text variant="label" font="mono" color="faint">
                   Loading...
-                </span>
+                </Text>
               )}
             </div>
           )}
@@ -460,21 +412,22 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  fontWeight: 500,
                   padding: '8px 16px',
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
                   borderBottom:
                     activeTab === tab.id ? '2px solid #10b981' : '2px solid transparent',
-                  color:
-                    activeTab === tab.id ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
                   marginBottom: -1,
                 }}
               >
-                {tab.label}
+                <Text
+                  variant="body-sm"
+                  weight={500}
+                  color={activeTab === tab.id ? 'primary' : 'muted'}
+                >
+                  {tab.label}
+                </Text>
               </button>
             ))}
           </div>
@@ -502,9 +455,6 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                       <button
                         onClick={() => setReadmeExpanded(true)}
                         style={{
-                          fontFamily: 'var(--font-sans)',
-                          fontSize: 12,
-                          color: 'var(--color-blue)',
                           background: 'none',
                           border: 'none',
                           cursor: 'pointer',
@@ -512,16 +462,15 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                           display: 'block',
                         }}
                       >
-                        Show more ({readmeLines.length - README_COLLAPSED_LINES} more lines)
+                        <Text variant="caption" style={{ color: 'var(--color-blue)' }}>
+                          Show more ({readmeLines.length - README_COLLAPSED_LINES} more lines)
+                        </Text>
                       </button>
                     )}
                     {readmeExpanded && readmeLines.length > README_COLLAPSED_LINES && (
                       <button
                         onClick={() => setReadmeExpanded(false)}
                         style={{
-                          fontFamily: 'var(--font-sans)',
-                          fontSize: 12,
-                          color: 'var(--color-blue)',
                           background: 'none',
                           border: 'none',
                           cursor: 'pointer',
@@ -529,20 +478,16 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                           display: 'block',
                         }}
                       >
-                        Show less
+                        <Text variant="caption" style={{ color: 'var(--color-blue)' }}>
+                          Show less
+                        </Text>
                       </button>
                     )}
                   </>
                 ) : (
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      color: 'var(--color-text-faint)',
-                    }}
-                  >
+                  <Text variant="caption" font="mono" color="faint">
                     No README available
-                  </span>
+                  </Text>
                 )}
               </div>
             </Card>
@@ -567,15 +512,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                     {JSON.stringify(manifest, null, 2)}
                   </pre>
                 ) : (
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      color: 'var(--color-text-faint)',
-                    }}
-                  >
+                  <Text variant="caption" font="mono" color="faint">
                     No manifest available
-                  </span>
+                  </Text>
                 )}
               </div>
             </Card>
@@ -588,16 +527,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {/* Security level */}
                   <div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: 'var(--color-text-primary)',
-                      }}
-                    >
+                    <Text variant="body-sm" weight={600} color="primary">
                       Security Level
-                    </span>
+                    </Text>
                     <div
                       style={{
                         marginTop: 6,
@@ -615,11 +547,11 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                           display: 'inline-block',
                         }}
                       />
-                      <span
+                      <Text
+                        variant="body-sm"
+                        font="mono"
+                        weight={600}
                         style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: 13,
-                          fontWeight: 600,
                           color: securityLevelColor(detail.security?.scan_security_level),
                           textTransform: 'capitalize',
                         }}
@@ -627,22 +559,15 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                         {detail.security?.scan_security_level ??
                           detail.security?.scan_status ??
                           'unknown'}
-                      </span>
+                      </Text>
                     </div>
                   </div>
 
                   {/* Scan layers */}
                   <div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: 'var(--color-text-primary)',
-                      }}
-                    >
+                    <Text variant="body-sm" weight={600} color="primary">
                       Security Layers
-                    </span>
+                    </Text>
                     <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {(detail.security?.scan_layers && detail.security.scan_layers.length > 0
                         ? detail.security.scan_layers
@@ -654,8 +579,6 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 8,
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: 12,
                           }}
                         >
                           <span
@@ -667,16 +590,18 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                               display: 'inline-block',
                             }}
                           />
-                          <span style={{ color: 'var(--color-text-dim)' }}>
+                          <Text variant="caption" font="mono" color="dim">
                             L{layer.layer}: {layer.name}
-                          </span>
-                          <span
+                          </Text>
+                          <Text
+                            variant="caption"
+                            font="mono"
                             style={{ color: layerStatusColor(layer.status), marginLeft: 'auto' }}
                           >
                             {layer.status}
                             {layer.confidence != null &&
                               ` (${(layer.confidence * 100).toFixed(0)}%)`}
-                          </span>
+                          </Text>
                         </div>
                       ))}
                     </div>
@@ -704,26 +629,20 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
 
                   {/* Signature info */}
                   <div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: 'var(--color-text-primary)',
-                      }}
-                    >
+                    <Text variant="body-sm" weight={600} color="primary">
                       Sigstore Signature
-                    </span>
-                    <div
+                    </Text>
+                    <Text
+                      variant="caption"
+                      as="div"
+                      font="mono"
                       style={{
                         marginTop: 6,
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
                         color: versionData?.signed ? '#10b981' : 'var(--color-text-faint)',
                       }}
                     >
                       {versionData?.signed ? 'Signed (Fulcio + Rekor)' : 'Not signed'}
-                    </div>
+                    </Text>
                   </div>
                 </div>
               </div>
@@ -734,17 +653,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
         {/* Sidebar */}
         <div>
           {/* Versions */}
-          <h3
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 14,
-              fontWeight: 600,
-              color: 'var(--color-text-primary)',
-              marginBottom: 8,
-            }}
-          >
+          <Text variant="body" as="h3" weight={600} color="primary" style={{ marginBottom: 8 }}>
             Versions ({detail.versions.length})
-          </h3>
+          </Text>
           <Card>
             <div style={{ maxHeight: 300, overflowY: 'auto' }}>
               {detail.versions.map((v) => (
@@ -759,26 +670,19 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                   }}
                 >
                   <div>
-                    <span
+                    <Text
+                      variant="caption"
+                      font="mono"
                       style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
                         color: v.yanked ? 'var(--color-text-faint)' : 'var(--color-text-primary)',
                         textDecoration: v.yanked ? 'line-through' : 'none',
                       }}
                     >
                       {v.version}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 10,
-                        color: 'var(--color-text-faint)',
-                        marginLeft: 8,
-                      }}
-                    >
+                    </Text>
+                    <Text variant="tiny" font="mono" color="faint" style={{ marginLeft: 8 }}>
                       {v.published_at.slice(0, 10)}
-                    </span>
+                    </Text>
                   </div>
                   {!v.yanked && (
                     <Button
@@ -789,15 +693,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                     />
                   )}
                   {v.yanked && (
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 10,
-                        color: '#ef4444',
-                      }}
-                    >
+                    <Text variant="tiny" font="mono" style={{ color: '#ef4444' }}>
                       yanked
-                    </span>
+                    </Text>
                   )}
                 </div>
               ))}
@@ -815,20 +713,13 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                 background: 'rgba(239,68,68,0.05)',
               }}
             >
-              <div
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  color: 'var(--color-text-primary)',
-                  marginBottom: 8,
-                }}
-              >
+              <Text variant="body-sm" as="div" color="primary" style={{ marginBottom: 8 }}>
                 Yank{' '}
                 <strong style={{ color: 'var(--color-cyan)' }}>
                   {skillName}@{yankTarget}
                 </strong>
                 ?
-              </div>
+              </Text>
               <input
                 value={yankReason}
                 onChange={(e) => setYankReason(e.target.value)}
@@ -864,30 +755,19 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
 
           {/* Quick actions */}
           <div style={{ marginTop: 16 }}>
-            <h3
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 14,
-                fontWeight: 600,
-                color: 'var(--color-text-primary)',
-                marginBottom: 8,
-              }}
-            >
+            <Text variant="body" as="h3" weight={600} color="primary" style={{ marginBottom: 8 }}>
               Actions
-            </h3>
+            </Text>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <a
                 href={`${WEB_URL}/skills/${detail.name}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 12,
-                  color: 'var(--color-blue)',
-                  textDecoration: 'none',
-                }}
+                style={{ textDecoration: 'none' }}
               >
-                Open on web →
+                <Text variant="caption" style={{ color: 'var(--color-blue)' }}>
+                  Open on web &#8594;
+                </Text>
               </a>
 
               {/* Re-scan */}
@@ -922,16 +802,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                   background: 'rgba(239,68,68,0.05)',
                 }}
               >
-                <div
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 13,
-                    color: 'var(--color-text-primary)',
-                    marginBottom: 8,
-                  }}
-                >
+                <Text variant="body-sm" as="div" color="primary" style={{ marginBottom: 8 }}>
                   Block <strong style={{ color: 'var(--color-cyan)' }}>{skillName}</strong>?
-                </div>
+                </Text>
                 <textarea
                   value={blockReason}
                   onChange={(e) => setBlockReason(e.target.value)}
@@ -971,17 +844,9 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
           {/* Categories */}
           {detail.categories.length > 0 && (
             <div style={{ marginTop: 16 }}>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: 'var(--color-text-primary)',
-                  marginBottom: 8,
-                }}
-              >
+              <Text variant="body" as="h3" weight={600} color="primary" style={{ marginBottom: 8 }}>
                 Categories
-              </h3>
+              </Text>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {detail.categories.map((cat) => (
                   <a
@@ -990,16 +855,15 @@ export const SkillDetailPane = ({ skillName }: { skillName: string }) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
                       padding: '3px 8px',
                       borderRadius: 4,
                       background: 'var(--color-accent)',
-                      color: 'var(--color-bg)',
                       textDecoration: 'none',
                     }}
                   >
-                    {cat}
+                    <Text variant="label" font="mono" style={{ color: 'var(--color-bg)' }}>
+                      {cat}
+                    </Text>
                   </a>
                 ))}
               </div>

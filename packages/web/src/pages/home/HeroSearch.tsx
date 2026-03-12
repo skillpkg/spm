@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { type SearchResultItem } from '../../lib/api';
 import { searchSkillsQuery } from '../search/queries';
-import { TrustBadge, type TrustTier } from '@spm/ui';
+import { TrustBadge, Text, type TrustTier } from '@spm/ui';
 
 interface HeroSearchProps {
   totalSkills: number;
@@ -106,10 +106,11 @@ export const HeroSearch = ({
             height: 64,
           }}
         />
-        <span
+        <Text
+          variant="display"
+          as="span"
           style={{
             fontFamily: "'Alfa Slab One', serif",
-            fontSize: 42,
             fontWeight: 400,
             backgroundImage: 'linear-gradient(135deg, #3dfce4 0%, #2564ff 100%)',
             WebkitBackgroundClip: 'text',
@@ -119,34 +120,29 @@ export const HeroSearch = ({
           }}
         >
           spm
-        </span>
+        </Text>
       </div>
-      <h1
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 24,
-          fontWeight: 600,
-          color: 'var(--color-text-primary)',
-          marginBottom: 4,
-          position: 'relative',
-          marginTop: 0,
-        }}
+      <Text
+        variant="h1"
+        font="sans"
+        color="primary"
+        weight={600}
+        as="h1"
+        style={{ marginBottom: 4, position: 'relative', marginTop: 0 }}
       >
         Find skills for your agents
-      </h1>
+      </Text>
       {(totalSkills > 0 || totalCategories > 0) && (
-        <p
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 14,
-            color: 'var(--color-text-muted)',
-            marginBottom: 20,
-            marginTop: 0,
-          }}
+        <Text
+          variant="body"
+          font="sans"
+          color="muted"
+          as="p"
+          style={{ marginBottom: 20, marginTop: 0 }}
         >
           {totalSkills} skill{totalSkills !== 1 ? 's' : ''} &middot; {totalCategories} categor
           {totalCategories !== 1 ? 'ies' : 'y'}
-        </p>
+        </Text>
       )}
 
       <div style={{ width: '100%', maxWidth: 600, position: 'relative' }}>
@@ -167,9 +163,9 @@ export const HeroSearch = ({
               transition: 'all 0.2s',
             }}
           >
-            <span style={{ color: 'var(--color-text-muted)', fontSize: 15, marginRight: 10 }}>
+            <Text variant="h4" color="muted" as="span" style={{ marginRight: 10 }}>
               &#x2315;
-            </span>
+            </Text>
             <input
               ref={inputRef}
               value={query}
@@ -189,46 +185,41 @@ export const HeroSearch = ({
               }}
             />
             {isFetching && debouncedQuery && (
-              <span
-                style={{
-                  color: 'var(--color-text-muted)',
-                  fontSize: 12,
-                  marginRight: 8,
-                }}
-              >
+              <Text variant="caption" color="muted" as="span" style={{ marginRight: 8 }}>
                 ...
-              </span>
+              </Text>
             )}
             {!query && (
-              <kbd
+              <Text
+                variant="label"
+                font="mono"
+                color="muted"
+                as="kbd"
                 style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
                   padding: '2px 6px',
                   background: '#111318',
                   border: '1px solid #1e293b',
                   borderRadius: 4,
-                  color: 'var(--color-text-muted)',
                 }}
               >
                 /
-              </kbd>
+              </Text>
             )}
             {query && (
-              <span
-                onClick={() => {
-                  setQuery('');
-                  inputRef.current?.focus();
-                }}
-                style={{
-                  color: 'var(--color-text-muted)',
-                  cursor: 'pointer',
-                  fontSize: 14,
-                  padding: 4,
+              <Text
+                variant="body"
+                color="muted"
+                as="span"
+                style={{ cursor: 'pointer', padding: 4 }}
+                {...{
+                  onClick: () => {
+                    setQuery('');
+                    inputRef.current?.focus();
+                  },
                 }}
               >
                 &#x2715;
-              </span>
+              </Text>
             )}
           </div>
         </form>
@@ -278,45 +269,42 @@ export const HeroSearch = ({
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                        <span
-                          style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: 14,
-                            color: 'var(--color-cyan)',
-                            fontWeight: 600,
-                            whiteSpace: 'nowrap',
-                          }}
+                        <Text
+                          variant="body"
+                          font="mono"
+                          weight={600}
+                          as="span"
+                          style={{ color: 'var(--color-cyan)', whiteSpace: 'nowrap' }}
                         >
                           {skill.name}
-                        </span>
+                        </Text>
                         <TrustBadge tier={skill.author.trust_tier as TrustTier} />
-                        <span
+                        <Text
+                          variant="caption"
+                          font="sans"
+                          color="dim"
+                          as="span"
                           style={{
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: 12,
-                            color: 'var(--color-text-dim)',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
                           }}
                         >
                           {skill.description}
-                        </span>
+                        </Text>
                       </div>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: 11,
-                          color: 'var(--color-text-muted)',
-                          whiteSpace: 'nowrap',
-                          marginLeft: 12,
-                        }}
+                      <Text
+                        variant="label"
+                        font="mono"
+                        color="muted"
+                        as="span"
+                        style={{ whiteSpace: 'nowrap', marginLeft: 12 }}
                       >
                         {skill.downloads >= 1000
                           ? `${(skill.downloads / 1000).toFixed(1)}k`
                           : skill.downloads}{' '}
                         &#x2B07;
-                      </span>
+                      </Text>
                     </div>
                   </Link>
                 ))}
@@ -349,17 +337,15 @@ export const HeroSearch = ({
                 )}
               </>
             ) : (
-              <div
-                style={{
-                  padding: '16px',
-                  textAlign: 'center',
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  color: 'var(--color-text-muted)',
-                }}
+              <Text
+                variant="body-sm"
+                font="sans"
+                color="muted"
+                as="div"
+                style={{ padding: '16px', textAlign: 'center' }}
               >
                 No skills found for &quot;{debouncedQuery}&quot;
-              </div>
+              </Text>
             )}
           </div>
         )}

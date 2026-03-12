@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TRUST_CONFIG } from '@spm/ui';
+import { TRUST_CONFIG, Text } from '@spm/ui';
 import { type Skill } from './types';
 
 interface SkillRowProps {
@@ -27,100 +27,53 @@ export const SkillRow = ({ skill }: SkillRowProps) => {
     >
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 14,
-              color: 'var(--color-cyan)',
-              fontWeight: 600,
-            }}
+          <Text
+            variant="body"
+            font="mono"
+            weight={600}
+            as="span"
+            style={{ color: 'var(--color-cyan)' }}
           >
             {skill.name}
-          </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              color: 'var(--color-text-faint)',
-            }}
-          >
+          </Text>
+          <Text variant="label" font="mono" color="faint" as="span">
             {skill.version}
-          </span>
+          </Text>
         </div>
-        <div
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 12,
-            color: 'var(--color-text-muted)',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
+        <Text
+          variant="caption"
+          font="sans"
+          color="muted"
+          as="div"
+          style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         >
           {skill.desc}
-        </div>
+        </Text>
       </div>
       <div style={{ textAlign: 'right' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 13,
-            color: 'var(--color-text-primary)',
-          }}
-        >
+        <Text variant="body-sm" font="mono" color="primary" as="div">
           {(skill.downloads / 1000).toFixed(1)}k
-        </div>
-        <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 11,
-            color: 'var(--color-accent)',
-          }}
-        >
+        </Text>
+        <Text variant="label" font="mono" color="accent" as="div">
           {skill.weeklyGrowth}
-        </div>
+        </Text>
       </div>
       <div style={{ textAlign: 'right' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 13,
-            color: 'var(--color-yellow)',
-          }}
-        >
+        <Text variant="body-sm" font="mono" as="div" style={{ color: 'var(--color-yellow)' }}>
           &#9733; {skill.rating}
-        </div>
-        <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 11,
-            color: 'var(--color-text-muted)',
-          }}
-        >
+        </Text>
+        <Text variant="label" font="mono" color="muted" as="div">
           {skill.reviews} reviews
-        </div>
+        </Text>
       </div>
       <div style={{ textAlign: 'right' }}>
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 11,
-            color: trustCfg.color,
-          }}
-        >
+        <Text variant="label" font="mono" as="span" style={{ color: trustCfg.color }}>
           {trustCfg.checks} {trustCfg.label}
-        </span>
+        </Text>
       </div>
-      <div
-        style={{
-          textAlign: 'right',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
-          color: 'var(--color-text-muted)',
-        }}
-      >
+      <Text variant="label" font="mono" color="muted" as="div" style={{ textAlign: 'right' }}>
         {skill.updated}
-      </div>
+      </Text>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@spm/web-auth';
+import { Text } from '@spm/ui';
 import type { ReactNode } from 'react';
 
 export const AdminRoute = ({ children }: { children: ReactNode }) => {
@@ -19,13 +20,12 @@ export const AdminRoute = ({ children }: { children: ReactNode }) => {
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '100vh',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 14,
-          color: 'var(--color-text-muted)',
           background: 'var(--color-bg)',
         }}
       >
-        Loading...
+        <Text variant="body" font="mono" color="muted">
+          Loading...
+        </Text>
       </div>
     );
   }
@@ -43,9 +43,7 @@ export const AdminRoute = ({ children }: { children: ReactNode }) => {
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '100vh',
-          fontFamily: 'var(--font-sans)',
           background: 'var(--color-bg)',
-          color: 'var(--color-text-primary)',
           gap: 16,
         }}
       >
@@ -63,27 +61,18 @@ export const AdminRoute = ({ children }: { children: ReactNode }) => {
         >
           &#x1F6AB;
         </div>
-        <h1
-          style={{
-            fontSize: 22,
-            fontWeight: 700,
-            margin: 0,
-          }}
-        >
+        <Text variant="h2" as="h1" style={{ fontSize: 22, margin: 0 }}>
           Access Denied
-        </h1>
-        <p
-          style={{
-            fontSize: 14,
-            color: 'var(--color-text-muted)',
-            margin: 0,
-            textAlign: 'center',
-            maxWidth: 360,
-          }}
+        </Text>
+        <Text
+          variant="body"
+          as="p"
+          color="muted"
+          style={{ margin: 0, textAlign: 'center', maxWidth: 360 }}
         >
           You do not have admin privileges. Contact an administrator if you believe this is an
           error.
-        </p>
+        </Text>
         <button
           onClick={signOut}
           style={{
@@ -92,14 +81,12 @@ export const AdminRoute = ({ children }: { children: ReactNode }) => {
             borderRadius: 8,
             border: '1px solid var(--color-border-default)',
             background: 'var(--color-bg-hover)',
-            color: 'var(--color-text-primary)',
-            fontFamily: 'var(--font-sans)',
-            fontSize: 14,
-            fontWeight: 500,
             cursor: 'pointer',
           }}
         >
-          Sign out
+          <Text variant="body" color="primary" weight={500}>
+            Sign out
+          </Text>
         </button>
       </div>
     );

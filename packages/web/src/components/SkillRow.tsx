@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type SkillSummary } from '../data/constants';
-import { TrustBadge, SecurityBadge } from '@spm/ui';
+import { TrustBadge, SecurityBadge, Text } from '@spm/ui';
 
 export const SkillRow = ({
   skill,
@@ -33,33 +33,26 @@ export const SkillRow = ({
         }}
       >
         <div style={{ minWidth: 150 }}>
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 13,
-              color: 'var(--color-cyan)',
-              fontWeight: 500,
-            }}
+          <Text
+            variant="body-sm"
+            font="mono"
+            weight={500}
+            as="span"
+            style={{ color: 'var(--color-cyan)' }}
           >
             {skill.name}
-          </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              color: 'var(--color-text-faint)',
-              marginLeft: 6,
-            }}
-          >
+          </Text>
+          <Text variant="label" font="mono" color="faint" as="span" style={{ marginLeft: 6 }}>
             v{skill.version}
-          </span>
+          </Text>
         </div>
-        <div
+        <Text
+          variant="caption"
+          font="sans"
+          as="div"
           style={{
             flex: 1,
             minWidth: 0,
-            fontFamily: 'var(--font-sans)',
-            fontSize: 12,
             color: '#5a6578',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -67,15 +60,16 @@ export const SkillRow = ({
           }}
         >
           {skill.desc || ''}
-        </div>
-        <div
+        </Text>
+        <Text
+          variant="label"
+          font="mono"
+          color="muted"
+          as="div"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 14,
-            fontFamily: 'var(--font-mono)',
-            fontSize: 11,
-            color: 'var(--color-text-muted)',
             flexShrink: 0,
           }}
         >
@@ -99,7 +93,7 @@ export const SkillRow = ({
           <span style={{ color: 'var(--color-yellow)', minWidth: 30 }}>
             &#x2605; {skill.rating || '\u2014'}
           </span>
-        </div>
+        </Text>
       </div>
     </Link>
   );

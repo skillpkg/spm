@@ -1,4 +1,4 @@
-import { Sidebar, Badge, SidebarUserFooter, type SidebarSection } from '@spm/ui';
+import { Sidebar, Badge, SidebarUserFooter, Text, type SidebarSection } from '@spm/ui';
 import { useAuth } from '@spm/web-auth';
 
 const TABS_MAP: Record<string, string> = {
@@ -57,11 +57,11 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
     >
       <img src="/logo-64.png" alt="SPM" style={{ width: 28, height: 28 }} />
-      <span
+      <Text
+        variant="h3"
+        font="mono"
+        weight={700}
         style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 16,
-          fontWeight: 700,
           backgroundImage: 'linear-gradient(135deg, #3dfce4 0%, #2564ff 100%)',
           WebkitBackgroundClip: 'text',
           backgroundClip: 'text',
@@ -70,7 +70,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         }}
       >
         spm
-      </span>
+      </Text>
       <Badge label="ADMIN" color="red" />
     </div>
   );

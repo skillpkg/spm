@@ -9,6 +9,7 @@ import {
   FilterTag,
   SearchInput,
   StatBox,
+  Text,
   TRUST_CONFIG,
   type TrustTier,
 } from '@spm/ui';
@@ -176,29 +177,19 @@ export const UsersTab = () => {
             <FilterTag key={f.key} label={f.label} color={f.color} onRemove={f.clear} />
           ))}
           {activeFilters.length > 1 && (
-            <span
+            <Text
+              variant="label"
+              as="span"
+              color="dim"
+              style={{ cursor: 'pointer', marginLeft: 4 }}
               onClick={() => set({ role: null, trust: null })}
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 11,
-                color: 'var(--color-text-dim)',
-                cursor: 'pointer',
-                marginLeft: 4,
-              }}
             >
               Clear all
-            </span>
+            </Text>
           )}
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              color: 'var(--color-text-muted)',
-              marginLeft: 'auto',
-            }}
-          >
+          <Text variant="label" font="mono" color="muted" style={{ marginLeft: 'auto' }}>
             {filtered.length} of {allUsers.length}
-          </span>
+          </Text>
         </div>
       )}
 
@@ -219,14 +210,7 @@ export const UsersTab = () => {
           }}
         >
           <div>
-            <div
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 14,
-                color: 'var(--color-text-primary)',
-                marginBottom: 2,
-              }}
-            >
+            <Text variant="body" as="div" color="primary" style={{ marginBottom: 2 }}>
               {confirmAction.action === 'grant' && (
                 <>
                   Grant admin role to{' '}
@@ -239,16 +223,10 @@ export const UsersTab = () => {
                   <strong style={{ color: 'var(--color-cyan)' }}>@{confirmAction.username}</strong>?
                 </>
               )}
-            </div>
-            <div
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 12,
-                color: 'var(--color-text-muted)',
-              }}
-            >
+            </Text>
+            <Text variant="caption" color="muted">
               Logged in audit trail
-            </div>
+            </Text>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button
@@ -276,27 +254,14 @@ export const UsersTab = () => {
           }}
         >
           <div>
-            <div
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 14,
-                color: 'var(--color-text-primary)',
-                marginBottom: 2,
-              }}
-            >
+            <Text variant="body" as="div" color="primary" style={{ marginBottom: 2 }}>
               Change <strong style={{ color: 'var(--color-cyan)' }}>@{trustAction.username}</strong>{' '}
               trust tier from <strong>{trustAction.currentTier}</strong> to{' '}
               <strong style={{ color: 'var(--color-accent)' }}>{trustAction.newTier}</strong>?
-            </div>
-            <div
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 12,
-                color: 'var(--color-text-muted)',
-              }}
-            >
+            </Text>
+            <Text variant="caption" color="muted">
               Logged in audit trail
-            </div>
+            </Text>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button label="Confirm" color="accent" onClick={handleTrustChange} />
@@ -314,20 +279,31 @@ export const UsersTab = () => {
             gap: 6,
             padding: '8px 14px',
             borderBottom: '1px solid var(--color-border-default)',
-            fontFamily: 'var(--font-sans)',
-            fontSize: 10,
-            color: 'var(--color-text-muted)',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
           }}
         >
-          <span>User</span>
-          <span>Email</span>
-          <span>GitHub</span>
-          <span>Role</span>
-          <span>Trust</span>
-          <span>Joined</span>
-          <span style={{ textAlign: 'right' }}>Actions</span>
+          <Text variant="tiny" color="muted">
+            User
+          </Text>
+          <Text variant="tiny" color="muted">
+            Email
+          </Text>
+          <Text variant="tiny" color="muted">
+            GitHub
+          </Text>
+          <Text variant="tiny" color="muted">
+            Role
+          </Text>
+          <Text variant="tiny" color="muted">
+            Trust
+          </Text>
+          <Text variant="tiny" color="muted">
+            Joined
+          </Text>
+          <Text variant="tiny" color="muted" align="right">
+            Actions
+          </Text>
         </div>
         {filtered.map((user: AdminUserItem) => {
           const trustTier = user.trust_tier as TrustTier;
@@ -345,71 +321,37 @@ export const UsersTab = () => {
                 alignItems: 'center',
               }}
             >
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 13,
-                  color: 'var(--color-cyan)',
-                  fontWeight: 500,
-                }}
+              <Text
+                variant="body-sm"
+                font="mono"
+                weight={500}
+                style={{ color: 'var(--color-cyan)' }}
               >
                 @{user.username}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: 'var(--color-text-dim)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              </Text>
+              <Text variant="label" font="mono" color="dim" truncate>
                 {user.email ?? '--'}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: 'var(--color-blue)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              </Text>
+              <Text variant="label" font="mono" truncate style={{ color: 'var(--color-blue)' }}>
                 {user.github_login ?? '--'}
-              </span>
+              </Text>
               {user.role === 'admin' ? (
                 <Badge label="ADMIN" color="red" />
               ) : (
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--color-text-faint)',
-                  }}
-                >
+                <Text variant="label" font="mono" color="faint">
                   user
-                </span>
+                </Text>
               )}
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: cfg?.color ?? 'var(--color-text-dim)',
-                }}
+              <Text
+                variant="label"
+                font="mono"
+                style={{ color: cfg?.color ?? 'var(--color-text-dim)' }}
               >
                 {cfg?.checks ?? '--'} {cfg?.label ?? trustTier}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: 'var(--color-text-muted)',
-                }}
-              >
+              </Text>
+              <Text variant="label" font="mono" color="muted">
                 {user.created_at.slice(0, 10).slice(5)}
-              </span>
+              </Text>
               <div
                 style={{
                   display: 'flex',

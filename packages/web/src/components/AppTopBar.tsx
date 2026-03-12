@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { TopBar, Breadcrumb, type BreadcrumbItem } from '@spm/ui';
+import { TopBar, Breadcrumb, Text, type BreadcrumbItem } from '@spm/ui';
 
 const ROUTE_LABELS: Record<string, string> = {
   '/': 'Home',
@@ -63,9 +63,9 @@ const TopBarSearch = () => {
           padding: '0 12px',
         }}
       >
-        <span style={{ color: 'var(--color-text-muted)', fontSize: 14, marginRight: 8 }}>
+        <Text variant="body" color="muted" as="span" style={{ marginRight: 8 }}>
           &#x2315;
-        </span>
+        </Text>
         <input
           ref={inputRef}
           value={query}
@@ -83,17 +83,15 @@ const TopBarSearch = () => {
           }}
         />
         {query && (
-          <span
-            onClick={() => setQuery('')}
-            style={{
-              color: 'var(--color-text-muted)',
-              cursor: 'pointer',
-              fontSize: 12,
-              padding: 4,
-            }}
+          <Text
+            variant="caption"
+            color="muted"
+            as="span"
+            style={{ cursor: 'pointer', padding: 4 }}
+            {...{ onClick: () => setQuery('') }}
           >
             &#x2715;
-          </span>
+          </Text>
         )}
       </div>
     </form>

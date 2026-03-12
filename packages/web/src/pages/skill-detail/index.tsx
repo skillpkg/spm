@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useTabParam } from '../../lib/useTabParam';
 import { useQuery } from '@tanstack/react-query';
+import { Text } from '@spm/ui';
 import { skillDetailQuery } from './queries';
 import { apiToSkillFull } from './types';
 import { SkillHero } from './SkillHero';
@@ -19,15 +20,9 @@ export const SkillDetail = () => {
   if (isLoading) {
     return (
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '64px 32px', textAlign: 'center' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 15,
-            color: 'var(--color-text-muted)',
-          }}
-        >
+        <Text variant="h4" font="sans" color="muted" as="div">
           Loading skill...
-        </div>
+        </Text>
       </div>
     );
   }
@@ -35,16 +30,9 @@ export const SkillDetail = () => {
   if (!skill) {
     return (
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '64px 32px', textAlign: 'center' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 20,
-            color: 'var(--color-text-dim)',
-            marginBottom: 16,
-          }}
-        >
+        <Text variant="h2" font="sans" color="dim" as="div" style={{ marginBottom: 16 }}>
           Skill not found
-        </div>
+        </Text>
         <Link
           to="/"
           style={{

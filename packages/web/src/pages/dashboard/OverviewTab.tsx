@@ -1,4 +1,4 @@
-import { ActivityItem, BarSegment } from '@spm/ui';
+import { ActivityItem, BarSegment, Text } from '@spm/ui';
 import { type Skill, type ActivityEvent, type AgentStat, type TrustTier } from './types';
 import { SkillRow } from './SkillRow';
 import { SkillsTableHeader } from './SkillsTableHeader';
@@ -33,28 +33,19 @@ export const OverviewTab = ({
             marginBottom: 10,
           }}
         >
-          <h2
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 15,
-              fontWeight: 600,
-              color: 'var(--color-text-secondary)',
-              margin: 0,
-            }}
-          >
+          <Text variant="h4" font="sans" color="secondary" as="h2" style={{ margin: 0 }}>
             Your skills
-          </h2>
-          <span
-            onClick={onViewAllSkills}
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 12,
-              color: 'var(--color-accent)',
-              cursor: 'pointer',
-            }}
+          </Text>
+          <Text
+            variant="caption"
+            font="mono"
+            color="accent"
+            as="span"
+            style={{ cursor: 'pointer' }}
+            {...{ onClick: onViewAllSkills }}
           >
             View all &rarr;
-          </span>
+          </Text>
         </div>
         <div style={cardStyle}>
           <SkillsTableHeader />
@@ -66,18 +57,15 @@ export const OverviewTab = ({
 
       {/* Recent activity */}
       <div>
-        <h2
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 15,
-            fontWeight: 600,
-            color: 'var(--color-text-secondary)',
-            marginBottom: 10,
-            marginTop: 0,
-          }}
+        <Text
+          variant="h4"
+          font="sans"
+          color="secondary"
+          as="h2"
+          style={{ marginBottom: 10, marginTop: 0 }}
         >
           Recent activity
-        </h2>
+        </Text>
         <div style={{ ...cardStyle, padding: '6px 18px' }}>
           {activity.map((item, i) => (
             <ActivityItem key={i} item={item} />
@@ -92,17 +80,18 @@ export const OverviewTab = ({
 
       {/* Agent breakdown */}
       <div style={{ ...cardStyle, padding: '18px 20px', marginTop: 14 }}>
-        <div
+        <Text
+          variant="body"
+          font="sans"
+          color="primary"
+          weight={600}
+          as="div"
           style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 14,
-            fontWeight: 600,
-            color: 'var(--color-text-primary)',
             marginBottom: 14,
           }}
         >
           Installs by agent
-        </div>
+        </Text>
         {/* Stacked bar */}
         <div
           style={{
@@ -126,25 +115,13 @@ export const OverviewTab = ({
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 2, background: a.color }} />
-                <span
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 12,
-                    color: 'var(--color-text-secondary)',
-                  }}
-                >
+                <Text variant="caption" font="sans" color="secondary" as="span">
                   {a.agent}
-                </span>
+                </Text>
               </div>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                  color: 'var(--color-text-dim)',
-                }}
-              >
+              <Text variant="caption" font="mono" color="dim" as="span">
                 {a.pct}%
-              </span>
+              </Text>
             </div>
           ))}
         </div>
@@ -152,17 +129,18 @@ export const OverviewTab = ({
 
       {/* Quick links */}
       <div style={{ ...cardStyle, padding: '16px 20px', marginTop: 14 }}>
-        <div
+        <Text
+          variant="body"
+          font="sans"
+          color="primary"
+          weight={600}
+          as="div"
           style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 14,
-            fontWeight: 600,
-            color: 'var(--color-text-primary)',
             marginBottom: 10,
           }}
         >
           Quick links
-        </div>
+        </Text>
         {['Public profile', 'Account settings', 'API tokens', 'Publish guide'].map((label) => (
           <a
             key={label}

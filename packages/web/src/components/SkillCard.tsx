@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type SkillSummary } from '../data/constants';
-import { TrustBadge, SecurityBadge } from '@spm/ui';
+import { TrustBadge, SecurityBadge, Text } from '@spm/ui';
 
 const ACCENT_COLORS = ['#10b981', '#3b82f6', '#a78bfa'];
 
@@ -56,35 +56,22 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 16,
-                  color: 'var(--color-cyan)',
-                  fontWeight: 600,
-                }}
+              <Text
+                variant="h3"
+                font="mono"
+                weight={600}
+                as="span"
+                style={{ color: 'var(--color-cyan)' }}
               >
                 {skill.name}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                  color: 'var(--color-text-faint)',
-                }}
-              >
+              </Text>
+              <Text variant="caption" font="mono" color="faint" as="span">
                 v{skill.version}
-              </span>
+              </Text>
             </div>
-            <span
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 12,
-                color: 'var(--color-text-muted)',
-              }}
-            >
+            <Text variant="caption" font="sans" color="muted" as="span">
               by @{skill.author}
-            </span>
+            </Text>
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             <TrustBadge tier={skill.trust} />
@@ -92,12 +79,12 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
           </div>
         </div>
 
-        <p
+        <Text
+          variant="body-sm"
+          font="sans"
+          as="p"
           style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 13,
             color: '#8896aa',
-            marginBottom: 14,
             lineHeight: 1.6,
             display: '-webkit-box',
             WebkitLineClamp: 2,
@@ -108,35 +95,37 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
           }}
         >
           {skill.desc}
-        </p>
+        </Text>
 
         {skill.tags && skill.tags.length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
             {skill.tags.map((tag) => (
-              <span
+              <Text
                 key={tag}
+                variant="tiny"
+                font="mono"
+                color="dim"
+                as="span"
                 style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 10,
                   padding: '2px 7px',
                   borderRadius: 4,
                   background: '#111318',
-                  color: 'var(--color-text-dim)',
                   border: '1px solid var(--color-border-default)',
                 }}
               >
                 {tag}
-              </span>
+              </Text>
             ))}
           </div>
         )}
 
-        <div
+        <Text
+          variant="caption"
+          font="mono"
+          as="div"
           style={{
             display: 'flex',
             gap: 14,
-            fontFamily: 'var(--font-mono)',
-            fontSize: 12,
             paddingTop: 12,
             borderTop: '1px solid var(--color-border-default)',
             marginTop: 'auto',
@@ -149,7 +138,7 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
           {skill.rating && (
             <span style={{ color: 'var(--color-yellow)' }}>&#x2605; {skill.rating}</span>
           )}
-        </div>
+        </Text>
       </div>
     </Link>
   );

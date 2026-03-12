@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Badge, CopyButton, TrustBadge } from '@spm/ui';
+import { Badge, CopyButton, TrustBadge, Text } from '@spm/ui';
 import { type SkillFull } from './types';
 
 export const SkillHero = ({ skill }: { skill: SkillFull }) => (
@@ -17,26 +17,17 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
   >
     <div style={{ flex: 1 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-        <h1
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 26,
-            fontWeight: 700,
-            color: 'var(--color-cyan)',
-            margin: 0,
-          }}
+        <Text
+          variant="h1"
+          font="mono"
+          as="h1"
+          style={{ fontSize: 26, color: 'var(--color-cyan)', margin: 0 }}
         >
           {skill.name}
-        </h1>
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 15,
-            color: 'var(--color-accent)',
-          }}
-        >
+        </Text>
+        <Text variant="h4" font="mono" color="accent" as="span">
           v{skill.version}
-        </span>
+        </Text>
         <TrustBadge tier={skill.trust} size="lg" />
         {skill.importedFrom && (
           <a
@@ -50,7 +41,7 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
           </a>
         )}
       </div>
-      <div style={{ fontSize: 13, color: 'var(--color-text-primary)', marginBottom: 8 }}>
+      <Text variant="body-sm" color="primary" as="div" style={{ marginBottom: 8 }}>
         <span style={{ color: 'var(--color-text-faint)' }}>by </span>
         {skill.authors.map((a, i) => (
           <span key={a.username}>
@@ -63,20 +54,16 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
             </Link>
           </span>
         ))}
-      </div>
-      <p
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 15,
-          color: 'var(--color-text-secondary)',
-          marginBottom: 16,
-          lineHeight: 1.6,
-          maxWidth: 520,
-          marginTop: 0,
-        }}
+      </Text>
+      <Text
+        variant="h4"
+        font="sans"
+        color="secondary"
+        as="p"
+        style={{ marginBottom: 16, lineHeight: 1.6, maxWidth: 520, marginTop: 0 }}
       >
         {skill.desc}
-      </p>
+      </Text>
       {skill.categories.length > 0 && (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
           {skill.categories.map((cat) => (
@@ -101,20 +88,21 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
       )}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {skill.tags?.map((t) => (
-          <span
+          <Text
             key={t}
+            variant="label"
+            font="mono"
+            color="dim"
+            as="span"
             style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
               padding: '3px 8px',
               borderRadius: 4,
               background: '#111318',
-              color: 'var(--color-text-dim)',
               border: '1px solid var(--color-border-default)',
             }}
           >
             {t}
-          </span>
+          </Text>
         ))}
       </div>
     </div>
@@ -130,16 +118,9 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
         marginLeft: 24,
       }}
     >
-      <div
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 12,
-          color: 'var(--color-text-dim)',
-          marginBottom: 8,
-        }}
-      >
+      <Text variant="caption" font="sans" color="dim" as="div" style={{ marginBottom: 8 }}>
         Install
-      </div>
+      </Text>
       <div
         style={{
           display: 'flex',

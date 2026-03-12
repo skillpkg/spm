@@ -1,7 +1,15 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@spm/web-auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Card, SearchInput, StatusBadge, TRUST_CONFIG, type TrustTier } from '@spm/ui';
+import {
+  Button,
+  Card,
+  SearchInput,
+  StatusBadge,
+  Text,
+  TRUST_CONFIG,
+  type TrustTier,
+} from '@spm/ui';
 import { yankSkill } from '../lib/api';
 import { adminSkillsQuery } from './SkillModeration.queries';
 import { useSearchParamsState } from '../lib/useSearchParamsState';
@@ -67,15 +75,9 @@ export const SkillModeration = () => {
           onChange={(v) => set({ search: v || null, page: null })}
           placeholder="Search skills or authors..."
         />
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 12,
-            color: 'var(--color-text-muted)',
-          }}
-        >
+        <Text variant="caption" font="mono" color="muted">
           {data?.total ?? 0} total skills
-        </span>
+        </Text>
       </div>
 
       {/* Yank confirmation */}
@@ -89,20 +91,13 @@ export const SkillModeration = () => {
             background: 'rgba(239,68,68,0.05)',
           }}
         >
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 14,
-              color: 'var(--color-text-primary)',
-              marginBottom: 10,
-            }}
-          >
+          <Text variant="body" as="div" color="primary" style={{ marginBottom: 10 }}>
             Yank{' '}
             <strong style={{ color: 'var(--color-cyan)' }}>
               {yankTarget.name}@{yankTarget.version}
             </strong>
             ?
-          </div>
+          </Text>
           <input
             value={yankReason}
             onChange={(e) => setYankReason(e.target.value)}
@@ -144,18 +139,25 @@ export const SkillModeration = () => {
             gap: 10,
             padding: '8px 16px',
             borderBottom: '1px solid var(--color-border-default)',
-            fontFamily: 'var(--font-sans)',
-            fontSize: 11,
-            color: 'var(--color-text-muted)',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
           }}
         >
-          <span>Skill</span>
-          <span>Status</span>
-          <span>Trust</span>
-          <span>Published</span>
-          <span style={{ textAlign: 'right' }}>Actions</span>
+          <Text variant="label" color="muted">
+            Skill
+          </Text>
+          <Text variant="label" color="muted">
+            Status
+          </Text>
+          <Text variant="label" color="muted">
+            Trust
+          </Text>
+          <Text variant="label" color="muted">
+            Published
+          </Text>
+          <Text variant="label" color="muted" align="right">
+            Actions
+          </Text>
         </div>
 
         {/* Rows */}
@@ -176,64 +178,39 @@ export const SkillModeration = () => {
               }}
             >
               <div>
-                <span
+                <Text
+                  variant="body-sm"
+                  as="span"
+                  font="mono"
+                  weight={500}
+                  style={{ color: 'var(--color-cyan)', cursor: 'pointer' }}
                   onClick={() => set({ skill: skill.name })}
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 13,
-                    color: 'var(--color-cyan)',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => {
+                  onKeyDown={(e: React.KeyboardEvent) => {
                     if (e.key === 'Enter') set({ skill: skill.name });
                   }}
                 >
                   {skill.name}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--color-text-faint)',
-                    marginLeft: 6,
-                  }}
-                >
+                </Text>
+                <Text variant="label" font="mono" color="faint" style={{ marginLeft: 6 }}>
                   {skill.latest_version ?? '--'}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 11,
-                    color: 'var(--color-text-muted)',
-                    marginLeft: 8,
-                  }}
-                >
+                </Text>
+                <Text variant="label" color="muted" style={{ marginLeft: 8 }}>
                   @{skill.author}
-                </span>
+                </Text>
               </div>
               <StatusBadge status={getDisplayStatus(skill)} />
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: cfg?.color ?? 'var(--color-text-dim)',
-                }}
+              <Text
+                variant="label"
+                font="mono"
+                style={{ color: cfg?.color ?? 'var(--color-text-dim)' }}
               >
                 {cfg?.checks ?? '--'}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: 'var(--color-text-muted)',
-                  textAlign: 'right',
-                }}
-              >
+              </Text>
+              <Text variant="label" font="mono" color="muted" align="right">
                 {skill.updated_at.slice(0, 10).slice(5)}
-              </span>
+              </Text>
               <div
                 style={{
                   display: 'flex',
@@ -248,14 +225,13 @@ export const SkillModeration = () => {
                   rel="noopener noreferrer"
                   title="Open on web"
                   style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    color: 'var(--color-text-faint)',
                     textDecoration: 'none',
                     padding: '2px 4px',
                   }}
                 >
-                  ↗
+                  <Text variant="caption" font="mono" color="faint">
+                    &#8599;
+                  </Text>
                 </a>
                 <Button
                   label="Yank"
@@ -282,16 +258,9 @@ export const SkillModeration = () => {
             small
             onClick={() => set({ page: Math.max(1, page - 1) })}
           />
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 12,
-              color: 'var(--color-text-muted)',
-              padding: '4px 8px',
-            }}
-          >
+          <Text variant="caption" font="mono" color="muted" style={{ padding: '4px 8px' }}>
             Page {data.page} of {data.pages}
-          </span>
+          </Text>
           <Button
             label="Next"
             color="text-dim"

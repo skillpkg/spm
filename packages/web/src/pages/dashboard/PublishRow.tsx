@@ -1,3 +1,4 @@
+import { Text } from '@spm/ui';
 import type { PublishEvent } from './types';
 
 const STATUS_CONFIG = {
@@ -37,30 +38,18 @@ export const PublishRow = ({ item }: PublishRowProps) => {
       }}
     >
       <div>
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 13,
-            color: 'var(--color-cyan)',
-          }}
-        >
+        <Text variant="body-sm" font="mono" as="span" style={{ color: 'var(--color-cyan)' }}>
           {item.skill}
-        </span>
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 11,
-            color: 'var(--color-text-faint)',
-            marginLeft: 6,
-          }}
-        >
+        </Text>
+        <Text variant="label" font="mono" color="faint" as="span" style={{ marginLeft: 6 }}>
           {item.version}
-        </span>
+        </Text>
       </div>
-      <span
+      <Text
+        variant="label"
+        font="mono"
+        as="span"
         style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
           padding: '2px 8px',
           borderRadius: 4,
           textAlign: 'center',
@@ -69,39 +58,22 @@ export const PublishRow = ({ item }: PublishRowProps) => {
         }}
       >
         {s.label}
-      </span>
-      <div
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 12,
-          color: 'var(--color-text-muted)',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
+      </Text>
+      <Text
+        variant="caption"
+        font="sans"
+        color="muted"
+        as="div"
+        style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
       >
         {item.reason ?? 'All checks passed'}
-      </div>
-      <div
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
-          color: 'var(--color-text-muted)',
-          textAlign: 'right',
-        }}
-      >
+      </Text>
+      <Text variant="label" font="mono" color="muted" as="div" style={{ textAlign: 'right' }}>
         {item.date}
-      </div>
-      <div
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
-          color: 'var(--color-text-dim)',
-          textAlign: 'right',
-        }}
-      >
+      </Text>
+      <Text variant="label" font="mono" color="dim" as="div" style={{ textAlign: 'right' }}>
         {item.scanTime}
-      </div>
+      </Text>
     </div>
   );
 };

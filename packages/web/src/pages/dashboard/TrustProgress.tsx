@@ -1,4 +1,4 @@
-import { TRUST_CONFIG, type TrustTier } from '@spm/ui';
+import { TRUST_CONFIG, Text, type TrustTier } from '@spm/ui';
 
 interface TrustProgressProps {
   currentTier: TrustTier;
@@ -25,17 +25,16 @@ export const TrustProgress = ({ currentTier }: TrustProgressProps) => {
         borderRadius: 10,
       }}
     >
-      <div
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 14,
-          fontWeight: 600,
-          color: 'var(--color-text-primary)',
-          marginBottom: 16,
-        }}
+      <Text
+        variant="body"
+        font="sans"
+        color="primary"
+        weight={600}
+        as="div"
+        style={{ marginBottom: 16 }}
       >
         Trust progression
-      </div>
+      </Text>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {TIERS.map((tier, i) => {
           const done = isDone(i);
@@ -84,33 +83,29 @@ export const TrustProgress = ({ currentTier }: TrustProgressProps) => {
                 )}
               </div>
               <div style={i < TIERS.length - 1 ? { paddingBottom: 18 } : undefined}>
-                <div
+                <Text
+                  variant="body-sm"
+                  font="mono"
+                  as="div"
+                  weight={isCurrent ? 600 : 400}
                   style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 13,
                     color: isCurrent
                       ? cfg.color
                       : done
                         ? 'var(--color-text-secondary)'
                         : 'var(--color-text-muted)',
-                    fontWeight: isCurrent ? 600 : 400,
                   }}
                 >
                   {cfg.checks} {cfg.label}
                   {isCurrent && (
-                    <span style={{ fontSize: 11, marginLeft: 8, opacity: 0.7 }}>&larr; you</span>
+                    <Text variant="label" as="span" style={{ marginLeft: 8, opacity: 0.7 }}>
+                      &larr; you
+                    </Text>
                   )}
-                </div>
-                <div
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 12,
-                    color: 'var(--color-text-muted)',
-                    marginTop: 2,
-                  }}
-                >
+                </Text>
+                <Text variant="caption" font="sans" color="muted" as="div" style={{ marginTop: 2 }}>
                   {tier.desc}
-                </div>
+                </Text>
               </div>
             </div>
           );

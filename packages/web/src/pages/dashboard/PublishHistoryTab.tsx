@@ -1,18 +1,13 @@
+import { Text } from '@spm/ui';
 import { cardStyle } from './styles';
 
 export const PublishHistoryTab = () => (
   <div>
     <div style={cardStyle}>
       <div style={{ padding: 32, textAlign: 'center' }}>
-        <div
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 14,
-            color: 'var(--color-text-dim)',
-          }}
-        >
+        <Text variant="body" font="sans" color="dim" as="div">
           No publish history yet
-        </div>
+        </Text>
       </div>
     </div>
   </div>

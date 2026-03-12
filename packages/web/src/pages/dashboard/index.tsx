@@ -8,7 +8,7 @@ import {
   type ActivityEvent,
   type AgentStat,
 } from './types';
-import { MiniChart, StatBox, Tabs, TRUST_CONFIG, type TrustTier } from '@spm/ui';
+import { MiniChart, StatBox, Tabs, Text, TRUST_CONFIG, type TrustTier } from '@spm/ui';
 import { OverviewTab } from './OverviewTab';
 import { SkillsTab } from './SkillsTab';
 import { PublishHistoryTab } from './PublishHistoryTab';
@@ -109,20 +109,18 @@ export const Dashboard = () => {
               }}
             />
             <div>
-              <h1
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: 'var(--color-text-primary)',
-                  margin: 0,
-                }}
+              <Text
+                variant="h2"
+                font="mono"
+                color="primary"
+                as="h1"
+                style={{ fontSize: 22, margin: 0 }}
               >
                 @{username}
-              </h1>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: trustCfg.color }}>
+              </Text>
+              <Text variant="caption" font="mono" as="div" style={{ color: trustCfg.color }}>
                 {trustCfg.checks} {trustCfg.label} Author
-              </div>
+              </Text>
             </div>
           </div>
         </div>
@@ -166,16 +164,9 @@ export const Dashboard = () => {
             borderRadius: 10,
           }}
         >
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 12,
-              color: 'var(--color-text-muted)',
-              marginBottom: 6,
-            }}
-          >
+          <Text variant="caption" font="sans" color="muted" as="div" style={{ marginBottom: 6 }}>
             Weekly trend
-          </div>
+          </Text>
           <MiniChart data={weeklyTrend.map((d) => ({ value: d.downloads }))} />
         </div>
       </div>

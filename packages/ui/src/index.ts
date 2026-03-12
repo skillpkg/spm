@@ -2,6 +2,15 @@
 export { COLOR_VALUES, resolveColor, withAlpha } from './utils/colors';
 export { TRUST_CONFIG, type TrustTier, type TrustTierConfig } from './utils/trust-config';
 
+// Typography
+export {
+  Text,
+  type TextProps,
+  type TextVariant,
+  type TextColor,
+  type TextFont,
+} from './components/Text/Text';
+
 // Components
 export { Badge, type BadgeProps } from './components/Badge/Badge';
 export { StatusBadge, type StatusBadgeProps } from './components/StatusBadge/StatusBadge';

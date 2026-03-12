@@ -7,6 +7,15 @@ vi.mock('@spm/ui', () => ({
   TrustBadge: ({ tier }: { tier: string; showLabel?: boolean }) => (
     <span data-testid="trust-badge">{tier}</span>
   ),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Text: ({ children, as: Tag = 'span', style, ...rest }: any) => {
+    const El = Tag || 'span';
+    return (
+      <El style={style} {...rest}>
+        {children}
+      </El>
+    );
+  },
 }));
 
 vi.mock('../lib/api', () => ({

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Text } from '@spm/ui';
 
 export const Footer = () => {
   return (
@@ -12,7 +13,9 @@ export const Footer = () => {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div
+        <Text
+          variant="tiny"
+          as="div"
           style={{
             width: 18,
             height: 18,
@@ -22,35 +25,31 @@ export const Footer = () => {
             alignItems: 'center',
             justifyContent: 'center',
             fontFamily: "'Alfa Slab One', serif",
-            fontSize: 10,
             fontWeight: 400,
             color: 'var(--color-bg)',
           }}
         >
           S
-        </div>
-        <span
+        </Text>
+        <Text
+          variant="h4"
+          as="span"
           style={{
             fontFamily: "'Alfa Slab One', serif",
-            fontSize: 15,
             fontWeight: 400,
             color: '#0deaff',
           }}
         >
           spm
-        </span>
-        <span
-          style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}
-        >
+        </Text>
+        <Text variant="label" font="mono" color="faint" as="span">
           Skills Package Manager
-        </span>
+        </Text>
       </div>
       <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
-        <code
-          style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-faint)' }}
-        >
+        <Text variant="label" font="mono" color="faint" as="code">
           npm i -g @skillpkg/cli
-        </code>
+        </Text>
         <Link
           to="/docs"
           style={{

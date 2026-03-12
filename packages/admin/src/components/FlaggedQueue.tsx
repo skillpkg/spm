@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@spm/web-auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Card, StatBox, TrustBadge } from '@spm/ui';
+import { Badge, Button, Card, StatBox, Text, TrustBadge } from '@spm/ui';
 import { approveQueueItem, rejectQueueItem, type QueueItem } from '../lib/api';
 import { queueQuery, adminStatsQuery } from './FlaggedQueue.queries';
 import { LoadingState, ErrorState, EmptyState } from './DataState';
@@ -62,58 +62,38 @@ export const FlaggedQueue = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 15,
-                      color: 'var(--color-cyan)',
-                      fontWeight: 600,
-                    }}
+                  <Text
+                    variant="h4"
+                    font="mono"
+                    weight={600}
+                    style={{ color: 'var(--color-cyan)' }}
                   >
                     {item.skill}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      color: 'var(--color-text-faint)',
-                    }}
-                  >
+                  </Text>
+                  <Text variant="caption" font="mono" color="faint">
                     {item.version}
-                  </span>
+                  </Text>
                   <Badge label={`@${item.author.username}`} color="text-secondary" />
                   <TrustBadge tier={trustTier} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      color: 'var(--color-text-muted)',
-                    }}
-                  >
+                  <Text variant="label" font="mono" color="muted">
                     {new Date(item.submitted_at).toLocaleDateString()}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      color: 'var(--color-text-faint)',
-                    }}
-                  >
+                  </Text>
+                  <Text variant="label" font="mono" color="faint">
                     {expanded === item.id ? '\u25B2' : '\u25BC'}
-                  </span>
+                  </Text>
                 </div>
               </div>
 
               {/* Flags summary */}
               <div style={{ display: 'flex', gap: 8, padding: '0 18px 12px', flexWrap: 'wrap' }}>
                 {item.flags.map((f, i) => (
-                  <span
+                  <Text
                     key={i}
+                    variant="label"
+                    font="mono"
                     style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
                       padding: '2px 10px',
                       borderRadius: 4,
                       backgroundColor:
@@ -122,7 +102,7 @@ export const FlaggedQueue = () => {
                     }}
                   >
                     L{f.layer}: {f.type} ({((f.confidence ?? 0) * 100).toFixed(0)}%)
-                  </span>
+                  </Text>
                 ))}
               </div>
 
@@ -135,19 +115,18 @@ export const FlaggedQueue = () => {
                   }}
                 >
                   {/* Metadata */}
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      color: 'var(--color-text-muted)',
-                      marginBottom: 16,
-                    }}
+                  <Text
+                    variant="label"
+                    as="div"
+                    font="mono"
+                    color="muted"
+                    style={{ marginBottom: 16 }}
                   >
                     {item.size_bytes != null && (
                       <>Size: {(item.size_bytes / 1024).toFixed(0)} KB &middot; </>
                     )}
                     Submitted: {item.submitted_at}
-                  </div>
+                  </Text>
 
                   {/* Actions */}
                   <div style={{ display: 'flex', gap: 8 }}>

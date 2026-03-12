@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Text } from '@spm/ui';
 import { useAuth } from '../context/AuthContext';
 
 export const Nav = ({
@@ -59,7 +60,9 @@ export const Nav = ({
             height: 28,
           }}
         />
-        <span
+        <Text
+          variant="h3"
+          as="span"
           style={{
             fontFamily: "'Alfa Slab One', serif",
             fontSize: 18,
@@ -72,7 +75,7 @@ export const Nav = ({
           }}
         >
           spm
-        </span>
+        </Text>
       </Link>
 
       <form onSubmit={handleSubmit} style={{ flex: 1, maxWidth: 440 }}>
@@ -86,9 +89,9 @@ export const Nav = ({
             padding: '0 12px',
           }}
         >
-          <span style={{ color: 'var(--color-text-muted)', fontSize: 14, marginRight: 8 }}>
+          <Text variant="body" color="muted" as="span" style={{ marginRight: 8 }}>
             &#x2315;
-          </span>
+          </Text>
           <input
             ref={inputRef}
             value={query ?? ''}
@@ -106,17 +109,15 @@ export const Nav = ({
             }}
           />
           {query && (
-            <span
-              onClick={() => setQuery('')}
-              style={{
-                color: 'var(--color-text-muted)',
-                cursor: 'pointer',
-                fontSize: 12,
-                padding: 4,
-              }}
+            <Text
+              variant="caption"
+              color="muted"
+              as="span"
+              style={{ cursor: 'pointer', padding: 4 }}
+              {...{ onClick: () => setQuery('') }}
             >
               &#x2715;
-            </span>
+            </Text>
           )}
         </div>
       </form>
@@ -187,15 +188,9 @@ export const Nav = ({
                   border: '1px solid var(--color-border-default)',
                 }}
               />
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 13,
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
+              <Text variant="body-sm" font="mono" color="secondary" as="span">
                 {user.username}
-              </span>
+              </Text>
             </Link>
             <button
               onClick={signOut}

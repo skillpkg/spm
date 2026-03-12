@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Text } from '@spm/ui';
 
 const sections = [
   {
@@ -49,44 +50,36 @@ const sections = [
 
 export const Docs = () => (
   <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 32px 60px' }}>
-    <h1
-      style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 24,
-        fontWeight: 700,
-        color: 'var(--color-text-primary)',
-        marginBottom: 4,
-        marginTop: 0,
-      }}
+    <Text
+      variant="h1"
+      font="sans"
+      color="primary"
+      as="h1"
+      style={{ marginBottom: 4, marginTop: 0 }}
     >
       Documentation
-    </h1>
-    <p
-      style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 14,
-        color: 'var(--color-text-muted)',
-        marginBottom: 32,
-        marginTop: 0,
-      }}
+    </Text>
+    <Text
+      variant="body"
+      font="sans"
+      color="muted"
+      as="p"
+      style={{ marginBottom: 32, marginTop: 0 }}
     >
       Everything you need to know about the Skills Package Manager.
-    </p>
+    </Text>
 
     {sections.map((section) => (
       <div key={section.title} style={{ marginBottom: 32 }}>
-        <h2
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 16,
-            fontWeight: 600,
-            color: 'var(--color-text-secondary)',
-            marginBottom: 12,
-            marginTop: 0,
-          }}
+        <Text
+          variant="h3"
+          font="sans"
+          color="secondary"
+          as="h2"
+          style={{ marginBottom: 12, marginTop: 0 }}
         >
           {section.title}
-        </h2>
+        </Text>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {section.items.map((item) => (
             <div
@@ -99,27 +92,25 @@ export const Docs = () => (
                 cursor: 'pointer',
               }}
             >
-              <div
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: 'var(--color-text-primary)',
-                  marginBottom: 4,
-                }}
+              <Text
+                variant="body"
+                font="sans"
+                color="primary"
+                weight={500}
+                as="div"
+                style={{ marginBottom: 4 }}
               >
                 {item.label}
-              </div>
-              <div
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  color: 'var(--color-text-muted)',
-                  lineHeight: 1.5,
-                }}
+              </Text>
+              <Text
+                variant="body-sm"
+                font="sans"
+                color="muted"
+                as="div"
+                style={{ lineHeight: 1.5 }}
               >
                 {item.desc}
-              </div>
+              </Text>
             </div>
           ))}
         </div>
@@ -134,20 +125,17 @@ export const Docs = () => (
         borderRadius: 10,
       }}
     >
-      <div
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 14,
-          fontWeight: 500,
-          color: 'var(--color-text-primary)',
-          marginBottom: 4,
-        }}
+      <Text
+        variant="body"
+        font="sans"
+        color="primary"
+        weight={500}
+        as="div"
+        style={{ marginBottom: 4 }}
       >
         Can&apos;t find what you need?
-      </div>
-      <div
-        style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--color-text-muted)' }}
-      >
+      </Text>
+      <Text variant="body-sm" font="sans" color="muted" as="div">
         Check out the{' '}
         <Link to="/cli" style={{ color: 'var(--color-accent)', textDecoration: 'none' }}>
           CLI reference
@@ -162,7 +150,7 @@ export const Docs = () => (
           GitHub
         </a>
         .
-      </div>
+      </Text>
     </div>
   </div>
 );

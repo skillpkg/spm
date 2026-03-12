@@ -1,4 +1,4 @@
-import { SecurityBadge } from '@spm/ui';
+import { SecurityBadge, Text } from '@spm/ui';
 import { type SkillFull, cardStyle } from './types';
 
 const layerStatusIcon = (status: string) => {
@@ -43,49 +43,29 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
   <div style={{ paddingTop: 4, display: 'flex', flexDirection: 'column', gap: 12 }}>
     {/* Signature */}
     <div style={{ ...cardStyle, marginBottom: 0 }}>
-      <div
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 13,
-          fontWeight: 600,
-          color: 'var(--color-text-primary)',
-          marginBottom: 10,
-        }}
+      <Text
+        variant="body-sm"
+        font="sans"
+        color="primary"
+        weight={600}
+        as="div"
+        style={{ marginBottom: 10 }}
       >
         {skill.security.signed ? '\uD83D\uDD12' : '\u26A0'} Signature
-      </div>
+      </Text>
       {skill.security.signed ? (
-        <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 13,
-            color: 'var(--color-accent)',
-          }}
-        >
+        <Text variant="body-sm" font="mono" color="accent" as="div">
           &#x2713; Signed by {skill.security.signer} (Sigstore OIDC)
-        </div>
+        </Text>
       ) : (
         <div>
-          <div
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 13,
-              color: 'var(--color-yellow)',
-            }}
-          >
+          <Text variant="body-sm" font="mono" as="div" style={{ color: 'var(--color-yellow)' }}>
             &#x26A0; Unsigned — this version was published without a signature
-          </div>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 12,
-              color: 'var(--color-text-dim)',
-              marginTop: 6,
-            }}
-          >
+          </Text>
+          <Text variant="caption" font="sans" color="dim" as="div" style={{ marginTop: 6 }}>
             Signing happens automatically during <code style={{ fontSize: 12 }}>spm publish</code>{' '}
             when Sigstore is reachable. Re-publish a new version to sign it.
-          </div>
+          </Text>
         </div>
       )}
     </div>
@@ -100,16 +80,9 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
           marginBottom: 12,
         }}
       >
-        <div
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 13,
-            fontWeight: 600,
-            color: 'var(--color-text-primary)',
-          }}
-        >
+        <Text variant="body-sm" font="sans" color="primary" weight={600} as="div">
           &#x1F6E1; Security Scan
-        </div>
+        </Text>
         <SecurityBadge level={skill.security.level} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -117,14 +90,15 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
           skill.security.layers.map((layer) => {
             const icon = layerStatusIcon(layer.status);
             return (
-              <div
+              <Text
                 key={layer.layer}
+                variant="body-sm"
+                font="mono"
+                as="div"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 13,
                 }}
               >
                 <span style={{ color: icon.color, flexShrink: 0 }}>{icon.symbol}</span>
@@ -135,11 +109,12 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
                   {layerStatusLabel(layer.status, layer.confidence)}
                 </span>
                 {layer.status === 'error' && layer.detail && (
-                  <span
+                  <Text
+                    variant="label"
+                    font="mono"
+                    color="faint"
+                    as="span"
                     style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      color: 'var(--color-text-faint)',
                       marginLeft: 8,
                       maxWidth: 300,
                       overflow: 'hidden',
@@ -149,21 +124,15 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
                     title={layer.detail}
                   >
                     ({layer.detail})
-                  </span>
+                  </Text>
                 )}
-              </div>
+              </Text>
             );
           })
         ) : (
-          <div
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 13,
-              color: 'var(--color-text-faint)',
-            }}
-          >
+          <Text variant="body-sm" font="mono" color="faint" as="div">
             No scan data available
-          </div>
+          </Text>
         )}
       </div>
     </div>

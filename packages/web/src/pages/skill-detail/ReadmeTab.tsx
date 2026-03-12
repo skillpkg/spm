@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Text } from '@spm/ui';
 import { type SkillFull } from './types';
 
 const README_COLLAPSED_LINES = 15;
@@ -16,11 +17,12 @@ export const ReadmeTab = ({ skill }: { skill: SkillFull }) => {
 
     return (
       <div style={{ paddingTop: 4 }}>
-        <pre
+        <Text
+          variant="body-sm"
+          font="mono"
+          color="secondary"
+          as="pre"
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 13,
-            color: 'var(--color-text-secondary)',
             lineHeight: 1.7,
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
@@ -28,7 +30,7 @@ export const ReadmeTab = ({ skill }: { skill: SkillFull }) => {
           }}
         >
           {displayedText}
-        </pre>
+        </Text>
         {collapsed && (
           <button
             onClick={() => setExpanded(true)}
@@ -68,11 +70,12 @@ export const ReadmeTab = ({ skill }: { skill: SkillFull }) => {
   }
 
   return (
-    <div
+    <Text
+      variant="body"
+      font="sans"
+      color="secondary"
+      as="div"
       style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 14,
-        color: 'var(--color-text-secondary)',
         lineHeight: 1.75,
         paddingTop: 4,
       }}
@@ -82,6 +85,6 @@ export const ReadmeTab = ({ skill }: { skill: SkillFull }) => {
           {para}
         </p>
       ))}
-    </div>
+    </Text>
   );
 };

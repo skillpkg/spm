@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { TRUST_CONFIG, Sparkline } from '@spm/ui';
+import { TRUST_CONFIG, Sparkline, Text } from '@spm/ui';
 import { type SkillDownloadsDay } from '../../lib/api';
 import { skillDownloadsQuery } from './queries';
 import { type SkillFull, cardStyle } from './types';
@@ -47,38 +47,24 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
                 borderBottom: '1px solid #1a1d2733',
               }}
             >
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 12,
-                  color: 'var(--color-text-muted)',
-                }}
-              >
+              <Text variant="caption" font="sans" color="muted" as="span">
                 {row.label}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                  color: row.color || '#94a3b8',
-                }}
+              </Text>
+              <Text
+                variant="caption"
+                font="mono"
+                as="span"
+                style={{ color: row.color || '#94a3b8' }}
               >
                 {row.value}
-              </span>
+              </Text>
             </div>
           ))}
           {sparklineData && (
             <div style={{ paddingTop: 8 }}>
-              <div
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 10,
-                  color: 'var(--color-text-muted)',
-                  marginBottom: 4,
-                }}
-              >
+              <Text variant="tiny" font="sans" color="muted" as="div" style={{ marginBottom: 4 }}>
                 Last 30 days
-              </div>
+              </Text>
               <Sparkline data={sparklineData} width={192} height={32} color="#10b981" />
             </div>
           )}
@@ -86,18 +72,15 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
 
         {/* Authors */}
         <div style={cardStyle}>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 11,
-              color: 'var(--color-text-muted)',
-              marginBottom: 8,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}
+          <Text
+            variant="label"
+            font="sans"
+            color="muted"
+            as="div"
+            style={{ marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}
           >
             {skill.authors.length > 1 ? 'Authors' : 'Author'}
-          </div>
+          </Text>
           {skill.authors.map((a) => {
             const aTrust = TRUST_CONFIG[a.trust];
             return (
@@ -112,7 +95,11 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
                   marginBottom: 8,
                 }}
               >
-                <div
+                <Text
+                  variant="caption"
+                  font="mono"
+                  color="dim"
+                  as="div"
                   style={{
                     width: 28,
                     height: 28,
@@ -122,39 +109,22 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    color: 'var(--color-text-dim)',
                   }}
                 >
                   {a.username[0].toUpperCase()}
-                </div>
+                </Text>
                 <div>
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 13,
-                      color: 'var(--color-text-primary)',
-                    }}
-                  >
+                  <Text variant="body-sm" font="mono" color="primary" as="div">
                     @{a.username}
                     {a.role !== 'owner' && (
-                      <span
-                        style={{
-                          fontSize: 10,
-                          color: 'var(--color-text-muted)',
-                          marginLeft: 4,
-                        }}
-                      >
+                      <Text variant="tiny" color="muted" as="span" style={{ marginLeft: 4 }}>
                         {a.role}
-                      </span>
+                      </Text>
                     )}
-                  </div>
-                  <div
-                    style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: aTrust.color }}
-                  >
+                  </Text>
+                  <Text variant="label" font="mono" as="div" style={{ color: aTrust.color }}>
                     {aTrust.checks} {aTrust.label}
-                  </div>
+                  </Text>
                 </div>
               </Link>
             );
@@ -164,18 +134,15 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
         {/* Imported from */}
         {skill.importedFrom && (
           <div style={cardStyle}>
-            <div
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 11,
-                color: 'var(--color-text-muted)',
-                marginBottom: 8,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
+            <Text
+              variant="label"
+              font="sans"
+              color="muted"
+              as="div"
+              style={{ marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}
             >
               Imported from
-            </div>
+            </Text>
             <a
               href={skill.importedFrom}
               target="_blank"
@@ -190,35 +157,30 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
             >
               {skill.importedFrom.replace(/^https?:\/\/(www\.)?/, '')}
             </a>
-            <div
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 11,
-                color: 'var(--color-text-faint)',
-                marginTop: 6,
-                lineHeight: 1.4,
-              }}
+            <Text
+              variant="label"
+              font="sans"
+              color="faint"
+              as="div"
+              style={{ marginTop: 6, lineHeight: 1.4 }}
             >
               This skill was imported by SPM from an external source. The original author did not
               publish it directly.
-            </div>
+            </Text>
           </div>
         )}
 
         {/* Links */}
         <div style={cardStyle}>
-          <div
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 11,
-              color: 'var(--color-text-muted)',
-              marginBottom: 8,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}
+          <Text
+            variant="label"
+            font="sans"
+            color="muted"
+            as="div"
+            style={{ marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}
           >
             Links
-          </div>
+          </Text>
           {skill.repo && (
             <a
               href={skill.repo}
@@ -261,43 +223,38 @@ export const SkillSidebar = ({ skill }: { skill: SkillFull }) => {
         {((skill.dependencies?.pip?.length ?? 0) > 0 ||
           (skill.dependencies?.system?.length ?? 0) > 0) && (
           <div style={cardStyle}>
-            <div
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 11,
-                color: 'var(--color-text-muted)',
-                marginBottom: 8,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
+            <Text
+              variant="label"
+              font="sans"
+              color="muted"
+              as="div"
+              style={{ marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}
             >
               Dependencies
-            </div>
+            </Text>
             {skill.dependencies.system?.map((d) => (
-              <div
+              <Text
                 key={d}
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                  color: 'var(--color-text-dim)',
-                  padding: '2px 0',
-                }}
+                variant="caption"
+                font="mono"
+                color="dim"
+                as="div"
+                style={{ padding: '2px 0' }}
               >
                 {d}
-              </div>
+              </Text>
             ))}
             {skill.dependencies.pip?.map((d) => (
-              <div
+              <Text
                 key={d}
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                  color: 'var(--color-text-dim)',
-                  padding: '2px 0',
-                }}
+                variant="caption"
+                font="mono"
+                color="dim"
+                as="div"
+                style={{ padding: '2px 0' }}
               >
                 pip: {d}
-              </div>
+              </Text>
             ))}
           </div>
         )}

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Text } from '@spm/ui';
 import { type Category } from '../../data/constants';
 
 interface CategoryGridProps {
@@ -16,17 +17,9 @@ export const CategoryGrid = ({ categories }: CategoryGridProps) => {
           marginBottom: 14,
         }}
       >
-        <h2
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 15,
-            fontWeight: 600,
-            color: 'var(--color-text-secondary)',
-            margin: 0,
-          }}
-        >
+        <Text variant="h4" font="sans" color="secondary" as="h2" style={{ margin: 0 }}>
           Browse by category
-        </h2>
+        </Text>
         <Link
           to="/search"
           style={{
@@ -58,19 +51,15 @@ export const CategoryGrid = ({ categories }: CategoryGridProps) => {
                 cursor: 'pointer',
               }}
             >
-              <span style={{ fontSize: 14 }}>{cat.icon}</span>
-              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#c8d0dc' }}>
+              <Text variant="body" as="span" style={{ fontSize: 14 }}>
+                {cat.icon}
+              </Text>
+              <Text variant="body-sm" font="sans" as="span" style={{ color: '#c8d0dc' }}>
                 {cat.name}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: 'var(--color-text-muted)',
-                }}
-              >
+              </Text>
+              <Text variant="label" font="mono" color="muted" as="span">
                 {cat.count}
-              </span>
+              </Text>
             </div>
           </Link>
         ))}

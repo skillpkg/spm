@@ -1,3 +1,4 @@
+import { Text } from '@spm/ui';
 import { type Author, type Skill, type WeeklyData, type AgentStat } from './types';
 import { cardStyle, sectionTitle } from './styles';
 
@@ -36,15 +37,9 @@ export const AnalyticsTab = ({
                   gap: 6,
                 }}
               >
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 10,
-                    color: 'var(--color-text-muted)',
-                  }}
-                >
+                <Text variant="tiny" font="mono" color="muted" as="span">
                   {(w.downloads / 1000).toFixed(1)}k
-                </span>
+                </Text>
                 <div
                   style={{
                     width: '100%',
@@ -57,15 +52,9 @@ export const AnalyticsTab = ({
                     transition: 'all 0.3s',
                   }}
                 />
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 9,
-                    color: 'var(--color-text-muted)',
-                  }}
-                >
+                <Text variant="tiny" font="mono" color="muted" as="span" style={{ fontSize: 9 }}>
                   {w.week.split(' ')[1]}
-                </span>
+                </Text>
               </div>
             );
           })}
@@ -80,24 +69,17 @@ export const AnalyticsTab = ({
           return (
             <div key={skill.name} style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 13,
-                    color: 'var(--color-cyan)',
-                  }}
+                <Text
+                  variant="body-sm"
+                  font="mono"
+                  as="span"
+                  style={{ color: 'var(--color-cyan)' }}
                 >
                   {skill.name}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    color: 'var(--color-text-secondary)',
-                  }}
-                >
+                </Text>
+                <Text variant="caption" font="mono" color="secondary" as="span">
                   {(skill.downloads / 1000).toFixed(1)}k ({pct}%)
-                </span>
+                </Text>
               </div>
               <div
                 style={{
@@ -128,24 +110,12 @@ export const AnalyticsTab = ({
         {agents.map((a) => (
           <div key={a.agent} style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
+              <Text variant="body-sm" font="sans" color="secondary" as="span">
                 {a.agent}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                  color: 'var(--color-text-dim)',
-                }}
-              >
+              </Text>
+              <Text variant="caption" font="mono" color="dim" as="span">
                 {a.pct}%
-              </span>
+              </Text>
             </div>
             <div
               style={{
