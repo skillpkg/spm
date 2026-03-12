@@ -1,6 +1,8 @@
 import type { SearchParams, ResolveRequest, ApiError, Manifest } from '@spm/shared';
 import { loadConfig } from './config.js';
 
+declare const __CLI_VERSION__: string;
+
 export class ApiClientError extends Error {
   public readonly status: number;
   public readonly apiError: ApiError;
@@ -180,7 +182,7 @@ export const createApiClient = (config?: ApiClientConfig) => {
   const headers = (): Record<string, string> => {
     const h: Record<string, string> = {
       'Content-Type': 'application/json',
-      'User-Agent': 'spm-cli/0.0.1',
+      'User-Agent': `spm-cli/${__CLI_VERSION__}`,
     };
     if (token) {
       h['Authorization'] = `Bearer ${token}`;
@@ -317,7 +319,7 @@ export const createApiClient = (config?: ApiClientConfig) => {
       }
 
       const h: Record<string, string> = {
-        'User-Agent': 'spm-cli/0.0.1',
+        'User-Agent': `spm-cli/${__CLI_VERSION__}`,
       };
       if (token) {
         h['Authorization'] = `Bearer ${token}`;
@@ -381,7 +383,7 @@ export const createApiClient = (config?: ApiClientConfig) => {
         formData.append('signer_identity', signerIdentity);
       }
 
-      const h: Record<string, string> = { 'User-Agent': 'spm-cli/0.0.1' };
+      const h: Record<string, string> = { 'User-Agent': `spm-cli/${__CLI_VERSION__}` };
       if (token) h['Authorization'] = `Bearer ${token}`;
 
       const res = await fetch(url, { method: 'POST', headers: h, body: formData });

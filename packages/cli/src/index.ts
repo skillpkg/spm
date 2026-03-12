@@ -2,6 +2,8 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { getOutputMode, setOutputMode } from './lib/output.js';
 
+declare const __CLI_VERSION__: string;
+
 const banner = `
   ${chalk.cyan('╔═╗')}${chalk.blueBright('╔═╗')}${chalk.blue('╔╦╗')}
   ${chalk.cyan('╚═╗')}${chalk.blueBright('╠═╝')}${chalk.blue('║║║')}  ${chalk.dim('Skills Package Manager')}
@@ -35,7 +37,7 @@ const program = new Command();
 program
   .name('spm')
   .description('Skills Package Manager — install, manage, and publish AI agent skills')
-  .version('0.0.1')
+  .version(__CLI_VERSION__)
   .option('--verbose', 'Show detailed output')
   .option('--silent', 'Suppress all output (exit code only)')
   .option('--json', 'Output machine-readable JSON')
