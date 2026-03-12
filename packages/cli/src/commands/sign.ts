@@ -110,7 +110,7 @@ export const registerSignCommand = (program: Command): void => {
       if (opts.all) {
         // Fetch skills and find unsigned versions
         try {
-          const whoami = await api.whoami();
+          const { user: whoami } = await api.whoami();
           const isAdmin = whoami.is_admin;
 
           if (isAdmin) {

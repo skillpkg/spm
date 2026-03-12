@@ -17,7 +17,7 @@ export const registerLoginCommand = (program: Command): void => {
       // Check if already logged in
       if (config.token) {
         try {
-          const user = await client.whoami();
+          const { user } = await client.whoami();
           if (getCurrentMode() === 'json') {
             logJson({
               status: 'already_logged_in',

@@ -27,9 +27,10 @@ export const registerWhoamiCommand = (program: Command): void => {
 
       const client = createApiClient(config);
 
-      let user;
+      let user: Awaited<ReturnType<typeof client.whoami>>['user'];
       try {
-        user = await client.whoami();
+        const res = await client.whoami();
+        user = res.user;
       } catch (err) {
         if (err instanceof ApiClientError) {
           if (err.status === 401) {
@@ -56,9 +57,9 @@ export const registerWhoamiCommand = (program: Command): void => {
       if (getCurrentMode() === 'json') {
         logJson({
           username: user.username,
-          github: user.github_username,
+          github: user.github_login,
           trust_tier: user.trust_tier,
-          registered_at: user.registered_at,
+          registered_at: user.created_at,
           skills_published: user.skills_published,
           registry: config.registry,
         });
@@ -67,9 +68,9 @@ export const registerWhoamiCommand = (program: Command): void => {
 
       console.log('');
       log(c.bold(user.username));
-      log(`  GitHub:     github.com/${user.github_username}`);
+      log(`  GitHub:     github.com/${user.github_login}`);
       log(`  Trust tier: ${c.trust(user.trust_tier)}`);
-      log(`  Registered: ${user.registered_at}`);
+      log(`  Registered: ${user.created_at}`);
       log(`  Published:  ${user.skills_published} skills`);
       log(`  Registry:   ${c.dim(config.registry)}`);
     });

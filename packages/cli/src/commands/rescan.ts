@@ -68,7 +68,7 @@ export const registerRescanCommand = (program: Command): void => {
       if (opts.all) {
         // Batch rescan
         try {
-          const whoami = await api.whoami();
+          const { user: whoami } = await api.whoami();
           const isAdmin = whoami.is_admin;
 
           if (isAdmin) {

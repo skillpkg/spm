@@ -42,12 +42,19 @@ interface TokenPendingResponse {
 }
 
 interface WhoamiResponse {
-  username: string;
-  github_username: string;
-  trust_tier: string;
-  is_admin: boolean;
-  registered_at: string;
-  skills_published: number;
+  token: string;
+  user: {
+    id: string;
+    username: string;
+    github_login: string;
+    email: string | null;
+    trust_tier: string;
+    role: string;
+    is_admin: boolean;
+    skills_published: number;
+    total_downloads: number;
+    created_at: string;
+  };
 }
 
 export interface SkillSearchResultItem {
