@@ -120,7 +120,9 @@ export const registerSignCommand = (program: Command): void => {
           }
 
           // Admin: fetch all skills; regular user: only their own
-          const searchParams = isAdmin ? { per_page: 100 } : { author: whoami.username, per_page: 100 };
+          const searchParams = isAdmin
+            ? { per_page: 100 }
+            : { author: whoami.username, per_page: 100 };
           const searchResult = await api.searchSkills(searchParams);
 
           for (const skill of searchResult.results) {

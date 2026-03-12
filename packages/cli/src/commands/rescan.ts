@@ -13,7 +13,9 @@ const rescanOne = async (
   try {
     const result = await api.rescanSkill(name, version);
 
-    log(`${icons.success} Rescanned ${c.name(name)}@${c.version(result.version)}: ${c.trust(result.security_level)}`);
+    log(
+      `${icons.success} Rescanned ${c.name(name)}@${c.version(result.version)}: ${c.trust(result.security_level)}`,
+    );
 
     if (result.blocked.length > 0) {
       log(`   ${icons.error} Blocked: ${result.blocked.join(', ')}`);
@@ -75,7 +77,9 @@ export const registerRescanCommand = (program: Command): void => {
             log(`${icons.info} Rescanning your published skills...`);
           }
 
-          const searchParams = isAdmin ? { per_page: 100 } : { author: whoami.username, per_page: 100 };
+          const searchParams = isAdmin
+            ? { per_page: 100 }
+            : { author: whoami.username, per_page: 100 };
           const searchResult = await api.searchSkills(searchParams);
 
           if (searchResult.results.length === 0) {
@@ -97,7 +101,9 @@ export const registerRescanCommand = (program: Command): void => {
           }
 
           log('');
-          log(`${icons.success} ${succeeded} rescanned, ${failed} failed (${searchResult.results.length} total)`);
+          log(
+            `${icons.success} ${succeeded} rescanned, ${failed} failed (${searchResult.results.length} total)`,
+          );
 
           if (mode === 'json') {
             logJson({

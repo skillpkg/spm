@@ -346,10 +346,25 @@ describe('linker', () => {
     await fs.rm(tmpDir, { recursive: true, force: true });
   });
 
-  it('linkSkill falls back to symlink when npx fails', { timeout: 15000 }, async () => {
+  it('linkSkill falls back to symlink when npx fails', async () => {
     vi.doMock('node:os', async () => {
       const actual = await vi.importActual<typeof import('node:os')>('node:os');
       return { ...actual, homedir: () => tmpDir };
+    });
+    vi.doMock('node:child_process', async () => {
+      const actual =
+        await vi.importActual<typeof import('node:child_process')>('node:child_process');
+      return {
+        ...actual,
+        execFile: (
+          _cmd: string,
+          _args: string[],
+          _opts: Record<string, unknown>,
+          cb: (err: Error | null) => void,
+        ) => {
+          cb(new Error('mock: npx not available'));
+        },
+      };
     });
     const { linkSkill } = await import('../services/linker.js');
 
@@ -358,13 +373,13 @@ describe('linker', () => {
     await fs.mkdir(skillSrcDir, { recursive: true });
     await fs.writeFile(path.join(skillSrcDir, 'SKILL.md'), '# Test skill');
 
-    // npx will fail since skills CLI isn't installed, should fall back to symlink
     const result = await linkSkill(skillSrcDir, 'test-skill');
 
     // Should have fallen back to symlink or copy
     expect(result.agents.length).toBeGreaterThanOrEqual(0);
-    expect(['symlink', 'copy', 'vercel-skills-cli']).toContain(result.method);
+    expect(['symlink', 'copy']).toContain(result.method);
 
+    vi.doUnmock('node:child_process');
     vi.doUnmock('node:os');
   });
 
