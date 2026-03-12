@@ -1,6 +1,6 @@
 {
   "name": "@skillpkg/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Skills Package Manager — install, manage, and publish AI agent skills",
   "license": "MIT",

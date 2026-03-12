@@ -2,15 +2,6 @@ name: Publish CLI
 
 on:
   workflow_dispatch:
-    inputs:
-      bump:
-        description: 'Version bump type'
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-        default: patch
 
 concurrency:
   group: publish-cli
@@ -20,12 +11,8 @@ jobs:
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -56,27 +43,9 @@ jobs:
       - name: Test
         run: pnpm test
 
-      # Publish
-      - name: Bump version
-        working-directory: packages/cli
-        run: npm version ${{ inputs.bump }} --no-git-tag-version
-
+      # Publish whatever version is in package.json
       - name: Publish
         working-directory: packages/cli
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Get new version
-        id: version
-        working-directory: packages/cli
-        run: echo "version=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
-
-      - name: Commit version bump
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add packages/cli/package.json
-          git commit -m "chore(cli): release v${{ steps.version.outputs.version }}"
-          git tag "cli-v${{ steps.version.outputs.version }}"
-          git push origin main --tags
