@@ -74,7 +74,7 @@ const TopBarSearch = () => {
           ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search skills..."
+          placeholder="Search skills... (author:name, tag:keyword)"
           style={{
             flex: 1,
             fontFamily: 'var(--font-sans)',

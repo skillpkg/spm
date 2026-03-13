@@ -401,6 +401,8 @@ const SearchQuerySchema = z.object({
   category: z.string().optional(),
   trust: z.string().optional(),
   platform: z.string().optional(),
+  tag: z.string().optional(),
+  signed: z.enum(['true', 'false']).optional(),
   security: z.enum(['full', 'partial', 'any']).optional().default('any'),
   sort: z
     .enum(['relevance', 'downloads', 'rating', 'updated', 'new'])
@@ -413,7 +415,8 @@ const SearchQuerySchema = z.object({
 skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) => {
   const db = c.get('db');
   const params = c.req.valid('query');
-  const { q, author, category, trust, platform, security, sort, page, per_page } = params;
+  const { q, author, category, tag, signed, trust, platform, security, sort, page, per_page } =
+    params;
   const offset = (page - 1) * per_page;
 
   // Build WHERE conditions — always exclude blocked skills from public search
@@ -468,6 +471,33 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
         )`,
       );
     }
+  }
+
+  if (tag) {
+    conditions.push(
+      sql`${skills.id} IN (
+        SELECT ${skillTags.skillId} FROM ${skillTags}
+        WHERE ${skillTags.tag} ILIKE ${'%' + tag + '%'}
+      )`,
+    );
+  }
+
+  if (signed === 'true') {
+    conditions.push(
+      sql`${skills.id} IN (
+        SELECT ${versions.skillId} FROM ${versions}
+        WHERE ${versions.sigstoreBundleKey} IS NOT NULL
+        AND ${versions.yanked} = false
+      )`,
+    );
+  } else if (signed === 'false') {
+    conditions.push(
+      sql`${skills.id} NOT IN (
+        SELECT ${versions.skillId} FROM ${versions}
+        WHERE ${versions.sigstoreBundleKey} IS NOT NULL
+        AND ${versions.yanked} = false
+      )`,
+    );
   }
 
   if (security && security !== 'any') {

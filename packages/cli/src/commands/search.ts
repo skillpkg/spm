@@ -59,6 +59,7 @@ export const registerSearchCommand = (program: Command): void => {
   program
     .command('search <query>')
     .description('Search for skills in the registry')
+    .option('--author <username>', 'filter by author username')
     .option('--category <slug>', 'filter by category')
     .option('--trust <tier>', 'minimum trust tier')
     .option('--platform <name>', 'filter by platform')
@@ -70,6 +71,7 @@ export const registerSearchCommand = (program: Command): void => {
       async (
         query: string,
         opts: {
+          author?: string;
           category?: string;
           trust?: string;
           platform?: string;
@@ -92,6 +94,7 @@ export const registerSearchCommand = (program: Command): void => {
           per_page: parseInt(opts.perPage ?? '20', 10),
         };
 
+        if (opts.author) params.author = opts.author;
         if (opts.category) params.category = opts.category;
         if (opts.trust) params.trust = opts.trust;
         if (opts.platform) params.platform = opts.platform;
@@ -144,6 +147,7 @@ export const registerSearchCommand = (program: Command): void => {
 
         // Footer
         const filterParts: string[] = [];
+        if (opts.author) filterParts.push(`author=@${opts.author}`);
         if (opts.category) filterParts.push(`category=${opts.category}`);
         if (opts.trust) filterParts.push(`trust\u2265${opts.trust}`);
         if (opts.platform) filterParts.push(`platform=${opts.platform}`);
