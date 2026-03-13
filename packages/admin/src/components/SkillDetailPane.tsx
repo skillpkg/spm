@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '@spm/web-auth';
 import { useTabParam } from '../lib/useTabParam';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Card, Sparkline, Text, TRUST_CONFIG, type TrustTier } from '@spm/ui';
+import { Sparkline, Text, TRUST_CONFIG, type TrustTier } from '@spm/ui';
+import { LegacyBadge as Badge, LegacyButton as Button, LegacyCard as Card } from '@spm/ui/shadcn';
 import {
   getAdminSkillVersion,
   yankSkill,

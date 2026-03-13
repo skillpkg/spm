@@ -13,6 +13,7 @@ export interface TabsProps {
   onChange: (id: string) => void;
 }
 
+/** @deprecated Use `Tabs` from `@spm/ui/shadcn` instead */
 export const Tabs = ({ tabs, active, onChange }: TabsProps) => (
   <div
     style={{

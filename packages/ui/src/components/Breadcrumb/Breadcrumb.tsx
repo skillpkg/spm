@@ -68,6 +68,7 @@ const CrumbLink = ({ item, isLast }: { item: BreadcrumbItem; isLast: boolean }) 
   );
 };
 
+/** @deprecated Use `LegacyBreadcrumb` from `@spm/ui/shadcn` instead */
 export const Breadcrumb = ({ items }: BreadcrumbProps) => {
   if (items.length === 0) return null;
 

@@ -1,4 +1,5 @@
-import { Card, StatBox, Text } from '@spm/ui';
+import { StatBox, Text } from '@spm/ui';
+import { LegacyCard as Card } from '@spm/ui/shadcn';
 
 const SectionHeading = ({ children }: { children: string }) => (
   <Text

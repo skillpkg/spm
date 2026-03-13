@@ -1,6 +1,10 @@
 import { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { TopBar, Breadcrumb, Text, type BreadcrumbItem } from '@spm/ui';
+import { TopBar, Text } from '@spm/ui';
+import {
+  LegacyBreadcrumb as Breadcrumb,
+  type LegacyBreadcrumbItem as BreadcrumbItem,
+} from '@spm/ui/shadcn';
 
 const ROUTE_LABELS: Record<string, string> = {
   '/': 'Home',

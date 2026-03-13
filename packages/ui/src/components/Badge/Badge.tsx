@@ -5,6 +5,7 @@ export interface BadgeProps {
   color: string;
 }
 
+/** @deprecated Use `Badge` from `@spm/ui/shadcn` instead */
 export const Badge = ({ label, color }: BadgeProps) => (
   <span
     style={{

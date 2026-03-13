@@ -1,4 +1,5 @@
-import { TopBar, Breadcrumb } from '@spm/ui';
+import { TopBar } from '@spm/ui';
+import { LegacyBreadcrumb as Breadcrumb } from '@spm/ui/shadcn';
 import { TABS_MAP } from './AdminSidebar';
 
 interface AdminTopBarProps {

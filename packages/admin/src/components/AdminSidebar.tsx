@@ -1,4 +1,5 @@
-import { Sidebar, Badge, SidebarUserFooter, Text, type SidebarSection } from '@spm/ui';
+import { Sidebar, SidebarUserFooter, Text, type SidebarSection } from '@spm/ui';
+import { LegacyBadge as Badge } from '@spm/ui/shadcn';
 import { useAuth } from '@spm/web-auth';
 
 const TABS_MAP: Record<string, string> = {

@@ -8,7 +8,8 @@ import {
   type ActivityEvent,
   type AgentStat,
 } from './types';
-import { MiniChart, StatBox, Tabs, Text, TRUST_CONFIG, type TrustTier } from '@spm/ui';
+import { MiniChart, StatBox, Text, TRUST_CONFIG, type TrustTier } from '@spm/ui';
+import { LegacyTabs as Tabs } from '@spm/ui/shadcn';
 import { OverviewTab } from './OverviewTab';
 import { SkillsTab } from './SkillsTab';
 import { PublishHistoryTab } from './PublishHistoryTab';

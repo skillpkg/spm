@@ -6,6 +6,7 @@ export interface CardProps {
   style?: React.CSSProperties;
 }
 
+/** @deprecated Use `Card` from `@spm/ui/shadcn` instead */
 export const Card = ({ children, className = '', style }: CardProps) => (
   <div
     className={className}

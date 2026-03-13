@@ -8,6 +8,7 @@ export interface ButtonProps {
   small?: boolean;
 }
 
+/** @deprecated Use `Button` from `@spm/ui/shadcn` instead */
 export const Button = ({ label, color, onClick, small }: ButtonProps) => {
   const [hovered, setHovered] = useState(false);
   const resolved = resolveColor(color);

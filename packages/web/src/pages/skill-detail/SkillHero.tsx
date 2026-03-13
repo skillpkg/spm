@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Badge, CopyButton, TrustBadge, Text } from '@spm/ui';
+import { CopyButton, TrustBadge, Text } from '@spm/ui';
+import { LegacyBadge as Badge } from '@spm/ui/shadcn';
 import { type SkillFull } from './types';
 
 export const SkillHero = ({ skill }: { skill: SkillFull }) => (

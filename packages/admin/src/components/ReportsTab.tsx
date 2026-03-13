@@ -1,6 +1,7 @@
 import { useAuth } from '@spm/web-auth';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Card, PriorityDot, StatBox, StatusBadge, Text, type Priority } from '@spm/ui';
+import { PriorityDot, StatBox, StatusBadge, Text, type Priority } from '@spm/ui';
+import { LegacyButton as Button, LegacyCard as Card } from '@spm/ui/shadcn';
 import { updateReport } from '../lib/api';
 import { reportsQuery } from './ReportsTab.queries';
 import { LoadingState, ErrorState, EmptyState } from './DataState';

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '@spm/web-auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Card, StatBox, Text, TrustBadge } from '@spm/ui';
+import { StatBox, Text, TrustBadge } from '@spm/ui';
+import { LegacyBadge as Badge, LegacyButton as Button, LegacyCard as Card } from '@spm/ui/shadcn';
 import { approveQueueItem, rejectQueueItem, type QueueItem } from '../lib/api';
 import { queueQuery, adminStatsQuery } from './FlaggedQueue.queries';
 import { LoadingState, ErrorState, EmptyState } from './DataState';

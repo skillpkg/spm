@@ -5,6 +5,7 @@ export interface SearchInputProps {
   maxWidth?: number;
 }
 
+/** @deprecated Use `SearchInput` from `@spm/ui/shadcn` instead */
 export const SearchInput = ({ value, onChange, placeholder, maxWidth = 320 }: SearchInputProps) => (
   <div
     style={{

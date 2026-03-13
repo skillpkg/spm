@@ -1,6 +1,7 @@
 import { useAuth } from '@spm/web-auth';
 import { useQuery } from '@tanstack/react-query';
-import { Card, StatBox, Text } from '@spm/ui';
+import { StatBox, Text } from '@spm/ui';
+import { LegacyCard as Card } from '@spm/ui/shadcn';
 import { adminStatsQuery } from './FlaggedQueue.queries';
 import { LoadingState, ErrorState } from './DataState';
 
