@@ -52,9 +52,12 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
             font="mono"
             weight={600}
             as="div"
-            style={{ color: 'var(--color-cyan)', marginBottom: 4, wordBreak: 'break-word' }}
+            style={{ color: 'var(--color-cyan)', marginBottom: 2, wordBreak: 'break-word' }}
           >
             {skill.name}
+          </Text>
+          <Text variant="caption" font="sans" color="muted" as="div" style={{ marginBottom: 6 }}>
+            by @{skill.author}
           </Text>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <Text variant="caption" font="mono" color="faint" as="span">
@@ -62,9 +65,6 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
             </Text>
             <TrustBadge tier={skill.trust} />
             {skill.securityLevel && <SecurityBadge level={skill.securityLevel} showLabel={false} />}
-            <Text variant="caption" font="sans" color="muted" as="span">
-              by @{skill.author}
-            </Text>
           </div>
         </div>
 
