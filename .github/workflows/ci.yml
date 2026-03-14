@@ -72,7 +72,7 @@ jobs:
       - if: steps.changes.outputs.ui == 'true'
         run: pnpm install --frozen-lockfile
       - if: steps.changes.outputs.ui == 'true'
-        run: npx playwright install chromium
+        run: pnpm --filter @spm/web exec playwright install --with-deps chromium
       - if: steps.changes.outputs.ui == 'true'
         run: pnpm build
       - if: steps.changes.outputs.ui == 'true'
