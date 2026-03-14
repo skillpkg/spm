@@ -117,6 +117,7 @@ export const AppSidebar = ({
               section.items.map((item) => ({
                 id: `doc-${item.slug}`,
                 label: item.label,
+                indent: 1,
                 onClick: () => {
                   navigate(`/docs/${item.slug}`);
                   onMobileClose?.();

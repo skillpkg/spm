@@ -17,6 +17,8 @@ export interface SidebarItem {
   external?: boolean;
   badge?: string;
   badgeColor?: string;
+  /** Indent level for sub-items (default 0) */
+  indent?: number;
 }
 
 export interface SidebarProps {
@@ -57,15 +59,17 @@ const SectionTitle = ({ title }: { title: string }) => (
 const NavItem = ({ item, isActive }: { item: SidebarItem; isActive: boolean }) => {
   const [hovered, setHovered] = useState(false);
 
+  const indent = item.indent ?? 0;
   const style: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     gap: 10,
     padding: '8px 16px',
+    paddingLeft: 16 + indent * 14,
     margin: '1px 8px',
     borderRadius: 8,
     fontFamily: 'var(--font-sans)',
-    fontSize: 13,
+    fontSize: indent ? 12.5 : 13,
     fontWeight: isActive ? 600 : 400,
     color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-dim)',
     background: isActive
