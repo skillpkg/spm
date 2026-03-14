@@ -12,6 +12,7 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
   return (
     <Link
       to={`/skills/${skill.name}`}
+      className="spm-skill-card"
       style={{ textDecoration: 'none', flex: 1, minWidth: 240, display: 'flex' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -87,7 +88,10 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
         </Text>
 
         {skill.tags && skill.tags.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
+          <div
+            className="spm-card-tags"
+            style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}
+          >
             {skill.tags.map((tag) => (
               <Text
                 key={tag}

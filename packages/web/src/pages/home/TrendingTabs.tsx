@@ -65,7 +65,7 @@ export const TrendingTabs = ({
 
       {trendingTab === 'featured' && (
         <div>
-          <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
+          <div className="spm-trending-grid" style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
             {featuredSkills.slice(0, 3).map((s, i) => (
               <SkillCard key={s.name} skill={s} rank={i} />
             ))}
