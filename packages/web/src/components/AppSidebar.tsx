@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar, SidebarUserFooter, Text, type SidebarSection } from '@spm/ui';
 import { useAuth } from '../context/AuthContext';
+import { docSections } from '../data/docSections';
 
 const SpmLogo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -58,6 +59,7 @@ const pathToActiveId = (pathname: string): string => {
   if (pathname === '/') return 'home';
   if (pathname === '/search') return 'search';
   if (pathname === '/docs') return 'docs';
+  if (pathname.startsWith('/docs/')) return `doc-${pathname.split('/')[2]}`;
   if (pathname === '/cli') return 'cli';
   if (pathname === '/publish') return 'publish';
   if (pathname === '/dashboard') return 'dashboard';
@@ -74,6 +76,7 @@ export const AppSidebar = ({
   const { isAuthenticated, isAdmin, token } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const isOnDocsPage = location.pathname === '/docs' || location.pathname.startsWith('/docs/');
 
   const sections: SidebarSection[] = [
     {
@@ -102,12 +105,25 @@ export const AppSidebar = ({
       items: [
         {
           id: 'docs',
-          label: 'Getting Started',
+          label: 'Overview',
           onClick: () => {
             navigate('/docs');
             onMobileClose?.();
           },
         },
+        // Show doc sub-pages when on any /docs path
+        ...(isOnDocsPage
+          ? docSections.flatMap((section) =>
+              section.items.map((item) => ({
+                id: `doc-${item.slug}`,
+                label: item.label,
+                onClick: () => {
+                  navigate(`/docs/${item.slug}`);
+                  onMobileClose?.();
+                },
+              })),
+            )
+          : []),
         {
           id: 'cli',
           label: 'CLI Reference',

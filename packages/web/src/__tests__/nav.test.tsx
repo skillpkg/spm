@@ -74,12 +74,12 @@ describe('AppSidebar', () => {
     expect(screen.getByText('Search')).toBeInTheDocument();
   });
 
-  it('renders Docs section with Getting Started, CLI Reference, Publishing', () => {
+  it('renders Docs section with Overview, CLI Reference, Publishing', () => {
     mockedUseAuth.mockReturnValue(unauthenticatedState);
     renderSidebar();
 
     expect(screen.getByText('Docs')).toBeInTheDocument();
-    expect(screen.getByText('Getting Started')).toBeInTheDocument();
+    expect(screen.getByText('Overview')).toBeInTheDocument();
     expect(screen.getByText('CLI Reference')).toBeInTheDocument();
     expect(screen.getByText('Publishing')).toBeInTheDocument();
   });
