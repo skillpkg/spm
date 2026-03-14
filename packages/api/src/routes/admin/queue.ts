@@ -20,100 +20,114 @@ queueRoutes.get('/admin/queue', zValidator('query', QueueQuerySchema), async (c)
   const db = c.get('db');
   const { sort, status } = c.req.valid('query');
 
-  const conditions = [];
-  if (status === 'pending') {
-    conditions.push(eq(scans.status, 'flagged'));
-  } else {
-    conditions.push(sql`${scans.status} IN ('flagged', 'manual_approved', 'blocked')`);
-  }
+  try {
+    const conditions = [];
+    if (status === 'pending') {
+      conditions.push(eq(scans.status, 'flagged'));
+    } else {
+      conditions.push(sql`${scans.status} IN ('flagged', 'manual_approved', 'blocked')`);
+    }
 
-  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  let orderBy;
-  switch (sort) {
-    case 'newest':
-      orderBy = desc(scans.scannedAt);
-      break;
-    case 'confidence':
-      orderBy = desc(scans.confidence);
-      break;
-    case 'oldest':
-    default:
-      orderBy = asc(scans.scannedAt);
-      break;
-  }
+    let orderBy;
+    switch (sort) {
+      case 'newest':
+        orderBy = desc(scans.scannedAt);
+        break;
+      case 'confidence':
+        orderBy = desc(scans.confidence);
+        break;
+      case 'oldest':
+      default:
+        orderBy = asc(scans.scannedAt);
+        break;
+    }
 
-  const scanRows = await db
-    .select({
-      scanId: scans.id,
-      versionId: scans.versionId,
-      layer: scans.layer,
-      status: scans.status,
-      confidence: scans.confidence,
-      details: scans.details,
-      scannedAt: scans.scannedAt,
-    })
-    .from(scans)
-    .where(whereClause)
-    .orderBy(orderBy);
+    const scanRows = await db
+      .select({
+        scanId: scans.id,
+        versionId: scans.versionId,
+        layer: scans.layer,
+        status: scans.status,
+        confidence: scans.confidence,
+        details: scans.details,
+        scannedAt: scans.scannedAt,
+      })
+      .from(scans)
+      .where(whereClause)
+      .orderBy(orderBy);
 
-  // Enrich with skill + version + author info
-  const queue = await Promise.all(
-    scanRows.map(async (scan) => {
-      const [ver] = await db
-        .select({
-          version: versions.version,
-          skillId: versions.skillId,
-          sizeBytes: versions.sizeBytes,
-          publishedAt: versions.publishedAt,
-        })
-        .from(versions)
-        .where(eq(versions.id, scan.versionId))
-        .limit(1);
+    // Enrich with skill + version + author info
+    const queue = await Promise.all(
+      scanRows.map(async (scan) => {
+        const [ver] = await db
+          .select({
+            version: versions.version,
+            skillId: versions.skillId,
+            sizeBytes: versions.sizeBytes,
+            publishedAt: versions.publishedAt,
+          })
+          .from(versions)
+          .where(eq(versions.id, scan.versionId))
+          .limit(1);
 
-      if (!ver) return null;
+        if (!ver) return null;
 
-      const [skill] = await db
-        .select({ name: skills.name, ownerId: skills.ownerId })
-        .from(skills)
-        .where(eq(skills.id, ver.skillId))
-        .limit(1);
+        const [skill] = await db
+          .select({ name: skills.name, ownerId: skills.ownerId })
+          .from(skills)
+          .where(eq(skills.id, ver.skillId))
+          .limit(1);
 
-      if (!skill) return null;
+        if (!skill) return null;
 
-      const [author] = await db
-        .select({ username: users.username, trustTier: users.trustTier })
-        .from(users)
-        .where(eq(users.id, skill.ownerId))
-        .limit(1);
+        const [author] = await db
+          .select({ username: users.username, trustTier: users.trustTier })
+          .from(users)
+          .where(eq(users.id, skill.ownerId))
+          .limit(1);
 
-      return {
-        id: scan.scanId,
-        skill: skill.name,
-        version: ver.version,
-        author: {
-          username: author?.username ?? 'unknown',
-          trust_tier: author?.trustTier ?? 'registered',
-        },
-        flags: [
-          {
-            layer: scan.layer,
-            type: scan.status,
-            confidence: scan.confidence,
+        const scannedAt = scan.scannedAt;
+        const submittedAt =
+          scannedAt instanceof Date
+            ? scannedAt.toISOString()
+            : typeof scannedAt === 'string'
+              ? scannedAt
+              : new Date().toISOString();
+
+        return {
+          id: scan.scanId,
+          skill: skill.name,
+          version: ver.version,
+          author: {
+            username: author?.username ?? 'unknown',
+            trust_tier: author?.trustTier ?? 'registered',
           },
-        ],
-        submitted_at: scan.scannedAt.toISOString(),
-        size_bytes: ver.sizeBytes,
-      };
-    }),
-  );
+          flags: [
+            {
+              layer: scan.layer,
+              type: scan.status,
+              confidence: scan.confidence,
+            },
+          ],
+          submitted_at: submittedAt,
+          size_bytes: ver.sizeBytes,
+        };
+      }),
+    );
 
-  const filtered = queue.filter(Boolean);
+    const filtered = queue.filter(Boolean);
 
-  return c.json({
-    queue: filtered,
-    total: filtered.length,
-  });
+    return c.json({
+      queue: filtered,
+      total: filtered.length,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('GET /admin/queue error:', message, err);
+    return c.json({ error: 'internal_error', message, debug: String(err) }, 500);
+  }
 });
 
 // ── POST /admin/queue/:id/approve — approve a flagged skill ──

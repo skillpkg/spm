@@ -24,71 +24,80 @@ skillsRoutes.get('/admin/skills', zValidator('query', AdminSkillsQuerySchema), a
   const { page, per_page } = c.req.valid('query');
   const offset = (page - 1) * per_page;
 
-  const [totalRow] = await db.select({ total: count() }).from(skills);
+  try {
+    const [totalRow] = await db.select({ total: count() }).from(skills);
 
-  const rows = await db
-    .select({
-      id: skills.id,
-      name: skills.name,
-      description: skills.description,
-      categories: skills.categories,
-      deprecated: skills.deprecated,
-      ownerId: skills.ownerId,
-      createdAt: skills.createdAt,
-      updatedAt: skills.updatedAt,
-    })
-    .from(skills)
-    .orderBy(desc(skills.updatedAt))
-    .limit(per_page)
-    .offset(offset);
+    const rows = await db
+      .select({
+        id: skills.id,
+        name: skills.name,
+        description: skills.description,
+        categories: skills.categories,
+        deprecated: skills.deprecated,
+        ownerId: skills.ownerId,
+        createdAt: skills.createdAt,
+        updatedAt: skills.updatedAt,
+      })
+      .from(skills)
+      .orderBy(desc(skills.updatedAt))
+      .limit(per_page)
+      .offset(offset);
 
-  const results = await Promise.all(
-    rows.map(async (row) => {
-      const [author] = await db
-        .select({ username: users.username, trustTier: users.trustTier })
-        .from(users)
-        .where(eq(users.id, row.ownerId))
-        .limit(1);
-
-      const [latestVersion] = await db
-        .select({ version: versions.version, id: versions.id })
-        .from(versions)
-        .where(eq(versions.skillId, row.id))
-        .orderBy(desc(versions.publishedAt))
-        .limit(1);
-
-      let scanStatus: string | null = null;
-      if (latestVersion) {
-        const [scanRow] = await db
-          .select({ status: scans.status })
-          .from(scans)
-          .where(eq(scans.versionId, latestVersion.id))
+    const results = await Promise.all(
+      rows.map(async (row) => {
+        const [author] = await db
+          .select({ username: users.username, trustTier: users.trustTier })
+          .from(users)
+          .where(eq(users.id, row.ownerId))
           .limit(1);
-        scanStatus = scanRow?.status ?? null;
-      }
 
-      return {
-        name: row.name,
-        description: row.description,
-        categories: row.categories,
-        deprecated: row.deprecated,
-        author: author?.username ?? 'unknown',
-        trust_tier: author?.trustTier ?? 'registered',
-        latest_version: latestVersion?.version ?? null,
-        scan_status: scanStatus,
-        created_at: row.createdAt.toISOString(),
-        updated_at: row.updatedAt.toISOString(),
-      };
-    }),
-  );
+        const [latestVersion] = await db
+          .select({ version: versions.version, id: versions.id })
+          .from(versions)
+          .where(eq(versions.skillId, row.id))
+          .orderBy(desc(versions.publishedAt))
+          .limit(1);
 
-  return c.json({
-    results,
-    total: totalRow.total,
-    page,
-    per_page,
-    pages: Math.ceil(totalRow.total / per_page),
-  });
+        let scanStatus: string | null = null;
+        if (latestVersion) {
+          const [scanRow] = await db
+            .select({ status: scans.status })
+            .from(scans)
+            .where(eq(scans.versionId, latestVersion.id))
+            .limit(1);
+          scanStatus = scanRow?.status ?? null;
+        }
+
+        const createdAt = row.createdAt;
+        const updatedAt = row.updatedAt;
+
+        return {
+          name: row.name,
+          description: row.description,
+          categories: row.categories,
+          deprecated: row.deprecated,
+          author: author?.username ?? 'unknown',
+          trust_tier: author?.trustTier ?? 'registered',
+          latest_version: latestVersion?.version ?? null,
+          scan_status: scanStatus,
+          created_at: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt ?? ''),
+          updated_at: updatedAt instanceof Date ? updatedAt.toISOString() : String(updatedAt ?? ''),
+        };
+      }),
+    );
+
+    return c.json({
+      results,
+      total: totalRow.total,
+      page,
+      per_page,
+      pages: Math.ceil(totalRow.total / per_page),
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('GET /admin/skills error:', message, err);
+    return c.json({ error: 'internal_error', message, debug: String(err) }, 500);
+  }
 });
 
 // ── GET /admin/skills/:name/versions/:version — version detail ──
