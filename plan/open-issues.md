@@ -172,11 +172,11 @@ Each scanner shows PASS/WARN/FAIL badge on skill detail page, linking to a detai
 
 API endpoint (`POST /skills/:name/rescan`) with owner-or-admin auth, CLI commands (`spm rescan` single + `spm rescan --all` batch with admin-aware mode). Downloads .skl from R2, runs Layer 1/2/3, updates scan records.
 
-### Remaining (future): Admin UI integration
+### ~~Admin UI integration~~ DONE
 
-- "Re-scan" button in admin UI skill detail + list actions
-- "Scanning..." status indicator in UI
-- Audit log: who triggered re-scan and result
+- ~~"Re-scan" button in admin UI skill detail + list actions~~
+- ~~"Scanning..." status indicator in UI~~
+- Audit log: who triggered re-scan and result (future)
 
 ---
 
@@ -283,12 +283,21 @@ CSS media queries added for responsive layouts across web pages. Sidebar collaps
 
 ---
 
-## 19. Docs Pages — Buttons Non-Functional
+## ~~19. Docs Pages — Buttons Non-Functional~~ DONE
 
 **Priority:** High | **Estimate:** 1 session
-**Status:** Not started
+**Status:** Done — DocDetail page with slug-based routing, all doc buttons wired up.
 
 Buttons on the docs/landing pages (e.g. "Get Started", "View Docs", CTAs) are not wired up — they render but do nothing on click. Need to add proper `onClick` handlers or `<Link>` navigation to the correct routes.
+
+---
+
+## 20. Auto-Skill
+
+**Priority:** TBD | **Estimate:** TBD
+**Status:** Not started
+
+Details to be defined — placeholder for auto-skill support.
 
 ---
 
@@ -313,3 +322,9 @@ Buttons on the docs/landing pages (e.g. "Get Started", "View Docs", CTAs) are no
 - ~~Improve root `README.md` (getting started, feature highlights)~~
 - ~~Add package-level READMEs (`packages/admin/`, `packages/ui/`, `packages/web-auth/`)~~
 - All 8 packages now have READMEs. Root README expanded with quick start, create/publish, MCP setup, full project structure, and dev commands.
+
+### Enforce Admin Branch Protection
+
+- Enable `enforce_admins` on `main` branch so admins also require PRs + CI + approvals
+- Run: `gh api repos/skillpkg/spm/branches/main/protection/enforce_admins -X POST`
+- Do this after core development stabilizes and team grows

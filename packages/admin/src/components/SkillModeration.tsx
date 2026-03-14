@@ -10,7 +10,7 @@ import {
   TRUST_CONFIG,
   type TrustTier,
 } from '@spm/ui';
-import { yankSkill } from '../lib/api';
+import { yankSkill, rescanSkill } from '../lib/api';
 import { adminSkillsQuery } from './SkillModeration.queries';
 import { useSearchParamsState } from '../lib/useSearchParamsState';
 import { LoadingState, ErrorState } from './DataState';
@@ -28,9 +28,21 @@ export const SkillModeration = () => {
 
   const [yankTarget, setYankTarget] = useState<{ name: string; version: string } | null>(null);
   const [yankReason, setYankReason] = useState('');
+  const [rescanningSkill, setRescanningSkill] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
   const { data, isLoading, error, refetch } = useQuery(adminSkillsQuery(token ?? '', page));
+
+  const handleRescan = async (name: string) => {
+    if (!token || rescanningSkill) return;
+    setRescanningSkill(name);
+    try {
+      await rescanSkill(token, name);
+      refetch();
+    } finally {
+      setRescanningSkill(null);
+    }
+  };
 
   const handleYankConfirm = async () => {
     if (!token || !yankTarget || !yankReason.trim()) return;
@@ -135,7 +147,7 @@ export const SkillModeration = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 80px 80px 80px 90px',
+            gridTemplateColumns: '1fr 80px 80px 80px 150px',
             gap: 10,
             padding: '8px 16px',
             borderBottom: '1px solid var(--color-border-default)',
@@ -170,7 +182,7 @@ export const SkillModeration = () => {
               key={skill.name}
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 80px 80px 80px 90px',
+                gridTemplateColumns: '1fr 80px 80px 80px 150px',
                 gap: 10,
                 padding: '10px 16px',
                 borderBottom: '1px solid rgba(26,29,39,0.25)',
@@ -233,6 +245,12 @@ export const SkillModeration = () => {
                     &#8599;
                   </Text>
                 </a>
+                <Button
+                  label={rescanningSkill === skill.name ? 'Scanning...' : 'Rescan'}
+                  color="cyan"
+                  small
+                  onClick={() => handleRescan(skill.name)}
+                />
                 <Button
                   label="Yank"
                   color="red"
