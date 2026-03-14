@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "lint": "eslint src/",
     "preview": "vite preview",
-    "deploy": "npx wrangler pages deploy dist --project-name=spm-web"
+    "deploy": "npx wrangler pages deploy dist --project-name=spm-web",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@spm/ui": "workspace:*",
@@ -22,6 +23,7 @@
     "react-router-dom": "^7.13.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/vite": "^4.2.1",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",
