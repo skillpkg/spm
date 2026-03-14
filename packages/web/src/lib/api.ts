@@ -179,6 +179,22 @@ export interface CategoriesResponse {
 
 export const getCategories = (): Promise<CategoriesResponse> => apiFetch('/categories');
 
+// -- Author Search (autocomplete) --
+
+export interface AuthorSuggestion {
+  username: string;
+  trust_tier: string;
+  skill_count: number;
+}
+
+export interface AuthorSearchResponse {
+  authors: AuthorSuggestion[];
+  total: number;
+}
+
+export const searchAuthors = (q: string, perPage = 8): Promise<AuthorSearchResponse> =>
+  apiFetch(`/authors?q=${encodeURIComponent(q)}&per_page=${perPage}`);
+
 // -- Authors --
 
 export interface AuthorSkill {

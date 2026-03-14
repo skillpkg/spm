@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { type SearchResultItem } from '../../lib/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { type SearchResultItem, searchAuthors } from '../../lib/api';
 import { searchSkillsQuery } from '../search/queries';
 import { TrustBadge, Text, type TrustTier } from '@spm/ui';
 
@@ -20,6 +20,7 @@ export const HeroSearch = ({
   setQuery,
   onSubmit,
 }: HeroSearchProps) => {
+  const navigate = useNavigate();
   const [focused, setFocused] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,15 +37,30 @@ export const HeroSearch = ({
     return () => clearTimeout(timer);
   }, [query]);
 
-  // API-backed search
-  const { data: searchData, isFetching } = useQuery({
+  // Detect author: prefix
+  const authorMatch = debouncedQuery.match(/^author:(\S*)$/i);
+  const authorPrefix = authorMatch?.[1] ?? '';
+  const isAuthorMode = !!authorMatch;
+
+  // API-backed skill search
+  const { data: searchData, isFetching: isFetchingSkills } = useQuery({
     ...searchSkillsQuery(debouncedQuery ? { q: debouncedQuery, per_page: 6 } : { per_page: 0 }),
-    enabled: debouncedQuery.length >= 2,
+    enabled: debouncedQuery.length >= 2 && !isAuthorMode,
+  });
+
+  // API-backed author search
+  const { data: authorData, isFetching: isFetchingAuthors } = useQuery({
+    queryKey: ['authors', authorPrefix],
+    queryFn: () => searchAuthors(authorPrefix, 8),
+    enabled: isAuthorMode && authorPrefix.length >= 1,
   });
 
   const results: SearchResultItem[] = searchData?.results ?? [];
   const totalResults = searchData?.total ?? 0;
+  const authorResults = authorData?.authors ?? [];
+  const isFetching = isFetchingSkills || isFetchingAuthors;
   const showDropdown = focused && debouncedQuery.length >= 2;
+  const showAuthorDropdown = focused && isAuthorMode && authorPrefix.length >= 1;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -225,131 +241,213 @@ export const HeroSearch = ({
           </div>
         </form>
 
-        {/* Live search dropdown */}
-        {showDropdown && (results.length > 0 || (!isFetching && debouncedQuery.length >= 2)) && (
-          <div
-            ref={dropdownRef}
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              background: 'var(--color-bg-card)',
-              border: '1.5px solid #10b981',
-              borderTop: 'none',
-              borderRadius: '0 0 10px 10px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-              zIndex: 50,
-              overflow: 'hidden',
-            }}
-          >
-            {results.length > 0 ? (
-              <>
-                {results.map((skill) => (
-                  <Link
-                    key={skill.name}
-                    to={`/skills/${skill.name}`}
-                    style={{ textDecoration: 'none', display: 'block' }}
-                    onMouseDown={(e) => e.preventDefault()}
+        {/* Author autocomplete dropdown */}
+        {showAuthorDropdown &&
+          (authorResults.length > 0 || (!isFetchingAuthors && authorPrefix.length >= 1)) && (
+            <div
+              ref={dropdownRef}
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                background: 'var(--color-bg-card)',
+                border: '1.5px solid #10b981',
+                borderTop: 'none',
+                borderRadius: '0 0 10px 10px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                zIndex: 50,
+                overflow: 'hidden',
+              }}
+            >
+              {authorResults.length > 0 ? (
+                authorResults.map((author) => (
+                  <div
+                    key={author.username}
+                    style={{
+                      padding: '10px 16px',
+                      borderBottom: '1px solid #1a1d2744',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      navigate(`/search?q=${encodeURIComponent(`author:${author.username}`)}`);
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.background =
+                        'rgba(16,185,129,0.04)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.background = 'transparent';
+                    }}
                   >
-                    <div
-                      style={{
-                        padding: '10px 16px',
-                        borderBottom: '1px solid #1a1d2744',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLDivElement).style.background =
-                          'rgba(16,185,129,0.04)';
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLDivElement).style.background = 'transparent';
-                      }}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Text
+                        variant="body"
+                        font="mono"
+                        weight={600}
+                        as="span"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
+                        @{author.username}
+                      </Text>
+                      <TrustBadge tier={author.trust_tier as TrustTier} />
+                    </div>
+                    <Text
+                      variant="label"
+                      font="mono"
+                      color="muted"
+                      as="span"
+                      style={{ whiteSpace: 'nowrap' }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                      {author.skill_count} skill{author.skill_count !== 1 ? 's' : ''}
+                    </Text>
+                  </div>
+                ))
+              ) : (
+                <Text
+                  variant="body-sm"
+                  font="sans"
+                  color="muted"
+                  as="div"
+                  style={{ padding: '16px', textAlign: 'center' }}
+                >
+                  No authors matching &quot;{authorPrefix}&quot;
+                </Text>
+              )}
+            </div>
+          )}
+
+        {/* Live search dropdown */}
+        {!isAuthorMode &&
+          showDropdown &&
+          (results.length > 0 || (!isFetching && debouncedQuery.length >= 2)) && (
+            <div
+              ref={dropdownRef}
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                background: 'var(--color-bg-card)',
+                border: '1.5px solid #10b981',
+                borderTop: 'none',
+                borderRadius: '0 0 10px 10px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                zIndex: 50,
+                overflow: 'hidden',
+              }}
+            >
+              {results.length > 0 ? (
+                <>
+                  {results.map((skill) => (
+                    <Link
+                      key={skill.name}
+                      to={`/skills/${skill.name}`}
+                      style={{ textDecoration: 'none', display: 'block' }}
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      <div
+                        style={{
+                          padding: '10px 16px',
+                          borderBottom: '1px solid #1a1d2744',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLDivElement).style.background =
+                            'rgba(16,185,129,0.04)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLDivElement).style.background = 'transparent';
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                          <Text
+                            variant="body"
+                            font="mono"
+                            weight={600}
+                            as="span"
+                            style={{ color: 'var(--color-cyan)', whiteSpace: 'nowrap' }}
+                          >
+                            {skill.name}
+                          </Text>
+                          <TrustBadge tier={skill.author.trust_tier as TrustTier} />
+                          <Text
+                            variant="caption"
+                            font="sans"
+                            color="dim"
+                            as="span"
+                            style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {skill.description}
+                          </Text>
+                        </div>
                         <Text
-                          variant="body"
+                          variant="label"
                           font="mono"
-                          weight={600}
+                          color="muted"
                           as="span"
-                          style={{ color: 'var(--color-cyan)', whiteSpace: 'nowrap' }}
+                          style={{ whiteSpace: 'nowrap', marginLeft: 12 }}
                         >
-                          {skill.name}
-                        </Text>
-                        <TrustBadge tier={skill.author.trust_tier as TrustTier} />
-                        <Text
-                          variant="caption"
-                          font="sans"
-                          color="dim"
-                          as="span"
-                          style={{
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {skill.description}
+                          {skill.downloads >= 1000
+                            ? `${(skill.downloads / 1000).toFixed(1)}k`
+                            : skill.downloads}{' '}
+                          &#x2B07;
                         </Text>
                       </div>
-                      <Text
-                        variant="label"
-                        font="mono"
-                        color="muted"
-                        as="span"
-                        style={{ whiteSpace: 'nowrap', marginLeft: 12 }}
-                      >
-                        {skill.downloads >= 1000
-                          ? `${(skill.downloads / 1000).toFixed(1)}k`
-                          : skill.downloads}{' '}
-                        &#x2B07;
-                      </Text>
-                    </div>
-                  </Link>
-                ))}
-                {totalResults > results.length && (
-                  <Link
-                    to={`/search?q=${encodeURIComponent(debouncedQuery)}`}
-                    style={{ textDecoration: 'none', display: 'block' }}
-                    onMouseDown={(e) => e.preventDefault()}
-                  >
-                    <div
-                      style={{
-                        padding: '10px 16px',
-                        textAlign: 'center',
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 13,
-                        color: 'var(--color-accent)',
-                        cursor: 'pointer',
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLDivElement).style.background =
-                          'rgba(16,185,129,0.04)';
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLDivElement).style.background = 'transparent';
-                      }}
+                    </Link>
+                  ))}
+                  {totalResults > results.length && (
+                    <Link
+                      to={`/search?q=${encodeURIComponent(debouncedQuery)}`}
+                      style={{ textDecoration: 'none', display: 'block' }}
+                      onMouseDown={(e) => e.preventDefault()}
                     >
-                      View all {totalResults} results →
-                    </div>
-                  </Link>
-                )}
-              </>
-            ) : (
-              <Text
-                variant="body-sm"
-                font="sans"
-                color="muted"
-                as="div"
-                style={{ padding: '16px', textAlign: 'center' }}
-              >
-                No skills found for &quot;{debouncedQuery}&quot;
-              </Text>
-            )}
-          </div>
-        )}
+                      <div
+                        style={{
+                          padding: '10px 16px',
+                          textAlign: 'center',
+                          fontFamily: 'var(--font-sans)',
+                          fontSize: 13,
+                          color: 'var(--color-accent)',
+                          cursor: 'pointer',
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLDivElement).style.background =
+                            'rgba(16,185,129,0.04)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLDivElement).style.background = 'transparent';
+                        }}
+                      >
+                        View all {totalResults} results →
+                      </div>
+                    </Link>
+                  )}
+                </>
+              ) : (
+                <Text
+                  variant="body-sm"
+                  font="sans"
+                  color="muted"
+                  as="div"
+                  style={{ padding: '16px', textAlign: 'center' }}
+                >
+                  No skills found for &quot;{debouncedQuery}&quot;
+                </Text>
+              )}
+            </div>
+          )}
       </div>
     </section>
   );

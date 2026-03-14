@@ -1,11 +1,49 @@
 import { Hono } from 'hono';
-import { eq, and, desc, sql, count } from 'drizzle-orm';
+import { zValidator } from '@hono/zod-validator';
+import { z } from 'zod';
+import { eq, and, desc, sql, count, ilike } from 'drizzle-orm';
 import { ERROR_CODES, createApiError } from '@spm/shared';
 import type { AppEnv } from '../types.js';
 import { authed } from '../middleware/auth.js';
 import { users, skills, versions, downloads, auditLog } from '../db/schema.js';
 
 export const authorsRoutes = new Hono<AppEnv>();
+
+// ── GET /authors — list/search authors ──
+
+const AuthorsQuerySchema = z.object({
+  q: z.string().optional().default(''),
+  per_page: z.coerce.number().int().min(1).max(50).optional().default(10),
+});
+
+authorsRoutes.get('/authors', zValidator('query', AuthorsQuerySchema), async (c) => {
+  const db = c.get('db');
+  const { q, per_page } = c.req.valid('query');
+
+  const conditions = q ? ilike(users.username, `${q}%`) : undefined;
+
+  const rows = await db
+    .select({
+      username: users.username,
+      trustTier: users.trustTier,
+      skillCount: sql<number>`(
+        SELECT count(*)::int FROM skills s WHERE s.owner_id = ${users.id}
+      )`,
+    })
+    .from(users)
+    .where(conditions)
+    .orderBy(sql`(SELECT count(*) FROM skills s WHERE s.owner_id = ${users.id}) DESC`)
+    .limit(per_page);
+
+  return c.json({
+    authors: rows.map((r) => ({
+      username: r.username,
+      trust_tier: r.trustTier,
+      skill_count: r.skillCount,
+    })),
+    total: rows.length,
+  });
+});
 
 // ── GET /authors/:username — public author profile ──
 
