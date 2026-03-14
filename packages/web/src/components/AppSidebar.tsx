@@ -79,16 +79,16 @@ export const AppSidebar = ({
     {
       title: 'Discover',
       items: [
-        { id: 'home', label: 'Home', onClick: () => navigate('/') },
-        { id: 'search', label: 'Search', onClick: () => navigate('/search') },
+        { id: 'home', label: 'Home', onClick: () => { navigate('/'); onMobileClose?.(); } },
+        { id: 'search', label: 'Search', onClick: () => { navigate('/search'); onMobileClose?.(); } },
       ],
     },
     {
       title: 'Docs',
       items: [
-        { id: 'docs', label: 'Getting Started', onClick: () => navigate('/docs') },
-        { id: 'cli', label: 'CLI Reference', onClick: () => navigate('/cli') },
-        { id: 'publish', label: 'Publishing', onClick: () => navigate('/publish') },
+        { id: 'docs', label: 'Getting Started', onClick: () => { navigate('/docs'); onMobileClose?.(); } },
+        { id: 'cli', label: 'CLI Reference', onClick: () => { navigate('/cli'); onMobileClose?.(); } },
+        { id: 'publish', label: 'Publishing', onClick: () => { navigate('/publish'); onMobileClose?.(); } },
       ],
     },
   ];
@@ -96,7 +96,7 @@ export const AppSidebar = ({
   if (isAuthenticated) {
     sections.push({
       title: 'My Account',
-      items: [{ id: 'dashboard', label: 'Dashboard', onClick: () => navigate('/dashboard') }],
+      items: [{ id: 'dashboard', label: 'Dashboard', onClick: () => { navigate('/dashboard'); onMobileClose?.(); } }],
     });
   }
 

@@ -40,6 +40,23 @@ test.describe('mobile layout', () => {
     await expect(menuBtn).toBeVisible();
   });
 
+  test('hamburger opens sidebar on mobile', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'mobile-only test');
+    await page.goto('/');
+
+    // Overlay should not exist initially
+    const overlay = page.locator('[data-testid="sidebar-overlay"]');
+    await expect(overlay).toBeHidden();
+
+    // Click hamburger
+    await page.locator('.topbar-menu-btn').click();
+
+    // Overlay and sidebar nav should appear
+    await expect(overlay).toBeVisible();
+    const mobileSidebar = page.locator('.sidebar-mobile aside');
+    await expect(mobileSidebar).toBeVisible();
+  });
+
   test('search page filters stack on mobile', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'mobile-only test');
     await page.goto('/search?q=test');
