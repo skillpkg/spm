@@ -8,8 +8,9 @@ export const authorStatsQuery = (username: string, token: string) =>
     enabled: !!username && !!token,
   });
 
-export const dashboardSkillsQuery = () =>
+export const dashboardSkillsQuery = (username: string) =>
   queryOptions({
-    queryKey: ['searchSkills', { q: '', per_page: 50 }],
-    queryFn: () => searchSkills({ q: '', per_page: 50 }),
+    queryKey: ['dashboardSkills', username],
+    queryFn: () => searchSkills({ author: username, per_page: 100 }),
+    enabled: !!username,
   });

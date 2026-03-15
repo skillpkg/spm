@@ -70,9 +70,21 @@ export const OverviewTab = ({
           Recent activity
         </Text>
         <div style={{ ...cardStyle, padding: '6px 18px' }}>
-          {activity.map((item, i) => (
-            <ActivityItem key={i} item={item} />
-          ))}
+          {activity.length > 0 ? (
+            activity.slice(0, 10).map((item, i) => (
+              <ActivityItem key={i} item={item} />
+            ))
+          ) : (
+            <Text
+              variant="body-sm"
+              font="sans"
+              color="muted"
+              as="div"
+              style={{ padding: '16px 0', textAlign: 'center' }}
+            >
+              No recent activity
+            </Text>
+          )}
         </div>
       </div>
     </div>

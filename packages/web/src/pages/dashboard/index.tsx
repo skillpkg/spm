@@ -31,7 +31,7 @@ export const Dashboard = () => {
   const trustCfg = TRUST_CONFIG[trustTier] ?? TRUST_CONFIG['registered'];
 
   const { data: statsData } = useQuery(authorStatsQuery(username, token ?? ''));
-  const { data: skillsData } = useQuery(dashboardSkillsQuery());
+  const { data: skillsData } = useQuery(dashboardSkillsQuery(username));
 
   const authorStats: Author = {
     username,
@@ -58,19 +58,29 @@ export const Dashboard = () => {
       color: AGENT_COLORS[a.agent.toLowerCase()] ?? 'var(--color-text-dim)',
     })) ?? [];
 
+  const ACTIVITY_LABELS: Record<string, string> = {
+    'admin.approve': 'Skill approved',
+    'admin.reject': 'Skill rejected',
+    'admin.block': 'Skill blocked',
+    publish: 'Published',
+    yank: 'Version yanked',
+    deprecate: 'Deprecated',
+    review: 'New review',
+  };
+
   const recentActivity: ActivityEvent[] =
     statsData?.recent_activity?.map((a) => ({
-      type: a.type as ActivityEvent['type'],
+      type: (a.type === 'publish' || a.type === 'review' ? a.type : 'milestone') as ActivityEvent['type'],
       skill: a.skill,
       version: a.version,
       date: a.date.split('T')[0],
-      detail: a.version ? `Published ${a.version}` : a.type,
+      detail: a.version
+        ? `${ACTIVITY_LABELS[a.type] ?? a.type} v${a.version}`
+        : (ACTIVITY_LABELS[a.type] ?? a.type),
     })) ?? [];
 
   const skills: Skill[] =
-    skillsData?.results
-      .filter((s) => s.author.username === username)
-      .map((s) => ({
+    skillsData?.results?.map((s) => ({
         name: s.name,
         version: s.version,
         categories: s.categories,
