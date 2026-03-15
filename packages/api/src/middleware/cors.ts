@@ -15,6 +15,11 @@ export const corsMiddleware = (env: string) =>
         return origin;
       }
 
+      // Allow Cloudflare Pages preview deployments
+      if (origin.endsWith('.spm-web.pages.dev') || origin.endsWith('.spm-admin.pages.dev')) {
+        return origin;
+      }
+
       return null;
     },
     allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
