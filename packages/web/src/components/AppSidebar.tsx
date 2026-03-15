@@ -58,7 +58,7 @@ const SidebarFooter = () => {
 const pathToActiveId = (pathname: string): string => {
   if (pathname === '/') return 'home';
   if (pathname === '/search') return 'search';
-  if (pathname === '/docs') return 'docs';
+  if (pathname === '/docs') return 'doc-group-Getting Started';
   if (pathname.startsWith('/docs/')) return `doc-${pathname.split('/')[2]}`;
   if (pathname === '/cli') return 'cli';
   if (pathname === '/publish') return 'publish';
@@ -103,34 +103,27 @@ export const AppSidebar = ({
     {
       title: 'Docs',
       items: [
-        {
-          id: 'docs',
-          label: 'Overview',
-          onClick: () => {
-            navigate('/docs');
-            onMobileClose?.();
+        ...docSections.flatMap((section) => [
+          {
+            id: `doc-group-${section.title}`,
+            label: section.title,
+            onClick: () => {
+              navigate('/docs');
+              onMobileClose?.();
+            },
           },
-        },
-        // Show doc sub-sections when on any /docs path
-        ...(isOnDocsPage
-          ? docSections.flatMap((section) => [
-              {
-                id: `group-${section.title}`,
-                label: section.title,
-                indent: 1,
-                isGroupLabel: true,
-              },
-              ...section.items.map((item) => ({
+          ...(isOnDocsPage
+            ? section.items.map((item) => ({
                 id: `doc-${item.slug}`,
                 label: item.label,
-                indent: 2,
+                indent: 1,
                 onClick: () => {
                   navigate(`/docs/${item.slug}`);
                   onMobileClose?.();
                 },
-              })),
-            ])
-          : []),
+              }))
+            : []),
+        ]),
         {
           id: 'cli',
           label: 'CLI Reference',
