@@ -59,11 +59,22 @@ const pathToActiveId = (pathname: string): string => {
   if (pathname === '/') return 'home';
   if (pathname === '/search') return 'search';
   if (pathname === '/docs') return 'doc-group-Getting Started';
-  if (pathname.startsWith('/docs/')) return `doc-${pathname.split('/')[2]}`;
+  if (pathname.startsWith('/docs/')) {
+    const slug = pathname.split('/')[2];
+    return `doc-${slug}`;
+  }
   if (pathname === '/cli') return 'cli';
   if (pathname === '/publish') return 'publish';
   if (pathname === '/dashboard') return 'dashboard';
   return '';
+};
+
+/** Find which docSection a slug belongs to */
+const sectionForSlug = (slug: string): string | null => {
+  for (const section of docSections) {
+    if (section.items.some((item) => item.slug === slug)) return section.title;
+  }
+  return null;
 };
 
 export const AppSidebar = ({
@@ -76,7 +87,11 @@ export const AppSidebar = ({
   const { isAuthenticated, isAdmin, token } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const isOnDocsPage = location.pathname === '/docs' || location.pathname.startsWith('/docs/');
+  const currentSlug = location.pathname.startsWith('/docs/')
+    ? location.pathname.split('/')[2]
+    : null;
+  const activeSection =
+    location.pathname === '/docs' ? 'Getting Started' : currentSlug ? sectionForSlug(currentSlug) : null;
 
   const sections: SidebarSection[] = [
     {
@@ -103,27 +118,30 @@ export const AppSidebar = ({
     {
       title: 'Docs',
       items: [
-        ...docSections.flatMap((section) => [
-          {
-            id: `doc-group-${section.title}`,
-            label: section.title,
-            onClick: () => {
-              navigate('/docs');
-              onMobileClose?.();
+        ...docSections.flatMap((section) => {
+          const isExpanded = activeSection === section.title;
+          return [
+            {
+              id: `doc-group-${section.title}`,
+              label: section.title,
+              onClick: () => {
+                navigate(`/docs/${section.items[0].slug}`);
+                onMobileClose?.();
+              },
             },
-          },
-          ...(isOnDocsPage
-            ? section.items.map((item) => ({
-                id: `doc-${item.slug}`,
-                label: item.label,
-                indent: 1,
-                onClick: () => {
-                  navigate(`/docs/${item.slug}`);
-                  onMobileClose?.();
-                },
-              }))
-            : []),
-        ]),
+            ...(isExpanded
+              ? section.items.map((item) => ({
+                  id: `doc-${item.slug}`,
+                  label: item.label,
+                  indent: 1,
+                  onClick: () => {
+                    navigate(`/docs/${item.slug}`);
+                    onMobileClose?.();
+                  },
+                }))
+              : []),
+          ];
+        }),
         {
           id: 'cli',
           label: 'CLI Reference',
