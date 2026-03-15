@@ -195,6 +195,21 @@ export interface AuthorSearchResponse {
 export const searchAuthors = (q: string, perPage = 8): Promise<AuthorSearchResponse> =>
   apiFetch(`/authors?q=${encodeURIComponent(q)}&per_page=${perPage}`);
 
+// -- Tag Search (autocomplete) --
+
+export interface TagSuggestion {
+  tag: string;
+  count: number;
+}
+
+export interface TagSearchResponse {
+  tags: TagSuggestion[];
+  total: number;
+}
+
+export const searchTags = (q: string, perPage = 20): Promise<TagSearchResponse> =>
+  apiFetch(`/tags?q=${encodeURIComponent(q)}&per_page=${perPage}`);
+
 // -- Authors --
 
 export interface AuthorSkill {

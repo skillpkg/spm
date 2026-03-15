@@ -10,6 +10,7 @@ import { resolveRoutes } from './resolve.js';
 import { reviewsRoutes } from './reviews.js';
 import { authorsRoutes } from './authors.js';
 import { reportsRoutes } from './reports.js';
+import { tagsRoutes } from './tags.js';
 import { adminRoutes } from './admin/index.js';
 
 export const createRouter = () => {
@@ -27,6 +28,7 @@ export const createRouter = () => {
   router.route('/', resolveRoutes);
   router.route('/', reviewsRoutes);
   router.route('/', authorsRoutes);
+  router.route('/', tagsRoutes);
   router.route('/', reportsRoutes);
 
   // Admin routes
