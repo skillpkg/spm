@@ -426,12 +426,28 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
   const conditions = [ne(skills.status, 'blocked')];
 
   if (author) {
-    conditions.push(
-      sql`${skills.ownerId} IN (
-        SELECT ${users.id} FROM ${users}
-        WHERE ${users.username} = ${author}
-      )`,
-    );
+    const authors = author
+      .split(',')
+      .map((a) => a.trim())
+      .filter(Boolean);
+    if (authors.length === 1) {
+      conditions.push(
+        sql`${skills.ownerId} IN (
+          SELECT ${users.id} FROM ${users}
+          WHERE ${users.username} = ${authors[0]}
+        )`,
+      );
+    } else if (authors.length > 1) {
+      conditions.push(
+        sql`${skills.ownerId} IN (
+          SELECT ${users.id} FROM ${users}
+          WHERE ${users.username} IN (${sql.join(
+            authors.map((a) => sql`${a}`),
+            sql`, `,
+          )})
+        )`,
+      );
+    }
   }
 
   if (q) {
@@ -447,7 +463,20 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
   }
 
   if (category) {
-    conditions.push(sql`${category} = ANY(${skills.categories})`);
+    const categories = category
+      .split(',')
+      .map((c) => c.trim())
+      .filter(Boolean);
+    if (categories.length === 1) {
+      conditions.push(sql`${categories[0]} = ANY(${skills.categories})`);
+    } else if (categories.length > 1) {
+      conditions.push(
+        sql`${skills.categories} && ARRAY[${sql.join(
+          categories.map((c) => sql`${c}`),
+          sql`, `,
+        )}]::text[]`,
+      );
+    }
   }
 
   if (platform) {
@@ -477,12 +506,28 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
   }
 
   if (tag) {
-    conditions.push(
-      sql`${skills.id} IN (
-        SELECT ${skillTags.skillId} FROM ${skillTags}
-        WHERE ${skillTags.tag} ILIKE ${'%' + tag + '%'}
-      )`,
-    );
+    const tags = tag
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    if (tags.length === 1) {
+      conditions.push(
+        sql`${skills.id} IN (
+          SELECT ${skillTags.skillId} FROM ${skillTags}
+          WHERE ${skillTags.tag} ILIKE ${'%' + tags[0] + '%'}
+        )`,
+      );
+    } else if (tags.length > 1) {
+      conditions.push(
+        sql`${skills.id} IN (
+          SELECT ${skillTags.skillId} FROM ${skillTags}
+          WHERE ${skillTags.tag} ILIKE ANY(ARRAY[${sql.join(
+            tags.map((t) => sql`${'%' + t + '%'}`),
+            sql`, `,
+          )}])
+        )`,
+      );
+    }
   }
 
   if (signed === 'true') {
