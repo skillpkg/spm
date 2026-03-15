@@ -72,7 +72,7 @@ spm list`}</CodeBlock>
             credibility
           </li>
           <li>
-            <strong>Categories</strong> — Organize skills by function (coding, data, devops, etc.)
+            <strong>Categories</strong> — Organize skills by function (frontend, backend, testing, etc.)
           </li>
           <li>
             <strong>Security levels</strong> — Full, basic, or none based on scan results
@@ -168,7 +168,7 @@ description: A helpful skill that summarizes text
 authors:
   - yourname
 categories:
-  - text
+  - documents
 tags:
   - summarize
   - nlp
@@ -251,7 +251,7 @@ authors:
   - alice
   - bob
 categories:
-  - coding
+  - code-quality
 tags:
   - review
   - security
@@ -558,18 +558,18 @@ spm version major  # 1.2.0 → 2.0.0`}</CodeBlock>
           }}
         >
           {[
-            ['coding', 'Code generation, review, refactoring'],
-            ['data', 'Data analysis, transformation, visualization'],
-            ['devops', 'CI/CD, infrastructure, deployment'],
-            ['writing', 'Content creation, editing, formatting'],
-            ['research', 'Information gathering, summarization'],
-            ['design', 'UI/UX, image generation, layouts'],
-            ['testing', 'Test generation, QA, assertions'],
-            ['security', 'Vulnerability scanning, auditing'],
-            ['productivity', 'Task management, automation'],
-            ['communication', 'Email, chat, notifications'],
-            ['math', 'Calculations, statistics, modeling'],
-            ['language', 'Translation, NLP, text processing'],
+            ['documents', 'PDF, DOCX, PPTX, XLSX, text processing'],
+            ['data-viz', 'Charts, dashboards, CSV/JSON, visualization'],
+            ['data-analysis', 'Datasets, querying, transformation, analytics'],
+            ['ai-ml', 'Model training, evaluation, ML pipelines, LLMs'],
+            ['frontend', 'UI, React, HTML/CSS, design systems'],
+            ['backend', 'API, GraphQL, REST, database, migrations'],
+            ['infra', 'Docker, CI/CD, deploy, cloud, IaC'],
+            ['testing', 'Test generation, coverage, benchmarks'],
+            ['code-quality', 'Linting, standards, review, refactoring'],
+            ['security', 'Auth, encryption, vulnerability scanning'],
+            ['productivity', 'Git, terminal, workflow automation'],
+            ['other', "Doesn't fit above categories"],
           ].map(([cat, desc]) => (
             <div
               key={cat}
@@ -604,25 +604,25 @@ spm version major  # 1.2.0 → 2.0.0`}</CodeBlock>
         </P>
         <CodeBlock>{`spm publish
 
-# ✓ Auto-classified: coding, testing
+# ✓ Auto-classified: code-quality, testing
 # Accept suggested categories? (Y/n)`}</CodeBlock>
 
         <H2>Browsing by category</H2>
         <CodeBlock>{`# CLI
-spm search --category coding
+spm search --category frontend
 
 # Web
-# Visit skillpkg.dev/search?category=coding`}</CodeBlock>
+# Visit skillpkg.dev/search?category=frontend`}</CodeBlock>
 
         <H2>Multiple categories</H2>
         <P>
           Skills can belong to multiple categories. For example, a skill that generates test code
-          might be in both <Code>coding</Code> and <Code>testing</Code>:
+          might be in both <Code>code-quality</Code> and <Code>testing</Code>:
         </P>
         <CodeBlock>{`---
 name: test-generator
 categories:
-  - coding
+  - code-quality
   - testing
 ---`}</CodeBlock>
       </>
@@ -864,7 +864,7 @@ ls ~/.config/spm/skills/code-reviewer/SKILL.md`}</CodeBlock>
         <H2>Programmatic API</H2>
         <P>The registry exposes a REST API that any agent framework can call:</P>
         <CodeBlock>{`# Search for skills
-GET /api/skills/search?q=code+review&category=coding
+GET /api/skills/search?q=code+review&category=code-quality
 
 # Get skill details
 GET /api/skills/code-reviewer
@@ -1115,21 +1115,6 @@ export const DocDetail = () => {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 32px 60px' }}>
-      <Link
-        to="/docs"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          color: 'var(--color-text-dim)',
-          textDecoration: 'none',
-          fontFamily: 'var(--font-sans)',
-          fontSize: 14,
-          marginBottom: 20,
-        }}
-      >
-        ← Back to docs
-      </Link>
       <Text
         variant="h1"
         font="sans"
