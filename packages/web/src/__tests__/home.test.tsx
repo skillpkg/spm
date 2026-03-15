@@ -75,7 +75,9 @@ describe('Home', () => {
   it('renders search input', () => {
     renderHome();
 
-    const input = screen.getByPlaceholderText('Search skills...');
+    const input = screen.getByPlaceholderText(
+      'Search skills... (author:name, category:slug, tag:keyword)',
+    );
     expect(input).toBeInTheDocument();
   });
 

@@ -1,9 +1,11 @@
 import { useRef, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { type SearchResultItem, searchAuthors, getCategories } from '../../lib/api';
+import { type SearchResultItem } from '../../lib/api';
 import { searchSkillsQuery } from '../search/queries';
 import { TrustBadge, Text, type TrustTier } from '@spm/ui';
+import { useSearchAutocomplete } from '../../hooks/useSearchAutocomplete';
+import { AutocompleteDropdown } from '../../components/autocomplete/AutocompleteDropdown';
 
 interface HeroSearchProps {
   totalSkills: number;
@@ -37,48 +39,25 @@ export const HeroSearch = ({
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Detect author: or category: prefix
-  const authorMatch = debouncedQuery.match(/^author:(\S*)$/i);
-  const categoryMatch = debouncedQuery.match(/^category:(\S*)$/i);
-  const authorPrefix = authorMatch?.[1] ?? '';
-  const categoryPrefix = categoryMatch?.[1] ?? '';
-  const isAuthorMode = !!authorMatch;
-  const isCategoryMode = !!categoryMatch;
-  const isPrefixMode = isAuthorMode || isCategoryMode;
+  // Generic prefix autocomplete (author:, category:, tag:)
+  const autocomplete = useSearchAutocomplete(debouncedQuery, focused);
 
-  // API-backed skill search
+  // API-backed skill search (only when not in prefix mode)
   const { data: searchData, isFetching: isFetchingSkills } = useQuery({
     ...searchSkillsQuery(debouncedQuery ? { q: debouncedQuery, per_page: 6 } : { per_page: 0 }),
-    enabled: debouncedQuery.length >= 2 && !isPrefixMode,
+    enabled: debouncedQuery.length >= 2 && !autocomplete.mode,
   });
-
-  // API-backed author search
-  const { data: authorData, isFetching: isFetchingAuthors } = useQuery({
-    queryKey: ['authors', authorPrefix],
-    queryFn: () => searchAuthors(authorPrefix, 8),
-    enabled: isAuthorMode && authorPrefix.length >= 1,
-  });
-
-  // Categories (cached, filtered client-side)
-  const { data: categoriesData } = useQuery({
-    queryKey: ['categories'],
-    queryFn: getCategories,
-    enabled: isCategoryMode,
-    staleTime: 60_000,
-  });
-  const filteredCategories = isCategoryMode
-    ? (categoriesData?.categories ?? []).filter((c) =>
-        c.slug.toLowerCase().startsWith(categoryPrefix.toLowerCase()),
-      )
-    : [];
 
   const results: SearchResultItem[] = searchData?.results ?? [];
   const totalResults = searchData?.total ?? 0;
-  const authorResults = authorData?.authors ?? [];
-  const isFetching = isFetchingSkills || isFetchingAuthors;
-  const showDropdown = focused && debouncedQuery.length >= 2;
-  const showAuthorDropdown = focused && isAuthorMode && authorPrefix.length >= 1;
-  const showCategoryDropdown = focused && isCategoryMode;
+  const isFetching = isFetchingSkills || autocomplete.isFetching;
+  const showSkillDropdown = focused && debouncedQuery.length >= 2 && !autocomplete.mode;
+
+  // Has any dropdown open (for border radius)
+  const hasDropdown =
+    (autocomplete.showDropdown && (autocomplete.items.length > 0 || autocomplete.emptyMessage)) ||
+    (showSkillDropdown &&
+      (results.length > 0 || (!isFetchingSkills && debouncedQuery.length >= 2)));
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -187,18 +166,12 @@ export const HeroSearch = ({
               display: 'flex',
               alignItems: 'center',
               background: 'var(--color-bg-card)',
-              borderRadius:
-                (showDropdown && !isPrefixMode && results.length > 0) ||
-                (showAuthorDropdown && authorResults.length > 0) ||
-                (showCategoryDropdown && filteredCategories.length > 0)
-                  ? '10px 10px 0 0'
-                  : 10,
+              borderRadius: hasDropdown ? '10px 10px 0 0' : 10,
               padding: '0 16px',
               border: `1.5px solid ${focused ? '#10b981' : '#1e293b'}`,
-              borderBottom:
-                showDropdown && results.length > 0
-                  ? '1px solid #1e293b'
-                  : `1.5px solid ${focused ? '#10b981' : '#1e293b'}`,
+              borderBottom: hasDropdown
+                ? '1px solid #1e293b'
+                : `1.5px solid ${focused ? '#10b981' : '#1e293b'}`,
               boxShadow: focused ? '0 0 0 3px rgba(16,185,129,0.07)' : 'none',
               transition: 'all 0.2s',
             }}
@@ -212,7 +185,7 @@ export const HeroSearch = ({
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setFocused(true)}
               onBlur={() => setTimeout(() => setFocused(false), 200)}
-              placeholder="Search skills..."
+              placeholder="Search skills... (author:name, category:slug, tag:keyword)"
               style={{
                 flex: 1,
                 fontFamily: 'var(--font-sans)',
@@ -264,168 +237,21 @@ export const HeroSearch = ({
           </div>
         </form>
 
-        {/* Author autocomplete dropdown */}
-        {showAuthorDropdown &&
-          (authorResults.length > 0 || (!isFetchingAuthors && authorPrefix.length >= 1)) && (
-            <div
-              ref={dropdownRef}
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                background: 'var(--color-bg-card)',
-                border: '1.5px solid #10b981',
-                borderTop: 'none',
-                borderRadius: '0 0 10px 10px',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-                zIndex: 50,
-                overflow: 'hidden',
-              }}
-            >
-              {authorResults.length > 0 ? (
-                authorResults.map((author) => (
-                  <div
-                    key={author.username}
-                    style={{
-                      padding: '10px 16px',
-                      borderBottom: '1px solid #1a1d2744',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      navigate(`/search?q=${encodeURIComponent(`author:${author.username}`)}`);
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLDivElement).style.background =
-                        'rgba(16,185,129,0.04)';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLDivElement).style.background = 'transparent';
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Text
-                        variant="body"
-                        font="mono"
-                        weight={600}
-                        as="span"
-                        style={{ color: 'var(--color-text-primary)' }}
-                      >
-                        @{author.username}
-                      </Text>
-                      <TrustBadge tier={author.trust_tier as TrustTier} />
-                    </div>
-                    <Text
-                      variant="label"
-                      font="mono"
-                      color="muted"
-                      as="span"
-                      style={{ whiteSpace: 'nowrap' }}
-                    >
-                      {author.skill_count} skill{author.skill_count !== 1 ? 's' : ''}
-                    </Text>
-                  </div>
-                ))
-              ) : (
-                <Text
-                  variant="body-sm"
-                  font="sans"
-                  color="muted"
-                  as="div"
-                  style={{ padding: '16px', textAlign: 'center' }}
-                >
-                  No authors matching &quot;{authorPrefix}&quot;
-                </Text>
-              )}
-            </div>
-          )}
-
-        {/* Category autocomplete dropdown */}
-        {showCategoryDropdown && (
-          <div
+        {/* Prefix autocomplete dropdown (author:, category:, tag:) */}
+        {autocomplete.showDropdown && (
+          <AutocompleteDropdown
             ref={dropdownRef}
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              background: 'var(--color-bg-card)',
-              border: '1.5px solid #10b981',
-              borderTop: 'none',
-              borderRadius: '0 0 10px 10px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-              zIndex: 50,
-              overflow: 'hidden',
-            }}
-          >
-            {filteredCategories.length > 0 ? (
-              filteredCategories.map((cat) => (
-                <div
-                  key={cat.slug}
-                  style={{
-                    padding: '10px 16px',
-                    borderBottom: '1px solid #1a1d2744',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    navigate(`/search?category=${encodeURIComponent(cat.slug)}`);
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.background = 'rgba(16,185,129,0.04)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.background = 'transparent';
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 16 }}>{cat.icon}</span>
-                    <Text
-                      variant="body"
-                      font="mono"
-                      weight={600}
-                      as="span"
-                      style={{ color: 'var(--color-text-primary)' }}
-                    >
-                      {cat.display}
-                    </Text>
-                  </div>
-                  <Text
-                    variant="label"
-                    font="mono"
-                    color="muted"
-                    as="span"
-                    style={{ whiteSpace: 'nowrap' }}
-                  >
-                    {cat.count} skill{cat.count !== 1 ? 's' : ''}
-                  </Text>
-                </div>
-              ))
-            ) : (
-              <Text
-                variant="body-sm"
-                font="sans"
-                color="muted"
-                as="div"
-                style={{ padding: '16px', textAlign: 'center' }}
-              >
-                No categories matching &quot;{categoryPrefix}&quot;
-              </Text>
-            )}
-          </div>
+            items={autocomplete.items}
+            emptyMessage={autocomplete.emptyMessage}
+            variant="hero"
+            onSelect={() => setQuery('')}
+          />
         )}
 
-        {/* Live search dropdown */}
-        {!isPrefixMode &&
-          showDropdown &&
-          (results.length > 0 || (!isFetching && debouncedQuery.length >= 2)) && (
+        {/* Live skill search dropdown */}
+        {!autocomplete.mode &&
+          showSkillDropdown &&
+          (results.length > 0 || (!isFetchingSkills && debouncedQuery.length >= 2)) && (
             <div
               ref={dropdownRef}
               style={{

@@ -1,13 +1,13 @@
 import { useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { TopBar, Text, TrustBadge, type TrustTier } from '@spm/ui';
+import { TopBar, Text } from '@spm/ui';
 import {
   LegacyBreadcrumb as Breadcrumb,
   type LegacyBreadcrumbItem as BreadcrumbItem,
 } from '@spm/ui/shadcn';
 import { docSections, docSlugToLabel } from '../data/docSections';
-import { searchAuthors, getCategories } from '../lib/api';
+import { useSearchAutocomplete } from '../hooks/useSearchAutocomplete';
+import { AutocompleteDropdown } from './autocomplete/AutocompleteDropdown';
 
 const ROUTE_LABELS: Record<string, string> = {
   '/': 'Home',
@@ -59,49 +59,26 @@ const deriveBreadcrumbs = (pathname: string): BreadcrumbItem[] => {
 const TopBarSearch = () => {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
-  const [debouncedPrefix, setDebouncedPrefix] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  // Detect author: or category: prefix
-  const authorMatch = query.match(/^author:(\S*)$/i);
-  const categoryMatch = query.match(/^category:(\S*)$/i);
-  const authorPrefix = authorMatch?.[1] ?? '';
-  const categoryPrefix = categoryMatch?.[1] ?? '';
-  const isAuthorMode = !!authorMatch;
-  const isCategoryMode = !!categoryMatch;
-
-  // Debounce the author prefix
+  // Debounce
   useEffect(() => {
-    if (!isAuthorMode || !authorPrefix) {
-      setDebouncedPrefix('');
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setDebouncedQuery('');
       return;
     }
-    const timer = setTimeout(() => setDebouncedPrefix(authorPrefix), 200);
+    const timer = setTimeout(() => setDebouncedQuery(trimmed), 200);
     return () => clearTimeout(timer);
-  }, [authorPrefix, isAuthorMode]);
+  }, [query]);
 
-  const { data: authorData } = useQuery({
-    queryKey: ['authors', debouncedPrefix],
-    queryFn: () => searchAuthors(debouncedPrefix, 6),
-    enabled: isAuthorMode && debouncedPrefix.length >= 1,
-  });
+  // Generic prefix autocomplete
+  const autocomplete = useSearchAutocomplete(debouncedQuery, focused);
 
-  const { data: categoriesData } = useQuery({
-    queryKey: ['categories'],
-    queryFn: getCategories,
-    enabled: isCategoryMode,
-    staleTime: 60_000,
-  });
-  const filteredCategories = isCategoryMode
-    ? (categoriesData?.categories ?? []).filter((c) =>
-        c.slug.toLowerCase().startsWith(categoryPrefix.toLowerCase()),
-      )
-    : [];
-
-  const authorResults = authorData?.authors ?? [];
-  const showAuthorDropdown = focused && isAuthorMode && authorPrefix.length >= 1;
-  const showCategoryDropdown = focused && isCategoryMode;
+  const hasDropdown =
+    autocomplete.showDropdown && (autocomplete.items.length > 0 || autocomplete.emptyMessage);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,11 +89,6 @@ const TopBarSearch = () => {
     }
   };
 
-  const selectAuthor = (username: string) => {
-    navigate(`/search?q=${encodeURIComponent(`author:${username}`)}`);
-    setQuery('');
-  };
-
   return (
     <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 440, position: 'relative' }}>
       <div
@@ -125,11 +97,7 @@ const TopBarSearch = () => {
           alignItems: 'center',
           background: 'var(--color-bg-input)',
           border: '1px solid var(--color-border-default)',
-          borderRadius:
-            (showAuthorDropdown && authorResults.length > 0) ||
-            (showCategoryDropdown && filteredCategories.length > 0)
-              ? '8px 8px 0 0'
-              : 8,
+          borderRadius: hasDropdown ? '8px 8px 0 0' : 8,
           padding: '0 12px',
         }}
       >
@@ -172,123 +140,14 @@ const TopBarSearch = () => {
         )}
       </div>
 
-      {/* Author autocomplete dropdown */}
-      {showAuthorDropdown && authorResults.length > 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            background: 'var(--color-bg-card)',
-            border: '1px solid var(--color-border-default)',
-            borderTop: 'none',
-            borderRadius: '0 0 8px 8px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-            zIndex: 50,
-            overflow: 'hidden',
-          }}
-        >
-          {authorResults.map((author) => (
-            <div
-              key={author.username}
-              style={{
-                padding: '8px 12px',
-                borderBottom: '1px solid #1a1d2744',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                selectAuthor(author.username);
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = 'rgba(16,185,129,0.04)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = 'transparent';
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Text
-                  variant="body-sm"
-                  font="mono"
-                  weight={600}
-                  as="span"
-                  style={{ color: 'var(--color-text-primary)' }}
-                >
-                  @{author.username}
-                </Text>
-                <TrustBadge tier={author.trust_tier as TrustTier} />
-              </div>
-              <Text variant="label" font="mono" color="muted" as="span">
-                {author.skill_count} skill{author.skill_count !== 1 ? 's' : ''}
-              </Text>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Category autocomplete dropdown */}
-      {showCategoryDropdown && filteredCategories.length > 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            background: 'var(--color-bg-card)',
-            border: '1px solid var(--color-border-default)',
-            borderTop: 'none',
-            borderRadius: '0 0 8px 8px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-            zIndex: 50,
-            overflow: 'hidden',
-          }}
-        >
-          {filteredCategories.map((cat) => (
-            <div
-              key={cat.slug}
-              style={{
-                padding: '8px 12px',
-                borderBottom: '1px solid #1a1d2744',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                navigate(`/search?category=${encodeURIComponent(cat.slug)}`);
-                setQuery('');
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = 'rgba(16,185,129,0.04)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = 'transparent';
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 14 }}>{cat.icon}</span>
-                <Text
-                  variant="body-sm"
-                  font="mono"
-                  weight={600}
-                  as="span"
-                  style={{ color: 'var(--color-text-primary)' }}
-                >
-                  {cat.display}
-                </Text>
-              </div>
-              <Text variant="label" font="mono" color="muted" as="span">
-                {cat.count} skill{cat.count !== 1 ? 's' : ''}
-              </Text>
-            </div>
-          ))}
-        </div>
+      {/* Prefix autocomplete dropdown (author:, category:, tag:) */}
+      {autocomplete.showDropdown && (
+        <AutocompleteDropdown
+          items={autocomplete.items}
+          emptyMessage={autocomplete.emptyMessage}
+          variant="compact"
+          onSelect={() => setQuery('')}
+        />
       )}
     </form>
   );
