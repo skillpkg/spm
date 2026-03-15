@@ -55,11 +55,6 @@ export const docSections: DocSection[] = [
     title: 'Guides',
     items: [
       {
-        label: 'Publishing skills',
-        slug: 'publishing-skills',
-        desc: 'Step-by-step guide to publishing and versioning your skills.',
-      },
-      {
         label: 'Installing skills',
         slug: 'installing-skills',
         desc: 'Install skills globally or per-project, pin versions, and manage dependencies.',
