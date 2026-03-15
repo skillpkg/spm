@@ -72,7 +72,8 @@ spm list`}</CodeBlock>
             credibility
           </li>
           <li>
-            <strong>Categories</strong> — Organize skills by function (frontend, backend, testing, etc.)
+            <strong>Categories</strong> — Organize skills by function (frontend, backend, testing,
+            etc.)
           </li>
           <li>
             <strong>Security levels</strong> — Full, basic, or none based on scan results

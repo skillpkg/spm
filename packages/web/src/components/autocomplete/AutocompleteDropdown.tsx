@@ -8,11 +8,14 @@ interface AutocompleteDropdownProps {
   emptyMessage: string | null;
   /** Visual variant — hero uses slightly larger padding */
   variant?: 'hero' | 'compact';
+  /** Called after navigation (default behavior) */
   onSelect?: () => void;
+  /** If provided, called instead of navigation — receives the navigateTo URL */
+  onItemSelect?: (navigateTo: string) => void;
 }
 
 export const AutocompleteDropdown = forwardRef<HTMLDivElement, AutocompleteDropdownProps>(
-  ({ items, emptyMessage, variant = 'hero', onSelect }, ref) => {
+  ({ items, emptyMessage, variant = 'hero', onSelect, onItemSelect }, ref) => {
     const navigate = useNavigate();
     const isCompact = variant === 'compact';
     const pad = isCompact ? '8px 12px' : '10px 16px';
@@ -64,7 +67,11 @@ export const AutocompleteDropdown = forwardRef<HTMLDivElement, AutocompleteDropd
             }}
             onMouseDown={(e) => {
               e.preventDefault();
-              navigate(item.navigateTo);
+              if (onItemSelect) {
+                onItemSelect(item.navigateTo);
+              } else {
+                navigate(item.navigateTo);
+              }
               onSelect?.();
             }}
             onMouseEnter={(e) => {

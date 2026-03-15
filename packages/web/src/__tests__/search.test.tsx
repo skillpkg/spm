@@ -5,6 +5,9 @@ import { renderWithProviders } from './helpers';
 
 vi.mock('../lib/api', () => ({
   searchSkills: vi.fn(),
+  searchAuthors: vi.fn().mockResolvedValue({ authors: [], total: 0 }),
+  searchTags: vi.fn().mockResolvedValue({ tags: [], total: 0 }),
+  getCategories: vi.fn().mockResolvedValue({ categories: [], total_skills: 0 }),
 }));
 
 const mockedSearchSkills = vi.mocked(searchSkills);

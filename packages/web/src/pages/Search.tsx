@@ -1,11 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { CATEGORY_NAMES, CATEGORY_SLUGS, TRUST_TIERS, SORT_OPTIONS } from '../data/constants';
 import { TrustBadge, SecurityBadge, Text, type TrustTier, type SecurityLevel } from '@spm/ui';
 import { type SearchResultItem } from '../lib/api';
 import { searchSkillsQuery } from './search/queries';
-import { parseSearchQuery, buildQueryString } from '../lib/parse-search-query';
+import {
+  parseSearchQuery,
+  buildQueryString,
+  getTokenAtCursor,
+  replaceTokenAtCursor,
+} from '../lib/parse-search-query';
+import { useSearchAutocomplete } from '../hooks/useSearchAutocomplete';
+import { AutocompleteDropdown } from '../components/autocomplete/AutocompleteDropdown';
 
 // Reverse map: slug → display name
 const SLUG_TO_CATEGORY: Record<string, string> = {};
@@ -160,12 +167,24 @@ export const Search = () => {
 
   // Local input state for the search bar
   const [inputValue, setInputValue] = useState(rawQuery);
+  const [cursorPos, setCursorPos] = useState(0);
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     setInputValue(rawQuery);
   }, [rawQuery]);
 
+  // Cursor-aware autocomplete: detect which token the cursor is in
+  const cursorToken = useMemo(
+    () => getTokenAtCursor(inputValue, cursorPos),
+    [inputValue, cursorPos],
+  );
+  const cursorQuery = cursorToken.mode ? `${cursorToken.mode}:${cursorToken.prefix}` : '';
+  const autocomplete = useSearchAutocomplete(cursorQuery, focused);
+
   // Derive sidebar state from parsed query
-  const category = parsed.category ? (SLUG_TO_CATEGORY[parsed.category] ?? 'All') : 'All';
+  const activeCategories = parsed.category ?? [];
   const trustFilter = parsed.trust
     ? parsed.trust.charAt(0).toUpperCase() + parsed.trust.slice(1)
     : 'All';
@@ -182,12 +201,32 @@ export const Search = () => {
     setSearchParams(newQuery ? { q: newQuery } : {});
   };
 
+  // Toggle a value in a multi-value filter
+  const toggleMultiFilter = (key: 'author' | 'category' | 'tag', value: string) => {
+    const current = (parsed[key] as string[] | undefined) ?? [];
+    const newValues = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    const newParsed = { ...parsed, [key]: newValues.length > 0 ? newValues : undefined };
+    const newQuery = buildQueryString(newParsed);
+    setSearchParams(newQuery ? { q: newQuery } : {});
+  };
+
+  // Remove a single value from a multi-value filter
+  const removeMultiValue = (key: 'author' | 'category' | 'tag', value: string) => {
+    const current = (parsed[key] as string[] | undefined) ?? [];
+    const newValues = current.filter((v) => v !== value);
+    const newParsed = { ...parsed, [key]: newValues.length > 0 ? newValues : undefined };
+    const newQuery = buildQueryString(newParsed);
+    setSearchParams(newQuery ? { q: newQuery } : {});
+  };
+
   // Build API params from parsed query
   const params: Record<string, string | number> = { per_page: 50 };
   if (parsed.q.trim()) params.q = parsed.q.trim();
-  if (parsed.author) params.author = parsed.author;
-  if (parsed.category) params.category = parsed.category;
-  if (parsed.tag) params.tag = parsed.tag;
+  if (parsed.author?.length) params.author = parsed.author.join(',');
+  if (parsed.category?.length) params.category = parsed.category.join(',');
+  if (parsed.tag?.length) params.tag = parsed.tag.join(',');
   if (parsed.signed) params.signed = parsed.signed;
   if (parsed.platform) params.platform = parsed.platform;
   if (parsed.trust) params.trust = parsed.trust;
@@ -200,23 +239,80 @@ export const Search = () => {
   const displayTotal = searchData?.total ?? filtered.length;
 
   // Collect active filters for chip display
-  const activeFilters = [
-    parsed.author && { key: 'author', label: `author:${parsed.author}` },
-    parsed.category && {
-      key: 'category',
-      label: SLUG_TO_CATEGORY[parsed.category] || parsed.category,
-    },
-    parsed.tag && { key: 'tag', label: `tag:${parsed.tag}` },
-    parsed.signed && { key: 'signed', label: `signed:${parsed.signed}` },
-    parsed.platform && { key: 'platform', label: `platform:${parsed.platform}` },
-    parsed.trust && { key: 'trust', label: trustFilter },
-    parsed.security && { key: 'security', label: securityFilter },
-  ].filter(Boolean) as Array<{ key: string; label: string }>;
+  const activeFilters: Array<{ key: string; label: string; value?: string; multi?: boolean }> = [];
+  if (parsed.author) {
+    for (const a of parsed.author) {
+      activeFilters.push({ key: 'author', label: `author:${a}`, value: a, multi: true });
+    }
+  }
+  if (parsed.category) {
+    for (const c of parsed.category) {
+      activeFilters.push({
+        key: 'category',
+        label: SLUG_TO_CATEGORY[c] || c,
+        value: c,
+        multi: true,
+      });
+    }
+  }
+  if (parsed.tag) {
+    for (const t of parsed.tag) {
+      activeFilters.push({ key: 'tag', label: `tag:${t}`, value: t, multi: true });
+    }
+  }
+  if (parsed.signed) activeFilters.push({ key: 'signed', label: `signed:${parsed.signed}` });
+  if (parsed.platform)
+    activeFilters.push({ key: 'platform', label: `platform:${parsed.platform}` });
+  if (parsed.trust) activeFilters.push({ key: 'trust', label: trustFilter });
+  if (parsed.security) activeFilters.push({ key: 'security', label: securityFilter });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchParams(inputValue.trim() ? { q: inputValue.trim() } : {});
   };
+
+  const handleAutocompleteSelect = () => {
+    // The autocomplete item's navigateTo contains the URL, but for the search page
+    // we want to insert the selected value into the input at the cursor position
+  };
+
+  const handleItemSelect = (navigateTo: string) => {
+    if (!cursorToken.mode) return;
+
+    // Extract the value from the navigateTo URL
+    // author: → /search?q=author:username → extract username
+    // category: → /search?category=slug → extract slug
+    // tag: → /search?q=tag:tagname → extract tagname
+    const url = new URL(navigateTo, 'http://x');
+    let value = '';
+    if (cursorToken.mode === 'category') {
+      value = url.searchParams.get('category') ?? '';
+    } else {
+      const q = url.searchParams.get('q') ?? '';
+      const match = q.match(/^(?:author|tag):(.+)$/i);
+      value = match?.[1] ?? '';
+    }
+
+    if (value) {
+      const { newInput, newCursorPos } = replaceTokenAtCursor(
+        inputValue,
+        cursorToken,
+        cursorToken.mode,
+        value,
+      );
+      setInputValue(newInput);
+      // Submit immediately
+      setSearchParams(newInput.trim() ? { q: newInput.trim() } : {});
+      // Restore cursor
+      setTimeout(() => {
+        inputRef.current?.setSelectionRange(newCursorPos, newCursorPos);
+        inputRef.current?.focus();
+      }, 0);
+    }
+  };
+
+  const hasDropdown =
+    autocomplete.showDropdown && (autocomplete.items.length > 0 || autocomplete.emptyMessage);
 
   return (
     <div
@@ -243,17 +339,28 @@ export const Search = () => {
             >
               Category
             </Text>
-            {CATEGORY_NAMES.map((cat) => (
-              <div
-                key={cat}
-                onClick={() =>
-                  updateFilter('category', cat === 'All' ? undefined : (CATEGORY_SLUGS[cat] ?? cat))
-                }
-                style={sidebarItemStyle(category === cat)}
-              >
-                {cat}
-              </div>
-            ))}
+            {CATEGORY_NAMES.map((cat) => {
+              const slug = CATEGORY_SLUGS[cat] ?? '';
+              const isActive =
+                cat === 'All' ? activeCategories.length === 0 : activeCategories.includes(slug);
+              return (
+                <div
+                  key={cat}
+                  onClick={() => {
+                    if (cat === 'All') {
+                      const newParsed = { ...parsed, category: undefined };
+                      const newQuery = buildQueryString(newParsed);
+                      setSearchParams(newQuery ? { q: newQuery } : {});
+                    } else {
+                      toggleMultiFilter('category', slug);
+                    }
+                  }}
+                  style={sidebarItemStyle(isActive)}
+                >
+                  {cat}
+                </div>
+              );
+            })}
           </div>
 
           {/* Trust filter */}
@@ -348,12 +455,20 @@ export const Search = () => {
 
       {/* Results */}
       <main style={{ flex: 1, minWidth: 0 }}>
-        {/* Search input */}
-        <form onSubmit={handleSubmit} style={{ marginBottom: 16 }}>
+        {/* Search input with autocomplete */}
+        <form onSubmit={handleSubmit} style={{ marginBottom: 16, position: 'relative' }}>
           <input
+            ref={inputRef}
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              setCursorPos(e.target.selectionStart ?? 0);
+            }}
+            onKeyUp={(e) => setCursorPos((e.target as HTMLInputElement).selectionStart ?? 0)}
+            onClick={(e) => setCursorPos((e.target as HTMLInputElement).selectionStart ?? 0)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setTimeout(() => setFocused(false), 200)}
             placeholder="Search skills... try author:name category:frontend tag:imported"
             style={{
               width: '100%',
@@ -362,12 +477,21 @@ export const Search = () => {
               padding: '10px 14px',
               background: 'var(--color-bg-card)',
               color: 'var(--color-text-primary)',
-              border: '1px solid var(--color-border-default)',
-              borderRadius: 8,
+              border: `1px solid ${hasDropdown ? 'var(--color-accent)' : 'var(--color-border-default)'}`,
+              borderRadius: hasDropdown ? '8px 8px 0 0' : 8,
               outline: 'none',
               boxSizing: 'border-box',
             }}
           />
+          {autocomplete.showDropdown && (
+            <AutocompleteDropdown
+              items={autocomplete.items}
+              emptyMessage={autocomplete.emptyMessage}
+              variant="compact"
+              onSelect={handleAutocompleteSelect}
+              onItemSelect={handleItemSelect}
+            />
+          )}
         </form>
 
         {/* Header */}
@@ -423,8 +547,18 @@ export const Search = () => {
         {/* Active filters */}
         {activeFilters.length > 0 && (
           <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
-            {activeFilters.map((f) => (
-              <span key={f.key} onClick={() => updateFilter(f.key, undefined)} style={chipStyle}>
+            {activeFilters.map((f, i) => (
+              <span
+                key={`${f.key}-${f.value ?? i}`}
+                onClick={() => {
+                  if (f.multi && f.value) {
+                    removeMultiValue(f.key as 'author' | 'category' | 'tag', f.value);
+                  } else {
+                    updateFilter(f.key, undefined);
+                  }
+                }}
+                style={chipStyle}
+              >
                 {f.label}{' '}
                 <Text variant="tiny" as="span">
                   &#x2715;
