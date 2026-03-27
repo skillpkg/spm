@@ -3,6 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { registerSearchTool } from './tools/search.js';
 import { registerInfoTool } from './tools/info.js';
 import { registerCategoriesTool } from './tools/categories.js';
+import { registerTemplateTool } from './tools/template.js';
 
 const DEFAULT_REGISTRY_URL = 'https://registry.skillpkg.dev/api/v1';
 
@@ -17,6 +18,7 @@ const main = async (): Promise<void> => {
   registerSearchTool(server, baseUrl);
   registerInfoTool(server, baseUrl);
   registerCategoriesTool(server, baseUrl);
+  registerTemplateTool(server, baseUrl);
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

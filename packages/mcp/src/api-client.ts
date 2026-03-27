@@ -117,4 +117,19 @@ export const fetchCategories = async (
   return (await res.json()) as { categories: CategoryEntry[] };
 };
 
+export const fetchTemplate = async (
+  baseUrl: string,
+): Promise<{ manifest: object; skill_md: string }> => {
+  const res = await fetch(`${baseUrl}/template`);
+  if (!res.ok) {
+    const error: ApiClientError = {
+      status: res.status,
+      message: `Failed to fetch skill template: ${res.statusText}`,
+    };
+    throw error;
+  }
+
+  return (await res.json()) as { manifest: object; skill_md: string };
+};
+
 export { isApiClientError };

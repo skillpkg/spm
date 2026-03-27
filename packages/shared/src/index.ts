@@ -40,6 +40,11 @@ export { TRUST_TIERS, TRUST_TIER_INFO } from './trust.js';
 
 export type { TrustTier } from './trust.js';
 
+// Template
+export { SKILL_TEMPLATE } from './template.js';
+
+export type { SkillTemplate } from './template.js';
+
 // Errors
 export { ERROR_CODES, createApiError } from './errors.js';
 
