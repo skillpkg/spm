@@ -13,6 +13,7 @@ All routes are prefixed with `/api/v1/`.
 | **Auth**      | `POST /auth/device`, `POST /auth/token`, `GET /auth/whoami`, `POST /auth/logout`                                                     |
 | **Skills**    | `POST /skills` (publish), `GET /skills/:name`, `GET /skills/search`, `PATCH /skills/:name`, `DELETE /skills/:name/versions/:version` |
 | **Discovery** | `GET /categories`, `GET /trending`, `GET /authors/:name`, `GET /resolve`                                                             |
+| **Template**  | `GET /template`                                                                                                                      |
 | **Reviews**   | `POST /skills/:name/reviews`, `GET /skills/:name/reviews`                                                                            |
 | **Reports**   | `POST /reports`                                                                                                                      |
 | **Admin**     | `/admin/queue`, `/admin/skills`, `/admin/reports`, `/admin/stats`, `/admin/users`                                                    |

@@ -9,6 +9,7 @@ MCP server for the [SPM](https://skillpkg.dev) skills registry. Search, browse, 
 | `spm_search`     | Search skills by query and category      |
 | `spm_info`       | Get detailed info about a specific skill |
 | `spm_categories` | List all skill categories with counts    |
+| `spm_template`   | Get the skill template as a starting point |
 
 ## Quick Start
 
@@ -88,6 +89,7 @@ Once configured, ask your AI agent to search for skills:
 - "Search for PDF skills on SPM"
 - "What categories of skills are available?"
 - "Get info about the frontend-design skill"
+- "Show me the skill template so I can create a new skill"
 
 ### Custom Registry URL
 

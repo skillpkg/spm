@@ -827,7 +827,7 @@ Return a markdown list of findings with severity levels.`}</CodeBlock>
     }
   }
 }`}</CodeBlock>
-        <P>The MCP server exposes three tools:</P>
+        <P>The MCP server exposes four tools:</P>
         <UL>
           <li>
             <Code>spm_search</Code> — Search the registry by query, category, or tag
@@ -837,6 +837,10 @@ Return a markdown list of findings with severity levels.`}</CodeBlock>
           </li>
           <li>
             <Code>spm_categories</Code> — List all available categories with counts
+          </li>
+          <li>
+            <Code>spm_template</Code> — Get the skill template (manifest + SKILL.md) as a starting
+            point for creating a new skill
           </li>
         </UL>
 
@@ -874,7 +878,10 @@ GET /api/skills/code-reviewer
 GET /api/skills/code-reviewer/versions/1.2.0
 
 # Download package
-GET /api/skills/code-reviewer/download?version=1.2.0`}</CodeBlock>
+GET /api/skills/code-reviewer/download?version=1.2.0
+
+# Get skill template (manifest.json + SKILL.md)
+GET /api/v1/template`}</CodeBlock>
 
         <H2>Agent frameworks</H2>
         <P>
