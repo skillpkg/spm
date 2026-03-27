@@ -11,6 +11,10 @@
   <a href="https://skillpkg.dev">skillpkg.dev</a> · <a href="https://www.npmjs.com/package/@skillpkg/cli">npm</a> · <a href="https://skillpkg.dev/docs">docs</a>
 </p>
 
+<p align="center">
+  <a href="https://claude.com/plugins/skillpkg"><img src="https://img.shields.io/badge/Claude-Plugin-blue" alt="Available on claude.com/plugins" /></a>
+</p>
+
 ## Quick Start
 
 ```bash
@@ -28,6 +32,22 @@ spm agents
 ```
 
 Works with Claude Code, Cursor, Copilot, Codex, and 30+ agent platforms.
+
+## Install Skills via Cowork
+
+There is a `skillpkg` plugin for [Claude Cowork](https://claude.com/plugins) and Claude Code. Install it from [claude.com/plugins](https://claude.com/plugins) (search "skillpkg") or via:
+
+```
+claude plugin install skillpkg
+```
+
+Once installed, you get slash commands:
+
+- `/skillpkg:search` — search the registry
+- `/skillpkg:install` — install a skill
+- `/skillpkg:info` — get skill details
+
+See the [`skillpkg-plugin`](https://github.com/skillpkg/skillpkg-plugin) repo for more.
 
 ## Create & Publish
 

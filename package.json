@@ -1,5 +1,6 @@
 {
   "name": "spm",
+  "description": "The agent skills registry — CLI and Cowork plugin for skillpkg.dev",
   "private": true,
   "packageManager": "pnpm@9.15.4",
   "scripts": {
