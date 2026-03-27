@@ -45,6 +45,12 @@ spm publish
 
 Every published skill is automatically security scanned (3 layers) and signed with [Sigstore](https://sigstore.dev) for supply chain integrity.
 
+See the [`examples/skill-template/`](examples/skill-template/) directory for a complete starter template ([`manifest.json`](examples/skill-template/manifest.json) + [`SKILL.md`](examples/skill-template/SKILL.md)), or fetch it from the API:
+
+```bash
+curl https://registry.skillpkg.dev/api/v1/template
+```
+
 ## MCP Server
 
 Let your AI agents discover skills directly via [Model Context Protocol](https://modelcontextprotocol.io):
@@ -72,6 +78,7 @@ packages/
   ui/         Shared React components                 @spm/ui
   web-auth/   Shared auth logic                       @spm/web-auth
 migrations/   Neon Postgres SQL migrations
+examples/     Skill template & examples
 plan/         Spec docs
 ```
 
