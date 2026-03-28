@@ -1,0 +1,22 @@
+{
+  "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+  "verificationMaterial": {
+    "certificate": {
+      "rawBytes": "Q0VSVElGSUNBVEUgZm9yIHRlc3RAZXhhbXBsZS5jb20gaXNzdWVkIGJ5IEZ1bGNpbw=="
+    },
+    "tlogEntries": [
+      {
+        "logIndex": "12345678",
+        "logId": "c0d23d6ad406973f9559f3ba2d1ca01f84147d8ffc5b8445c224f98b9591801d",
+        "integratedTime": "1700000000"
+      }
+    ]
+  },
+  "messageSignature": {
+    "messageDigest": {
+      "algorithm": "SHA2_256",
+      "digest": "dGVzdC1kaWdlc3Q="
+    },
+    "signature": "dGVzdC1zaWduYXR1cmU="
+  }
+}
