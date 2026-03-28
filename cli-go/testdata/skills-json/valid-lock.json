@@ -1,0 +1,26 @@
+{
+  "lockfileVersion": 1,
+  "generated_at": "2025-01-15T10:30:00.000Z",
+  "generated_by": "spm@0.0.1",
+  "skills": {
+    "code-review": {
+      "version": "1.2.3",
+      "resolved": "https://registry.skillpkg.dev/skills/code-review/1.2.3/download",
+      "checksum": "sha256:abc123def456",
+      "source": "registry"
+    },
+    "test-generator": {
+      "version": "2.1.5",
+      "resolved": "https://registry.skillpkg.dev/skills/test-generator/2.1.5/download",
+      "checksum": "sha256:789ghi012jkl",
+      "source": "registry",
+      "signer": "github:testuser"
+    },
+    "@acme/deploy-helper": {
+      "version": "0.8.0",
+      "resolved": "https://registry.skillpkg.dev/skills/@acme/deploy-helper/0.8.0/download",
+      "checksum": "sha256:mno345pqr678",
+      "source": "registry"
+    }
+  }
+}

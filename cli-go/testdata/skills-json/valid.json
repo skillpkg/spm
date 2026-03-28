@@ -1,0 +1,7 @@
+{
+  "skills": {
+    "code-review": "^1.0.0",
+    "test-generator": "~2.1.0",
+    "@acme/deploy-helper": ">=0.5.0"
+  }
+}
