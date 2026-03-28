@@ -302,6 +302,80 @@ Details to be defined — placeholder for auto-skill support.
 
 ---
 
+## 21. Private Registries
+
+**Priority:** High | **Estimate:** 8-12 sessions total (phased)
+**Status:** Not started
+
+### Why
+
+Companies want to use SPM for internal skills without publishing to the public registry. This is the path to enterprise adoption and revenue.
+
+### Phase 1: Organizations & User Management — **Estimate: 3-4 sessions**
+
+Current SPM has flat users with `user`/`admin` roles. Private registries need org-level access control.
+
+**DB schema changes:**
+- `organizations` table: id, name (slug), display_name, created_at
+- `org_members` table: org_id, user_id, role (owner/admin/member/read-only), invited_at, joined_at
+- `org_invites` table: org_id, email, role, token, expires_at
+- Add `org_id` (nullable) to `skills` table — null = public, set = org-private
+
+**API endpoints:**
+- `POST /orgs` — create org
+- `GET /orgs/:name` — org profile
+- `POST /orgs/:name/members` — invite member
+- `PATCH /orgs/:name/members/:username` — change role
+- `DELETE /orgs/:name/members/:username` — remove member
+
+**Auth changes:**
+- Org membership check middleware
+- Read auth on private skills (currently downloads are unauthenticated)
+- Scoped publish: only org members can publish to `@org/*`
+
+**CLI changes:**
+- `spm org create/list/members` commands
+- `spm login` stores token per registry
+
+### Phase 2: Private Skill Visibility & Access Control — **Estimate: 2-3 sessions**
+
+- Visibility field on skills: `public` | `private` | `org-only`
+- Private skills excluded from public search/browse
+- Download requires auth + org membership for private skills
+- Org-scoped search: `spm search --org mycompany`
+- Web UI: org dashboard with member management, private skill listing
+
+### Phase 3: Multi-Registry CLI Support — **Estimate: 1-2 sessions**
+
+- Scoped registries in `skills.json`: `@company/*` → `https://spm.company.com`, rest → public
+- Per-registry token storage in CLI config
+- `spm login --registry <url>` — authenticate against specific registry
+- Transparent resolution: install from correct registry based on scope
+
+### Phase 4: Hosted Multi-Tenant (SaaS) — **Estimate: 2-3 sessions**
+
+- Org isolation on shared infrastructure (same DB, R2 prefixed per org)
+- Billing/plan model (free tier, team, enterprise)
+- Org-level settings: allowed categories, security scan requirements, approval workflows
+- Audit log: who published/installed/changed what
+
+### Future: Self-Hosted (on-prem)
+
+- Abstract storage backend (S3-compatible, not just R2)
+- Abstract DB (any Postgres, not just Neon)
+- Abstract auth (SSO/SAML, not just GitHub OAuth)
+- Docker image / Helm chart
+- Remove Cloudflare-specific dependencies (KV → Redis, Workers → Node)
+- Air-gap support: proxy/mirror public registry, allowlist approved public skills
+
+### Auth Flexibility (spans all phases)
+
+- API tokens for CI/CD (long-lived, scoped to org + permissions)
+- Service accounts for automation pipelines
+- SSO/SAML integration (Phase 4+)
+
+---
+
 ## 13. Post-Launch / Low Priority
 
 ### Email Notifications
