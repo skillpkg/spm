@@ -1,0 +1,52 @@
+name: Release CLI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli-go
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: cli-go/go.mod
+
+      - name: Run tests
+        run: go test ./...
+
+  release:
+    name: Release
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli-go
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: cli-go/go.mod
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+          workdir: cli-go
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
