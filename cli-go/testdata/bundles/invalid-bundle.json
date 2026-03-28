@@ -1,0 +1,4 @@
+{
+  "this": "is not a valid sigstore bundle",
+  "missing": "required fields like mediaType and verificationMaterial"
+}
