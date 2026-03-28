@@ -1,0 +1,65 @@
+version: 2
+
+project_name: spm
+
+builds:
+  - id: spm
+    main: .
+    binary: spm
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X github.com/skillpkg/spm/cmd.Version={{.Version}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - id: spm
+    builds:
+      - spm
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+  groups:
+    - title: Features
+      regexp: "^feat"
+      order: 0
+    - title: Bug Fixes
+      regexp: "^fix"
+      order: 1
+    - title: Refactoring
+      regexp: "^refactor"
+      order: 2
+    - title: Others
+      order: 999
+
+release:
+  github:
+    owner: skillpkg
+    name: spm
+  draft: false
+  prerelease: auto
+  name_template: "v{{.Version}}"

@@ -35,7 +35,7 @@ coverage/
 skills/
 
 # Internal scripts (import, discovery tooling)
-scripts/
+/scripts/
 
 # Working plan docs (local only)
 plan/open-issues.md
