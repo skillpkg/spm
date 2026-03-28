@@ -11,6 +11,7 @@ import { reviewsRoutes } from './reviews.js';
 import { authorsRoutes } from './authors.js';
 import { reportsRoutes } from './reports.js';
 import { tagsRoutes } from './tags.js';
+import { templateRoutes } from './template.js';
 import { adminRoutes } from './admin/index.js';
 
 export const createRouter = () => {
@@ -30,6 +31,9 @@ export const createRouter = () => {
   router.route('/', authorsRoutes);
   router.route('/', tagsRoutes);
   router.route('/', reportsRoutes);
+
+  // Template route
+  router.route('/', templateRoutes);
 
   // Admin routes
   router.route('/', adminRoutes);

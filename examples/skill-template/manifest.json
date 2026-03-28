@@ -1,0 +1,42 @@
+{
+  "name": "my-skill",
+  "version": "0.1.0",
+  "description": "A brief description of what this skill does and when an AI agent should use it. Should be 30-1024 characters.",
+  "categories": ["other"],
+  "keywords": ["example", "template"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Your Name",
+      "email": "you@example.com"
+    }
+  ],
+  "urls": {
+    "repository": "https://github.com/your-username/my-skill"
+  },
+  "agents": {
+    "platforms": ["*"],
+    "requires_tools": [],
+    "min_context": "standard",
+    "requires_network": false,
+    "requires_mcp": []
+  },
+  "dependencies": {
+    "skills": {},
+    "pip": [],
+    "npm": [],
+    "system": []
+  },
+  "security": {
+    "sandboxed": true,
+    "network_access": false,
+    "filesystem_scope": ["$WORKDIR"]
+  },
+  "files": {
+    "include": ["**/*"],
+    "exclude": ["node_modules/**", ".git/**"]
+  },
+  "spm": {
+    "manifest_version": 1
+  }
+}
