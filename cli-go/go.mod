@@ -7,6 +7,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.19.0
+	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 )
