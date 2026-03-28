@@ -1,0 +1,53 @@
+{
+  "name": "@myorg/data-pipeline",
+  "version": "2.3.1-beta.1",
+  "description": "A full-featured data pipeline skill with all fields populated for testing",
+  "authors": [
+    { "name": "Alice Smith", "email": "alice@example.com", "url": "https://alice.dev" }
+  ],
+  "maintainers": [
+    { "name": "Bob Jones", "email": "bob@example.com" }
+  ],
+  "keywords": ["data", "pipeline", "etl"],
+  "categories": ["data-analysis", "backend"],
+  "license": "MIT",
+  "private": false,
+  "urls": {
+    "homepage": "https://example.com",
+    "repository": "https://github.com/myorg/data-pipeline",
+    "issues": "https://github.com/myorg/data-pipeline/issues",
+    "documentation": "https://docs.example.com",
+    "changelog": "https://github.com/myorg/data-pipeline/blob/main/CHANGELOG.md",
+    "funding": "https://opencollective.com/myorg"
+  },
+  "forked_from": "original-pipeline",
+  "agents": {
+    "platforms": ["claude", "cursor"],
+    "requires_tools": ["bash", "python"],
+    "min_context": "large",
+    "requires_network": true,
+    "requires_mcp": ["filesystem"]
+  },
+  "dependencies": {
+    "skills": {
+      "csv-reader": "^1.0.0",
+      "json-formatter": "~2.1.0"
+    },
+    "pip": ["pandas>=2.0", "numpy"],
+    "npm": ["lodash"],
+    "system": ["ffmpeg"]
+  },
+  "security": {
+    "sandboxed": false,
+    "network_access": true,
+    "filesystem_scope": ["$WORKDIR", "$OUTPUTS", "/tmp"]
+  },
+  "files": {
+    "include": ["SKILL.md", "scripts/**"],
+    "exclude": ["tests/**"]
+  },
+  "$schema": "https://skillpkg.dev/schema/manifest.json",
+  "spm": {
+    "manifest_version": 1
+  }
+}
