@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Text } from '@spm/ui';
+import { InstallTabs } from './InstallTabs';
 
 export const Footer = () => {
   return (
@@ -47,9 +48,7 @@ export const Footer = () => {
         </Text>
       </div>
       <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
-        <Text variant="label" font="mono" color="faint" as="code">
-          npm i -g @skillpkg/cli
-        </Text>
+        <InstallTabs compact />
         <Link
           to="/docs"
           style={{

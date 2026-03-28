@@ -121,6 +121,70 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
           </Text>
         ))}
       </div>
+      {/* Requires section — show dependency badges from manifest */}
+      {(skill.dependencies.pip.length > 0 ||
+        skill.dependencies.system.length > 0 ||
+        skill.dependencies.skills.length > 0) && (
+        <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <Text variant="caption" font="sans" color="dim" as="span" style={{ marginRight: 2 }}>
+            Requires:
+          </Text>
+          {skill.dependencies.pip.map((dep) => (
+            <Text
+              key={`pip-${dep}`}
+              variant="label"
+              font="mono"
+              as="span"
+              style={{
+                padding: '2px 8px',
+                borderRadius: 4,
+                background: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+                color: '#60a5fa',
+                fontSize: 11,
+              }}
+            >
+              {dep}
+            </Text>
+          ))}
+          {skill.dependencies.system.map((dep) => (
+            <Text
+              key={`sys-${dep}`}
+              variant="label"
+              font="mono"
+              as="span"
+              style={{
+                padding: '2px 8px',
+                borderRadius: 4,
+                background: 'rgba(168, 85, 247, 0.1)',
+                border: '1px solid rgba(168, 85, 247, 0.25)',
+                color: '#a78bfa',
+                fontSize: 11,
+              }}
+            >
+              {dep}
+            </Text>
+          ))}
+          {skill.dependencies.skills.map((dep) => (
+            <Link
+              key={`skill-${dep}`}
+              to={`/skills/${dep}`}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                padding: '2px 8px',
+                borderRadius: 4,
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                color: '#34d399',
+                textDecoration: 'none',
+              }}
+            >
+              {dep}
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
 
     {/* Install box */}
