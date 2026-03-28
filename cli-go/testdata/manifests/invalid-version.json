@@ -1,0 +1,5 @@
+{
+  "name": "my-skill",
+  "version": "not-a-version",
+  "description": "A skill with an invalid version that is not semver"
+}
