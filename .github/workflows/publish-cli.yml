@@ -62,7 +62,7 @@ jobs:
         run: pnpm install
 
       - name: Build
-        run: pnpm --filter @skillpkg/mcp build
+        run: pnpm --filter @skillpkg/mcp... build
 
       - name: Publish @skillpkg/mcp
         working-directory: packages/mcp
