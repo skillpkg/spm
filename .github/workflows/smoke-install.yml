@@ -1,0 +1,117 @@
+name: Smoke Test Installs
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to test (e.g. 1.1.0)"
+        required: true
+
+jobs:
+  brew:
+    name: Homebrew (macOS)
+    runs-on: macos-latest
+    steps:
+      - name: Install via Homebrew
+        run: |
+          brew tap skillpkg/tap
+          brew install skillpkg/tap/spm
+
+      - name: Verify binary
+        run: |
+          spm --version
+          spm --help
+
+      - name: Smoke test commands
+        run: |
+          # Version should match the release tag
+          VERSION="${{ github.event.release.tag_name || format('v{0}', inputs.version) }}"
+          INSTALLED="$(spm --version)"
+          echo "Expected: spm version ${VERSION#v}"
+          echo "Got:      $INSTALLED"
+          echo "$INSTALLED" | grep -q "${VERSION#v}"
+
+          # Help should list core commands
+          HELP="$(spm --help)"
+          echo "$HELP" | grep -q "search"
+          echo "$HELP" | grep -q "install"
+          echo "$HELP" | grep -q "publish"
+          echo "✓ Homebrew install passed"
+
+  curl:
+    name: curl installer (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install via curl
+        run: |
+          # Use the installer script from the repo (same as skillpkg.dev/install.sh)
+          chmod +x cli-go/installer/install.sh
+          sudo cli-go/installer/install.sh
+
+      - name: Verify binary
+        run: |
+          spm --version
+          spm --help
+
+      - name: Smoke test commands
+        run: |
+          VERSION="${{ github.event.release.tag_name || format('v{0}', inputs.version) }}"
+          INSTALLED="$(spm --version)"
+          echo "Expected: spm version ${VERSION#v}"
+          echo "Got:      $INSTALLED"
+          echo "$INSTALLED" | grep -q "${VERSION#v}"
+
+          HELP="$(spm --help)"
+          echo "$HELP" | grep -q "search"
+          echo "$HELP" | grep -q "install"
+          echo "$HELP" | grep -q "publish"
+          echo "✓ curl install passed"
+
+  npm:
+    name: npm wrapper (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Update wrapper version
+        working-directory: packages/cli-npm
+        run: |
+          VERSION="${{ github.event.release.tag_name || format('v{0}', inputs.version) }}"
+          # Set the version the installer will download
+          npm version "${VERSION#v}" --no-git-tag-version
+
+      - name: Install via npm
+        working-directory: packages/cli-npm
+        env:
+          SPM_VERSION: ${{ github.event.release.tag_name && format('{0}', github.event.release.tag_name) || inputs.version }}
+        run: |
+          # Remove the 'v' prefix for SPM_VERSION
+          export SPM_VERSION="${SPM_VERSION#v}"
+          npm install -g .
+
+      - name: Verify binary
+        run: |
+          spm --version
+          spm --help
+
+      - name: Smoke test commands
+        run: |
+          VERSION="${{ github.event.release.tag_name || format('v{0}', inputs.version) }}"
+          INSTALLED="$(spm --version)"
+          echo "Expected: spm version ${VERSION#v}"
+          echo "Got:      $INSTALLED"
+          echo "$INSTALLED" | grep -q "${VERSION#v}"
+
+          HELP="$(spm --help)"
+          echo "$HELP" | grep -q "search"
+          echo "$HELP" | grep -q "install"
+          echo "$HELP" | grep -q "publish"
+          echo "✓ npm install passed"
