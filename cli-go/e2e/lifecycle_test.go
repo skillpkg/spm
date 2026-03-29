@@ -114,9 +114,7 @@ func TestAuthoringFlowJSON(t *testing.T) {
 }
 
 // TestConsumerFlow tests: install -> list -> uninstall -> list (empty)
-// TODO: Fix once install/list agree on skills.json location (SPM_HOME vs workDir)
 func TestConsumerFlow(t *testing.T) {
-	t.Skip("skipped: install/list skills.json location mismatch — tracked for fix")
 	server := startMockRegistry(t)
 	defer server.Close()
 
@@ -259,9 +257,7 @@ func TestVersionExplicit(t *testing.T) {
 }
 
 // TestInstallMultiple tests installing multiple skills at once.
-// TODO: Fix once install JSON output format is finalized
 func TestInstallMultiple(t *testing.T) {
-	t.Skip("skipped: install JSON output format mismatch — tracked for fix")
 	server := startMockRegistry(t)
 	defer server.Close()
 

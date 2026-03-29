@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -150,30 +151,33 @@ func startMockRegistry(t *testing.T) *httptest.Server {
 		_ = json.NewEncoder(w).Encode(resp)
 	})
 
-	// GET /api/v1/skills/<name> — info
-	mux.HandleFunc("/api/v1/skills/hello-world", func(w http.ResponseWriter, r *http.Request) {
-		// Specific version sub-paths
-		if r.URL.Path == "/api/v1/skills/hello-world/1.0.0/download" {
-			// Return the download URL as a redirect to self
-			sklURL := "http://" + r.Host + "/files/hello-world-1.0.0.skl"
+	// GET /api/v1/skills/<name>[/...] — info + version download
+	// Trailing slash catches all sub-paths under /api/v1/skills/
+	mux.HandleFunc("/api/v1/skills/", func(w http.ResponseWriter, r *http.Request) {
+		path := strings.TrimPrefix(r.URL.Path, "/api/v1/skills/")
+
+		// Download sub-path: <name>/<version>/download
+		if strings.HasSuffix(path, "/download") {
+			// Extract skill name from path
+			parts := strings.SplitN(path, "/", 3)
+			name := parts[0]
+			sklURL := "http://" + r.Host + "/files/" + name + "-1.0.0.skl"
 			http.Redirect(w, r, sklURL, http.StatusFound)
 			return
 		}
-		if r.Method != http.MethodGet {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		resp := map[string]any{
-			"name":           "hello-world",
-			"description":    "A hello world skill",
+
+		// Info: extract skill name (first segment)
+		name := strings.SplitN(path, "/", 2)[0]
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"name":           name,
+			"description":    "A " + name + " skill",
 			"author":         map[string]string{"username": "testuser", "trust_tier": "registered"},
 			"category":       "other",
 			"latest_version": "1.0.0",
 			"downloads":      42,
 			"versions":       []map[string]string{{"version": "1.0.0", "published_at": "2025-01-01T00:00:00Z"}},
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		})
 	})
 
 	// POST /api/v1/resolve — resolve versions
