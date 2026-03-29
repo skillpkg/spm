@@ -99,11 +99,14 @@ jobs:
 
       - name: Verify binary
         run: |
+          # Ensure npm global bin is on PATH
+          export PATH="$(npm config get prefix)/bin:$PATH"
           spm --version
           spm --help
 
       - name: Smoke test commands
         run: |
+          export PATH="$(npm config get prefix)/bin:$PATH"
           VERSION="${{ github.event.release.tag_name || format('v{0}', inputs.version) }}"
           INSTALLED="$(spm --version)"
           echo "Expected: spm version ${VERSION#v}"

@@ -1,6 +1,17 @@
 #!/bin/sh
 # Wrapper script — delegates to the downloaded Go binary.
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Resolve symlinks to find the real script location (npm creates symlinks for global installs).
+SELF="$0"
+while [ -L "$SELF" ]; do
+  DIR="$(cd "$(dirname "$SELF")" && pwd)"
+  SELF="$(readlink "$SELF")"
+  # Handle relative symlinks
+  case "$SELF" in
+    /*) ;;
+    *) SELF="$DIR/$SELF" ;;
+  esac
+done
+SCRIPT_DIR="$(cd "$(dirname "$SELF")" && pwd)"
 BINARY="$SCRIPT_DIR/spm-go"
 
 if [ -x "$BINARY" ]; then
