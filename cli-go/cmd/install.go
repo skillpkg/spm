@@ -389,7 +389,7 @@ func downloadSkl(client *api.Client, name, version string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("downloading from %s: %w", dlURL, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("download returned HTTP %d", resp.StatusCode)
@@ -404,7 +404,7 @@ func extractTarGz(data []byte, targetDir string) error {
 	if err != nil {
 		return fmt.Errorf("opening gzip: %w", err)
 	}
-	defer gr.Close()
+	defer func() { _ = gr.Close() }()
 
 	return extractTar(gr, targetDir)
 }
@@ -442,10 +442,10 @@ func extractTar(r io.Reader, targetDir string) error {
 				return fmt.Errorf("creating file %s: %w", target, err)
 			}
 			if _, err := io.Copy(f, tr); err != nil {
-				f.Close()
+				_ = f.Close()
 				return fmt.Errorf("writing file %s: %w", target, err)
 			}
-			f.Close()
+			_ = f.Close()
 		}
 	}
 	return nil

@@ -23,7 +23,7 @@ func TestCollabList(t *testing.T) {
 		assert.Equal(t, "/api/v1/skills/my-skill/collaborators", r.URL.Path)
 		assert.Equal(t, http.MethodGet, r.Method)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(collabs)
+		_ = json.NewEncoder(w).Encode(collabs)
 	}))
 	defer srv.Close()
 
@@ -42,7 +42,7 @@ func TestCollabListJSON(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(collabs)
+		_ = json.NewEncoder(w).Encode(collabs)
 	}))
 	defer srv.Close()
 
@@ -70,7 +70,7 @@ func TestCollabAdd(t *testing.T) {
 		assert.Equal(t, "Bearer test-token", r.Header.Get("Authorization"))
 
 		var body api.CollaboratorAction
-		json.NewDecoder(r.Body).Decode(&body)
+		_ = json.NewDecoder(r.Body).Decode(&body)
 		assert.Equal(t, "bob", body.Username)
 		assert.Equal(t, "maintainer", body.Role)
 

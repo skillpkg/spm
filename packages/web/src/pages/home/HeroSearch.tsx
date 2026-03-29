@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { type SearchResultItem } from '../../lib/api';
 import { searchSkillsQuery } from '../search/queries';
 import { TrustBadge, Text, type TrustTier } from '@spm/ui';
@@ -22,7 +22,6 @@ export const HeroSearch = ({
   setQuery,
   onSubmit,
 }: HeroSearchProps) => {
-  const navigate = useNavigate();
   const [focused, setFocused] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);

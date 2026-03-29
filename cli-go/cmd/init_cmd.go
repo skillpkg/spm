@@ -199,7 +199,7 @@ func dirToKebab(name string) string {
 	for len(s) > 0 && s[len(s)-1] == '-' {
 		s = s[:len(s)-1]
 	}
-	if len(s) < 2 || !(s[0] >= 'a' && s[0] <= 'z') {
+	if len(s) < 2 || s[0] < 'a' || s[0] > 'z' {
 		return "my-skill"
 	}
 	return s

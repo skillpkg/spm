@@ -160,13 +160,13 @@ func createTarGz(archivePath, baseDir string, files []string) error {
 	if err != nil {
 		return err
 	}
-	defer outFile.Close()
+	defer func() { _ = outFile.Close() }()
 
 	gzWriter := gzip.NewWriter(outFile)
-	defer gzWriter.Close()
+	defer func() { _ = gzWriter.Close() }()
 
 	tw := tar.NewWriter(gzWriter)
-	defer tw.Close()
+	defer func() { _ = tw.Close() }()
 
 	for _, file := range files {
 		fullPath := filepath.Join(baseDir, file)
@@ -190,10 +190,10 @@ func createTarGz(archivePath, baseDir string, files []string) error {
 			return fmt.Errorf("open %s: %w", file, err)
 		}
 		if _, err := io.Copy(tw, f); err != nil {
-			f.Close()
+			_ = f.Close()
 			return fmt.Errorf("copy %s: %w", file, err)
 		}
-		f.Close()
+		_ = f.Close()
 	}
 
 	return nil

@@ -25,7 +25,7 @@ func TestDeviceCode_Success(t *testing.T) {
 		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(DeviceCodeResponse{
+		_ = json.NewEncoder(w).Encode(DeviceCodeResponse{
 			DeviceCode:      "abc123",
 			UserCode:        "ABCD-1234",
 			VerificationURI: "https://github.com/login/device",
@@ -50,12 +50,12 @@ func TestPollToken_Success(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/auth/token", func(w http.ResponseWriter, r *http.Request) {
 		var body map[string]string
-		json.NewDecoder(r.Body).Decode(&body)
+		_ = json.NewDecoder(r.Body).Decode(&body)
 		assert.Equal(t, "abc123", body["device_code"])
 		assert.Equal(t, "urn:ietf:params:oauth:grant-type:device_code", body["grant_type"])
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(TokenResponse{
+		_ = json.NewEncoder(w).Encode(TokenResponse{
 			Token: "spm_token_123",
 			User: TokenUser{
 				ID:          "user-1",
@@ -79,7 +79,7 @@ func TestPollToken_Pending(t *testing.T) {
 	mux.HandleFunc("/api/v1/auth/token", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(428)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error": "authorization_pending",
 		})
 	})
@@ -96,7 +96,7 @@ func TestPollToken_SlowDown(t *testing.T) {
 	mux.HandleFunc("/api/v1/auth/token", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(428)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error": "slow_down",
 		})
 	})
@@ -113,7 +113,7 @@ func TestPollToken_Expired(t *testing.T) {
 	mux.HandleFunc("/api/v1/auth/token", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(410)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error": "expired_token",
 		})
 	})
@@ -137,14 +137,14 @@ func TestPollDeviceFlow_PendingThenSuccess(t *testing.T) {
 		if count <= 2 {
 			// First two calls: pending
 			w.WriteHeader(428)
-			json.NewEncoder(w).Encode(map[string]string{
+			_ = json.NewEncoder(w).Encode(map[string]string{
 				"error": "authorization_pending",
 			})
 			return
 		}
 
 		// Third call: success
-		json.NewEncoder(w).Encode(TokenResponse{
+		_ = json.NewEncoder(w).Encode(TokenResponse{
 			Token: "spm_final_token",
 			User:  TokenUser{Username: "almog"},
 		})
@@ -171,11 +171,11 @@ func TestPollDeviceFlow_SlowDownIncreasesInterval(t *testing.T) {
 
 		if count == 1 {
 			w.WriteHeader(428)
-			json.NewEncoder(w).Encode(map[string]string{"error": "slow_down"})
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "slow_down"})
 			return
 		}
 
-		json.NewEncoder(w).Encode(TokenResponse{
+		_ = json.NewEncoder(w).Encode(TokenResponse{
 			Token: "spm_token",
 			User:  TokenUser{Username: "almog"},
 		})
@@ -203,7 +203,7 @@ func TestPollDeviceFlow_Expired(t *testing.T) {
 	mux.HandleFunc("/api/v1/auth/token", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(410)
-		json.NewEncoder(w).Encode(map[string]string{"error": "expired_token"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"error": "expired_token"})
 	})
 
 	_, client := newTestServer(t, mux)
@@ -221,7 +221,7 @@ func TestPollDeviceFlow_Timeout(t *testing.T) {
 	mux.HandleFunc("/api/v1/auth/token", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(428)
-		json.NewEncoder(w).Encode(map[string]string{"error": "authorization_pending"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"error": "authorization_pending"})
 	})
 
 	_, client := newTestServer(t, mux)
@@ -317,7 +317,7 @@ func TestTokenLoadFromTOML(t *testing.T) {
 		Registry: "https://my-registry.dev",
 	})
 	require.NoError(t, err)
-	f.Close()
+	require.NoError(t, f.Close())
 
 	loaded, err := config.Load()
 	require.NoError(t, err)

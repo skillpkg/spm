@@ -29,7 +29,7 @@ func TestSearchHumanOutput(t *testing.T) {
 		assert.Equal(t, "test", r.URL.Query().Get("q"))
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"results": []map[string]any{
 				{
 					"name":        "code-review",
@@ -70,7 +70,7 @@ func TestSearchHumanOutput(t *testing.T) {
 func TestSearchJSONOutput(t *testing.T) {
 	srv, buf := setupSearchTest(t, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"results": []map[string]any{
 				{
 					"name":        "hello-skill",
@@ -103,7 +103,7 @@ func TestSearchJSONOutput(t *testing.T) {
 func TestSearchEmptyResults(t *testing.T) {
 	srv, buf := setupSearchTest(t, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"results":  []any{},
 			"total":    0,
 			"page":     1,
@@ -129,7 +129,7 @@ func TestSearchWithFilters(t *testing.T) {
 		assert.Equal(t, "downloads", r.URL.Query().Get("sort"))
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"results":  []any{},
 			"total":    0,
 			"page":     1,
@@ -148,7 +148,7 @@ func TestSearchWithFilters(t *testing.T) {
 func TestSearchServerError(t *testing.T) {
 	srv, _ := setupSearchTest(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error":   "internal_error",
 			"message": "database unavailable",
 		})

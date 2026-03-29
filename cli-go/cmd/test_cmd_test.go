@@ -125,7 +125,7 @@ func TestTestCleanSkillPasses(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	// Set up a clean skill
 	writeFile(t, filepath.Join(dir, "SKILL.md"), "# Clean Skill\n\nA perfectly clean skill with no issues.")

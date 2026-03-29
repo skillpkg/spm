@@ -43,7 +43,7 @@ func TestAuthHeader_Present(t *testing.T) {
 	mux.HandleFunc("/api/v1/auth/whoami", func(w http.ResponseWriter, r *http.Request) {
 		gotAuth = r.Header.Get("Authorization")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(WhoamiUser{Username: "testuser"})
+		_ = json.NewEncoder(w).Encode(WhoamiUser{Username: "testuser"})
 	})
 
 	_, client := newTestServer(t, mux)
@@ -60,7 +60,7 @@ func TestAuthHeader_Absent(t *testing.T) {
 	mux.HandleFunc("/api/v1/skills", func(w http.ResponseWriter, r *http.Request) {
 		gotAuth = r.Header.Get("Authorization")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(SearchResponse{})
+		_ = json.NewEncoder(w).Encode(SearchResponse{})
 	})
 
 	_, client := newTestServer(t, mux)
@@ -81,7 +81,7 @@ func TestSearch_Success(t *testing.T) {
 		assert.Equal(t, "data-viz", r.URL.Query().Get("category"))
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(SearchResponse{
+		_ = json.NewEncoder(w).Encode(SearchResponse{
 			Results: []SearchResult{{Name: "data-viz", Version: "1.0.0"}},
 			Total:   1,
 			Page:    1,
@@ -104,7 +104,7 @@ func TestInfo_Success(t *testing.T) {
 	mux.HandleFunc("/api/v1/skills/data-viz", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(SkillInfo{
+		_ = json.NewEncoder(w).Encode(SkillInfo{
 			Name:          "data-viz",
 			LatestVersion: "1.2.3",
 			Author:        Author{Username: "almog"},
@@ -144,7 +144,7 @@ func TestGetVersion_Success(t *testing.T) {
 	mux.HandleFunc("/api/v1/skills/data-viz/1.2.3", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(VersionInfo{
+		_ = json.NewEncoder(w).Encode(VersionInfo{
 			Name:    "data-viz",
 			Version: "1.2.3",
 			Yanked:  false,
@@ -193,7 +193,7 @@ func TestPublish_Success(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(PublishResponse{
+		_ = json.NewEncoder(w).Encode(PublishResponse{
 			Status:  "published",
 			Name:    "test-skill",
 			Version: "1.0.0",
@@ -221,7 +221,7 @@ func TestPublish_WithSigstore(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(PublishResponse{Status: "published", Name: "s", Version: "1.0.0"})
+		_ = json.NewEncoder(w).Encode(PublishResponse{Status: "published", Name: "s", Version: "1.0.0"})
 	})
 
 	_, client := newTestServer(t, mux)
@@ -242,11 +242,11 @@ func TestYank_Success(t *testing.T) {
 		assert.Equal(t, http.MethodDelete, r.Method)
 
 		var body map[string]string
-		json.NewDecoder(r.Body).Decode(&body)
+		_ = json.NewDecoder(r.Body).Decode(&body)
 		assert.Equal(t, "critical bug", body["reason"])
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(YankResponse{
+		_ = json.NewEncoder(w).Encode(YankResponse{
 			Name:    "data-viz",
 			Version: "1.2.3",
 			Yanked:  true,
@@ -268,11 +268,11 @@ func TestDeprecate_Success(t *testing.T) {
 		assert.Equal(t, http.MethodPatch, r.Method)
 
 		var body map[string]any
-		json.NewDecoder(r.Body).Decode(&body)
+		_ = json.NewDecoder(r.Body).Decode(&body)
 		assert.Equal(t, true, body["deprecated"])
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(DeprecateResponse{
+		_ = json.NewEncoder(w).Encode(DeprecateResponse{
 			Name:       "old-skill",
 			Deprecated: true,
 		})
@@ -292,13 +292,13 @@ func TestReport_Success(t *testing.T) {
 		assert.Equal(t, http.MethodPost, r.Method)
 
 		var body map[string]string
-		json.NewDecoder(r.Body).Decode(&body)
+		_ = json.NewDecoder(r.Body).Decode(&body)
 		assert.Equal(t, "malicious", body["reason"])
 		assert.Equal(t, "high", body["priority"])
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(ReportResponse{
+		_ = json.NewEncoder(w).Encode(ReportResponse{
 			ID:     "report-123",
 			Skill:  "bad-skill",
 			Status: "open",
@@ -318,7 +318,7 @@ func TestGetCollaborators_Success(t *testing.T) {
 	mux.HandleFunc("/api/v1/skills/my-skill/collaborators", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]Collaborator{
+		_ = json.NewEncoder(w).Encode([]Collaborator{
 			{Username: "alice", Role: "maintainer"},
 			{Username: "bob", Role: "contributor"},
 		})
@@ -337,7 +337,7 @@ func TestAddCollaborator_Success(t *testing.T) {
 		assert.Equal(t, http.MethodPost, r.Method)
 
 		var body CollaboratorAction
-		json.NewDecoder(r.Body).Decode(&body)
+		_ = json.NewDecoder(r.Body).Decode(&body)
 		assert.Equal(t, "alice", body.Username)
 		assert.Equal(t, "maintainer", body.Role)
 
@@ -369,11 +369,11 @@ func TestClassify_Success(t *testing.T) {
 		assert.Equal(t, http.MethodPost, r.Method)
 
 		var body map[string]string
-		json.NewDecoder(r.Body).Decode(&body)
+		_ = json.NewDecoder(r.Body).Decode(&body)
 		assert.NotEmpty(t, body["skill_md_content"])
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ClassifyResponse{
+		_ = json.NewEncoder(w).Encode(ClassifyResponse{
 			SuggestedCategory: "data-viz",
 			Confidence:        0.92,
 			MatchesManifest:   true,
@@ -395,12 +395,12 @@ func TestResolve_Success(t *testing.T) {
 		assert.Equal(t, http.MethodPost, r.Method)
 
 		var body map[string]any
-		json.NewDecoder(r.Body).Decode(&body)
+		_ = json.NewDecoder(r.Body).Decode(&body)
 		skills := body["skills"].([]any)
 		assert.Len(t, skills, 1)
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ResolveResponse{
+		_ = json.NewEncoder(w).Encode(ResolveResponse{
 			Resolved: []ResolvedSkill{
 				{Name: "data-viz", Version: "1.2.3", DownloadURL: "https://example.com/data-viz.skl"},
 			},
@@ -424,7 +424,7 @@ func TestVerifySignature_Success(t *testing.T) {
 	mux.HandleFunc("/api/v1/skills/data-viz/1.2.3/verify-signature", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"verified": true,
 			"signer":   "almog@github",
 		})
@@ -443,7 +443,7 @@ func TestRescan_Success(t *testing.T) {
 	mux.HandleFunc("/api/v1/skills/data-viz/1.2.3/rescan", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"status": "scanning",
 		})
 	})
@@ -463,7 +463,7 @@ func TestWhoami_Success(t *testing.T) {
 		assert.Equal(t, "Bearer test-token", r.Header.Get("Authorization"))
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(WhoamiUser{
+		_ = json.NewEncoder(w).Encode(WhoamiUser{
 			ID:              "user-1",
 			Username:        "almog",
 			GithubLogin:     "almog",
@@ -554,7 +554,7 @@ func TestError_409(t *testing.T) {
 	mux.HandleFunc("/api/v1/skills", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(409)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error":      "version_exists",
 			"message":    "Version 1.0.0 already exists",
 			"suggestion": "Run: spm version patch",
@@ -594,7 +594,7 @@ func TestError_429(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Retry-After", "23")
 		w.WriteHeader(429)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error":   "rate_limited",
 			"message": "Too many requests",
 		})
@@ -630,7 +630,7 @@ func TestError_DefaultMapping(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/skills/bad", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(500)
-		io.WriteString(w, "Internal Server Error")
+		_, _ = io.WriteString(w, "Internal Server Error")
 	})
 
 	_, client := newTestServer(t, mux)

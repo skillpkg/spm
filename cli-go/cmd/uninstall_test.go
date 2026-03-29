@@ -21,22 +21,22 @@ func setupUninstallTestEnv(t *testing.T, skillName string) (spmHome string, cwd 
 	cwd = filepath.Join(tmpDir, "project")
 
 	// Create directories
-	os.MkdirAll(filepath.Join(spmHome, "skills", skillName, "1.0.0"), 0o755)
-	os.MkdirAll(filepath.Join(spmHome, "cache", skillName), 0o755)
-	os.MkdirAll(cwd, 0o755)
+	require.NoError(t, os.MkdirAll(filepath.Join(spmHome, "skills", skillName, "1.0.0"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(spmHome, "cache", skillName), 0o755))
+	require.NoError(t, os.MkdirAll(cwd, 0o755))
 
 	// Write a skill file
-	os.WriteFile(
+	require.NoError(t, os.WriteFile(
 		filepath.Join(spmHome, "skills", skillName, "1.0.0", "skill.json"),
 		[]byte(`{"name": "`+skillName+`", "version": "1.0.0"}`),
 		0o644,
-	)
+	))
 
 	// Write skills.json
 	sjContent, _ := json.MarshalIndent(map[string]any{
 		"skills": map[string]string{skillName: "^1.0.0"},
 	}, "", "  ")
-	os.WriteFile(filepath.Join(cwd, "skills.json"), sjContent, 0o644)
+	require.NoError(t, os.WriteFile(filepath.Join(cwd, "skills.json"), sjContent, 0o644))
 
 	// Write lock file
 	lockContent, _ := json.MarshalIndent(map[string]any{
@@ -52,13 +52,13 @@ func setupUninstallTestEnv(t *testing.T, skillName string) (spmHome string, cwd 
 			},
 		},
 	}, "", "  ")
-	os.WriteFile(filepath.Join(cwd, "skills-lock.json"), lockContent, 0o644)
+	require.NoError(t, os.WriteFile(filepath.Join(cwd, "skills-lock.json"), lockContent, 0o644))
 
 	t.Setenv("SPM_HOME", spmHome)
 
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(cwd))
-	t.Cleanup(func() { os.Chdir(origDir) })
+	t.Cleanup(func() { _ = os.Chdir(origDir) })
 
 	return spmHome, cwd
 }
@@ -135,16 +135,16 @@ func TestUninstallMultiple(t *testing.T) {
 	tmpDir := t.TempDir()
 	spmHome := filepath.Join(tmpDir, ".spm")
 	cwd := filepath.Join(tmpDir, "project")
-	os.MkdirAll(cwd, 0o755)
+	require.NoError(t, os.MkdirAll(cwd, 0o755))
 
 	// Create two skills
 	for _, name := range []string{"skill-a", "skill-b"} {
-		os.MkdirAll(filepath.Join(spmHome, "skills", name, "1.0.0"), 0o755)
-		os.WriteFile(
+		require.NoError(t, os.MkdirAll(filepath.Join(spmHome, "skills", name, "1.0.0"), 0o755))
+		require.NoError(t, os.WriteFile(
 			filepath.Join(spmHome, "skills", name, "1.0.0", "skill.json"),
 			[]byte(`{"name": "`+name+`"}`),
 			0o644,
-		)
+		))
 	}
 
 	sjContent, _ := json.MarshalIndent(map[string]any{
@@ -153,12 +153,12 @@ func TestUninstallMultiple(t *testing.T) {
 			"skill-b": "^1.0.0",
 		},
 	}, "", "  ")
-	os.WriteFile(filepath.Join(cwd, "skills.json"), sjContent, 0o644)
+	require.NoError(t, os.WriteFile(filepath.Join(cwd, "skills.json"), sjContent, 0o644))
 
 	t.Setenv("SPM_HOME", spmHome)
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(cwd))
-	t.Cleanup(func() { os.Chdir(origDir) })
+	t.Cleanup(func() { _ = os.Chdir(origDir) })
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
@@ -181,13 +181,13 @@ func TestUninstallNotInstalled(t *testing.T) {
 	tmpDir := t.TempDir()
 	spmHome := filepath.Join(tmpDir, ".spm")
 	cwd := filepath.Join(tmpDir, "project")
-	os.MkdirAll(cwd, 0o755)
-	os.MkdirAll(spmHome, 0o755)
+	require.NoError(t, os.MkdirAll(cwd, 0o755))
+	require.NoError(t, os.MkdirAll(spmHome, 0o755))
 
 	t.Setenv("SPM_HOME", spmHome)
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(cwd))
-	t.Cleanup(func() { os.Chdir(origDir) })
+	t.Cleanup(func() { _ = os.Chdir(origDir) })
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}

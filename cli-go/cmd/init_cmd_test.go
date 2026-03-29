@@ -15,7 +15,7 @@ func TestInitCreatesFiles(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	// Reset flags
 	initName = "test-skill"
@@ -58,7 +58,7 @@ func TestInitDefaultsFromDir(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	// No name flag set, should derive from dir
 	initName = ""
@@ -81,7 +81,7 @@ func TestInitInvalidCategory(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	initName = "test-skill"
 	initVersion = "0.1.0"

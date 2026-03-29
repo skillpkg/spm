@@ -147,7 +147,7 @@ func runPublish(_ *cobra.Command, args []string) error {
 
 	// 5. Sign (optional, graceful)
 	var sigstoreBundle []byte
-	signStatus := "unsigned"
+	var signStatus string
 
 	if publishNoSign {
 		Out.Log("  %s Skipping signing (--no-sign)", output.Yellow(output.Icons["warning"]))

@@ -312,13 +312,13 @@ func verifyTarGz(t *testing.T, path string) {
 	if err != nil {
 		t.Fatalf("opening .skl file: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	gr, err := gzip.NewReader(f)
 	if err != nil {
 		t.Fatalf(".skl is not valid gzip: %v", err)
 	}
-	defer gr.Close()
+	defer func() { _ = gr.Close() }()
 
 	tr := tar.NewReader(gr)
 	fileNames := make(map[string]bool)

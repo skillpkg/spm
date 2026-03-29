@@ -22,9 +22,9 @@ func setupUpdateTestEnv(t *testing.T) (spmHome string, cwd string) {
 	spmHome = filepath.Join(tmpDir, ".spm")
 	cwd = filepath.Join(tmpDir, "project")
 
-	os.MkdirAll(filepath.Join(spmHome, "skills"), 0o755)
-	os.MkdirAll(filepath.Join(spmHome, "cache"), 0o755)
-	os.MkdirAll(cwd, 0o755)
+	require.NoError(t, os.MkdirAll(filepath.Join(spmHome, "skills"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(spmHome, "cache"), 0o755))
+	require.NoError(t, os.MkdirAll(cwd, 0o755))
 
 	// Write skills.json with an existing skill
 	sjContent, _ := json.MarshalIndent(map[string]any{
@@ -32,7 +32,7 @@ func setupUpdateTestEnv(t *testing.T) (spmHome string, cwd string) {
 			"updatable-skill": "^1.0.0",
 		},
 	}, "", "  ")
-	os.WriteFile(filepath.Join(cwd, "skills.json"), sjContent, 0o644)
+	require.NoError(t, os.WriteFile(filepath.Join(cwd, "skills.json"), sjContent, 0o644))
 
 	// Write lock file with old version
 	lockContent, _ := json.MarshalIndent(map[string]any{
@@ -48,12 +48,12 @@ func setupUpdateTestEnv(t *testing.T) (spmHome string, cwd string) {
 			},
 		},
 	}, "", "  ")
-	os.WriteFile(filepath.Join(cwd, "skills-lock.json"), lockContent, 0o644)
+	require.NoError(t, os.WriteFile(filepath.Join(cwd, "skills-lock.json"), lockContent, 0o644))
 
 	t.Setenv("SPM_HOME", spmHome)
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(cwd))
-	t.Cleanup(func() { os.Chdir(origDir) })
+	t.Cleanup(func() { _ = os.Chdir(origDir) })
 
 	return spmHome, cwd
 }
@@ -63,15 +63,15 @@ func TestUpdateDetectsNewerVersion(t *testing.T) {
 	sklData := createTestSkl(t, "updatable-skill", "1.2.0")
 
 	dlSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(sklData)
+		_, _ = w.Write(sklData)
 	}))
 	defer dlSrv.Close()
 
 	apiSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/api/v1/resolve":
-			json.NewEncoder(w).Encode(map[string]any{
+		switch r.URL.Path {
+		case "/api/v1/resolve":
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []map[string]any{
 					{
 						"name":            "updatable-skill",
@@ -87,7 +87,7 @@ func TestUpdateDetectsNewerVersion(t *testing.T) {
 				},
 				"unresolved": []any{},
 			})
-		case r.URL.Path == "/api/v1/skills/updatable-skill/1.2.0/download":
+		case "/api/v1/skills/updatable-skill/1.2.0/download":
 			http.Redirect(w, r, dlSrv.URL+"/updatable-skill-1.2.0.skl", http.StatusFound)
 		}
 	}))
@@ -124,7 +124,7 @@ func TestUpdateAlreadyUpToDate(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/api/v1/resolve" {
 			// Return same version as locked
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []map[string]any{
 					{
 						"name":            "updatable-skill",
@@ -159,13 +159,13 @@ func TestUpdateNoSkillsJSON(t *testing.T) {
 	tmpDir := t.TempDir()
 	spmHome := filepath.Join(tmpDir, ".spm")
 	cwd := filepath.Join(tmpDir, "project")
-	os.MkdirAll(cwd, 0o755)
-	os.MkdirAll(spmHome, 0o755)
+	require.NoError(t, os.MkdirAll(cwd, 0o755))
+	require.NoError(t, os.MkdirAll(spmHome, 0o755))
 
 	t.Setenv("SPM_HOME", spmHome)
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(cwd))
-	t.Cleanup(func() { os.Chdir(origDir) })
+	t.Cleanup(func() { _ = os.Chdir(origDir) })
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
@@ -182,15 +182,15 @@ func TestUpdateJSONOutput(t *testing.T) {
 	sklData := createTestSkl(t, "updatable-skill", "1.3.0")
 
 	dlSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(sklData)
+		_, _ = w.Write(sklData)
 	}))
 	defer dlSrv.Close()
 
 	apiSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/api/v1/resolve":
-			json.NewEncoder(w).Encode(map[string]any{
+		switch r.URL.Path {
+		case "/api/v1/resolve":
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []map[string]any{
 					{
 						"name":            "updatable-skill",
@@ -206,7 +206,7 @@ func TestUpdateJSONOutput(t *testing.T) {
 				},
 				"unresolved": []any{},
 			})
-		case r.URL.Path == "/api/v1/skills/updatable-skill/1.3.0/download":
+		case "/api/v1/skills/updatable-skill/1.3.0/download":
 			http.Redirect(w, r, dlSrv.URL+"/updatable-skill-1.3.0.skl", http.StatusFound)
 		}
 	}))
@@ -238,15 +238,15 @@ func TestUpdateSpecificSkill(t *testing.T) {
 	sklData := createTestSkl(t, "updatable-skill", "1.1.0")
 
 	dlSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(sklData)
+		_, _ = w.Write(sklData)
 	}))
 	defer dlSrv.Close()
 
 	apiSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/api/v1/resolve":
-			json.NewEncoder(w).Encode(map[string]any{
+		switch r.URL.Path {
+		case "/api/v1/resolve":
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []map[string]any{
 					{
 						"name":            "updatable-skill",
@@ -262,7 +262,7 @@ func TestUpdateSpecificSkill(t *testing.T) {
 				},
 				"unresolved": []any{},
 			})
-		case r.URL.Path == "/api/v1/skills/updatable-skill/1.1.0/download":
+		case "/api/v1/skills/updatable-skill/1.1.0/download":
 			http.Redirect(w, r, dlSrv.URL+"/updatable-skill-1.1.0.skl", http.StatusFound)
 		}
 	}))
@@ -288,7 +288,7 @@ func TestUpdateSkillNotInRegistry(t *testing.T) {
 	apiSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/api/v1/resolve" {
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []any{},
 				"unresolved": []map[string]any{
 					{

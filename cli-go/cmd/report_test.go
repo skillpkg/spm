@@ -17,12 +17,12 @@ func TestReport_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/skills/bad-skill/report" && r.Method == http.MethodPost {
 			var body map[string]string
-			json.NewDecoder(r.Body).Decode(&body)
+			_ = json.NewDecoder(r.Body).Decode(&body)
 			assert.Equal(t, "malicious content", body["reason"])
 			assert.Equal(t, "high", body["priority"])
 
 			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"id":         "rpt-123",
 				"skill":      "bad-skill",
 				"status":     "pending",
@@ -76,7 +76,7 @@ func TestReport_NoAuth(t *testing.T) {
 func TestReport_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"error":   "skill_not_found",
 			"message": "Skill not found",
 		})
@@ -100,7 +100,7 @@ func TestReport_NotFound(t *testing.T) {
 func TestReport_RateLimited(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusTooManyRequests)
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"error":   "rate_limited",
 			"message": "Too many requests",
 		})
@@ -125,7 +125,7 @@ func TestReport_HumanOutput(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"id":         "rpt-456",
 				"skill":      "bad-skill",
 				"status":     "pending",

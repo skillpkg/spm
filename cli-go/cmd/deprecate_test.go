@@ -17,7 +17,7 @@ func TestDeprecate_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/skills/my-skill" && r.Method == http.MethodPatch {
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"name":           "my-skill",
 				"deprecated":     true,
 				"deprecated_msg": "Use new-skill instead",
@@ -55,11 +55,11 @@ func TestDeprecate_Undo(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/skills/my-skill" && r.Method == http.MethodPatch {
 			var body map[string]any
-			json.NewDecoder(r.Body).Decode(&body)
+			_ = json.NewDecoder(r.Body).Decode(&body)
 			assert.Equal(t, false, body["deprecated"])
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"name":       "my-skill",
 				"deprecated": false,
 				"updated_at": "2024-01-01T00:00:00Z",
@@ -108,7 +108,7 @@ func TestDeprecate_NoAuth(t *testing.T) {
 func TestDeprecate_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"error":   "skill_not_found",
 			"message": "Skill not found",
 		})
@@ -137,12 +137,12 @@ func TestDeprecate_DefaultMessage(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPatch {
 			var body map[string]any
-			json.NewDecoder(r.Body).Decode(&body)
+			_ = json.NewDecoder(r.Body).Decode(&body)
 			// Default message should be set
 			assert.Equal(t, "This skill has been deprecated.", body["deprecated_msg"])
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"name":           "my-skill",
 				"deprecated":     true,
 				"deprecated_msg": "This skill has been deprecated.",

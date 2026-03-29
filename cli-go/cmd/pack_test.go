@@ -36,11 +36,11 @@ func listTarGzFiles(t *testing.T, archivePath string) []string {
 	t.Helper()
 	f, err := os.Open(archivePath)
 	require.NoError(t, err)
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	gz, err := gzip.NewReader(f)
 	require.NoError(t, err)
-	defer gz.Close()
+	defer func() { _ = gz.Close() }()
 
 	tr := tar.NewReader(gz)
 	var files []string
@@ -59,7 +59,7 @@ func TestPackCreatesSklFile(t *testing.T) {
 	dir := setupPackSkillDir(t)
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	Out = output.New()
 	Out.Mode = output.ModeSilent
@@ -80,7 +80,7 @@ func TestPackContainsExpectedFiles(t *testing.T) {
 	dir := setupPackSkillDir(t)
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	Out = output.New()
 	Out.Mode = output.ModeSilent
@@ -135,7 +135,7 @@ func TestPackIncludesScripts(t *testing.T) {
 
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	Out = output.New()
 	Out.Mode = output.ModeSilent

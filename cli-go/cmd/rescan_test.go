@@ -17,7 +17,7 @@ func TestRescan_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/skills/my-skill/1.0.0/rescan" && r.Method == http.MethodPost {
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"name":        "my-skill",
 				"version":     "1.0.0",
 				"scan_status": "pending",
@@ -76,7 +76,7 @@ func TestRescan_NoAuth(t *testing.T) {
 func TestRescan_Forbidden(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"error":   "forbidden",
 			"message": "Admin access required",
 		})
@@ -98,7 +98,7 @@ func TestRescan_Forbidden(t *testing.T) {
 func TestRescan_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"error":   "version_not_found",
 			"message": "Version not found",
 		})
@@ -121,7 +121,7 @@ func TestRescan_HumanOutput(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"name":        "my-skill",
 				"version":     "1.0.0",
 				"scan_status": "pending",

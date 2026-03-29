@@ -38,7 +38,7 @@ func TestVersionPatch(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	writeVersionManifest(t, dir, "1.2.3")
 
@@ -54,7 +54,7 @@ func TestVersionMinor(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	writeVersionManifest(t, dir, "1.2.3")
 
@@ -70,7 +70,7 @@ func TestVersionMajor(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	writeVersionManifest(t, dir, "1.2.3")
 
@@ -86,7 +86,7 @@ func TestVersionExplicit(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	writeVersionManifest(t, dir, "1.0.0")
 
@@ -102,7 +102,7 @@ func TestVersionInvalidInput(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	writeVersionManifest(t, dir, "1.0.0")
 
@@ -118,7 +118,7 @@ func TestVersionNoManifest(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	Out = output.New()
 	Out.Mode = output.ModeSilent
@@ -132,7 +132,7 @@ func TestVersionPreservesOtherFields(t *testing.T) {
 	dir := t.TempDir()
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	writeVersionManifest(t, dir, "1.0.0")
 

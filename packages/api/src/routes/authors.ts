@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { eq, and, desc, sql, count, ilike, type SQL } from 'drizzle-orm';
+import { eq, and, desc, sql, count, ilike } from 'drizzle-orm';
 import { ERROR_CODES, createApiError } from '@spm/shared';
 import type { AppEnv } from '../types.js';
 import { authed } from '../middleware/auth.js';

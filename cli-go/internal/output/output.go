@@ -78,7 +78,7 @@ func (o *Output) Log(format string, args ...any) {
 	if o.Mode == ModeJSON || o.Mode == ModeSilent {
 		return
 	}
-	fmt.Fprintf(o.Writer, format+"\n", args...)
+	_, _ = fmt.Fprintf(o.Writer, format+"\n", args...)
 }
 
 // LogVerbose prints a message only in verbose mode.
@@ -87,7 +87,7 @@ func (o *Output) LogVerbose(format string, args ...any) {
 		return
 	}
 	msg := fmt.Sprintf("[verbose] "+format, args...)
-	fmt.Fprintf(o.Writer, "%s\n", Dim(msg))
+	_, _ = fmt.Fprintf(o.Writer, "%s\n", Dim(msg))
 }
 
 // LogJSON outputs a value as JSON. Only active in JSON mode.
@@ -107,7 +107,7 @@ func (o *Output) LogError(format string, args ...any) {
 		return
 	}
 	msg := fmt.Sprintf("%s %s", Icons["error"], fmt.Sprintf(format, args...))
-	fmt.Fprintf(o.ErrW, "%s\n", Red(msg))
+	_, _ = fmt.Fprintf(o.ErrW, "%s\n", Red(msg))
 }
 
 // StartSpinner creates and starts a terminal spinner. Returns nil in non-human modes.

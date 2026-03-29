@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CopyButton, Text } from '@spm/ui';
+import { CopyButton } from '@spm/ui';
 
 type InstallMethod = 'brew' | 'curl' | 'npm';
 

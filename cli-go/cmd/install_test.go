@@ -60,18 +60,18 @@ func setupInstallTestEnv(t *testing.T) (spmHome string, cwd string) {
 	tmpDir := t.TempDir()
 
 	spmHome = filepath.Join(tmpDir, ".spm")
-	os.MkdirAll(filepath.Join(spmHome, "skills"), 0o755)
-	os.MkdirAll(filepath.Join(spmHome, "cache"), 0o755)
+	require.NoError(t, os.MkdirAll(filepath.Join(spmHome, "skills"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(spmHome, "cache"), 0o755))
 
 	cwd = filepath.Join(tmpDir, "project")
-	os.MkdirAll(cwd, 0o755)
+	require.NoError(t, os.MkdirAll(cwd, 0o755))
 
 	t.Setenv("SPM_HOME", spmHome)
 
 	// Change to project directory for skills.json operations
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(cwd))
-	t.Cleanup(func() { os.Chdir(origDir) })
+	t.Cleanup(func() { _ = os.Chdir(origDir) })
 
 	return spmHome, cwd
 }
@@ -83,7 +83,7 @@ func TestInstallSuccess(t *testing.T) {
 	// Download server serves the .skl file
 	dlSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/gzip")
-		w.Write(sklData)
+		_, _ = w.Write(sklData)
 	}))
 	defer dlSrv.Close()
 
@@ -93,7 +93,7 @@ func TestInstallSuccess(t *testing.T) {
 
 		switch {
 		case r.URL.Path == "/api/v1/resolve" && r.Method == "POST":
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []map[string]any{
 					{
 						"name":            "my-skill",
@@ -164,12 +164,12 @@ func TestInstallAlreadyInstalled(t *testing.T) {
     }
   }
 }`
-	os.WriteFile(filepath.Join(cwd, "skills-lock.json"), []byte(lockContent), 0o644)
+	require.NoError(t, os.WriteFile(filepath.Join(cwd, "skills-lock.json"), []byte(lockContent), 0o644))
 
 	apiSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/api/v1/resolve" {
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []map[string]any{
 					{
 						"name":            "my-skill",
@@ -207,7 +207,7 @@ func TestInstallNotFound(t *testing.T) {
 	apiSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/api/v1/resolve" {
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []any{},
 				"unresolved": []map[string]any{
 					{
@@ -257,15 +257,15 @@ func TestInstallJSONOutput(t *testing.T) {
 	sklData := createTestSkl(t, "json-skill", "2.0.0")
 
 	dlSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(sklData)
+		_, _ = w.Write(sklData)
 	}))
 	defer dlSrv.Close()
 
 	apiSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/api/v1/resolve":
-			json.NewEncoder(w).Encode(map[string]any{
+		switch r.URL.Path {
+		case "/api/v1/resolve":
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []map[string]any{
 					{
 						"name":            "json-skill",
@@ -281,7 +281,7 @@ func TestInstallJSONOutput(t *testing.T) {
 				},
 				"unresolved": []any{},
 			})
-		case r.URL.Path == "/api/v1/skills/json-skill/2.0.0/download":
+		case "/api/v1/skills/json-skill/2.0.0/download":
 			http.Redirect(w, r, dlSrv.URL+"/json-skill-2.0.0.skl", http.StatusFound)
 		}
 	}))
@@ -316,18 +316,18 @@ func TestInstallFromSkillsJSON(t *testing.T) {
 
 	// Write skills.json in project dir
 	sjContent := `{"skills": {"existing-skill": "^1.0.0"}}`
-	os.WriteFile(filepath.Join(cwd, "skills.json"), []byte(sjContent), 0o644)
+	require.NoError(t, os.WriteFile(filepath.Join(cwd, "skills.json"), []byte(sjContent), 0o644))
 
 	dlSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(sklData)
+		_, _ = w.Write(sklData)
 	}))
 	defer dlSrv.Close()
 
 	apiSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/api/v1/resolve":
-			json.NewEncoder(w).Encode(map[string]any{
+		switch r.URL.Path {
+		case "/api/v1/resolve":
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"resolved": []map[string]any{
 					{
 						"name":            "existing-skill",
@@ -343,7 +343,7 @@ func TestInstallFromSkillsJSON(t *testing.T) {
 				},
 				"unresolved": []any{},
 			})
-		case r.URL.Path == "/api/v1/skills/existing-skill/1.5.0/download":
+		case "/api/v1/skills/existing-skill/1.5.0/download":
 			http.Redirect(w, r, dlSrv.URL+"/existing-skill-1.5.0.skl", http.StatusFound)
 		}
 	}))

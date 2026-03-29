@@ -65,10 +65,10 @@ func TestPublish_Success(t *testing.T) {
 				"url":             "https://skillpkg.dev/skills/test-skill",
 				"checksum_sha256": "abc123",
 			}
-			json.NewEncoder(w).Encode(resp)
+			_ = json.NewEncoder(w).Encode(resp)
 		case r.URL.Path == "/api/v1/categories/classify" && r.Method == http.MethodPost:
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"suggested_category": "testing",
 				"confidence":         0.95,
 				"matches_manifest":   true,
@@ -108,14 +108,14 @@ func TestPublish_WithSigning(t *testing.T) {
 		switch {
 		case r.URL.Path == "/api/v1/skills" && r.Method == http.MethodPost:
 			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"status":  "published",
 				"name":    "test-skill",
 				"version": "1.0.0",
 			})
 		case r.URL.Path == "/api/v1/categories/classify":
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"suggested_category": "testing",
 				"confidence":         0.9,
 			})
@@ -154,14 +154,14 @@ func TestPublish_SigningFailureDoesNotBlock(t *testing.T) {
 		switch {
 		case r.URL.Path == "/api/v1/skills" && r.Method == http.MethodPost:
 			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"status":  "published",
 				"name":    "test-skill",
 				"version": "1.0.0",
 			})
 		case r.URL.Path == "/api/v1/categories/classify":
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"suggested_category": "testing",
 				"confidence":         0.9,
 			})
@@ -283,14 +283,14 @@ func TestPublish_NoSignFlag(t *testing.T) {
 		switch {
 		case r.URL.Path == "/api/v1/skills" && r.Method == http.MethodPost:
 			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"status":  "published",
 				"name":    "test-skill",
 				"version": "1.0.0",
 			})
 		case r.URL.Path == "/api/v1/categories/classify":
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"suggested_category": "testing",
 				"confidence":         0.9,
 			})
@@ -321,13 +321,13 @@ func TestPublish_APIConflict(t *testing.T) {
 		switch {
 		case r.URL.Path == "/api/v1/skills" && r.Method == http.MethodPost:
 			w.WriteHeader(http.StatusConflict)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"error":   "version_exists",
 				"message": "Version 1.0.0 already exists",
 			})
 		case r.URL.Path == "/api/v1/categories/classify":
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]any{
+			_ = json.NewEncoder(w).Encode(map[string]any{
 				"suggested_category": "testing",
 				"confidence":         0.9,
 			})

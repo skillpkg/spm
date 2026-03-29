@@ -40,13 +40,13 @@ func TestMain(m *testing.M) {
 	buildCmd.Stderr = os.Stderr
 	if err := buildCmd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to build spm binary: %v\n", err)
-		os.RemoveAll(tmpDir)
+		_ = os.RemoveAll(tmpDir)
 		os.Exit(1)
 	}
 
 	code := m.Run()
 
-	os.RemoveAll(tmpDir)
+	_ = os.RemoveAll(tmpDir)
 	os.Exit(code)
 }
 
@@ -147,7 +147,7 @@ func startMockRegistry(t *testing.T) *httptest.Server {
 			"pages":    1,
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	})
 
 	// GET /api/v1/skills/<name> — info
@@ -173,7 +173,7 @@ func startMockRegistry(t *testing.T) *httptest.Server {
 			"versions":       []map[string]string{{"version": "1.0.0", "published_at": "2025-01-01T00:00:00Z"}},
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	})
 
 	// POST /api/v1/resolve — resolve versions
@@ -189,7 +189,7 @@ func startMockRegistry(t *testing.T) *httptest.Server {
 				Range string `json:"range"`
 			} `json:"skills"`
 		}
-		json.NewDecoder(r.Body).Decode(&reqBody)
+		_ = json.NewDecoder(r.Body).Decode(&reqBody)
 
 		resolved := make([]map[string]any, 0, len(reqBody.Skills))
 		for _, s := range reqBody.Skills {
@@ -211,21 +211,21 @@ func startMockRegistry(t *testing.T) *httptest.Server {
 			"unresolved": []any{},
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	})
 
 	// GET /files/*.skl — serve a minimal .skl archive
 	mux.HandleFunc("/files/", func(w http.ResponseWriter, r *http.Request) {
 		sklData := buildMinimalSkl(t)
 		w.Header().Set("Content-Type", "application/gzip")
-		w.Write(sklData)
+		_, _ = w.Write(sklData)
 	})
 
 	// GET /api/v1/auth/whoami — requires token
 	mux.HandleFunc("/api/v1/auth/whoami", func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") == "" {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized", "message": "Missing or invalid token"})
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized", "message": "Missing or invalid token"})
 			return
 		}
 		resp := map[string]any{
@@ -240,7 +240,7 @@ func startMockRegistry(t *testing.T) *httptest.Server {
 			"created_at":       "2025-01-01T00:00:00Z",
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	})
 
 	server := httptest.NewServer(mux)
@@ -274,8 +274,8 @@ func buildMinimalSkl(t *testing.T) []byte {
 	// Add SKILL.md
 	addFileToTar(t, tw, "SKILL.md", skillMD)
 
-	tw.Close()
-	gw.Close()
+	_ = tw.Close()
+	_ = gw.Close()
 
 	return buf.Bytes()
 }

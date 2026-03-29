@@ -64,7 +64,7 @@ func TestDetectCIEnv(t *testing.T) {
 			// Clear all CI env vars
 			for _, key := range []string{"GITHUB_ACTIONS", "GITLAB_CI", "CI"} {
 				t.Setenv(key, "")
-				os.Unsetenv(key)
+				_ = os.Unsetenv(key)
 			}
 			// Set the test env vars
 			for k, v := range tc.envVars {
@@ -86,7 +86,7 @@ func TestIsCI(t *testing.T) {
 	t.Run("returns false outside CI", func(t *testing.T) {
 		for _, key := range []string{"GITHUB_ACTIONS", "GITLAB_CI", "CI"} {
 			t.Setenv(key, "")
-			os.Unsetenv(key)
+			_ = os.Unsetenv(key)
 		}
 		assert.False(t, IsCI())
 	})
@@ -283,7 +283,7 @@ func TestInteractiveSigner_SuccessfulCallback(t *testing.T) {
 				if err != nil {
 					return
 				}
-				resp.Body.Close()
+				_ = resp.Body.Close()
 			}()
 			return nil
 		},
@@ -466,7 +466,7 @@ func TestNewSigner_ReturnsGracefulSigner(t *testing.T) {
 	// Clear CI env vars
 	for _, key := range []string{"GITHUB_ACTIONS", "GITLAB_CI", "CI"} {
 		t.Setenv(key, "")
-		os.Unsetenv(key)
+		_ = os.Unsetenv(key)
 	}
 
 	signer := NewSigner()
@@ -487,7 +487,7 @@ func TestNewSigner_CIReturnsGracefulWithCISigner(t *testing.T) {
 func TestNewSigner_NonCIReturnsGracefulWithInteractiveSigner(t *testing.T) {
 	for _, key := range []string{"GITHUB_ACTIONS", "GITLAB_CI", "CI"} {
 		t.Setenv(key, "")
-		os.Unsetenv(key)
+		_ = os.Unsetenv(key)
 	}
 
 	signer := NewSigner()

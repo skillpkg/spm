@@ -202,7 +202,7 @@ func (s *InteractiveSigner) Sign(data []byte) (*SignResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to start callback server: %w", err)
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 
 	port := listener.Addr().(*net.TCPAddr).Port
 	redirectURI := fmt.Sprintf("http://localhost:%d/callback", port)
@@ -219,7 +219,7 @@ func (s *InteractiveSigner) Sign(data []byte) (*SignResult, error) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, "<html><body><h3>Authenticated!</h3><p>You can close this tab.</p></body></html>")
+		_, _ = fmt.Fprint(w, "<html><body><h3>Authenticated!</h3><p>You can close this tab.</p></body></html>")
 		// In real Sigstore, we'd exchange the code for an OIDC token here.
 		// For now, we pass the code through as a placeholder.
 		tokenCh <- code
@@ -231,7 +231,7 @@ func (s *InteractiveSigner) Sign(data []byte) (*SignResult, error) {
 			errCh <- serveErr
 		}
 	}()
-	defer server.Close()
+	defer func() { _ = server.Close() }()
 
 	// Build the auth URL (Sigstore OAuth issuer)
 	authURL := fmt.Sprintf(

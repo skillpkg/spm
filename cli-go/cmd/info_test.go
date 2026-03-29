@@ -27,7 +27,7 @@ func TestInfoHumanOutput(t *testing.T) {
 	srv, buf := setupInfoTest(t, func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/api/v1/skills/code-review", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"name":             "code-review",
 			"description":      "Automated code review for PRs",
 			"author":           map[string]string{"username": "alice", "trust_tier": "verified"},
@@ -83,7 +83,7 @@ func TestInfoHumanOutput(t *testing.T) {
 func TestInfoJSONOutput(t *testing.T) {
 	srv, buf := setupInfoTest(t, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"name":             "my-skill",
 			"description":      "A test skill",
 			"author":           map[string]string{"username": "bob", "trust_tier": "registered"},
@@ -116,7 +116,7 @@ func TestInfoWithVersion(t *testing.T) {
 	srv, buf := setupInfoTest(t, func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/api/v1/skills/my-skill/1.2.3", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"name":            "my-skill",
 			"version":         "1.2.3",
 			"size_bytes":      4096,
@@ -139,7 +139,7 @@ func TestInfoWithVersion(t *testing.T) {
 func TestInfoNotFound(t *testing.T) {
 	srv, _ := setupInfoTest(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error":   "skill_not_found",
 			"message": "Skill not found",
 		})
@@ -156,7 +156,7 @@ func TestInfoNotFound(t *testing.T) {
 func TestInfoNotFoundJSON(t *testing.T) {
 	srv, buf := setupInfoTest(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error":   "skill_not_found",
 			"message": "Skill not found",
 		})

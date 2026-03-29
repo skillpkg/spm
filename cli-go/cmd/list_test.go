@@ -52,7 +52,7 @@ func TestListHumanOutput(t *testing.T) {
 
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(tmpDir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
@@ -82,7 +82,7 @@ func TestListJSONOutput(t *testing.T) {
 
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(tmpDir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeJSON, Writer: &buf, ErrW: &buf}
@@ -105,7 +105,7 @@ func TestListNoSkillsInstalled(t *testing.T) {
 
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(tmpDir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
@@ -127,7 +127,7 @@ func TestListEmptySkillsJson(t *testing.T) {
 
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(tmpDir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
@@ -152,7 +152,7 @@ func TestListNoLockFile(t *testing.T) {
 
 	origDir, _ := os.Getwd()
 	require.NoError(t, os.Chdir(tmpDir))
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
