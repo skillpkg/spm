@@ -91,26 +91,12 @@ jobs:
       - name: Install via npm
         working-directory: packages/cli-npm
         run: |
-          # package.json version was already set in the previous step
-          cat package.json | head -5
-          # Pack first, then install the tarball (more reliable than `npm install -g .`)
           TARBALL="$(npm pack)"
-          echo "Packed: $TARBALL"
           npm install -g "./$TARBALL"
-          # Debug: check what got installed
-          NPM_PREFIX="$(npm config get prefix)"
-          echo "npm prefix: $NPM_PREFIX"
-          ls -la "$NPM_PREFIX/bin/" | grep spm || true
-          ls -la "$NPM_PREFIX/lib/node_modules/@skillpkg/cli/bin/" || true
 
       - name: Verify binary
         run: |
           NPM_BIN="$(npm config get prefix)/bin"
-          echo "PATH before: $PATH"
-          echo "npm bin: $NPM_BIN"
-          ls -la "$NPM_BIN/spm"
-          file "$NPM_BIN/spm" || true
-          # Run via full path first to check the wrapper works
           "$NPM_BIN/spm" --version
           "$NPM_BIN/spm" --help
 
