@@ -102,23 +102,25 @@ jobs:
 
       - name: Verify binary
         run: |
-          # Ensure npm global bin is on PATH
-          NPM_PREFIX="$(npm config get prefix)"
-          export PATH="$NPM_PREFIX/bin:$PATH"
-          which spm || echo "spm not in PATH"
-          spm --version
-          spm --help
+          NPM_BIN="$(npm config get prefix)/bin"
+          echo "PATH before: $PATH"
+          echo "npm bin: $NPM_BIN"
+          ls -la "$NPM_BIN/spm"
+          file "$NPM_BIN/spm" || true
+          # Run via full path first to check the wrapper works
+          "$NPM_BIN/spm" --version
+          "$NPM_BIN/spm" --help
 
       - name: Smoke test commands
         run: |
-          export PATH="$(npm config get prefix)/bin:$PATH"
+          NPM_BIN="$(npm config get prefix)/bin"
           VERSION="${{ github.event.release.tag_name || format('v{0}', inputs.version) }}"
-          INSTALLED="$(spm --version)"
+          INSTALLED="$("$NPM_BIN/spm" --version)"
           echo "Expected: spm version ${VERSION#v}"
           echo "Got:      $INSTALLED"
           echo "$INSTALLED" | grep -q "${VERSION#v}"
 
-          HELP="$(spm --help)"
+          HELP="$("$NPM_BIN/spm" --help)"
           echo "$HELP" | grep -q "search"
           echo "$HELP" | grep -q "install"
           echo "$HELP" | grep -q "publish"
