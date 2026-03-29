@@ -3,7 +3,7 @@
  * Postinstall script: downloads the correct SPM Go binary for the current platform.
  * Falls back gracefully if download fails (e.g., behind a firewall).
  */
-import { createWriteStream, readFileSync, writeFileSync, mkdirSync, chmodSync, existsSync, unlinkSync, renameSync } from "node:fs";
+import { createWriteStream, readFileSync, writeFileSync, mkdirSync, rmdirSync, chmodSync, existsSync, unlinkSync, renameSync } from "node:fs";
 import { pipeline } from "node:stream/promises";
 import { execSync } from "node:child_process";
 import { join, dirname } from "node:path";
@@ -81,26 +81,28 @@ async function downloadAndExtractTarGz(url, outDir, binName) {
     throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
   }
 
-  // Save the tar.gz first, then extract with tar
-  const tmpPath = join(outDir, "spm.tar.gz");
+  // Save the tar.gz to a temp directory, extract there, then move binary to outDir.
+  // We must NOT extract directly to outDir because the archive contains a file named
+  // "spm" which would overwrite the bin/spm shell wrapper that npm installed.
+  const tmpDir = join(outDir, ".tmp");
+  mkdirSync(tmpDir, { recursive: true });
+  const tmpPath = join(tmpDir, "spm.tar.gz");
   const fileStream = createWriteStream(tmpPath);
   await pipeline(Readable.fromWeb(resp.body), fileStream);
 
-  // Extract the spm binary from the tar.gz, then rename to spm-go
-  execSync(`tar -xzf "${tmpPath}" -C "${outDir}" spm`, { stdio: "ignore" });
-  const extracted = join(outDir, "spm");
-  const target = join(outDir, binName);
-  if (extracted !== target) {
-    renameSync(extracted, target);
-  }
+  execSync(`tar -xzf "${tmpPath}" -C "${tmpDir}" spm`, { stdio: "ignore" });
+  renameSync(join(tmpDir, "spm"), join(outDir, binName));
 
-  // Clean up
+  // Clean up temp directory
   unlinkSync(tmpPath);
+  rmdirSync(tmpDir);
 }
 
 async function downloadAndExtractZip(url, outDir, binName) {
-  // For Windows: download zip, extract with PowerShell
-  const tmpPath = join(outDir, "spm.zip");
+  // For Windows: download zip, extract with PowerShell into a temp dir
+  const tmpDir = join(outDir, ".tmp");
+  mkdirSync(tmpDir, { recursive: true });
+  const tmpPath = join(tmpDir, "spm.zip");
   const resp = await fetch(url, { redirect: "follow" });
   if (!resp.ok) {
     throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
@@ -110,18 +112,17 @@ async function downloadAndExtractZip(url, outDir, binName) {
   await pipeline(Readable.fromWeb(resp.body), fileStream);
 
   execSync(
-    `powershell -Command "Expand-Archive -Path '${tmpPath}' -DestinationPath '${outDir}' -Force"`,
+    `powershell -Command "Expand-Archive -Path '${tmpPath}' -DestinationPath '${tmpDir}' -Force"`,
     { stdio: "ignore" }
   );
 
-  // Rename spm.exe to spm-go.exe
-  const extracted = join(outDir, "spm.exe");
-  const target = join(outDir, binName);
-  if (existsSync(extracted) && extracted !== target) {
-    renameSync(extracted, target);
+  const extracted = join(tmpDir, "spm.exe");
+  if (existsSync(extracted)) {
+    renameSync(extracted, join(outDir, binName));
   }
 
   unlinkSync(tmpPath);
+  rmdirSync(tmpDir);
 }
 
 function writeStub(binPath, platform) {
