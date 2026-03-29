@@ -93,7 +93,10 @@ jobs:
         run: |
           # package.json version was already set in the previous step
           cat package.json | head -5
-          npm install -g .
+          # Pack first, then install the tarball (more reliable than `npm install -g .`)
+          TARBALL="$(npm pack)"
+          echo "Packed: $TARBALL"
+          npm install -g "./$TARBALL"
           # Debug: check what got installed
           NPM_PREFIX="$(npm config get prefix)"
           echo "npm prefix: $NPM_PREFIX"
