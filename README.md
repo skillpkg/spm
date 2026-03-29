@@ -8,15 +8,27 @@
 
 <p align="center">
   <strong>The package manager for AI agent skills.</strong><br/>
-  <a href="https://skillpkg.dev">skillpkg.dev</a> · <a href="https://www.npmjs.com/package/@skillpkg/cli">npm</a> · <a href="https://skillpkg.dev/docs">docs</a>
+  <a href="https://skillpkg.dev">skillpkg.dev</a> · <a href="https://github.com/skillpkg/spm/releases">releases</a> · <a href="https://www.npmjs.com/package/@skillpkg/cli">npm</a> · <a href="https://skillpkg.dev/docs">docs</a>
 </p>
+
+## Install
+
+```bash
+# macOS
+brew install skillpkg/tap/spm
+
+# Linux / macOS (curl)
+curl -fsSL https://skillpkg.dev/install.sh | sh
+
+# npm (downloads the native binary)
+npm install -g @skillpkg/cli
+```
+
+Single static binary, zero runtime dependencies.
 
 ## Quick Start
 
 ```bash
-# Install the CLI
-npm install -g @skillpkg/cli
-
 # Search for skills
 spm search "pdf tools"
 
@@ -68,10 +80,11 @@ See [`packages/mcp/README.md`](packages/mcp/README.md) for Claude Desktop and Cu
 ## Project Structure
 
 ```
+cli-go/       Go CLI (spm binary)                    brew/curl/npm
 packages/
   shared/     Zod schemas, types, constants          @spm/shared
   api/        Registry API (Cloudflare Workers)       registry.skillpkg.dev
-  cli/        spm CLI                                 @skillpkg/cli
+  cli-npm/    npm wrapper (downloads Go binary)       @skillpkg/cli
   web/        skillpkg.dev (Cloudflare Pages)
   admin/      Admin dashboard                         admin.skillpkg.dev
   mcp/        MCP server                              @skillpkg/mcp
@@ -90,7 +103,7 @@ plan/         Spec docs
 | API       | Hono on Cloudflare Workers                           |
 | Database  | Neon Postgres + Drizzle ORM                          |
 | Storage   | Cloudflare R2                                        |
-| CLI       | TypeScript, Commander.js, Sigstore                   |
+| CLI       | Go, Cobra, Sigstore                                  |
 | Web       | React 19, Vite, Tailwind v4                          |
 | Auth      | GitHub OAuth device flow + JWT                       |
 | Security  | 3-layer scan pipeline (regex → static analysis → ML) |
@@ -120,7 +133,7 @@ pnpm --filter @spm/web test:e2e     # Playwright e2e tests
 - **Website:** [skillpkg.dev](https://skillpkg.dev)
 - **Registry API:** [registry.skillpkg.dev](https://registry.skillpkg.dev)
 - **Admin:** [admin.skillpkg.dev](https://admin.skillpkg.dev)
-- **CLI:** [`@skillpkg/cli`](https://www.npmjs.com/package/@skillpkg/cli) on npm
+- **CLI:** [GitHub Releases](https://github.com/skillpkg/spm/releases) · [Homebrew](https://github.com/skillpkg/homebrew-tap) · [`@skillpkg/cli`](https://www.npmjs.com/package/@skillpkg/cli) on npm
 - **MCP:** [`@skillpkg/mcp`](https://www.npmjs.com/package/@skillpkg/mcp) on npm
 
 ## License

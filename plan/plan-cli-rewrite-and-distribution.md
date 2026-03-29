@@ -442,4 +442,4 @@ All of these must pass before shipping:
 - [x] `npm i -g @skillpkg/cli` — wrapper package (packages/cli-npm/) downloads Go binary on postinstall
 - [x] All 21 commands implemented
 - [x] Web app shows multi-method install instructions
-- [ ] READMEs updated
+- [x] READMEs updated
