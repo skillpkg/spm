@@ -1,17 +1,27 @@
-name: Publish CLI (npm wrapper)
+name: Publish npm packages
 
 on:
   workflow_dispatch:
+    inputs:
+      package:
+        description: "Package to publish"
+        required: true
+        default: "cli-npm"
+        type: choice
+        options:
+          - cli-npm
+          - mcp
   release:
     types: [published]
 
 concurrency:
-  group: publish-cli
+  group: publish-npm
   cancel-in-progress: false
 
 jobs:
-  publish:
-    name: Publish to npm
+  cli-npm:
+    name: Publish @skillpkg/cli
+    if: github.event_name == 'release' || inputs.package == 'cli-npm'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +40,34 @@ jobs:
 
       - name: Publish @skillpkg/cli
         working-directory: packages/cli-npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  mcp:
+    name: Publish @skillpkg/mcp
+    if: inputs.package == 'mcp'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm --filter @skillpkg/mcp build
+
+      - name: Publish @skillpkg/mcp
+        working-directory: packages/mcp
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

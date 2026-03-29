@@ -1,6 +1,6 @@
 {
   "name": "@skillpkg/mcp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "type": "module",
   "description": "MCP server for the SPM skills registry — search, browse, and query AI agent skills",
   "license": "MIT",
