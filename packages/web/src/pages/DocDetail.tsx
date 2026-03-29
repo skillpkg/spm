@@ -1,5 +1,74 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Text } from '@spm/ui';
+import { Text, CopyButton } from '@spm/ui';
+
+type InstallMethod = 'brew' | 'curl' | 'npm';
+
+const installMethods: { key: InstallMethod; label: string; command: string; note: string }[] = [
+  { key: 'brew', label: 'Homebrew', command: 'brew install skillpkg/tap/spm', note: 'macOS / Linux' },
+  { key: 'curl', label: 'Shell script', command: 'curl -fsSL https://skillpkg.dev/install.sh | sh', note: 'macOS / Linux' },
+  { key: 'npm', label: 'npm', command: 'npm i -g @skillpkg/cli', note: 'Requires Node.js' },
+];
+
+const InstallMethodPicker = () => {
+  const [active, setActive] = useState<InstallMethod>('brew');
+  const current = installMethods.find((m) => m.key === active)!;
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 0, marginBottom: 10 }}>
+        {installMethods.map((m) => (
+          <button
+            key={m.key}
+            onClick={() => setActive(m.key)}
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 13,
+              padding: '6px 16px',
+              background: active === m.key ? 'var(--color-accent)' : 'transparent',
+              color: active === m.key ? 'var(--color-bg)' : 'var(--color-text-muted)',
+              border: `1px solid ${active === m.key ? 'var(--color-accent)' : 'var(--color-border-default)'}`,
+              borderRadius: 0,
+              cursor: 'pointer',
+              fontWeight: active === m.key ? 600 : 400,
+              transition: 'all 0.15s',
+              ...(m.key === 'brew' ? { borderRadius: '6px 0 0 6px' } : {}),
+              ...(m.key === 'npm' ? { borderRadius: '0 6px 6px 0' } : {}),
+              ...(m.key !== 'brew' ? { borderLeft: 'none' } : {}),
+            }}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 14,
+          padding: '12px 16px',
+          background: 'var(--color-bg-card)',
+          border: '1px solid var(--color-border-default)',
+          borderRadius: 8,
+          gap: 12,
+        }}
+      >
+        <span>
+          <span style={{ color: 'var(--color-text-muted)' }}>$ </span>
+          <span style={{ color: 'var(--color-text-primary)' }}>{current.command}</span>
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--color-text-dim)' }}>
+            {current.note}
+          </span>
+          <CopyButton text={current.command} />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const docs: Record<string, { title: string; content: () => React.ReactNode }> = {
   'what-is-spm': {
@@ -87,18 +156,16 @@ spm list`}</CodeBlock>
     title: 'Installation',
     content: () => (
       <>
+        <H2>Install SPM</H2>
+        <P>
+          SPM is a single binary with no runtime dependencies. Choose your preferred install method:
+        </P>
+        <InstallMethodPicker />
+
         <H2>Prerequisites</H2>
         <UL>
-          <li>Node.js 18 or later</li>
-          <li>npm, pnpm, or yarn</li>
           <li>A GitHub account (for publishing)</li>
         </UL>
-
-        <H2>Install the CLI</H2>
-        <P>Install SPM globally using npm:</P>
-        <CodeBlock>{`npm install -g @aspect/spm`}</CodeBlock>
-        <P>Or with pnpm:</P>
-        <CodeBlock>{`pnpm add -g @aspect/spm`}</CodeBlock>
 
         <H2>Verify installation</H2>
         <CodeBlock>{`spm --version
@@ -134,7 +201,11 @@ spm config set registry https://registry.skillpkg.dev
 spm config list`}</CodeBlock>
 
         <H2>Uninstall</H2>
-        <CodeBlock>{`npm uninstall -g @aspect/spm`}</CodeBlock>
+        <CodeBlock>{`# If installed via brew
+brew uninstall spm
+
+# If installed via npm
+npm uninstall -g @skillpkg/cli`}</CodeBlock>
       </>
     ),
   },
