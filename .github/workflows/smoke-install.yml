@@ -95,12 +95,20 @@ jobs:
         run: |
           # Remove the 'v' prefix for SPM_VERSION
           export SPM_VERSION="${SPM_VERSION#v}"
+          echo "SPM_VERSION=$SPM_VERSION"
           npm install -g .
+          # Debug: check what got installed
+          NPM_PREFIX="$(npm config get prefix)"
+          echo "npm prefix: $NPM_PREFIX"
+          ls -la "$NPM_PREFIX/bin/" | grep spm || true
+          ls -la "$NPM_PREFIX/lib/node_modules/@skillpkg/cli/bin/" || true
 
       - name: Verify binary
         run: |
           # Ensure npm global bin is on PATH
-          export PATH="$(npm config get prefix)/bin:$PATH"
+          NPM_PREFIX="$(npm config get prefix)"
+          export PATH="$NPM_PREFIX/bin:$PATH"
+          which spm || echo "spm not in PATH"
           spm --version
           spm --help
 
