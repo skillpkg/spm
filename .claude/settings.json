@@ -18,7 +18,10 @@
       "Bash(vitest:*)",
       "Bash(tsc:*)",
       "Bash(eslint:*)",
-      "Bash(prettier:*)"
+      "Bash(prettier:*)",
+      "Bash(go:*)",
+      "Bash(gofmt:*)",
+      "Bash(golangci-lint:*)"
     ]
   }
 }
