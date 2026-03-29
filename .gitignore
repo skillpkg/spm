@@ -40,5 +40,9 @@ scripts/
 # Working plan docs (local only)
 plan/open-issues.md
 
+# npm CLI wrapper — downloaded Go binaries (keep the shell wrapper)
+packages/cli-npm/bin/spm-go
+packages/cli-npm/bin/spm-go.exe
+
 # Logs
 *.log

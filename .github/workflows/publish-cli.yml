@@ -1,7 +1,9 @@
-name: Publish CLI
+name: Publish CLI (npm wrapper)
 
 on:
   workflow_dispatch:
+  release:
+    types: [published]
 
 concurrency:
   group: publish-cli
@@ -19,33 +21,8 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      - uses: pnpm/action-setup@v4
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/share/pnpm/store/v3
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-
-
-      - run: pnpm install --frozen-lockfile
-
-      # Quality gate (inlined to avoid shared concurrency with deploy)
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Build
-        run: pnpm build
-
-      - name: Test
-        run: pnpm test
-
-      # Publish whatever version is in package.json
-      - name: Publish
-        working-directory: packages/cli
+      - name: Publish @skillpkg/cli
+        working-directory: packages/cli-npm
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

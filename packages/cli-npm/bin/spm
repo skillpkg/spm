@@ -1,0 +1,12 @@
+#!/bin/sh
+# Wrapper script — delegates to the downloaded Go binary.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BINARY="$SCRIPT_DIR/spm-go"
+
+if [ -x "$BINARY" ]; then
+  exec "$BINARY" "$@"
+fi
+
+echo "SPM binary not found. Run 'npm rebuild @skillpkg/cli' or install from:" >&2
+echo "  https://github.com/skillpkg/spm/releases" >&2
+exit 1

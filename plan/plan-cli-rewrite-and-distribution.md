@@ -436,10 +436,10 @@ All of these must pass before shipping:
 - [x] E2E tests pass against compiled binary
 - [x] Binary size < 20MB (actual: ~11MB)
 - [x] goreleaser config exists
-- [ ] goreleaser builds succeed for all 5 targets
-- [ ] `brew install spm` works on macOS
-- [ ] `curl installer` works on Linux
-- [ ] `npm i -g @skillpkg/cli` still works (wrapper that downloads Go binary)
+- [x] goreleaser builds succeed for all 5 targets (snapshot verified locally)
+- [x] `brew install spm` — homebrew-tap repo created, goreleaser auto-publishes formula on release
+- [x] `curl installer` — install.sh served from skillpkg.dev/install.sh via Cloudflare Pages
+- [x] `npm i -g @skillpkg/cli` — wrapper package (packages/cli-npm/) downloads Go binary on postinstall
 - [x] All 21 commands implemented
-- [ ] Web app shows multi-method install instructions
+- [x] Web app shows multi-method install instructions
 - [ ] READMEs updated

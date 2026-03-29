@@ -7,7 +7,7 @@ A package manager for AI agent skills. Monorepo with four packages + Go CLI.
 - `cli-go/` — Go CLI (primary CLI, static binary, distributed via brew/curl/npm)
 - `packages/shared/` — Zod schemas, types, constants (imported by all other packages)
 - `packages/api/` — Hono registry API (deploys to Cloudflare Workers)
-- `packages/cli/` — Legacy TypeScript CLI (superseded by cli-go/)
+- `packages/cli-npm/` — npm wrapper package (@skillpkg/cli) that downloads the Go binary
 - `packages/web/` — skillpkg.dev React app (deploys to Cloudflare Pages)
 - `migrations/` — Neon Postgres SQL migrations
 - `plan/` — Full spec docs. READ THESE before implementing a feature.
