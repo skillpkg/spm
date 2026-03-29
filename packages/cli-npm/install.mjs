@@ -3,7 +3,7 @@
  * Postinstall script: downloads the correct SPM Go binary for the current platform.
  * Falls back gracefully if download fails (e.g., behind a firewall).
  */
-import { createWriteStream, writeFileSync, mkdirSync, chmodSync, existsSync, unlinkSync, renameSync } from "node:fs";
+import { createWriteStream, readFileSync, writeFileSync, mkdirSync, chmodSync, existsSync, unlinkSync, renameSync } from "node:fs";
 import { pipeline } from "node:stream/promises";
 import { execSync } from "node:child_process";
 import { join, dirname } from "node:path";
@@ -11,7 +11,9 @@ import { fileURLToPath } from "node:url";
 import { Readable } from "node:stream";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const VERSION = process.env.SPM_VERSION || "1.0.0";
+// Read version from package.json (env var override for testing)
+const pkg = JSON.parse(readFileSync(join(__dirname, "package.json"), "utf8"));
+const VERSION = process.env.SPM_VERSION || pkg.version;
 const REPO = "skillpkg/spm";
 
 const PLATFORM_MAP = {
