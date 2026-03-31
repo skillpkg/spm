@@ -28,6 +28,12 @@ jobs:
         env:
           SYNC_TOKEN: ${{ secrets.PLUGIN_SYNC_TOKEN }}
         run: |
+          if [ -z "$SYNC_TOKEN" ]; then
+            echo "::error::PLUGIN_SYNC_TOKEN secret is empty or not set"
+            exit 1
+          fi
+          echo "Token length: ${#SYNC_TOKEN}"
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
