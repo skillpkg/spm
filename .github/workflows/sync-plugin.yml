@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'packages/claude-plugin/**'
+  workflow_dispatch:
 
 # Requires a PLUGIN_SYNC_TOKEN secret:
 # Fine-grained PAT with Contents:write on skillpkg/claude-plugin
