@@ -5,6 +5,7 @@ import { corsMiddleware } from './middleware/cors.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { createDb } from './db/index.js';
 import { createRouter } from './routes/index.js';
+import { mcpApp } from './mcp/index.js';
 
 // Top-level app for root-level routes (robots.txt, sitemap.xml)
 const root = new Hono<AppEnv>();
@@ -24,7 +25,8 @@ root.get('/robots.txt', (c) => {
       'Disallow: /api/v1/auth',
       'Disallow: /api/v1/admin',
       '',
-      '# AI crawlers — use our MCP server instead: npm install -g @skillpkg/mcp',
+      '# AI crawlers — use our MCP endpoint: POST https://registry.skillpkg.dev/mcp',
+      '# Or install the local MCP server: npm install -g @skillpkg/mcp',
       '# See https://skillpkg.dev/llms.txt for details',
       'User-agent: GPTBot',
       'Disallow: /',
@@ -119,6 +121,9 @@ app.onError(errorHandler);
 
 // Mount all routes
 app.route('/', createRouter());
+
+// Mount MCP endpoint (before API so /mcp is not under /api/v1)
+root.route('/mcp', mcpApp);
 
 // Mount API under root
 root.route('/', app);
