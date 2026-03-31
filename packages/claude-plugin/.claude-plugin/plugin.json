@@ -1,0 +1,12 @@
+{
+  "name": "skillpkg",
+  "version": "0.1.0",
+  "description": "Search, browse, and install AI agent skills from skillpkg.dev",
+  "author": {
+    "name": "skillpkg",
+    "url": "https://skillpkg.dev"
+  },
+  "repository": "https://github.com/skillpkg/claude-plugin",
+  "license": "MIT",
+  "keywords": ["skills", "agents", "registry", "spm", "skillpkg"]
+}

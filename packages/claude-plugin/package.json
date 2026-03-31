@@ -1,0 +1,12 @@
+{
+  "name": "@skillpkg/claude-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Claude Code plugin for SPM — search, browse, and install AI agent skills",
+  "scripts": {
+    "build": "echo 'no-op'",
+    "lint": "echo 'no-op'",
+    "typecheck": "echo 'no-op'",
+    "test": "echo 'no-op'"
+  }
+}
