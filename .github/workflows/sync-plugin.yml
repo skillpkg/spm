@@ -24,15 +24,22 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Push subtree to standalone repo
+        env:
+          SYNC_TOKEN: ${{ secrets.PLUGIN_SYNC_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git subtree split --prefix packages/claude-plugin -b plugin-split
-          git remote add plugin https://x-access-token:${{ secrets.PLUGIN_SYNC_TOKEN }}@github.com/skillpkg/claude-plugin.git || true
+
+          REMOTE_URL="https://x-access-token:${SYNC_TOKEN}@github.com/skillpkg/claude-plugin.git"
+          git remote remove plugin 2>/dev/null || true
+          git remote add plugin "${REMOTE_URL}"
           git push plugin plugin-split:main --force
 
       - name: Tag release
+        env:
+          SYNC_TOKEN: ${{ secrets.PLUGIN_SYNC_TOKEN }}
         run: |
           git tag "v${{ steps.version.outputs.version }}" plugin-split || true
           git push plugin "v${{ steps.version.outputs.version }}" --force || true
