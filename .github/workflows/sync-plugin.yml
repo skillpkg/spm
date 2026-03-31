@@ -1,0 +1,38 @@
+name: Sync Claude Plugin
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/claude-plugin/**'
+
+# Requires a PLUGIN_SYNC_TOKEN secret:
+# Fine-grained PAT with Contents:write on skillpkg/claude-plugin
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract plugin version
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' packages/claude-plugin/.claude-plugin/plugin.json)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Push subtree to standalone repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git subtree split --prefix packages/claude-plugin -b plugin-split
+          git remote add plugin https://x-access-token:${{ secrets.PLUGIN_SYNC_TOKEN }}@github.com/skillpkg/claude-plugin.git || true
+          git push plugin plugin-split:main --force
+
+      - name: Tag release
+        run: |
+          git tag "v${{ steps.version.outputs.version }}" plugin-split || true
+          git push plugin "v${{ steps.version.outputs.version }}" --force || true

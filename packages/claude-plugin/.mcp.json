@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "skillpkg": {
+      "type": "url",
+      "url": "https://registry.skillpkg.dev/mcp"
+    }
+  }
+}
