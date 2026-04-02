@@ -55,6 +55,44 @@ const SidebarFooter = () => {
   return <SidebarUserFooter username={user.username} onSignOut={signOut} />;
 };
 
+const SidebarLinks = () => {
+  const navigate = useNavigate();
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: 12,
+        padding: '8px 0 4px',
+        borderTop: '1px solid var(--color-border-default)',
+        marginTop: 8,
+      }}
+    >
+      {[
+        { label: 'Privacy', to: '/privacy' },
+        { label: 'GitHub', href: 'https://github.com/skillpkg/spm' },
+        { label: 'Contact', href: 'mailto:support@skillpkg.dev' },
+      ].map((link) => (
+        <button
+          key={link.label}
+          type="button"
+          onClick={() => ('to' in link && link.to ? navigate(link.to) : window.open(link.href, '_blank'))}
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 11,
+            color: 'var(--color-text-dim)',
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+          }}
+        >
+          {link.label}
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const pathToActiveId = (pathname: string): string => {
   if (pathname === '/') return 'home';
   if (pathname === '/search') return 'search';
@@ -203,7 +241,12 @@ export const AppSidebar = ({
       header={<SpmLogo />}
       sections={sections}
       activeId={pathToActiveId(location.pathname)}
-      footer={<SidebarFooter />}
+      footer={
+        <>
+          <SidebarFooter />
+          <SidebarLinks />
+        </>
+      }
       mobileOpen={mobileOpen}
       onMobileClose={onMobileClose}
     />
