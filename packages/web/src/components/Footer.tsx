@@ -71,6 +71,17 @@ export const Footer = () => {
         >
           Contact
         </a>
+        <Link
+          to="/privacy"
+          style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 12,
+            color: 'var(--color-text-muted)',
+            textDecoration: 'none',
+          }}
+        >
+          Privacy
+        </Link>
         <a
           href="https://github.com/skillpkg/spm"
           target="_blank"

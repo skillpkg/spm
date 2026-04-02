@@ -1,0 +1,13 @@
+{
+  "name": "spm",
+  "description": "Search, browse, and query AI agent skills from the SPM registry. Find skills by keyword, explore categories, get detailed skill info, and generate skill templates.",
+  "version": "0.2.0",
+  "author": {
+    "name": "almog27"
+  },
+  "homepage": "https://skillpkg.dev",
+  "repository": {
+    "url": "https://github.com/skillpkg/spm"
+  },
+  "license": "MIT"
+}

@@ -14,6 +14,7 @@ import { Docs } from './pages/Docs';
 import { DocDetail } from './pages/DocDetail';
 import { CLI } from './pages/CLI';
 import { Publish } from './pages/Publish';
+import { Privacy } from './pages/Privacy';
 
 export const App = () => {
   return (
@@ -39,6 +40,7 @@ export const App = () => {
               <Route path="/docs/:slug" element={<DocDetail />} />
               <Route path="/cli" element={<CLI />} />
               <Route path="/publish" element={<Publish />} />
+              <Route path="/privacy" element={<Privacy />} />
             </Route>
           </Routes>
         </AuthProvider>
