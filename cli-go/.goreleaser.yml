@@ -56,20 +56,15 @@ changelog:
     - title: Others
       order: 999
 
-brews:
+homebrew_casks:
   - name: spm
     repository:
       owner: skillpkg
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    directory: Formula
     homepage: "https://skillpkg.dev"
     description: "Skills Package Manager for AI agents"
     license: "MIT"
-    install: |
-      bin.install "spm"
-    test: |
-      system "#{bin}/spm", "--version"
 
 release:
   github:

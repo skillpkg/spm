@@ -16,11 +16,12 @@ jobs:
       run:
         working-directory: cli-go
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-go@v5
         with:
           go-version-file: cli-go/go.mod
+          cache-dependency-path: cli-go/go.sum
 
       - name: Run tests
         run: go test ./...
@@ -33,13 +34,14 @@ jobs:
       run:
         working-directory: cli-go
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - uses: actions/setup-go@v5
         with:
           go-version-file: cli-go/go.mod
+          cache-dependency-path: cli-go/go.sum
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
