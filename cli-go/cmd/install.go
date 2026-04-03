@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -380,22 +379,7 @@ func downloadExtractLink(client *api.Client, skill api.ResolvedSkill, spmHome st
 
 // downloadSkl downloads the .skl file for a skill version.
 func downloadSkl(client *api.Client, name, version string) ([]byte, error) {
-	dlURL, err := client.DownloadURL(name, version)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := http.Get(dlURL) //nolint:gosec
-	if err != nil {
-		return nil, fmt.Errorf("downloading from %s: %w", dlURL, err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("download returned HTTP %d", resp.StatusCode)
-	}
-
-	return io.ReadAll(resp.Body)
+	return client.Download(name, version)
 }
 
 // extractTarGz extracts a tar.gz archive into the target directory.

@@ -355,6 +355,32 @@ func (c *Client) DownloadURL(name, version string) (string, error) {
 	return "", mapStatusToError(resp.StatusCode, body)
 }
 
+// Download fetches the .skl file for a skill version directly.
+// Handles both redirect-based and direct-serve download endpoints.
+func (c *Client) Download(name, version string) ([]byte, error) {
+	path := fmt.Sprintf("/skills/%s/%s/download", url.PathEscape(name), url.PathEscape(version))
+	reqURL := c.BaseURL + apiBasePath + path
+
+	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("creating request: %w", err)
+	}
+	c.setAuthHeader(req)
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, mapStatusToError(resp.StatusCode, body)
+	}
+
+	return io.ReadAll(resp.Body)
+}
+
 // Publish publishes a skill package (multipart upload).
 func (c *Client) Publish(manifestJSON []byte, sklData io.Reader, sklFilename string, sigstoreBundle []byte) (*PublishResponse, error) {
 	var body bytes.Buffer
