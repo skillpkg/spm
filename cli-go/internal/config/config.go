@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -85,9 +86,13 @@ func Save(cfg *Config) error {
 
 // RegistryURL returns the effective registry URL.
 // Priority: SPM_REGISTRY env > config file > default.
+// Strips trailing /api/v1 if present since the client appends it.
 func (c *Config) RegistryURL() string {
+	url := DefaultRegistry
 	if c.Registry != "" {
-		return c.Registry
+		url = c.Registry
 	}
-	return DefaultRegistry
+	url = strings.TrimRight(url, "/")
+	url = strings.TrimSuffix(url, "/api/v1")
+	return url
 }
