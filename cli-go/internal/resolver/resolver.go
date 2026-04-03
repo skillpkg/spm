@@ -86,13 +86,23 @@ func Parse(input string) (*Specifier, error) {
 			spec.Name = rest
 		}
 	} else {
-		// Unscoped: name or name@version
+		// Unscoped: name, name@version, or org/name, org/name@version
+		// First split off @version if present
 		atIdx := strings.Index(input, "@")
+		var namePart string
 		if atIdx >= 0 {
-			spec.Name = input[:atIdx]
+			namePart = input[:atIdx]
 			spec.VersionRange = input[atIdx+1:]
 		} else {
-			spec.Name = input
+			namePart = input
+		}
+
+		// Handle org/name format (e.g., "skillpkg/ship" → scope=skillpkg, name=ship)
+		if slashIdx := strings.Index(namePart, "/"); slashIdx >= 0 {
+			spec.Scope = namePart[:slashIdx]
+			spec.Name = namePart[slashIdx+1:]
+		} else {
+			spec.Name = namePart
 		}
 	}
 

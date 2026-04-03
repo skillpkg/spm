@@ -82,6 +82,16 @@ func TestParseSpecifiers(t *testing.T) {
 			wantVersion: "1.0.0", wantFull: "my-skill", wantIsLatest: false,
 			desc: "trimmed whitespace",
 		},
+		{
+			input: "skillpkg/ship", wantScope: "skillpkg", wantName: "ship",
+			wantVersion: "", wantFull: "@skillpkg/ship", wantIsLatest: true,
+			desc: "unscoped org/name format",
+		},
+		{
+			input: "skillpkg/ship@1.0.0", wantScope: "skillpkg", wantName: "ship",
+			wantVersion: "1.0.0", wantFull: "@skillpkg/ship", wantIsLatest: false,
+			desc: "unscoped org/name with version",
+		},
 	}
 
 	for _, tt := range tests {
