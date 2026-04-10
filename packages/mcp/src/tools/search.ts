@@ -35,7 +35,7 @@ export const formatSearchResults = (
       `${i + 1}. ${skill.name} v${skill.version} by ${skill.author.username}${trust} ${stars} ${reviews} ${dl}`,
     );
     lines.push(`   ${skill.description}`);
-    lines.push(`   Install: spm install ${skill.name}`);
+    lines.push(`   Install: spm install "${skill.name}"`);
     lines.push('');
   });
 

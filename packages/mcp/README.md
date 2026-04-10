@@ -88,7 +88,7 @@ Once configured, ask your AI agent to search for skills:
 
 - "Search for PDF skills on SPM"
 - "What categories of skills are available?"
-- "Get info about the frontend-design skill"
+- "Get info about the @skillpkg/frontend-design skill"
 - "Show me the skill template so I can create a new skill"
 
 ### Custom Registry URL

@@ -47,10 +47,10 @@ describe('formatSearchResults', () => {
     expect(result).toContain('⭐ 4.8');
     expect(result).toContain('(142 reviews)');
     expect(result).toContain('↓ 12,400');
-    expect(result).toContain('spm install data-viz');
+    expect(result).toContain('spm install "data-viz"');
     expect(result).toContain('2. chart-export v0.8.0 by test-user');
     expect(result).toContain('⭐ 4.5');
-    expect(result).toContain('spm install chart-export');
+    expect(result).toContain('spm install "chart-export"');
   });
 
   it('handles empty results', () => {
@@ -86,7 +86,7 @@ describe('formatSkillInfo', () => {
     expect(result).toContain('Rating: ⭐ 4.8 (142 reviews)');
     expect(result).toContain('Tags: charts, plotly, d3, dashboards');
     expect(result).toContain('Platforms: all');
-    expect(result).toContain('Install: spm install data-viz');
+    expect(result).toContain('Install: spm install "data-viz"');
   });
 
   it('formats skill without optional fields', () => {

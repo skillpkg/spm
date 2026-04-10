@@ -4,7 +4,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { CATEGORY_INFO, type SkillCategory } from '@spm/shared';
 
 export const infoInputSchema = {
-  name: z.string().describe('The name of the skill to get info about'),
+  name: z.string().describe('The skill name, e.g. "@scope/skill-name"'),
 };
 
 export const formatSkillInfo = (skill: {
@@ -64,7 +64,7 @@ export const formatSkillInfo = (skill: {
   }
 
   lines.push('');
-  lines.push(`Install: spm install ${skill.name}`);
+  lines.push(`Install: spm install "${skill.name}"`);
 
   return lines.join('\n');
 };
