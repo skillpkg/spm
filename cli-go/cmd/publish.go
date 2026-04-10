@@ -355,9 +355,7 @@ func buildSkillPageURL(registryURL, skillName string) string {
 	}
 
 	// Private registries: strip "registry." prefix if present
-	if strings.HasPrefix(host, "registry.") {
-		host = strings.TrimPrefix(host, "registry.")
-	}
+	host = strings.TrimPrefix(host, "registry.")
 
 	scheme := parsed.Scheme
 	if scheme == "" {
