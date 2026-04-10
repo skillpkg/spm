@@ -504,6 +504,7 @@ description: 'e.g. "@alice/pdf-generator"'
 14. **Delete old R2 keys**
 15. **Update documentation and plan docs**
 16. **Users delete and re-install lock files**
+17. **Remove interim scope-stripping workarounds** (see Appendix A)
 
 ---
 
@@ -544,3 +545,49 @@ description: 'e.g. "@alice/pdf-generator"'
 - [ ] Org create/list/members CLI commands work
 - [ ] Org member can publish to org scope
 - [ ] Non-member cannot publish to org scope
+
+---
+
+## Appendix A: Interim Workarounds (to remove in Phase 4)
+
+The following temporary fixes were added to handle `org/name` input (e.g., `skillpkg/ship`) before scoped names are fully implemented. They work around the flat-namespace DB by stripping scope prefixes. **All must be removed or replaced** once the migration to mandatory scoped names is complete.
+
+### 1. CLI resolver: `org/name` → scope parsing (v1.1.1)
+
+**File:** `cli-go/internal/resolver/resolver.go`
+
+The `Parse()` function was updated to treat unscoped `org/name` (without `@`) as a scoped specifier — e.g., `skillpkg/ship` parses as `scope=skillpkg, name=ship`, and `FullName()` returns `@skillpkg/ship`.
+
+**Remove when:** Scoped names are mandatory. The `@scope/name` path already worked; the `org/name` shorthand won't be needed once all names are scoped.
+
+### 2. API resolve: scope-stripping fallback (v1.1.1)
+
+**File:** `packages/api/src/routes/resolve.ts`
+
+The resolve endpoint tries an exact DB match first, then strips the scope prefix and retries:
+```typescript
+if (!skill && name.includes('/')) {
+  const bareName = name.split('/').pop()!;
+  [skill] = await db.select().from(skills).where(eq(skills.name, bareName)).limit(1);
+}
+```
+
+It also uses `canonicalName = skill.name` (the DB name) instead of the input name for download URLs, and compares bare names for did-you-mean suggestions.
+
+**Remove when:** DB stores scoped names. The exact match (`WHERE name = '@scope/skill'`) will work directly and no fallback is needed.
+
+### 3. CLI config: `/api/v1` suffix stripping (v1.1.2)
+
+**File:** `cli-go/internal/config/config.go`
+
+`RegistryURL()` strips trailing `/api/v1` from the config value to prevent double-pathing (`/api/v1/api/v1/...`). This was caused by some configs saving the full API URL instead of just the base URL.
+
+**Keep:** This is a defensive fix unrelated to scoped names — it should stay permanently.
+
+### 4. CLI download: direct-serve handler (v1.1.3)
+
+**File:** `cli-go/internal/api/client.go`
+
+Added `Download()` method that handles direct 200 responses (not just 302 redirects) from the download endpoint.
+
+**Keep:** This is a protocol fix unrelated to scoped names — it should stay permanently.
