@@ -44,8 +44,5 @@ FROM users u
 WHERE u.id = pa.user_id
 AND pa.skill_name NOT LIKE '@%';
 
--- ── Refresh search vectors with new scoped names ──
-
-UPDATE skills SET search_vector =
-  setweight(to_tsvector('english', name), 'A') ||
-  setweight(to_tsvector('english', coalesce(description, '')), 'B');
+-- Note: search_vector is a GENERATED ALWAYS column — it auto-updates when name changes.
+-- No manual refresh needed.
