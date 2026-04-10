@@ -11,6 +11,8 @@ export {
   type TokenResponse,
 } from '@spm/web-auth';
 
+import { skillApiPath } from './urls';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
 
 const apiFetch = async <T>(path: string, opts?: RequestInit): Promise<T> => {
@@ -138,7 +140,7 @@ export interface SkillDetailResponse {
 }
 
 export const getSkill = (name: string): Promise<SkillDetailResponse> =>
-  apiFetch(`/skills/${encodeURIComponent(name)}`);
+  apiFetch(skillApiPath(name));
 
 // -- Reviews --
 
@@ -161,7 +163,7 @@ export interface ReviewsResponse {
 }
 
 export const getSkillReviews = (name: string): Promise<ReviewsResponse> =>
-  apiFetch(`/skills/${encodeURIComponent(name)}/reviews`);
+  apiFetch(`${skillApiPath(name)}/reviews`);
 
 // -- Categories --
 
@@ -246,7 +248,7 @@ export interface SkillDownloadsResponse {
 }
 
 export const getSkillDownloads = (name: string): Promise<SkillDownloadsResponse> =>
-  apiFetch(`/skills/${encodeURIComponent(name)}/downloads`);
+  apiFetch(`${skillApiPath(name)}/downloads`);
 
 // -- Author Stats (auth required) --
 
