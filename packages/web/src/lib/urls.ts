@@ -4,15 +4,10 @@ export function skillPath(name: string): string {
   return `/skills/${name}`;
 }
 
-/** Build the API path segment for a skill name, preserving the @scope/name structure */
+/** Build the API path segment for a skill name.
+ * Uses full encodeURIComponent so the scoped name hits the unscoped
+ * /skills/:name route (Hono decodes it automatically).
+ */
 export function skillApiPath(name: string): string {
-  // "@alice/my-skill" → "/skills/@alice/my-skill"
-  // "my-skill" → "/skills/my-skill"
-  if (name.startsWith('@') && name.includes('/')) {
-    const slashIdx = name.indexOf('/');
-    const scope = name.slice(1, slashIdx);
-    const skillName = name.slice(slashIdx + 1);
-    return `/skills/@${encodeURIComponent(scope)}/${encodeURIComponent(skillName)}`;
-  }
   return `/skills/${encodeURIComponent(name)}`;
 }

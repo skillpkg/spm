@@ -799,12 +799,9 @@ dualSkillRoute('get', '', async (c: Context<AppEnv>) => {
       .map((s) => s.name);
 
     return c.json(
-      {
-        ...createApiError('SKILL_NOT_FOUND', {
-          suggestion: suggestions.length > 0 ? `Did you mean: ${suggestions.join(', ')}?` : undefined,
-        }),
-        _debug: { name, scope: c.req.param('scope'), paramName: c.req.param('name') },
-      },
+      createApiError('SKILL_NOT_FOUND', {
+        suggestion: suggestions.length > 0 ? `Did you mean: ${suggestions.join(', ')}?` : undefined,
+      }),
       ERROR_CODES.SKILL_NOT_FOUND.status,
     );
   }
