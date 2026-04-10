@@ -543,6 +543,73 @@ func (c *Client) VerifySignature(name, version string) (map[string]any, error) {
 	return resp, nil
 }
 
+// AttachSignatureResponse is the response from POST /skills/:name/sign.
+type AttachSignatureResponse struct {
+	Name           string `json:"name"`
+	Version        string `json:"version"`
+	Signed         bool   `json:"signed"`
+	SignerIdentity string `json:"signer_identity,omitempty"`
+	SignedAt       string `json:"signed_at"`
+}
+
+// AttachSignature uploads a sigstore bundle to an already-published version.
+func (c *Client) AttachSignature(name, version string, sigstoreBundle []byte, signerIdentity string) (*AttachSignatureResponse, error) {
+	var body bytes.Buffer
+	w := multipart.NewWriter(&body)
+
+	if err := w.WriteField("version", version); err != nil {
+		return nil, fmt.Errorf("writing version field: %w", err)
+	}
+
+	if signerIdentity != "" {
+		if err := w.WriteField("signer_identity", signerIdentity); err != nil {
+			return nil, fmt.Errorf("writing signer_identity field: %w", err)
+		}
+	}
+
+	fw, err := w.CreateFormFile("sigstore_bundle", name+"-"+version+".sigstore")
+	if err != nil {
+		return nil, fmt.Errorf("creating sigstore form file: %w", err)
+	}
+	if _, err := fw.Write(sigstoreBundle); err != nil {
+		return nil, fmt.Errorf("writing sigstore data: %w", err)
+	}
+
+	if err := w.Close(); err != nil {
+		return nil, fmt.Errorf("closing multipart writer: %w", err)
+	}
+
+	path := fmt.Sprintf("/skills/%s/sign", url.PathEscape(name))
+	reqURL := c.BaseURL + apiBasePath + path
+	req, err := http.NewRequest(http.MethodPost, reqURL, &body)
+	if err != nil {
+		return nil, fmt.Errorf("creating request: %w", err)
+	}
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	c.setAuthHeader(req)
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("reading response: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, mapStatusToError(resp.StatusCode, respBody)
+	}
+
+	var result AttachSignatureResponse
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		return nil, fmt.Errorf("decoding response: %w", err)
+	}
+	return &result, nil
+}
+
 // Rescan triggers a re-scan of a skill version.
 func (c *Client) Rescan(name, version string) (map[string]any, error) {
 	path := fmt.Sprintf("/skills/%s/%s/rescan", url.PathEscape(name), url.PathEscape(version))

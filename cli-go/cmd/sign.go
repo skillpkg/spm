@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"path/filepath"
-	"strings"
 
+	"github.com/skillpkg/spm/internal/api"
+	"github.com/skillpkg/spm/internal/manifest"
 	"github.com/skillpkg/spm/internal/output"
 	"github.com/skillpkg/spm/internal/signing"
 	"github.com/spf13/cobra"
@@ -18,16 +17,20 @@ var SignerFactory = func() signing.Signer {
 }
 
 var signCmd = &cobra.Command{
-	Use:   "sign <file.skl>",
-	Short: "Sign a .skl archive with Sigstore",
-	Long: `Sign a skill package archive using Sigstore keyless signing.
+	Use:   "sign [path]",
+	Short: "Sign an already-published skill with Sigstore",
+	Long: `Sign a published skill version using Sigstore keyless signing.
+
+Downloads the published .skl archive from the registry, signs it, and
+uploads the signature. This ensures the signature matches the exact
+bytes users download.
 
 In CI environments (GitHub Actions, GitLab CI), signing uses OIDC
 tokens automatically. In interactive mode, opens a browser for
 OAuth authentication.
 
-The signature bundle is written to <file>.sigstore.json.`,
-	Args: cobra.ExactArgs(1),
+Run from a skill directory containing manifest.json, or pass the path.`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: runSign,
 }
 
@@ -36,93 +39,149 @@ func init() {
 }
 
 func runSign(cmd *cobra.Command, args []string) error {
-	filePath := args[0]
-
-	// Validate file exists and has .skl extension
-	if !strings.HasSuffix(filePath, ".skl") {
-		Out.LogError("file must have .skl extension: %s", filePath)
-		return fmt.Errorf("file must have .skl extension: %s", filePath)
+	// Determine skill directory
+	skillDir := "."
+	if len(args) > 0 {
+		skillDir = args[0]
 	}
-
-	info, err := os.Stat(filePath)
+	absDir, err := filepath.Abs(skillDir)
 	if err != nil {
-		Out.LogError("cannot access file: %s", err)
-		return fmt.Errorf("cannot access file: %w", err)
-	}
-	if info.IsDir() {
-		Out.LogError("path is a directory, not a file: %s", filePath)
-		return fmt.Errorf("path is a directory: %s", filePath)
+		return fmt.Errorf("resolving path: %w", err)
 	}
 
-	// Read the file
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		Out.LogError("failed to read file: %s", err)
-		return fmt.Errorf("failed to read file: %w", err)
-	}
-
-	// Detect environment
-	env := signing.DetectCIEnv()
-	if env != signing.EnvUnknown {
-		Out.LogVerbose("detected CI environment: %s", env)
-	}
-
-	// Create signer and sign
-	s := SignerFactory()
-	sp := Out.StartSpinner("Signing with Sigstore...")
-	result, err := s.Sign(data)
-	output.StopSpinner(sp)
-
-	if err != nil {
-		Out.LogError("signing failed: %s", err)
-		return fmt.Errorf("signing failed: %w", err)
-	}
-
-	if result == nil {
-		// Graceful failure -- signing did not succeed but did not error either
-		Out.Log("%s Signing skipped (could not authenticate with Sigstore)", output.Icons["warning"])
+	// 1. Check auth
+	if Cfg.Token == "" {
 		if Out.Mode == output.ModeJSON {
 			return Out.LogJSON(map[string]any{
 				"command": "sign",
-				"file":    filePath,
-				"signed":  false,
-				"message": "signing skipped",
+				"status":  "error",
+				"error":   "not_logged_in",
 			})
 		}
-		return nil
+		Out.LogError("Not authenticated. Run %s to log in.", output.Cyan("spm login"))
+		return fmt.Errorf("not logged in")
 	}
 
-	// Write the bundle to <file>.sigstore.json
-	bundlePath := filePath + ".sigstore.json"
-
-	// Pretty-print the bundle JSON
-	var prettyBundle json.RawMessage
-	if err := json.Unmarshal([]byte(result.Bundle), &prettyBundle); err == nil {
-		indented, err := json.MarshalIndent(prettyBundle, "", "  ")
-		if err == nil {
-			result.Bundle = string(indented)
+	// 2. Read manifest to get name + version
+	manifestPath := filepath.Join(absDir, "manifest.json")
+	mf, err := manifest.LoadFile(manifestPath)
+	if err != nil {
+		if Out.Mode == output.ModeJSON {
+			return Out.LogJSON(map[string]any{
+				"command": "sign",
+				"status":  "error",
+				"error":   "manifest_read_failed",
+				"message": err.Error(),
+			})
 		}
+		Out.LogError("Failed to read manifest.json: %s", err)
+		return fmt.Errorf("reading manifest: %w", err)
 	}
 
-	if err := os.WriteFile(bundlePath, []byte(result.Bundle), 0644); err != nil {
-		Out.LogError("failed to write bundle: %s", err)
-		return fmt.Errorf("failed to write bundle: %w", err)
+	Out.Log("%s Signing %s@%s...", output.Icons["lock"], output.Cyan(mf.Name), mf.Version)
+
+	// 3. Download the published .skl from the registry
+	client := api.NewClient(Cfg.RegistryURL(), Cfg.Token)
+
+	sp := Out.StartSpinner("Downloading published package...")
+	sklData, err := client.Download(mf.Name, mf.Version)
+	output.StopSpinner(sp)
+	if err != nil {
+		var apiErr *api.APIError
+		if isAPIError(err, &apiErr) {
+			if Out.Mode == output.ModeJSON {
+				return Out.LogJSON(map[string]any{
+					"command": "sign",
+					"status":  "error",
+					"error":   apiErr.Code,
+					"message": apiErr.Message,
+				})
+			}
+			if apiErr.IsNotFound() {
+				Out.LogError("Version %s@%s is not published. Publish first with %s.",
+					mf.Name, mf.Version, output.Cyan("spm publish"))
+			} else {
+				Out.LogError("Download failed: %s", apiErr.Message)
+			}
+			return fmt.Errorf("download failed: %s", apiErr.Message)
+		}
+		Out.LogError("Failed to download package: %s", err)
+		return fmt.Errorf("download failed: %w", err)
+	}
+	Out.Log("  %s Downloaded %s (%s)", output.Green(output.Icons["success"]),
+		fmt.Sprintf("%s-%s.skl", mf.Name, mf.Version), formatBytesInt(len(sklData)))
+
+	// 4. Sign the downloaded bytes
+	sp = Out.StartSpinner("Signing with Sigstore...")
+	signer := SignerFactory()
+	signResult, signErr := signer.Sign(sklData)
+	output.StopSpinner(sp)
+
+	if signErr != nil {
+		if Out.Mode == output.ModeJSON {
+			return Out.LogJSON(map[string]any{
+				"command": "sign",
+				"status":  "error",
+				"error":   "signing_failed",
+				"message": signErr.Error(),
+			})
+		}
+		Out.LogError("Signing failed: %s", signErr)
+		return fmt.Errorf("signing failed: %w", signErr)
 	}
 
-	// Output
+	if signResult == nil {
+		if Out.Mode == output.ModeJSON {
+			return Out.LogJSON(map[string]any{
+				"command": "sign",
+				"status":  "error",
+				"error":   "signing_unavailable",
+				"message": "could not authenticate with Sigstore",
+			})
+		}
+		Out.LogError("Signing unavailable (could not authenticate with Sigstore)")
+		return fmt.Errorf("signing unavailable")
+	}
+
+	Out.Log("  %s Signed by %s (Sigstore)", output.Green(output.Icons["success"]),
+		output.Green(signResult.SignerIdentity))
+
+	// 5. Upload signature to registry
+	sp = Out.StartSpinner("Uploading signature...")
+	attachResp, err := client.AttachSignature(mf.Name, mf.Version, []byte(signResult.Bundle), signResult.SignerIdentity)
+	output.StopSpinner(sp)
+
+	if err != nil {
+		var apiErr *api.APIError
+		if isAPIError(err, &apiErr) {
+			if Out.Mode == output.ModeJSON {
+				return Out.LogJSON(map[string]any{
+					"command": "sign",
+					"status":  "error",
+					"error":   apiErr.Code,
+					"message": apiErr.Message,
+				})
+			}
+			Out.LogError("Failed to upload signature: %s", apiErr.Message)
+			return fmt.Errorf("upload failed: %s", apiErr.Message)
+		}
+		Out.LogError("Failed to upload signature: %s", err)
+		return fmt.Errorf("upload failed: %w", err)
+	}
+
 	if Out.Mode == output.ModeJSON {
 		return Out.LogJSON(map[string]any{
 			"command": "sign",
-			"file":    filePath,
-			"bundle":  bundlePath,
-			"signed":  true,
-			"signer":  result.SignerIdentity,
+			"status":  "signed",
+			"name":    attachResp.Name,
+			"version": attachResp.Version,
+			"signer":  attachResp.SignerIdentity,
 		})
 	}
 
-	Out.Log("%s Signed %s", output.Icons["success"], output.Green(filepath.Base(filePath)))
-	Out.Log("  %s Signer: %s", output.Icons["key"], output.Cyan(result.SignerIdentity))
-	Out.Log("  %s Bundle: %s", output.Icons["arrow"], bundlePath)
+	Out.Log("")
+	Out.Log("%s Signature attached to %s@%s", output.Green(output.Icons["success"]),
+		output.Cyan(attachResp.Name), attachResp.Version)
 
 	return nil
 }
