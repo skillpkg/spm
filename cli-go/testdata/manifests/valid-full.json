@@ -2,12 +2,8 @@
   "name": "@myorg/data-pipeline",
   "version": "2.3.1-beta.1",
   "description": "A full-featured data pipeline skill with all fields populated for testing",
-  "authors": [
-    { "name": "Alice Smith", "email": "alice@example.com", "url": "https://alice.dev" }
-  ],
-  "maintainers": [
-    { "name": "Bob Jones", "email": "bob@example.com" }
-  ],
+  "authors": [{ "name": "Alice Smith", "email": "alice@example.com", "url": "https://alice.dev" }],
+  "maintainers": [{ "name": "Bob Jones", "email": "bob@example.com" }],
   "keywords": ["data", "pipeline", "etl"],
   "categories": ["data-analysis", "backend"],
   "license": "MIT",

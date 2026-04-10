@@ -9,6 +9,7 @@ A Go rewrite produces a ~10-15MB static binary with zero runtime dependencies, d
 ## Scope
 
 Rewrite `packages/cli/` from TypeScript to Go. Everything else stays as-is:
+
 - `packages/api/` — Hono on Cloudflare Workers (TypeScript, unchanged)
 - `packages/web/` — React app (TypeScript, unchanged)
 - `packages/shared/` — Zod schemas remain the source of truth; Go CLI ports the validation logic as Go structs + validators
@@ -98,29 +99,30 @@ cli-go/
 
 ## Go Dependencies
 
-| Purpose | Package |
-|---------|---------|
-| CLI framework | `github.com/spf13/cobra` |
-| Terminal colors | `github.com/fatih/color` |
-| Spinners | `github.com/briandowns/spinner` |
-| Tables | `github.com/jedib0t/go-pretty/v6/table` |
-| Interactive prompts | `github.com/AlecAivazis/survey/v2` |
-| Semver | `github.com/Masterminds/semver/v3` |
-| TOML | `github.com/BurntSushi/toml` |
-| Sigstore signing | `github.com/sigstore/sigstore-go` |
-| Browser open | `github.com/pkg/browser` |
-| Archive (tar/gzip) | `archive/tar`, `compress/gzip` (stdlib) |
-| HTTP client | `net/http` (stdlib) |
-| JSON | `encoding/json` (stdlib) |
-| Testing | `testing` (stdlib) + `github.com/stretchr/testify` |
-| HTTP test server | `net/http/httptest` (stdlib) |
-| Release | `goreleaser/goreleaser` |
+| Purpose             | Package                                            |
+| ------------------- | -------------------------------------------------- |
+| CLI framework       | `github.com/spf13/cobra`                           |
+| Terminal colors     | `github.com/fatih/color`                           |
+| Spinners            | `github.com/briandowns/spinner`                    |
+| Tables              | `github.com/jedib0t/go-pretty/v6/table`            |
+| Interactive prompts | `github.com/AlecAivazis/survey/v2`                 |
+| Semver              | `github.com/Masterminds/semver/v3`                 |
+| TOML                | `github.com/BurntSushi/toml`                       |
+| Sigstore signing    | `github.com/sigstore/sigstore-go`                  |
+| Browser open        | `github.com/pkg/browser`                           |
+| Archive (tar/gzip)  | `archive/tar`, `compress/gzip` (stdlib)            |
+| HTTP client         | `net/http` (stdlib)                                |
+| JSON                | `encoding/json` (stdlib)                           |
+| Testing             | `testing` (stdlib) + `github.com/stretchr/testify` |
+| HTTP test server    | `net/http/httptest` (stdlib)                       |
+| Release             | `goreleaser/goreleaser`                            |
 
 ## Parallel Work Streams
 
 The rewrite is split into **5 independent streams** that can run concurrently. Each stream writes tests first, then implementation.
 
 ### Stream 1: Core Infrastructure
+
 **Owner:** Agent 1
 **No dependencies on other streams.**
 
@@ -133,6 +135,7 @@ cmd/root.go            — global flags, output mode wiring
 ```
 
 **Tests first:**
+
 - Config: load/save TOML, token persistence, default registry URL, env var overrides
 - Output: icon set completeness, color functions return strings, mode switching (json > silent > verbose), log/logVerbose/logJson/logError behavior per mode
 - Manifest: valid/invalid manifest parsing, all field constraints (name regex, version semver, description length, category enum, dependency arrays), round-trip JSON
@@ -141,6 +144,7 @@ cmd/root.go            — global flags, output mode wiring
 **Deliverable:** All internal packages compile and pass tests. No commands yet.
 
 ### Stream 2: API Client + Auth
+
 **Owner:** Agent 2
 **No dependencies on other streams.**
 
@@ -152,6 +156,7 @@ cmd/whoami.go
 ```
 
 **Tests first (using httptest.Server to mock the registry):**
+
 - Device flow: initiate → poll (pending → slow_down → success), timeout/expiry
 - Token management: save to config, load from config, 401 refresh
 - All API endpoints: search, info, versions, download, publish (multipart), yank, deprecate, report, collaborators, classify, resolve, verify-signature, rescan
@@ -161,6 +166,7 @@ cmd/whoami.go
 **Deliverable:** Fully tested API client. Auth commands work against mock server.
 
 ### Stream 3: Sigstore Signing + Verification
+
 **Owner:** Agent 3
 **No dependencies on other streams.**
 
@@ -171,6 +177,7 @@ cmd/verify.go
 ```
 
 **Tests first:**
+
 - CI signing: detect CI env (GITHUB_ACTIONS, GITLAB_CI, CI=true), auto-sign with OIDC
 - Interactive signing: browser OIDC flow, local HTTP callback server
 - Bundle creation: valid Sigstore bundle JSON output
@@ -182,6 +189,7 @@ cmd/verify.go
 **Deliverable:** Sign and verify work independently. Can be integrated with publish later.
 
 ### Stream 4: File Operations (Skills JSON, Linker, Preflight, Scanner)
+
 **Owner:** Agent 4
 **No dependencies on other streams.**
 
@@ -193,6 +201,7 @@ internal/scanner/      — scanner.go + tests
 ```
 
 **Tests first (all use real temp directories, no mocks):**
+
 - Skills JSON: load/save round-trip, add/remove skills, lock file creation with metadata (version, resolved, checksum, source, signer), lock file merge on update, missing file handling
 - Linker: symlink creation to agent dirs (~/.claude/skills, ~/.cursor/skills, ~/.agents/skills), copy fallback, unlink removes from all agents, getLinkedAgents returns agent names, handles missing dirs gracefully
 - Preflight: detect broken symlinks, remove stale copies, skip healthy links, report counts
@@ -201,6 +210,7 @@ internal/scanner/      — scanner.go + tests
 **Deliverable:** All file operation packages compile and pass tests.
 
 ### Stream 5: Commands (depends on Streams 1-4 completing)
+
 **Owner:** All agents converge, or split into sub-groups
 
 ```
@@ -224,6 +234,7 @@ cmd/rescan.go          — uses api
 ```
 
 **Tests first (per command):**
+
 - Each command gets unit tests with mocked internal packages
 - Validate output format (default vs json vs verbose vs silent)
 - Validate error handling per API error code
@@ -267,6 +278,7 @@ Week 5:    Polish + docs + messaging updates
 ### Unit Tests (per internal package — Streams 1-4)
 
 Each `internal/` package has `*_test.go` files that:
+
 - Use `httptest.Server` for API mocking (no real network calls)
 - Use `t.TempDir()` for file system operations (real files, auto-cleaned)
 - Use `testify/assert` + `testify/require` for assertions
@@ -278,6 +290,7 @@ Each `internal/` package has `*_test.go` files that:
 ### Integration Tests (Stream 5 — command level)
 
 Each `cmd/*.go` gets tests in `cmd/*_test.go` that:
+
 - Create a real Cobra command
 - Execute it with `cmd.Execute()` capturing stdout/stderr
 - Mock only the API (via httptest.Server) and home dir (via env var or param)
@@ -369,6 +382,7 @@ Go structs are the **port**, not the source of truth. If `@spm/shared` schemas c
 ### 2. No npx dependency
 
 The Go linker does **not** shell out to `npx skills`. It directly manages symlinks/copies to known agent directories:
+
 - `~/.claude/skills/`
 - `~/.cursor/skills/`
 - `~/.agents/skills/` (Codex)
@@ -377,6 +391,7 @@ The Go linker does **not** shell out to `npx skills`. It directly manages symlin
 ### 3. Dependency warnings (new feature)
 
 `spm install` reads `dependencies.pip`, `dependencies.npm`, `dependencies.system` from each skill's manifest and:
+
 - Checks if `python3` / `pip` / `node` / `npm` / system binaries are on `$PATH`
 - Prints warnings for missing deps (does NOT auto-install)
 - In `--json` mode, includes `missing_dependencies` array in output
@@ -392,6 +407,7 @@ SPM_TOKEN      — override auth token (for CI publishing)
 ### 5. Binary distribution
 
 goreleaser produces:
+
 - `spm_linux_amd64.tar.gz`
 - `spm_linux_arm64.tar.gz`
 - `spm_darwin_amd64.tar.gz`
@@ -405,11 +421,13 @@ goreleaser produces:
 ### Web app changes
 
 **Footer.tsx** — Replace `npm i -g @skillpkg/cli` with tabbed install:
+
 ```
 brew install spm  |  curl -fsSL skillpkg.dev/install.sh | sh  |  npm i -g @skillpkg/cli
 ```
 
 **DocDetail.tsx** — Replace prerequisites:
+
 ```
 Before:                          After:
 - Node.js 18 or later     →    Install SPM:
@@ -419,6 +437,7 @@ Before:                          After:
 ```
 
 **SkillHero.tsx** — Show dependency badges from manifest:
+
 ```
 Requires: Python >= 3.10 | ffmpeg | pandas
 ```

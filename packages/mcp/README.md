@@ -4,11 +4,11 @@ MCP server for the [SPM](https://skillpkg.dev) skills registry. Search, browse, 
 
 ## Tools
 
-| Tool             | Description                              |
-| ---------------- | ---------------------------------------- |
-| `spm_search`     | Search skills by query and category      |
-| `spm_info`       | Get detailed info about a specific skill |
-| `spm_categories` | List all skill categories with counts    |
+| Tool             | Description                                |
+| ---------------- | ------------------------------------------ |
+| `spm_search`     | Search skills by query and category        |
+| `spm_info`       | Get detailed info about a specific skill   |
+| `spm_categories` | List all skill categories with counts      |
 | `spm_template`   | Get the skill template as a starting point |
 
 ## Quick Start

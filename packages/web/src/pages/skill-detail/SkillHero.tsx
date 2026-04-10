@@ -125,7 +125,9 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
       {(skill.dependencies.pip.length > 0 ||
         skill.dependencies.system.length > 0 ||
         skill.dependencies.skills.length > 0) && (
-        <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        <div
+          style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}
+        >
           <Text variant="caption" font="sans" color="dim" as="span" style={{ marginRight: 2 }}>
             Requires:
           </Text>

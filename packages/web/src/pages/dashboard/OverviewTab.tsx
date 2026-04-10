@@ -71,9 +71,7 @@ export const OverviewTab = ({
         </Text>
         <div style={{ ...cardStyle, padding: '6px 18px' }}>
           {activity.length > 0 ? (
-            activity.slice(0, 10).map((item, i) => (
-              <ActivityItem key={i} item={item} />
-            ))
+            activity.slice(0, 10).map((item, i) => <ActivityItem key={i} item={item} />)
           ) : (
             <Text
               variant="body-sm"

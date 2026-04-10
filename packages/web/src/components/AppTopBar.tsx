@@ -57,9 +57,6 @@ export const AppTopBar = ({ onMenuClick }: { onMenuClick?: () => void }) => {
   const { pathname } = useLocation();
 
   return (
-    <TopBar
-      left={<Breadcrumb items={deriveBreadcrumbs(pathname)} />}
-      onMenuClick={onMenuClick}
-    />
+    <TopBar left={<Breadcrumb items={deriveBreadcrumbs(pathname)} />} onMenuClick={onMenuClick} />
   );
 };

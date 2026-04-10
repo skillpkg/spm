@@ -5,8 +5,18 @@ import { Text, CopyButton } from '@spm/ui';
 type InstallMethod = 'brew' | 'curl' | 'npm';
 
 const installMethods: { key: InstallMethod; label: string; command: string; note: string }[] = [
-  { key: 'brew', label: 'Homebrew', command: 'brew install skillpkg/tap/spm', note: 'macOS / Linux' },
-  { key: 'curl', label: 'Shell script', command: 'curl -fsSL https://skillpkg.dev/install.sh | sh', note: 'macOS / Linux' },
+  {
+    key: 'brew',
+    label: 'Homebrew',
+    command: 'brew install skillpkg/tap/spm',
+    note: 'macOS / Linux',
+  },
+  {
+    key: 'curl',
+    label: 'Shell script',
+    command: 'curl -fsSL https://skillpkg.dev/install.sh | sh',
+    note: 'macOS / Linux',
+  },
   { key: 'npm', label: 'npm', command: 'npm i -g @skillpkg/cli', note: 'Requires Node.js' },
 ];
 
@@ -60,7 +70,9 @@ const InstallMethodPicker = () => {
           <span style={{ color: 'var(--color-text-primary)' }}>{current.command}</span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--color-text-dim)' }}>
+          <span
+            style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--color-text-dim)' }}
+          >
             {current.note}
           </span>
           <CopyButton text={current.command} />

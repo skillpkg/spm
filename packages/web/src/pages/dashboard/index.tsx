@@ -70,7 +70,9 @@ export const Dashboard = () => {
 
   const recentActivity: ActivityEvent[] =
     statsData?.recent_activity?.map((a) => ({
-      type: (a.type === 'publish' || a.type === 'review' ? a.type : 'milestone') as ActivityEvent['type'],
+      type: (a.type === 'publish' || a.type === 'review'
+        ? a.type
+        : 'milestone') as ActivityEvent['type'],
       skill: a.skill,
       version: a.version,
       date: a.date.split('T')[0],
@@ -81,20 +83,20 @@ export const Dashboard = () => {
 
   const skills: Skill[] =
     skillsData?.results?.map((s) => ({
-        name: s.name,
-        version: s.version,
-        categories: s.categories,
-        desc: s.description,
-        downloads: s.downloads,
-        weeklyDownloads: s.weekly_downloads,
-        weeklyGrowth: '',
-        rating: s.rating_avg ?? 0,
-        reviews: s.rating_count ?? 0,
-        trust: s.author.trust_tier as TrustTier,
-        published: s.published_at?.split('T')[0] ?? '',
-        updated: s.updated_at?.split('T')[0] ?? '',
-        status: 'published',
-      })) ?? [];
+      name: s.name,
+      version: s.version,
+      categories: s.categories,
+      desc: s.description,
+      downloads: s.downloads,
+      weeklyDownloads: s.weekly_downloads,
+      weeklyGrowth: '',
+      rating: s.rating_avg ?? 0,
+      reviews: s.rating_count ?? 0,
+      trust: s.author.trust_tier as TrustTier,
+      published: s.published_at?.split('T')[0] ?? '',
+      updated: s.updated_at?.split('T')[0] ?? '',
+      status: 'published',
+    })) ?? [];
 
   return (
     <div

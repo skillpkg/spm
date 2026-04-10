@@ -75,7 +75,9 @@ const SidebarLinks = () => {
         <button
           key={link.label}
           type="button"
-          onClick={() => ('to' in link && link.to ? navigate(link.to) : window.open(link.href, '_blank'))}
+          onClick={() =>
+            'to' in link && link.to ? navigate(link.to) : window.open(link.href, '_blank')
+          }
           style={{
             fontFamily: 'var(--font-sans)',
             fontSize: 11,

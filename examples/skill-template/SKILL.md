@@ -15,9 +15,9 @@ Describe what this skill does and when it should be triggered.
 
 ## Quick Reference
 
-| Task          | Command / Action         |
-| ------------- | ------------------------ |
-| Example task  | How to accomplish it     |
+| Task         | Command / Action     |
+| ------------ | -------------------- |
+| Example task | How to accomplish it |
 
 ## Instructions
 
