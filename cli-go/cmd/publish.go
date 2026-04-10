@@ -6,11 +6,13 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/skillpkg/spm/internal/api"
+	"github.com/skillpkg/spm/internal/config"
 	"github.com/skillpkg/spm/internal/manifest"
 	"github.com/skillpkg/spm/internal/output"
 	"github.com/skillpkg/spm/internal/scanner"
@@ -233,13 +235,18 @@ func runPublish(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("publish failed: %w", err)
 	}
 
+	skillPageURL := publishResp.URL
+	if skillPageURL == "" || !strings.HasPrefix(skillPageURL, "http") {
+		skillPageURL = buildSkillPageURL(Cfg.RegistryURL(), publishResp.Name)
+	}
+
 	if Out.Mode == output.ModeJSON {
 		return Out.LogJSON(map[string]any{
 			"command":       "publish",
 			"status":        publishResp.Status,
 			"name":          publishResp.Name,
 			"version":       publishResp.Version,
-			"url":           publishResp.URL,
+			"url":           skillPageURL,
 			"checksum":      publishResp.ChecksumSHA256,
 			"sign_status":   signStatus,
 			"scan_warnings": scanResult.Warnings,
@@ -250,9 +257,7 @@ func runPublish(_ *cobra.Command, args []string) error {
 	Out.Log("")
 	Out.Log("%s Published %s@%s", output.Green(output.Icons["success"]),
 		output.Cyan(publishResp.Name), publishResp.Version)
-	if publishResp.URL != "" {
-		Out.Log("  %s %s", output.Icons["arrow"], output.Dim(publishResp.URL))
-	}
+	Out.Log("  %s %s", output.Icons["arrow"], skillPageURL)
 	Out.Log("")
 
 	return nil
@@ -331,6 +336,35 @@ func packSkill(dir string, mf *manifest.Manifest) ([]byte, string, error) {
 
 	filename := fmt.Sprintf("%s-%s.skl", mf.Name, mf.Version)
 	return buf.Bytes(), filename, nil
+}
+
+// buildSkillPageURL constructs the web page URL for a published skill.
+// For the default public registry, it returns https://skillpkg.dev/skills/{name}.
+// For custom/private registries, it derives the web URL from the registry URL.
+func buildSkillPageURL(registryURL, skillName string) string {
+	parsed, err := url.Parse(registryURL)
+	if err != nil {
+		return registryURL + "/skills/" + skillName
+	}
+
+	host := parsed.Hostname()
+
+	// Default public registry: registry.skillpkg.dev → skillpkg.dev
+	if host == "registry.skillpkg.dev" || host == config.DefaultRegistry {
+		return "https://skillpkg.dev/skills/" + skillName
+	}
+
+	// Private registries: strip "registry." prefix if present
+	if strings.HasPrefix(host, "registry.") {
+		host = strings.TrimPrefix(host, "registry.")
+	}
+
+	scheme := parsed.Scheme
+	if scheme == "" {
+		scheme = "https"
+	}
+
+	return scheme + "://" + host + "/skills/" + skillName
 }
 
 // formatBytesInt formats a byte count as a human-readable string.
