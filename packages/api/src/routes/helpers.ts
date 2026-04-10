@@ -9,7 +9,9 @@ export const extractSkillName = (c: Context<AppEnv>): string => {
   const scope = c.req.param('scope');
   const name = c.req.param('name');
   if (scope) {
-    return `@${scope}/${name}`;
+    // Hono may or may not include the @ prefix depending on router behavior
+    const cleanScope = scope.startsWith('@') ? scope.slice(1) : scope;
+    return `@${cleanScope}/${name}`;
   }
   return name;
 };
