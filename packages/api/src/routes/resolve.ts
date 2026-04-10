@@ -5,6 +5,7 @@ import { compareTwoStrings } from 'string-similarity';
 import { ResolveRequestSchema } from '@spm/shared';
 import type { AppEnv } from '../types.js';
 import { skills, versions, users, scans } from '../db/schema.js';
+import { buildDownloadUrl, buildBundleUrl } from './helpers.js';
 
 export const resolveRoutes = new Hono<AppEnv>();
 
@@ -39,19 +40,13 @@ resolveRoutes.post('/resolve', zValidator('json', ResolveRequestSchema), async (
   for (const specifier of body.skills) {
     const { name, range } = specifier;
 
-    // Find the skill — try exact name first, then strip scope prefix (e.g., "skillpkg/ship" → "ship")
-    let [skill] = await db.select().from(skills).where(eq(skills.name, name)).limit(1);
-
-    if (!skill && name.includes('/')) {
-      const bareName = name.split('/').pop()!;
-      [skill] = await db.select().from(skills).where(eq(skills.name, bareName)).limit(1);
-    }
+    // Find the skill by exact name match (supports scoped names like @scope/name)
+    const [skill] = await db.select().from(skills).where(eq(skills.name, name)).limit(1);
 
     if (!skill) {
-      // Did-you-mean suggestion (compare using bare name if scoped)
-      const compareName = name.includes('/') ? name.split('/').pop()! : name;
+      // Did-you-mean suggestion
       const suggestions = allNames
-        .map((n) => ({ name: n, score: compareTwoStrings(compareName, n) }))
+        .map((n) => ({ name: n, score: compareTwoStrings(name, n) }))
         .filter((s) => s.score > 0.4)
         .sort((a, b) => b.score - a.score);
 
@@ -103,16 +98,13 @@ resolveRoutes.post('/resolve', zValidator('json', ResolveRequestSchema), async (
     const manifest = latestVersion.manifest as Record<string, unknown> | undefined;
     const deps = (manifest?.dependencies as Record<string, unknown>)?.skills;
 
-    // Use the canonical name from DB (handles scope-stripped lookups like "skillpkg/ship" → "ship")
-    const canonicalName = skill.name;
-
     resolved.push({
-      name: canonicalName,
+      name: skill.name,
       version: latestVersion.version,
       checksum_sha256: latestVersion.checksumSha256,
-      download_url: `/api/v1/skills/${canonicalName}/${latestVersion.version}/download`,
+      download_url: buildDownloadUrl(skill.name, latestVersion.version),
       sigstore_bundle_url: latestVersion.sigstoreBundleKey
-        ? `/api/v1/skills/${canonicalName}/${latestVersion.version}/bundle`
+        ? buildBundleUrl(skill.name, latestVersion.version)
         : null,
       size_bytes: latestVersion.sizeBytes,
       trust_tier: owner?.trustTier ?? 'registered',

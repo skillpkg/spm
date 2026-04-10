@@ -25,6 +25,7 @@ export const App = () => {
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/skills/@:scope/:name" element={<SkillDetail />} />
               <Route path="/skills/:name" element={<SkillDetail />} />
               <Route path="/authors/:username" element={<AuthorProfile />} />
               <Route

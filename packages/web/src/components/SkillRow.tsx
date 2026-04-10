@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type SkillSummary } from '../data/constants';
 import { TrustBadge, SecurityBadge, Text } from '@spm/ui';
+import { skillPath } from '../lib/urls';
 
 export const SkillRow = ({
   skill,
@@ -16,7 +17,7 @@ export const SkillRow = ({
 
   return (
     <Link
-      to={`/skills/${skill.name}`}
+      to={skillPath(skill.name)}
       style={{ textDecoration: 'none' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

@@ -1,23 +1,37 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { ReportRequestSchema, ERROR_CODES, createApiError } from '@spm/shared';
 import type { AppEnv } from '../types.js';
 import { optionalAuth } from '../middleware/auth.js';
 import { skills, reports } from '../db/schema.js';
+import { extractSkillName } from './helpers.js';
 
 export const reportsRoutes = new Hono<AppEnv>();
 
+/**
+ * Register a route handler for both scoped and unscoped skill paths.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const dualSkillRoute = (method: 'get' | 'post', suffix: string, ...handlers: any[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (reportsRoutes[method] as any)(`/skills/@:scope/:name${suffix}`, ...handlers);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (reportsRoutes[method] as any)(`/skills/:name${suffix}`, ...handlers);
+};
+
 // ── POST /skills/:name/report — report a skill (anonymous allowed) ──
 
-reportsRoutes.post(
-  '/skills/:name/report',
+dualSkillRoute(
+  'post',
+  '/report',
   optionalAuth,
   zValidator('json', ReportRequestSchema),
-  async (c) => {
+  async (c: Context<AppEnv>) => {
     const db = c.get('db');
-    const name = c.req.param('name');
-    const body = c.req.valid('json');
+    const name = extractSkillName(c);
+    const body = c.req.valid('json' as never) as { reason: string; priority: string };
 
     // Find the skill
     const [skill] = await db

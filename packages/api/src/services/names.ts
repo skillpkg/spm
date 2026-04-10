@@ -4,7 +4,7 @@ import { compareTwoStrings } from 'string-similarity';
 
 const NAME_RE = /^(@[a-z0-9-]+\/)?[a-z][a-z0-9-]*$/;
 const NAME_MIN = 2;
-const NAME_MAX = 50;
+const NAME_MAX = 64;
 const SIMILARITY_THRESHOLD = 0.8;
 
 export const RESERVED_NAMES: readonly string[] = [

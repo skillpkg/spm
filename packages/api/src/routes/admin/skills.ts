@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, desc, count, sql } from 'drizzle-orm';
@@ -9,8 +10,20 @@ import { getObject } from '../../services/r2.js';
 import { extractTextFiles } from '../../security/extract.js';
 import { runSecurityPipeline } from '../../services/scanner.js';
 import { audit } from './audit.js';
+import { extractSkillName } from '../helpers.js';
 
 export const skillsRoutes = new Hono<AppEnv>();
+
+/**
+ * Register a route handler for both scoped and unscoped admin skill paths.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const dualAdminSkillRoute = (method: 'get' | 'post', suffix: string, ...handlers: any[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (skillsRoutes[method] as any)(`/admin/skills/@:scope/:name${suffix}`, ...handlers);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (skillsRoutes[method] as any)(`/admin/skills/:name${suffix}`, ...handlers);
+};
 
 // ── GET /admin/skills — list all skills with admin metadata ──
 
@@ -89,9 +102,9 @@ skillsRoutes.get('/admin/skills', zValidator('query', AdminSkillsQuerySchema), a
 
 // ── GET /admin/skills/:name/versions/:version — version detail ──
 
-skillsRoutes.get('/admin/skills/:name/versions/:version', async (c) => {
+dualAdminSkillRoute('get', '/versions/:version', async (c: Context<AppEnv>) => {
   const db = c.get('db');
-  const name = c.req.param('name');
+  const name = extractSkillName(c);
   const version = c.req.param('version');
 
   const [skill] = await db
@@ -134,53 +147,58 @@ const AdminYankSchema = z.object({
   notify_author: z.boolean().optional().default(false),
 });
 
-skillsRoutes.post('/admin/skills/:name/yank', zValidator('json', AdminYankSchema), async (c) => {
-  const db = c.get('db');
-  const jwt = c.get('jwtPayload');
-  const name = c.req.param('name');
-  const body = c.req.valid('json');
+dualAdminSkillRoute(
+  'post',
+  '/yank',
+  zValidator('json', AdminYankSchema),
+  async (c: Context<AppEnv>) => {
+    const db = c.get('db');
+    const jwt = c.get('jwtPayload');
+    const name = extractSkillName(c);
+    const body = c.req.valid('json' as never) as z.infer<typeof AdminYankSchema>;
 
-  const [skill] = await db
-    .select({ id: skills.id })
-    .from(skills)
-    .where(eq(skills.name, name))
-    .limit(1);
+    const [skill] = await db
+      .select({ id: skills.id })
+      .from(skills)
+      .where(eq(skills.name, name))
+      .limit(1);
 
-  if (!skill) {
-    return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
-  }
+    if (!skill) {
+      return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+    }
 
-  const [ver] = await db
-    .select({ id: versions.id })
-    .from(versions)
-    .where(and(eq(versions.skillId, skill.id), eq(versions.version, body.version)))
-    .limit(1);
+    const [ver] = await db
+      .select({ id: versions.id })
+      .from(versions)
+      .where(and(eq(versions.skillId, skill.id), eq(versions.version, body.version)))
+      .limit(1);
 
-  if (!ver) {
-    return c.json(createApiError('VERSION_NOT_FOUND'), ERROR_CODES.VERSION_NOT_FOUND.status);
-  }
+    if (!ver) {
+      return c.json(createApiError('VERSION_NOT_FOUND'), ERROR_CODES.VERSION_NOT_FOUND.status);
+    }
 
-  await db
-    .update(versions)
-    .set({ yanked: true, yankReason: body.reason })
-    .where(eq(versions.id, ver.id));
+    await db
+      .update(versions)
+      .set({ yanked: true, yankReason: body.reason })
+      .where(eq(versions.id, ver.id));
 
-  await audit(
-    db,
-    jwt.sub,
-    'admin.yank',
-    { skill: name, version: body.version, reason: body.reason },
-    { skillId: skill.id, versionId: ver.id },
-  );
+    await audit(
+      db,
+      jwt.sub,
+      'admin.yank',
+      { skill: name, version: body.version, reason: body.reason },
+      { skillId: skill.id, versionId: ver.id },
+    );
 
-  return c.json({
-    name,
-    version: body.version,
-    yanked: true,
-    reason: body.reason,
-    yanked_at: new Date().toISOString(),
-  });
-});
+    return c.json({
+      name,
+      version: body.version,
+      yanked: true,
+      reason: body.reason,
+      yanked_at: new Date().toISOString(),
+    });
+  },
+);
 
 // ── POST /admin/skills/:name/block — block a skill ──
 
@@ -188,53 +206,58 @@ const BlockSchema = z.object({
   reason: z.string().min(1),
 });
 
-skillsRoutes.post('/admin/skills/:name/block', zValidator('json', BlockSchema), async (c) => {
-  const db = c.get('db');
-  const jwt = c.get('jwtPayload');
-  const name = c.req.param('name');
-  const body = c.req.valid('json');
+dualAdminSkillRoute(
+  'post',
+  '/block',
+  zValidator('json', BlockSchema),
+  async (c: Context<AppEnv>) => {
+    const db = c.get('db');
+    const jwt = c.get('jwtPayload');
+    const name = extractSkillName(c);
+    const body = c.req.valid('json' as never) as z.infer<typeof BlockSchema>;
 
-  const [skill] = await db
-    .select({ id: skills.id, status: skills.status })
-    .from(skills)
-    .where(eq(skills.name, name))
-    .limit(1);
+    const [skill] = await db
+      .select({ id: skills.id, status: skills.status })
+      .from(skills)
+      .where(eq(skills.name, name))
+      .limit(1);
 
-  if (!skill) {
-    return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
-  }
+    if (!skill) {
+      return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+    }
 
-  if (skill.status === 'blocked') {
-    return c.json({ name, status: 'blocked', message: 'Skill is already blocked' });
-  }
+    if (skill.status === 'blocked') {
+      return c.json({ name, status: 'blocked', message: 'Skill is already blocked' });
+    }
 
-  await db
-    .update(skills)
-    .set({ status: 'blocked', updatedAt: new Date() })
-    .where(eq(skills.id, skill.id));
+    await db
+      .update(skills)
+      .set({ status: 'blocked', updatedAt: new Date() })
+      .where(eq(skills.id, skill.id));
 
-  await audit(
-    db,
-    jwt.sub,
-    'admin.block',
-    { skill: name, reason: body.reason },
-    { skillId: skill.id },
-  );
+    await audit(
+      db,
+      jwt.sub,
+      'admin.block',
+      { skill: name, reason: body.reason },
+      { skillId: skill.id },
+    );
 
-  return c.json({
-    name,
-    status: 'blocked',
-    reason: body.reason,
-    blocked_at: new Date().toISOString(),
-  });
-});
+    return c.json({
+      name,
+      status: 'blocked',
+      reason: body.reason,
+      blocked_at: new Date().toISOString(),
+    });
+  },
+);
 
 // ── POST /admin/skills/:name/unblock — unblock a skill ──
 
-skillsRoutes.post('/admin/skills/:name/unblock', async (c) => {
+dualAdminSkillRoute('post', '/unblock', async (c: Context<AppEnv>) => {
   const db = c.get('db');
   const jwt = c.get('jwtPayload');
-  const name = c.req.param('name');
+  const name = extractSkillName(c);
 
   const [skill] = await db
     .select({ id: skills.id, status: skills.status })
@@ -270,149 +293,154 @@ const RescanSchema = z.object({
   version: z.string().optional(),
 });
 
-skillsRoutes.post('/admin/skills/:name/rescan', zValidator('json', RescanSchema), async (c) => {
-  const db = c.get('db');
-  const jwt = c.get('jwtPayload');
-  const name = c.req.param('name');
-  const body = c.req.valid('json');
+dualAdminSkillRoute(
+  'post',
+  '/rescan',
+  zValidator('json', RescanSchema),
+  async (c: Context<AppEnv>) => {
+    const db = c.get('db');
+    const jwt = c.get('jwtPayload');
+    const name = extractSkillName(c);
+    const body = c.req.valid('json' as never) as z.infer<typeof RescanSchema>;
 
-  const [skill] = await db
-    .select({ id: skills.id })
-    .from(skills)
-    .where(eq(skills.name, name))
-    .limit(1);
+    const [skill] = await db
+      .select({ id: skills.id })
+      .from(skills)
+      .where(eq(skills.name, name))
+      .limit(1);
 
-  if (!skill) {
-    return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
-  }
+    if (!skill) {
+      return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+    }
 
-  const [ver] = body.version
-    ? await db
-        .select({
-          id: versions.id,
-          version: versions.version,
-          sklStorageKey: versions.sklStorageKey,
-        })
-        .from(versions)
-        .where(and(eq(versions.skillId, skill.id), eq(versions.version, body.version)))
-        .limit(1)
-    : await db
-        .select({
-          id: versions.id,
-          version: versions.version,
-          sklStorageKey: versions.sklStorageKey,
-        })
-        .from(versions)
-        .where(eq(versions.skillId, skill.id))
-        .orderBy(
-          desc(versions.versionMajor),
-          desc(versions.versionMinor),
-          desc(versions.versionPatch),
-        )
-        .limit(1);
+    const [ver] = body.version
+      ? await db
+          .select({
+            id: versions.id,
+            version: versions.version,
+            sklStorageKey: versions.sklStorageKey,
+          })
+          .from(versions)
+          .where(and(eq(versions.skillId, skill.id), eq(versions.version, body.version)))
+          .limit(1)
+      : await db
+          .select({
+            id: versions.id,
+            version: versions.version,
+            sklStorageKey: versions.sklStorageKey,
+          })
+          .from(versions)
+          .where(eq(versions.skillId, skill.id))
+          .orderBy(
+            desc(versions.versionMajor),
+            desc(versions.versionMinor),
+            desc(versions.versionPatch),
+          )
+          .limit(1);
 
-  if (!ver) {
-    return c.json(createApiError('VERSION_NOT_FOUND'), ERROR_CODES.VERSION_NOT_FOUND.status);
-  }
+    if (!ver) {
+      return c.json(createApiError('VERSION_NOT_FOUND'), ERROR_CODES.VERSION_NOT_FOUND.status);
+    }
 
-  const obj = await getObject(c.env.R2_BUCKET, ver.sklStorageKey);
-  if (!obj) {
-    return c.json(
-      createApiError('SKILL_NOT_FOUND', { message: 'Package not found in storage' }),
-      404,
-    );
-  }
+    const obj = await getObject(c.env.R2_BUCKET, ver.sklStorageKey);
+    if (!obj) {
+      return c.json(
+        createApiError('SKILL_NOT_FOUND', { message: 'Package not found in storage' }),
+        404,
+      );
+    }
 
-  const packageData = await obj.arrayBuffer();
-  let textFiles: Array<{ name: string; content: string }>;
-  try {
-    textFiles = await extractTextFiles(packageData);
-  } catch {
-    textFiles = [];
-  }
+    const packageData = await obj.arrayBuffer();
+    let textFiles: Array<{ name: string; content: string }>;
+    try {
+      textFiles = await extractTextFiles(packageData);
+    } catch {
+      textFiles = [];
+    }
 
-  const scanResult = await runSecurityPipeline(textFiles, {
-    hfApiToken: c.env.HF_API_TOKEN,
-    lakeraApiKey: c.env.LAKERA_API_KEY,
-  });
+    const scanResult = await runSecurityPipeline(textFiles, {
+      hfApiToken: c.env.HF_API_TOKEN,
+      lakeraApiKey: c.env.LAKERA_API_KEY,
+    });
 
-  // Upsert scan records per layer
-  const dbStatusMap: Record<string, 'pending' | 'passed' | 'flagged' | 'blocked'> = {
-    passed: 'passed',
-    flagged: 'flagged',
-    blocked: 'blocked',
-    error: 'pending', // DB enum has no 'error'; store as 'pending', actual status in details
-    skipped: 'pending',
-  };
-
-  for (const layer of scanResult.layers) {
-    const dbStatus = dbStatusMap[layer.status] ?? 'pending';
-
-    const layerDetails = {
-      name: layer.name,
-      status: layer.status,
-      blocked: layer.blocked,
-      warnings: layer.warnings,
-      ...(layer.error ? { error: layer.error } : {}),
+    // Upsert scan records per layer
+    const dbStatusMap: Record<string, 'pending' | 'passed' | 'flagged' | 'blocked'> = {
+      passed: 'passed',
+      flagged: 'flagged',
+      blocked: 'blocked',
+      error: 'pending', // DB enum has no 'error'; store as 'pending', actual status in details
+      skipped: 'pending',
     };
 
-    await db
-      .insert(scans)
-      .values({
-        versionId: ver.id,
-        layer: layer.layer,
-        status: dbStatus,
-        confidence: layer.confidence,
-        details: layerDetails,
-      })
-      .onConflictDoUpdate({
-        target: [scans.versionId, scans.layer],
-        set: {
+    for (const layer of scanResult.layers) {
+      const dbStatus = dbStatusMap[layer.status] ?? 'pending';
+
+      const layerDetails = {
+        name: layer.name,
+        status: layer.status,
+        blocked: layer.blocked,
+        warnings: layer.warnings,
+        ...(layer.error ? { error: layer.error } : {}),
+      };
+
+      await db
+        .insert(scans)
+        .values({
+          versionId: ver.id,
+          layer: layer.layer,
           status: dbStatus,
           confidence: layer.confidence,
           details: layerDetails,
-          scannedAt: new Date(),
-        },
-      });
-  }
+        })
+        .onConflictDoUpdate({
+          target: [scans.versionId, scans.layer],
+          set: {
+            status: dbStatus,
+            confidence: layer.confidence,
+            details: layerDetails,
+            scannedAt: new Date(),
+          },
+        });
+    }
 
-  await db
-    .update(skills)
-    .set({ scanSecurityLevel: scanResult.securityLevel, updatedAt: new Date() })
-    .where(eq(skills.id, skill.id));
+    await db
+      .update(skills)
+      .set({ scanSecurityLevel: scanResult.securityLevel, updatedAt: new Date() })
+      .where(eq(skills.id, skill.id));
 
-  await audit(
-    db,
-    jwt.sub,
-    'admin.rescan',
-    {
-      skill: name,
+    await audit(
+      db,
+      jwt.sub,
+      'admin.rescan',
+      {
+        skill: name,
+        version: ver.version,
+        result: scanResult.securityLevel,
+        layers: scanResult.layers.map((l) => ({ layer: l.layer, status: l.status })),
+        blocked: scanResult.blocked,
+        warnings: scanResult.warnings,
+      },
+      { skillId: skill.id, versionId: ver.id },
+    );
+
+    return c.json({
+      name,
       version: ver.version,
-      result: scanResult.securityLevel,
-      layers: scanResult.layers.map((l) => ({ layer: l.layer, status: l.status })),
+      security_level: scanResult.securityLevel,
+      passed: scanResult.passed,
       blocked: scanResult.blocked,
       warnings: scanResult.warnings,
-    },
-    { skillId: skill.id, versionId: ver.id },
-  );
-
-  return c.json({
-    name,
-    version: ver.version,
-    security_level: scanResult.securityLevel,
-    passed: scanResult.passed,
-    blocked: scanResult.blocked,
-    warnings: scanResult.warnings,
-    layers: scanResult.layers.map((l) => ({
-      layer: l.layer,
-      name: l.name,
-      status: l.status,
-      confidence: l.confidence,
-      ...(l.error ? { error: l.error } : {}),
-    })),
-    rescanned_at: new Date().toISOString(),
-  });
-});
+      layers: scanResult.layers.map((l) => ({
+        layer: l.layer,
+        name: l.name,
+        status: l.status,
+        confidence: l.confidence,
+        ...(l.error ? { error: l.error } : {}),
+      })),
+      rescanned_at: new Date().toISOString(),
+    });
+  },
+);
 
 // ── POST /admin/skills/:name/approve — manually approve a flagged/blocked skill ──
 
@@ -420,14 +448,15 @@ const ApproveSkillSchema = z.object({
   notes: z.string().optional(),
 });
 
-skillsRoutes.post(
-  '/admin/skills/:name/approve',
+dualAdminSkillRoute(
+  'post',
+  '/approve',
   zValidator('json', ApproveSkillSchema),
-  async (c) => {
+  async (c: Context<AppEnv>) => {
     const db = c.get('db');
     const jwt = c.get('jwtPayload');
-    const name = c.req.param('name');
-    const body = c.req.valid('json');
+    const name = extractSkillName(c);
+    const body = c.req.valid('json' as never) as z.infer<typeof ApproveSkillSchema>;
 
     const [skill] = await db
       .select({ id: skills.id })

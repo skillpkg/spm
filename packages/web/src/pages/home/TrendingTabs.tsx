@@ -3,6 +3,7 @@ import { type SkillSummary } from '../../data/constants';
 import { SkillCard } from '../../components/SkillCard';
 import { SkillRow } from '../../components/SkillRow';
 import { TrustBadge, Text } from '@spm/ui';
+import { skillPath } from '../../lib/urls';
 
 type TrendingTab = 'featured' | 'rising' | 'most-installed' | 'new';
 
@@ -152,7 +153,7 @@ export const TrendingTabs = ({
             }}
           >
             {mostInstalledSkills.map((s, i) => (
-              <Link key={s.name} to={`/skills/${s.name}`} style={{ textDecoration: 'none' }}>
+              <Link key={s.name} to={skillPath(s.name)} style={{ textDecoration: 'none' }}>
                 <div
                   style={{
                     display: 'flex',

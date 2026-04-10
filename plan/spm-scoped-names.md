@@ -5,6 +5,7 @@
 Migrate SPM from a flat namespace (`skill-name`) to mandatory scoped names (`@scope/skill-name`), following npm's scoped packages model. Every skill must belong to a scope — either a user (`@alice/my-skill`) or an organization (`@mycompany/my-skill`).
 
 **Why:**
+
 - Flat names can't scale — two people can't publish a skill with the same bare name
 - Orgs need private namespaces for internal skills
 - Author attribution is built into the name, not just metadata
@@ -17,6 +18,7 @@ Migrate SPM from a flat namespace (`skill-name`) to mandatory scoped names (`@sc
 ## 1. Naming Model
 
 ### Format
+
 ```
 @scope/skill-name
 ```
@@ -26,11 +28,13 @@ Migrate SPM from a flat namespace (`skill-name`) to mandatory scoped names (`@sc
 - **Full regex**: `^@[a-z0-9-]+\/[a-z][a-z0-9-]*$` (scope is now mandatory)
 
 ### Scope ownership
+
 - Every user automatically gets `@username` scope on account creation
 - Orgs get `@orgname` scope when created via `spm org create`
 - Only scope owners/members can publish to `@scope/*`
 
 ### Examples
+
 ```
 @alice/pdf-generator        # personal skill
 @mycompany/data-viz         # org skill
@@ -55,7 +59,7 @@ CREATE TABLE organizations (
 
 CREATE INDEX idx_org_name ON organizations(name);
 
--- org_members table  
+-- org_members table
 CREATE TABLE org_members (
   id         TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
   org_id     TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -90,12 +94,14 @@ AND pa.skill_name NOT LIKE '@%';
 ### 2.3 R2 storage key migration
 
 Existing R2 keys:
+
 ```
 packages/code-review/1.0.0.skl
 bundles/code-review/1.0.0.sigstore
 ```
 
 Need to become:
+
 ```
 packages/@alice/code-review/1.0.0.skl
 bundles/@alice/code-review/1.0.0.sigstore
@@ -110,7 +116,7 @@ Also update the stored `skl_storage_key` and `sigstore_bundle_key` columns in th
 After renaming skills, refresh the `search_vector` tsvector column so full-text search indexes the new scoped names:
 
 ```sql
-UPDATE skills SET search_vector = 
+UPDATE skills SET search_vector =
   setweight(to_tsvector('english', name), 'A') ||
   setweight(to_tsvector('english', coalesce(description, '')), 'B');
 ```
@@ -122,6 +128,7 @@ UPDATE skills SET search_vector =
 ### 3.1 The routing problem
 
 Current routes use `:name` as a single path segment:
+
 ```
 GET /skills/:name
 GET /skills/:name/:version
@@ -226,12 +233,13 @@ if (user.username === scope) {
 `POST /resolve` takes skill names in the request body. No route change needed — just ensure the names in the request are full scoped names. The lookup `WHERE name = ${skillName}` works as-is.
 
 Update generated URLs in resolve response:
+
 ```typescript
 // Current (broken for scoped names):
-download_url: `/api/v1/skills/${name}/${version}/download`
+download_url: `/api/v1/skills/${name}/${version}/download`;
 
 // Fixed:
-download_url: `/api/v1/skills/${encodeURIComponent(name)}/${version}/download`
+download_url: `/api/v1/skills/${encodeURIComponent(name)}/${version}/download`;
 // OR split: `/api/v1/skills/@${scope}/${bareName}/${version}/download`
 ```
 
@@ -243,15 +251,18 @@ download_url: `/api/v1/skills/${encodeURIComponent(name)}/${version}/download`
 
 ```typescript
 // Before (scope optional):
-export const SkillNameSchema = z.string()
-  .min(2).max(64)
+export const SkillNameSchema = z
+  .string()
+  .min(2)
+  .max(64)
   .regex(/^(@[a-z0-9-]+\/)?[a-z][a-z0-9-]*$/, '...');
 
 // After (scope mandatory):
-export const SkillNameSchema = z.string()
-  .min(4).max(64)  // min 4: "@a/b" is shortest valid name
-  .regex(/^@[a-z0-9-]+\/[a-z][a-z0-9-]*$/, 
-    'Must be scoped: @scope/skill-name (kebab-case)');
+export const SkillNameSchema = z
+  .string()
+  .min(4)
+  .max(64) // min 4: "@a/b" is shortest valid name
+  .regex(/^@[a-z0-9-]+\/[a-z][a-z0-9-]*$/, 'Must be scoped: @scope/skill-name (kebab-case)');
 ```
 
 ---
@@ -263,6 +274,7 @@ export const SkillNameSchema = z.string()
 **File:** `cli-go/internal/manifest/validate.go`
 
 Update name regex to require scope:
+
 ```go
 // Before:
 var nameRe = regexp.MustCompile(`^(@[a-z0-9-]+/)?[a-z][a-z0-9-]*$`)
@@ -277,7 +289,7 @@ Update error message accordingly.
 
 **File:** `cli-go/internal/api/client.go`
 
-All methods already use `url.PathEscape(name)` which encodes `@org/skill` to `%40org%2Fskill`. 
+All methods already use `url.PathEscape(name)` which encodes `@org/skill` to `%40org%2Fskill`.
 
 **Decision needed:** If API routes use npm-style split (`/@:scope/:name`), the client needs to split the name and construct the path differently:
 
@@ -306,6 +318,7 @@ func (c *Client) GetVersion(name, version string) (*VersionInfo, error) {
 ```
 
 Affected methods (all in `client.go`):
+
 - `Info()`, `GetVersion()`, `DownloadURL()`, `Download()`
 - `Yank()`, `Deprecate()`, `Report()`
 - `GetCollaborators()`, `AddCollaborator()`, `RemoveCollaborator()`
@@ -332,6 +345,7 @@ skillDir := filepath.Join(spmHome, "skills", skill.Name, skill.Version)
 This actually works on Linux/macOS — `@` is valid in directory names, and `/` creates a subdirectory naturally. On Windows, this also works.
 
 The structure becomes:
+
 ```
 ~/.spm/skills/
   @alice/
@@ -424,15 +438,15 @@ export function skillPagePath(name: string): string {
 
 Files to update (replace `` `/skills/${skill.name}` `` with `skillPagePath(skill.name)`):
 
-| File | Line |
-|------|------|
-| `components/SkillCard.tsx` | 14 |
-| `components/SkillRow.tsx` | 19 |
-| `pages/Search.tsx` | 56 |
-| `pages/AuthorProfile.tsx` | 140 |
-| `pages/home/TrendingTabs.tsx` | 155 |
-| `pages/home/HeroSearch.tsx` | 275 |
-| `pages/skill-detail/SkillHero.tsx` | 171 |
+| File                               | Line |
+| ---------------------------------- | ---- |
+| `components/SkillCard.tsx`         | 14   |
+| `components/SkillRow.tsx`          | 19   |
+| `pages/Search.tsx`                 | 56   |
+| `pages/AuthorProfile.tsx`          | 140  |
+| `pages/home/TrendingTabs.tsx`      | 155  |
+| `pages/home/HeroSearch.tsx`        | 275  |
+| `pages/skill-detail/SkillHero.tsx` | 171  |
 
 ### 6.3 API calls (no changes needed)
 
@@ -466,11 +480,12 @@ The formatted output shows `Install: spm install ${skill.name}`. With scoped nam
 ### 7.4 Tool description update
 
 Update example in `mcp/tools.ts:37`:
+
 ```typescript
 // Before:
-description: 'e.g. "pdf-generator"'
+description: 'e.g. "pdf-generator"';
 // After:
-description: 'e.g. "@alice/pdf-generator"'
+description: 'e.g. "@alice/pdf-generator"';
 ```
 
 ---
@@ -510,13 +525,13 @@ description: 'e.g. "@alice/pdf-generator"'
 
 ## 9. Breaking Changes Summary
 
-| What | Who's affected | Mitigation |
-|------|---------------|------------|
-| Skill names change | Lock files (`skills.json`) | Delete and re-install. Only current user affected. |
-| Manifest `name` field | Skill authors | Must update `manifest.json` to `@scope/name` before next publish |
-| API URLs | API consumers, MCP clients | Scoped routes coexist with unscoped during transition |
-| Web URLs | Bookmarks, shared links | Old `/skills/code-review` can 301 redirect to `/skills/@alice/code-review` |
-| `spm install skill` | CLI users | Must use `spm install @scope/skill` |
+| What                  | Who's affected             | Mitigation                                                                 |
+| --------------------- | -------------------------- | -------------------------------------------------------------------------- |
+| Skill names change    | Lock files (`skills.json`) | Delete and re-install. Only current user affected.                         |
+| Manifest `name` field | Skill authors              | Must update `manifest.json` to `@scope/name` before next publish           |
+| API URLs              | API consumers, MCP clients | Scoped routes coexist with unscoped during transition                      |
+| Web URLs              | Bookmarks, shared links    | Old `/skills/code-review` can 301 redirect to `/skills/@alice/code-review` |
+| `spm install skill`   | CLI users                  | Must use `spm install @scope/skill`                                        |
 
 ---
 
@@ -565,6 +580,7 @@ The `Parse()` function was updated to treat unscoped `org/name` (without `@`) as
 **File:** `packages/api/src/routes/resolve.ts`
 
 The resolve endpoint tries an exact DB match first, then strips the scope prefix and retries:
+
 ```typescript
 if (!skill && name.includes('/')) {
   const bareName = name.split('/').pop()!;

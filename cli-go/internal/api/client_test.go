@@ -35,6 +35,76 @@ func jsonHandler(t *testing.T, status int, body any) http.HandlerFunc {
 	}
 }
 
+// --- skillPath ---
+
+func TestSkillPath_Unscoped(t *testing.T) {
+	assert.Equal(t, "/data-viz", skillPath("data-viz"))
+}
+
+func TestSkillPath_Scoped(t *testing.T) {
+	assert.Equal(t, "/@alice/data-viz", skillPath("@alice/data-viz"))
+}
+
+func TestSkillPath_ScopedSpecialChars(t *testing.T) {
+	// Name part gets PathEscaped, scope does not (it's a path segment)
+	assert.Equal(t, "/@my-org/my-skill", skillPath("@my-org/my-skill"))
+}
+
+func TestSkillPath_AtWithoutSlash(t *testing.T) {
+	// Edge case: starts with @ but no slash — falls through to PathEscape (@ is valid in paths)
+	assert.Equal(t, "/@noslash", skillPath("@noslash"))
+}
+
+// --- Scoped name integration tests ---
+
+func TestInfo_Scoped(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v1/skills/@alice/data-viz", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(SkillInfo{
+			Name:          "@alice/data-viz",
+			LatestVersion: "2.0.0",
+			Author:        Author{Username: "alice"},
+		})
+	})
+
+	_, client := newTestServer(t, mux)
+	info, err := client.Info("@alice/data-viz")
+	require.NoError(t, err)
+	assert.Equal(t, "@alice/data-viz", info.Name)
+	assert.Equal(t, "2.0.0", info.LatestVersion)
+}
+
+func TestGetVersion_Scoped(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v1/skills/@org/my-skill/1.0.0", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(VersionInfo{
+			Name:    "@org/my-skill",
+			Version: "1.0.0",
+		})
+	})
+
+	_, client := newTestServer(t, mux)
+	ver, err := client.GetVersion("@org/my-skill", "1.0.0")
+	require.NoError(t, err)
+	assert.Equal(t, "1.0.0", ver.Version)
+}
+
+func TestDownloadURL_Scoped(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v1/skills/@alice/data-viz/1.0.0/download", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "https://r2.example.com/scoped.skl", http.StatusFound)
+	})
+
+	_, client := newTestServer(t, mux)
+	u, err := client.DownloadURL("@alice/data-viz", "1.0.0")
+	require.NoError(t, err)
+	assert.Equal(t, "https://r2.example.com/scoped.skl", u)
+}
+
 // --- Auth header tests ---
 
 func TestAuthHeader_Present(t *testing.T) {

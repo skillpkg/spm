@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { TrustBadge, Text, type TrustTier } from '@spm/ui';
 import { authorProfileQuery } from './author/queries';
+import { skillPath } from '../lib/urls';
 
 interface AuthorDisplaySkill {
   name: string;
@@ -137,7 +138,7 @@ export const AuthorProfile = () => {
         {authorSkills.map((skill) => (
           <Link
             key={skill.name}
-            to={`/skills/${skill.name}`}
+            to={skillPath(skill.name)}
             style={{ textDecoration: 'none', display: 'block' }}
           >
             <div

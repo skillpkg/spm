@@ -11,10 +11,11 @@ import { SecurityTab } from './SecurityTab';
 import { SkillSidebar } from './SkillSidebar';
 
 export const SkillDetail = () => {
-  const { name } = useParams<{ name: string }>();
+  const { scope, name } = useParams<{ scope?: string; name: string }>();
+  const fullName = scope ? `@${scope}/${name}` : name!;
   const [activeTab, setActiveTab] = useTabParam('tab', 'readme');
 
-  const { data: apiData, isLoading } = useQuery(skillDetailQuery(name ?? ''));
+  const { data: apiData, isLoading } = useQuery(skillDetailQuery(fullName));
   const skill = apiData ? apiToSkillFull(apiData) : null;
 
   if (isLoading) {

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { type SearchResultItem } from '../../lib/api';
 import { searchSkillsQuery } from '../search/queries';
 import { TrustBadge, Text, type TrustTier } from '@spm/ui';
+import { skillPath } from '../../lib/urls';
 import { useSearchAutocomplete } from '../../hooks/useSearchAutocomplete';
 import { AutocompleteDropdown } from '../../components/autocomplete/AutocompleteDropdown';
 
@@ -272,7 +273,7 @@ export const HeroSearch = ({
                   {results.map((skill) => (
                     <Link
                       key={skill.name}
-                      to={`/skills/${skill.name}`}
+                      to={skillPath(skill.name)}
                       style={{ textDecoration: 'none', display: 'block' }}
                       onMouseDown={(e) => e.preventDefault()}
                     >

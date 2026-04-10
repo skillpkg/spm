@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { CopyButton, TrustBadge, Text } from '@spm/ui';
 import { LegacyBadge as Badge } from '@spm/ui/shadcn';
 import { type SkillFull } from './types';
+import { skillPath } from '../../lib/urls';
 
 export const SkillHero = ({ skill }: { skill: SkillFull }) => (
   <div
@@ -170,7 +171,7 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
           {skill.dependencies.skills.map((dep) => (
             <Link
               key={`skill-${dep}`}
-              to={`/skills/${dep}`}
+              to={skillPath(dep)}
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: 11,

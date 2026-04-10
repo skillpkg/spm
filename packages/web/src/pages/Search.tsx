@@ -11,6 +11,7 @@ import {
   getTokenAtCursor,
   replaceTokenAtCursor,
 } from '../lib/parse-search-query';
+import { skillPath } from '../lib/urls';
 import { useSearchAutocomplete } from '../hooks/useSearchAutocomplete';
 import { AutocompleteDropdown } from '../components/autocomplete/AutocompleteDropdown';
 
@@ -53,7 +54,7 @@ const apiResultToDisplay = (s: SearchResultItem): DisplaySkill => ({
 
 const SearchResultRow = ({ skill }: { skill: DisplaySkill }) => {
   return (
-    <Link to={`/skills/${skill.name}`} style={{ textDecoration: 'none', display: 'block' }}>
+    <Link to={skillPath(skill.name)} style={{ textDecoration: 'none', display: 'block' }}>
       <div
         style={{
           padding: '16px 20px',

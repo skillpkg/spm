@@ -21,9 +21,14 @@ const deriveBreadcrumbs = (pathname: string): BreadcrumbItem[] => {
 
   const crumbs: BreadcrumbItem[] = [{ label: 'Home', href: '/' }];
 
-  // Skill detail: /skills/:name
+  // Skill detail: /skills/:name or /skills/@:scope/:name
   if (pathname.startsWith('/skills/')) {
-    const name = decodeURIComponent(pathname.split('/')[2] ?? '');
+    const segments = pathname.split('/');
+    const segment2 = decodeURIComponent(segments[2] ?? '');
+    const name =
+      segment2.startsWith('@') && segments[3]
+        ? `${segment2}/${decodeURIComponent(segments[3])}`
+        : segment2;
     crumbs.push({ label: 'Search', href: '/search' });
     crumbs.push({ label: name });
     return crumbs;

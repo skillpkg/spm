@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type SkillSummary } from '../data/constants';
 import { TrustBadge, SecurityBadge, Text } from '@spm/ui';
+import { skillPath } from '../lib/urls';
 
 const ACCENT_COLORS = ['#10b981', '#3b82f6', '#a78bfa'];
 
@@ -11,7 +12,7 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
 
   return (
     <Link
-      to={`/skills/${skill.name}`}
+      to={skillPath(skill.name)}
       className="spm-skill-card"
       style={{ textDecoration: 'none', flex: 1, minWidth: 240, display: 'flex' }}
       onMouseEnter={() => setHovered(true)}

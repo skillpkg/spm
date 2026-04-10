@@ -268,6 +268,19 @@ type Collaborator struct {
 	AddedAt  string `json:"added_at"`
 }
 
+// skillPath builds the URL path segment for a skill name.
+// "@scope/skill" → "/@scope/skill" (split into path segments)
+// "skill" → "/skill" (unscoped, backwards compat)
+func skillPath(name string) string {
+	if strings.HasPrefix(name, "@") {
+		parts := strings.SplitN(name[1:], "/", 2)
+		if len(parts) == 2 {
+			return "/@" + parts[0] + "/" + url.PathEscape(parts[1])
+		}
+	}
+	return "/" + url.PathEscape(name)
+}
+
 // --- API methods ---
 
 // Search searches for skills.
@@ -305,7 +318,7 @@ func (c *Client) Search(params SearchParams) (*SearchResponse, error) {
 // Info gets full metadata for a skill.
 func (c *Client) Info(name string) (*SkillInfo, error) {
 	var resp SkillInfo
-	if err := c.get("/skills/"+url.PathEscape(name), &resp); err != nil {
+	if err := c.get("/skills"+skillPath(name), &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
@@ -314,7 +327,7 @@ func (c *Client) Info(name string) (*SkillInfo, error) {
 // GetVersion gets metadata for a specific version.
 func (c *Client) GetVersion(name, version string) (*VersionInfo, error) {
 	var resp VersionInfo
-	path := fmt.Sprintf("/skills/%s/%s", url.PathEscape(name), url.PathEscape(version))
+	path := fmt.Sprintf("/skills%s/%s", skillPath(name), url.PathEscape(version))
 	if err := c.get(path, &resp); err != nil {
 		return nil, err
 	}
@@ -324,7 +337,7 @@ func (c *Client) GetVersion(name, version string) (*VersionInfo, error) {
 // DownloadURL returns the download redirect URL for a skill version.
 // The caller should follow the redirect to download the .skl file.
 func (c *Client) DownloadURL(name, version string) (string, error) {
-	path := fmt.Sprintf("/skills/%s/%s/download", url.PathEscape(name), url.PathEscape(version))
+	path := fmt.Sprintf("/skills%s/%s/download", skillPath(name), url.PathEscape(version))
 	reqURL := c.BaseURL + apiBasePath + path
 
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
@@ -358,7 +371,7 @@ func (c *Client) DownloadURL(name, version string) (string, error) {
 // Download fetches the .skl file for a skill version directly.
 // Handles both redirect-based and direct-serve download endpoints.
 func (c *Client) Download(name, version string) ([]byte, error) {
-	path := fmt.Sprintf("/skills/%s/%s/download", url.PathEscape(name), url.PathEscape(version))
+	path := fmt.Sprintf("/skills%s/%s/download", skillPath(name), url.PathEscape(version))
 	reqURL := c.BaseURL + apiBasePath + path
 
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
@@ -447,7 +460,7 @@ func (c *Client) Publish(manifestJSON []byte, sklData io.Reader, sklFilename str
 
 // Yank yanks a specific version of a skill.
 func (c *Client) Yank(name, version, reason string) (*YankResponse, error) {
-	path := fmt.Sprintf("/skills/%s/%s", url.PathEscape(name), url.PathEscape(version))
+	path := fmt.Sprintf("/skills%s/%s", skillPath(name), url.PathEscape(version))
 	payload := map[string]string{"reason": reason}
 	var resp YankResponse
 	if err := c.doJSON(http.MethodDelete, path, payload, &resp); err != nil {
@@ -458,7 +471,7 @@ func (c *Client) Yank(name, version, reason string) (*YankResponse, error) {
 
 // Deprecate deprecates or un-deprecates a skill.
 func (c *Client) Deprecate(name string, deprecated bool, msg string) (*DeprecateResponse, error) {
-	path := "/skills/" + url.PathEscape(name)
+	path := "/skills" + skillPath(name)
 	payload := map[string]any{
 		"deprecated":     deprecated,
 		"deprecated_msg": msg,
@@ -472,7 +485,7 @@ func (c *Client) Deprecate(name string, deprecated bool, msg string) (*Deprecate
 
 // Report reports a skill.
 func (c *Client) Report(name, reason, priority string) (*ReportResponse, error) {
-	path := fmt.Sprintf("/skills/%s/report", url.PathEscape(name))
+	path := fmt.Sprintf("/skills%s/report", skillPath(name))
 	payload := map[string]string{
 		"reason":   reason,
 		"priority": priority,
@@ -487,7 +500,7 @@ func (c *Client) Report(name, reason, priority string) (*ReportResponse, error) 
 // GetCollaborators lists collaborators for a skill.
 func (c *Client) GetCollaborators(name string) ([]Collaborator, error) {
 	var resp []Collaborator
-	path := fmt.Sprintf("/skills/%s/collaborators", url.PathEscape(name))
+	path := fmt.Sprintf("/skills%s/collaborators", skillPath(name))
 	if err := c.get(path, &resp); err != nil {
 		return nil, err
 	}
@@ -496,14 +509,14 @@ func (c *Client) GetCollaborators(name string) ([]Collaborator, error) {
 
 // AddCollaborator adds a collaborator to a skill.
 func (c *Client) AddCollaborator(name, username, role string) error {
-	path := fmt.Sprintf("/skills/%s/collaborators", url.PathEscape(name))
+	path := fmt.Sprintf("/skills%s/collaborators", skillPath(name))
 	payload := CollaboratorAction{Username: username, Role: role}
 	return c.doJSON(http.MethodPost, path, payload, nil)
 }
 
 // RemoveCollaborator removes a collaborator from a skill.
 func (c *Client) RemoveCollaborator(name, username string) error {
-	path := fmt.Sprintf("/skills/%s/collaborators/%s", url.PathEscape(name), url.PathEscape(username))
+	path := fmt.Sprintf("/skills%s/collaborators/%s", skillPath(name), url.PathEscape(username))
 	return c.doJSON(http.MethodDelete, path, nil, nil)
 }
 
@@ -535,7 +548,7 @@ func (c *Client) Resolve(skills []ResolveSkill, platform string) (*ResolveRespon
 
 // VerifySignature verifies a skill's signature via the API.
 func (c *Client) VerifySignature(name, version string) (map[string]any, error) {
-	path := fmt.Sprintf("/skills/%s/%s/verify-signature", url.PathEscape(name), url.PathEscape(version))
+	path := fmt.Sprintf("/skills%s/%s/verify-signature", skillPath(name), url.PathEscape(version))
 	var resp map[string]any
 	if err := c.get(path, &resp); err != nil {
 		return nil, err
@@ -579,7 +592,7 @@ func (c *Client) AttachSignature(name, version string, sigstoreBundle []byte, si
 		return nil, fmt.Errorf("closing multipart writer: %w", err)
 	}
 
-	path := fmt.Sprintf("/skills/%s/sign", url.PathEscape(name))
+	path := fmt.Sprintf("/skills%s/sign", skillPath(name))
 	reqURL := c.BaseURL + apiBasePath + path
 	req, err := http.NewRequest(http.MethodPost, reqURL, &body)
 	if err != nil {
@@ -612,7 +625,7 @@ func (c *Client) AttachSignature(name, version string, sigstoreBundle []byte, si
 
 // Rescan triggers a re-scan of a skill version.
 func (c *Client) Rescan(name, version string) (map[string]any, error) {
-	path := fmt.Sprintf("/skills/%s/%s/rescan", url.PathEscape(name), url.PathEscape(version))
+	path := fmt.Sprintf("/skills%s/%s/rescan", skillPath(name), url.PathEscape(version))
 	var resp map[string]any
 	if err := c.doJSON(http.MethodPost, path, nil, &resp); err != nil {
 		return nil, err

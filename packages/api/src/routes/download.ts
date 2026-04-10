@@ -1,17 +1,19 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import { eq, and, sql } from 'drizzle-orm';
 import { ERROR_CODES, createApiError } from '@spm/shared';
 import type { AppEnv } from '../types.js';
 import { skills, versions, downloads } from '../db/schema.js';
 import { getObject } from '../services/r2.js';
+import { extractSkillName } from './helpers.js';
 
 export const downloadRoutes = new Hono<AppEnv>();
 
 // ── GET /skills/:name/:version/download — download .skl package ──
 
-downloadRoutes.get('/skills/:name/:version/download', async (c) => {
+const downloadHandler = async (c: Context<AppEnv>) => {
   const db = c.get('db');
-  const name = c.req.param('name');
+  const name = extractSkillName(c);
   const version = c.req.param('version');
 
   // Resolve skill
@@ -110,4 +112,8 @@ downloadRoutes.get('/skills/:name/:version/download', async (c) => {
       'X-Checksum-Sha256': ver.checksumSha256,
     },
   });
-});
+};
+
+// Register scoped route first, then unscoped for backwards compatibility
+downloadRoutes.get('/skills/@:scope/:name/:version/download', downloadHandler);
+downloadRoutes.get('/skills/:name/:version/download', downloadHandler);

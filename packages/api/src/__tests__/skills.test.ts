@@ -31,9 +31,9 @@ describe('name validation', () => {
     });
 
     it('should reject names that are too long', () => {
-      const result = validateSkillName('a'.repeat(51));
+      const result = validateSkillName('a'.repeat(65));
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('at most 50');
+      expect(result.error).toContain('at most 64');
     });
 
     it('should reject names not starting with a letter', () => {
@@ -349,10 +349,10 @@ describe('name validation — edge cases', () => {
     expect(validateSkillName(name50).valid).toBe(true);
   });
 
-  it('should reject 51 character name', () => {
-    const name51 = 'a' + 'b'.repeat(50);
-    expect(name51.length).toBe(51);
-    expect(validateSkillName(name51).valid).toBe(false);
+  it('should reject 65 character name', () => {
+    const name65 = 'a' + 'b'.repeat(64);
+    expect(name65.length).toBe(65);
+    expect(validateSkillName(name65).valid).toBe(false);
   });
 
   it('should reject names starting with a hyphen', () => {
