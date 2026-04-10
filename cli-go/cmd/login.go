@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/atotto/clipboard"
 	"github.com/pkg/browser"
 	"github.com/skillpkg/spm/internal/api"
 	"github.com/skillpkg/spm/internal/config"
@@ -14,6 +15,10 @@ import (
 // BrowserOpen is the function used to open URLs in the browser.
 // Can be overridden in tests.
 var BrowserOpen = browser.OpenURL
+
+// clipboardWrite is the function used to copy text to the clipboard.
+// Can be overridden in tests.
+var clipboardWrite = clipboard.WriteAll
 
 var loginCmd = &cobra.Command{
 	Use:   "login",
@@ -62,13 +67,20 @@ func runLogin(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to start authentication")
 	}
 
+	// Try to copy code to clipboard
+	copied := clipboardWrite(dcResp.UserCode) == nil
+
 	Out.Log("")
 	Out.Log("Opening GitHub for authentication...")
 	Out.Log("")
 	Out.Log("If your browser didn't open, go to:")
 	Out.Log("  %s", output.Cyan(dcResp.VerificationURI))
 	Out.Log("")
-	Out.Log("And enter code: %s", output.Bold(dcResp.UserCode))
+	if copied {
+		Out.Log("And paste the code: %s (copied to clipboard)", output.Bold(dcResp.UserCode))
+	} else {
+		Out.Log("And enter code: %s", output.Bold(dcResp.UserCode))
+	}
 	Out.Log("")
 
 	// Try to open browser

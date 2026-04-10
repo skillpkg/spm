@@ -15,6 +15,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/pkg/browser"
 )
 
 // SignResult holds the output of a signing operation.
@@ -421,7 +423,9 @@ func NewSigner() Signer {
 			},
 		}
 	} else {
-		inner = &InteractiveSigner{}
+		inner = &InteractiveSigner{
+			OpenBrowserFn: browser.OpenURL,
+		}
 	}
 	return &GracefulSigner{Inner: inner}
 }

@@ -373,7 +373,7 @@ skillsRoutes.post('/skills', authed, async (c) => {
       status: scanResult.securityLevel === 'flagged' ? 'flagged' : 'published',
       name,
       version,
-      url: `/api/v1/skills/${name}/${version}`,
+      url: `https://skillpkg.dev/skills/${name}`,
       checksum_sha256: checksum,
       security_level: scanResult.securityLevel,
       scans: scanResult.layers.map((l) => ({
