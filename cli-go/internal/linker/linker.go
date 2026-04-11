@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // AgentDir represents a known agent's skills directory.
@@ -48,14 +49,26 @@ func NewDefault(homeDir string) *Linker {
 	return New(DefaultAgentDirs(homeDir))
 }
 
+// bareName extracts the short name from a scoped skill name.
+// "@scope/my-skill" → "my-skill", "my-skill" → "my-skill"
+func bareName(name string) string {
+	if i := strings.LastIndex(name, "/"); i >= 0 {
+		return name[i+1:]
+	}
+	return name
+}
+
 // LinkSkill links a skill to all agent directories.
 // Tries symlink first, falls back to copy if symlink fails.
+// Scoped names like "@scope/my-skill" are linked as just "my-skill"
+// so the slash command is /my-skill instead of /@scope/my-skill.
 func (l *Linker) LinkSkill(skillPath string, skillName string) (*LinkResult, error) {
 	linkedAgents := make([]string, 0)
+	dirName := bareName(skillName)
 
 	// Try symlinks first
 	for _, agent := range l.AgentDirs {
-		targetDir := filepath.Join(agent.SkillsDir, skillName)
+		targetDir := filepath.Join(agent.SkillsDir, dirName)
 		if err := trySymlink(skillPath, targetDir); err == nil {
 			linkedAgents = append(linkedAgents, agent.Name)
 		}
@@ -72,7 +85,7 @@ func (l *Linker) LinkSkill(skillPath string, skillName string) (*LinkResult, err
 	// Fallback to copy
 	copiedAgents := make([]string, 0)
 	for _, agent := range l.AgentDirs {
-		targetDir := filepath.Join(agent.SkillsDir, skillName)
+		targetDir := filepath.Join(agent.SkillsDir, dirName)
 		if err := tryCopy(skillPath, targetDir); err == nil {
 			copiedAgents = append(copiedAgents, agent.Name)
 		}
@@ -89,9 +102,10 @@ func (l *Linker) LinkSkill(skillPath string, skillName string) (*LinkResult, err
 // Returns the list of agent names from which the skill was removed.
 func (l *Linker) UnlinkSkill(skillName string) ([]string, error) {
 	unlinkedAgents := make([]string, 0)
+	dirName := bareName(skillName)
 
 	for _, agent := range l.AgentDirs {
-		targetDir := filepath.Join(agent.SkillsDir, skillName)
+		targetDir := filepath.Join(agent.SkillsDir, dirName)
 
 		// Check if it's a symlink
 		fi, err := os.Lstat(targetDir)
@@ -118,9 +132,10 @@ func (l *Linker) UnlinkSkill(skillName string) ([]string, error) {
 // GetLinkedAgents returns the list of agent names where the skill is linked.
 func (l *Linker) GetLinkedAgents(skillName string) []string {
 	linked := make([]string, 0)
+	dirName := bareName(skillName)
 
 	for _, agent := range l.AgentDirs {
-		targetDir := filepath.Join(agent.SkillsDir, skillName)
+		targetDir := filepath.Join(agent.SkillsDir, dirName)
 		if _, err := os.Lstat(targetDir); err == nil {
 			linked = append(linked, agent.Name)
 		}
@@ -131,8 +146,9 @@ func (l *Linker) GetLinkedAgents(skillName string) []string {
 
 // IsSkillCopy returns true if the skill in agent directories is a copy (not a symlink).
 func (l *Linker) IsSkillCopy(skillName string) bool {
+	dirName := bareName(skillName)
 	for _, agent := range l.AgentDirs {
-		targetDir := filepath.Join(agent.SkillsDir, skillName)
+		targetDir := filepath.Join(agent.SkillsDir, dirName)
 		fi, err := os.Lstat(targetDir)
 		if err != nil {
 			continue
