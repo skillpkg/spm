@@ -587,7 +587,7 @@ export const Search = () => {
         >
           {isLoading ? (
             <>
-              {[1, 2, 3, 4, 5].map((i) => (
+              {[0, 1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
                   style={{
@@ -595,69 +595,75 @@ export const Search = () => {
                     borderBottom: '1px solid #1a1d2744',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div
-                        style={{
-                          width: 160 + i * 15,
-                          height: 18,
-                          borderRadius: 4,
-                          background: 'var(--color-bg-card)',
-                          animation: 'pulse 1.5s ease-in-out infinite',
-                          animationDelay: `${i * 0.08}s`,
-                        }}
-                      />
-                      <div
-                        style={{
-                          width: 44,
-                          height: 14,
-                          borderRadius: 4,
-                          background: 'var(--color-bg-card)',
-                          animation: 'pulse 1.5s ease-in-out infinite',
-                          animationDelay: `${i * 0.08 + 0.1}s`,
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        width: 80,
-                        height: 14,
-                        borderRadius: 4,
-                        background: 'var(--color-bg-card)',
-                        animation: 'pulse 1.5s ease-in-out infinite',
-                        animationDelay: `${i * 0.08 + 0.2}s`,
-                      }}
-                    />
-                  </div>
+                  {/* Row 1: name + version + badges | downloads + rating */}
                   <div
                     style={{
-                      width: `${75 - i * 5}%`,
-                      height: 13,
-                      borderRadius: 4,
-                      background: 'var(--color-bg-card)',
-                      marginBottom: 10,
-                      animation: 'pulse 1.5s ease-in-out infinite',
-                      animationDelay: `${i * 0.08 + 0.15}s`,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: 6,
                     }}
-                  />
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {[50, 40, 55].map((w, j) => (
-                      <div
-                        key={j}
-                        style={{
-                          width: w,
-                          height: 12,
-                          borderRadius: 4,
-                          background: 'var(--color-bg-card)',
-                          animation: 'pulse 1.5s ease-in-out infinite',
-                          animationDelay: `${i * 0.08 + j * 0.05 + 0.2}s`,
-                        }}
-                      />
-                    ))}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {/* Skill name */}
+                      <div className="skel-shimmer" style={{ width: 150 + i * 20, height: 18, borderRadius: 4 }} />
+                      {/* Version */}
+                      <div className="skel-shimmer" style={{ width: 42, height: 14, borderRadius: 4 }} />
+                      {/* Trust badge */}
+                      <div className="skel-shimmer" style={{ width: 60, height: 18, borderRadius: 10 }} />
+                      {/* Security badge */}
+                      <div className="skel-shimmer" style={{ width: 20, height: 18, borderRadius: 4 }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: 16 }}>
+                      {/* Downloads */}
+                      <div className="skel-shimmer" style={{ width: 40, height: 14, borderRadius: 4 }} />
+                      {/* Rating */}
+                      <div className="skel-shimmer" style={{ width: 32, height: 14, borderRadius: 4 }} />
+                    </div>
+                  </div>
+                  {/* Row 2: description */}
+                  <div style={{ marginBottom: 8, marginTop: 0 }}>
+                    <div className="skel-shimmer" style={{ width: `${85 - i * 6}%`, height: 13, borderRadius: 4, marginBottom: 4 }} />
+                    <div className="skel-shimmer" style={{ width: `${60 - i * 4}%`, height: 13, borderRadius: 4 }} />
+                  </div>
+                  {/* Row 3: author + tags */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {/* Author */}
+                    <div className="skel-shimmer" style={{ width: 80, height: 12, borderRadius: 4 }} />
+                    {/* Tags */}
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {[48, 56, 42].map((w, j) => (
+                        <div
+                          key={j}
+                          className="skel-shimmer"
+                          style={{
+                            width: w,
+                            height: 22,
+                            borderRadius: 4,
+                            border: '1px solid var(--color-border-default)',
+                          }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               ))}
-              <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }`}</style>
+              <style>{`
+                @keyframes shimmer {
+                  0% { background-position: -400px 0; }
+                  100% { background-position: 400px 0; }
+                }
+                .skel-shimmer {
+                  background: linear-gradient(
+                    90deg,
+                    rgba(255,255,255,0.03) 25%,
+                    rgba(255,255,255,0.08) 50%,
+                    rgba(255,255,255,0.03) 75%
+                  );
+                  background-size: 800px 100%;
+                  animation: shimmer 1.8s ease-in-out infinite;
+                }
+              `}</style>
             </>
           ) : filtered.length > 0 ? (
             filtered.map((skill) => <SearchResultRow key={skill.name} skill={skill} />)
