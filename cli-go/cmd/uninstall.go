@@ -13,34 +13,36 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var uninstallFlagKeepFiles bool
-
 var uninstallCmd = &cobra.Command{
-	Use:     "uninstall <name> [name...]",
-	Aliases: []string{"remove", "rm", "un"},
-	Short:   "Uninstall one or more skills",
-	Long: `Remove skills from agent directories, skills.json, and optionally delete files.
+	Use:     "uninstall <@scope/name> [...]",
+	Aliases: []string{"remove", "rm"},
+	Short:   "Remove one or more installed skills",
+	Long: `Remove skills by name. For each skill this will:
+
+  1. Remove the entry from skills.json
+  2. Remove the entry from skills-lock.json
+  3. Unlink from all agent directories
+  4. Remove cached files from ~/.spm/skills/
 
 Examples:
-  spm uninstall my-skill
-  spm uninstall skill-a skill-b
-  spm uninstall my-skill --keep-files`,
+  spm uninstall @scope/my-skill
+  spm uninstall @alice/skill-a @bob/skill-b
+  spm remove @scope/my-skill
+  spm rm @scope/my-skill`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: runUninstall,
 }
 
 func init() {
-	uninstallCmd.Flags().BoolVar(&uninstallFlagKeepFiles, "keep-files", false, "Unlink but don't delete skill files")
 	rootCmd.AddCommand(uninstallCmd)
 }
 
 // uninstallResult holds the result of uninstalling a single skill.
 type uninstallResult struct {
-	Name            string   `json:"name"`
-	UnlinkedAgents  []string `json:"unlinked_agents,omitempty"`
-	RemovedFromJSON bool     `json:"removed_from_json"`
-	RemovedFromLock bool     `json:"removed_from_lock"`
-	FilesDeleted    bool     `json:"files_deleted"`
+	Name           string   `json:"name"`
+	Version        string   `json:"version,omitempty"`
+	UnlinkedAgents []string `json:"unlinked_agents,omitempty"`
+	CacheRemoved   bool     `json:"cache_removed"`
 }
 
 // uninstallJSONOutput is the JSON mode output for the uninstall command.
@@ -48,94 +50,136 @@ type uninstallJSONOutput struct {
 	Command string            `json:"command"`
 	Status  string            `json:"status"`
 	Skills  []uninstallResult `json:"skills"`
+	Errors  []string          `json:"errors,omitempty"`
 }
 
 func runUninstall(cmd *cobra.Command, args []string) error {
-	spmHome, err := config.HomeDir()
-	if err != nil {
-		return fmt.Errorf("determining SPM home: %w", err)
-	}
-
-	homeDir := filepath.Dir(spmHome)
 	cwd, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("getting working directory: %w", err)
 	}
 
-	lnk := linker.NewDefault(homeDir)
-	results := make([]uninstallResult, 0, len(args))
+	spmHome, err := config.HomeDir()
+	if err != nil {
+		return fmt.Errorf("determining SPM home: %w", err)
+	}
 
-	for _, skillName := range args {
-		res := uninstallSkill(skillName, cwd, spmHome, lnk)
+	// Check that skills.json exists — error gracefully if not
+	sj, err := skillsjson.LoadSkillsJson(cwd)
+	if err != nil {
+		return fmt.Errorf("loading skills.json: %w", err)
+	}
+	if sj == nil {
+		if Out.Mode == output.ModeJSON {
+			return Out.LogJSON(uninstallJSONOutput{
+				Command: "uninstall",
+				Status:  "error",
+				Skills:  []uninstallResult{},
+				Errors:  []string{"no skills.json found in the current directory"},
+			})
+		}
+		Out.LogError("No skills.json found in the current directory.")
+		Out.Log("  Initialize a project with %s first.", output.Cyan("spm init"))
+		return fmt.Errorf("no skills.json found")
+	}
+
+	// Load lock file to get version info
+	lock, _ := skillsjson.LoadLockFile(cwd)
+
+	// Set up linker
+	homeDir := filepath.Dir(spmHome)
+	agentDirs := linker.DefaultAgentDirs(homeDir)
+	lnk := linker.New(agentDirs)
+
+	results := make([]uninstallResult, 0, len(args))
+	var errMsgs []string
+
+	for _, name := range args {
+		res := uninstallResult{Name: name}
+
+		// Get version from lock file before removing
+		if lock != nil {
+			if entry, ok := lock.Skills[name]; ok {
+				res.Version = entry.Version
+			}
+		}
+
+		// 1. Remove from skills.json
+		found, err := skillsjson.RemoveSkill(cwd, name)
+		if err != nil {
+			errMsg := fmt.Sprintf("failed to update skills.json for %s: %s", name, err)
+			errMsgs = append(errMsgs, errMsg)
+			Out.LogError("%s", errMsg)
+			continue
+		}
+		if !found {
+			errMsg := fmt.Sprintf("skill %s not found in skills.json", name)
+			errMsgs = append(errMsgs, errMsg)
+			Out.LogError("%s", errMsg)
+			continue
+		}
+
+		// 2. Remove from skills-lock.json
+		if _, err := skillsjson.RemoveFromLockFile(cwd, name); err != nil {
+			Out.LogVerbose("Failed to update lock file for %s: %s", name, err)
+		}
+
+		// 3. Unlink from agent directories
+		unlinkedAgents, err := lnk.UnlinkSkill(name)
+		if err != nil {
+			Out.LogVerbose("Failed to unlink %s: %s", name, err)
+		}
+		res.UnlinkedAgents = unlinkedAgents
+
+		// 4. Remove from local cache (~/.spm/skills/<name>/)
+		cacheDir := filepath.Join(spmHome, "skills", name)
+		if _, statErr := os.Stat(cacheDir); statErr == nil {
+			if err := os.RemoveAll(cacheDir); err != nil {
+				Out.LogVerbose("Failed to remove cache for %s: %s", name, err)
+			} else {
+				res.CacheRemoved = true
+			}
+		}
+
 		results = append(results, res)
 	}
 
+	// JSON output
 	if Out.Mode == output.ModeJSON {
+		status := "success"
+		if len(errMsgs) > 0 && len(results) == 0 {
+			status = "error"
+		} else if len(errMsgs) > 0 {
+			status = "partial"
+		}
 		return Out.LogJSON(uninstallJSONOutput{
 			Command: "uninstall",
-			Status:  "success",
+			Status:  status,
 			Skills:  results,
+			Errors:  errMsgs,
 		})
+	}
+
+	// Human output
+	if len(results) == 0 {
+		return fmt.Errorf("no skills were uninstalled")
 	}
 
 	Out.Log("")
 	for _, r := range results {
-		Out.Log("%s %s uninstalled", output.Icons["success"], output.Cyan(r.Name))
+		versionStr := ""
+		if r.Version != "" {
+			versionStr = "@" + r.Version
+		}
+		Out.Log("%s %s%s removed", output.Icons["success"],
+			output.Cyan(r.Name), output.Green(versionStr))
 		if len(r.UnlinkedAgents) > 0 {
 			Out.Log("  Unlinked from: %s", strings.Join(r.UnlinkedAgents, ", "))
 		}
-		if r.RemovedFromJSON {
-			Out.Log("  Removed from skills.json")
-		}
-		if r.RemovedFromLock {
-			Out.Log("  Removed from skills-lock.json")
-		}
-		if r.FilesDeleted {
-			Out.Log("  Skill files deleted")
-		}
 	}
+
+	Out.Log("")
+	Out.Log("%s %d skill(s) removed", output.Icons["success"], len(results))
 
 	return nil
-}
-
-func uninstallSkill(name, cwd, spmHome string, lnk *linker.Linker) uninstallResult {
-	res := uninstallResult{Name: name}
-
-	// Unlink from all agent directories
-	unlinked, err := lnk.UnlinkSkill(name)
-	if err != nil {
-		Out.LogVerbose("Failed to unlink %s: %s", name, err)
-	} else {
-		res.UnlinkedAgents = unlinked
-	}
-
-	// Remove from skills.json
-	removed, err := skillsjson.RemoveSkill(cwd, name)
-	if err != nil {
-		Out.LogVerbose("Failed to remove %s from skills.json: %s", name, err)
-	}
-	res.RemovedFromJSON = removed
-
-	// Remove from lock file
-	removedLock, err := skillsjson.RemoveFromLockFile(cwd, name)
-	if err != nil {
-		Out.LogVerbose("Failed to remove %s from lock file: %s", name, err)
-	}
-	res.RemovedFromLock = removedLock
-
-	// Delete skill files unless --keep-files
-	if !uninstallFlagKeepFiles {
-		skillStoreDir := filepath.Join(spmHome, "skills", name)
-		if err := os.RemoveAll(skillStoreDir); err != nil {
-			Out.LogVerbose("Failed to remove skill files at %s: %s", skillStoreDir, err)
-		} else {
-			res.FilesDeleted = true
-		}
-
-		// Also remove cache
-		cacheDir := filepath.Join(spmHome, "cache", name)
-		_ = os.RemoveAll(cacheDir)
-	}
-
-	return res
 }

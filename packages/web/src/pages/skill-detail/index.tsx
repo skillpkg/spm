@@ -42,17 +42,29 @@ export const SkillDetail = () => {
         >
           <div style={{ flex: 1, minWidth: 0 }}>
             {/* Title */}
-            <div className="skel-shimmer" style={{ width: 260, height: 28, borderRadius: 6, marginBottom: 8 }} />
+            <div
+              className="skel-shimmer"
+              style={{ width: 260, height: 28, borderRadius: 6, marginBottom: 8 }}
+            />
             {/* Scope / author */}
-            <div className="skel-shimmer" style={{ width: 120, height: 14, borderRadius: 4, marginBottom: 12 }} />
+            <div
+              className="skel-shimmer"
+              style={{ width: 120, height: 14, borderRadius: 4, marginBottom: 12 }}
+            />
             {/* Version + trust badge */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <div className="skel-shimmer" style={{ width: 56, height: 20, borderRadius: 4 }} />
               <div className="skel-shimmer" style={{ width: 72, height: 22, borderRadius: 10 }} />
             </div>
             {/* Description */}
-            <div className="skel-shimmer" style={{ width: '80%', height: 14, borderRadius: 4, marginBottom: 6 }} />
-            <div className="skel-shimmer" style={{ width: '55%', height: 14, borderRadius: 4, marginBottom: 16 }} />
+            <div
+              className="skel-shimmer"
+              style={{ width: '80%', height: 14, borderRadius: 4, marginBottom: 6 }}
+            />
+            <div
+              className="skel-shimmer"
+              style={{ width: '55%', height: 14, borderRadius: 4, marginBottom: 16 }}
+            />
             {/* Category badges */}
             <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
               <div className="skel-shimmer" style={{ width: 64, height: 22, borderRadius: 4 }} />
@@ -61,13 +73,25 @@ export const SkillDetail = () => {
             {/* Tags */}
             <div style={{ display: 'flex', gap: 6 }}>
               {[52, 64, 48, 56].map((w, j) => (
-                <div key={j} className="skel-shimmer" style={{ width: w, height: 22, borderRadius: 4, border: '1px solid var(--color-border-default)' }} />
+                <div
+                  key={j}
+                  className="skel-shimmer"
+                  style={{
+                    width: w,
+                    height: 22,
+                    borderRadius: 4,
+                    border: '1px solid var(--color-border-default)',
+                  }}
+                />
               ))}
             </div>
           </div>
           {/* Install box */}
           <div style={{ width: 220, flexShrink: 0, marginLeft: 24 }}>
-            <div className="skel-shimmer" style={{ width: '100%', height: 36, borderRadius: 6, marginBottom: 8 }} />
+            <div
+              className="skel-shimmer"
+              style={{ width: '100%', height: 36, borderRadius: 6, marginBottom: 8 }}
+            />
             <div className="skel-shimmer" style={{ width: '60%', height: 12, borderRadius: 4 }} />
           </div>
         </div>
@@ -107,11 +131,29 @@ export const SkillDetail = () => {
           {/* Sidebar */}
           <aside style={{ width: 240, flexShrink: 0 }}>
             {[56, 100, 100, 80, 100, 60].map((pct, i) => (
-              <div key={i} className="skel-shimmer" style={{ width: `${pct}%`, height: i === 0 ? 18 : 14, borderRadius: 4, marginBottom: i === 0 ? 12 : 8 }} />
+              <div
+                key={i}
+                className="skel-shimmer"
+                style={{
+                  width: `${pct}%`,
+                  height: i === 0 ? 18 : 14,
+                  borderRadius: 4,
+                  marginBottom: i === 0 ? 12 : 8,
+                }}
+              />
             ))}
             <div style={{ height: 16 }} />
             {[56, 100, 80].map((pct, i) => (
-              <div key={`b${i}`} className="skel-shimmer" style={{ width: `${pct}%`, height: i === 0 ? 18 : 14, borderRadius: 4, marginBottom: i === 0 ? 12 : 8 }} />
+              <div
+                key={`b${i}`}
+                className="skel-shimmer"
+                style={{
+                  width: `${pct}%`,
+                  height: i === 0 ? 18 : 14,
+                  borderRadius: 4,
+                  marginBottom: i === 0 ? 12 : 8,
+                }}
+              />
             ))}
           </aside>
         </div>

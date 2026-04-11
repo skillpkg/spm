@@ -439,350 +439,350 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
   const cacheKey = buildCacheKey('skills', queryString);
 
   return cachedResponse(c, cacheKey, CACHE_TTLS.search, async () => {
-  const db = c.get('db');
-  const params = c.req.valid('query');
-  const { q, author, category, tag, signed, trust, platform, security, sort, page, per_page } =
-    params;
-  const offset = (page - 1) * per_page;
+    const db = c.get('db');
+    const params = c.req.valid('query');
+    const { q, author, category, tag, signed, trust, platform, security, sort, page, per_page } =
+      params;
+    const offset = (page - 1) * per_page;
 
-  // Build WHERE conditions — always exclude blocked skills from public search
-  const conditions = [ne(skills.status, 'blocked')];
+    // Build WHERE conditions — always exclude blocked skills from public search
+    const conditions = [ne(skills.status, 'blocked')];
 
-  if (author) {
-    const authors = author
-      .split(',')
-      .map((a) => a.trim())
-      .filter(Boolean);
-    if (authors.length === 1) {
-      conditions.push(
-        sql`${skills.ownerId} IN (
+    if (author) {
+      const authors = author
+        .split(',')
+        .map((a) => a.trim())
+        .filter(Boolean);
+      if (authors.length === 1) {
+        conditions.push(
+          sql`${skills.ownerId} IN (
           SELECT ${users.id} FROM ${users}
           WHERE ${users.username} = ${authors[0]}
         )`,
-      );
-    } else if (authors.length > 1) {
-      conditions.push(
-        sql`${skills.ownerId} IN (
+        );
+      } else if (authors.length > 1) {
+        conditions.push(
+          sql`${skills.ownerId} IN (
           SELECT ${users.id} FROM ${users}
           WHERE ${users.username} IN (${sql.join(
             authors.map((a) => sql`${a}`),
             sql`, `,
           )})
         )`,
-      );
+        );
+      }
     }
-  }
 
-  if (q) {
-    // Use GIN full-text search with tag matching fallback
-    const searchCondition = buildSearchCondition(q);
-    if (searchCondition) {
-      conditions.push(searchCondition);
-    } else {
-      // Fallback to ILIKE if the query can't be parsed into tsquery
-      const fallback = or(ilike(skills.name, `%${q}%`), ilike(skills.description, `%${q}%`));
-      if (fallback) conditions.push(fallback);
+    if (q) {
+      // Use GIN full-text search with tag matching fallback
+      const searchCondition = buildSearchCondition(q);
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      } else {
+        // Fallback to ILIKE if the query can't be parsed into tsquery
+        const fallback = or(ilike(skills.name, `%${q}%`), ilike(skills.description, `%${q}%`));
+        if (fallback) conditions.push(fallback);
+      }
     }
-  }
 
-  if (category) {
-    const categories = category
-      .split(',')
-      .map((c) => c.trim())
-      .filter(Boolean);
-    if (categories.length === 1) {
-      conditions.push(sql`${categories[0]} = ANY(${skills.categories})`);
-    } else if (categories.length > 1) {
+    if (category) {
+      const categories = category
+        .split(',')
+        .map((c) => c.trim())
+        .filter(Boolean);
+      if (categories.length === 1) {
+        conditions.push(sql`${categories[0]} = ANY(${skills.categories})`);
+      } else if (categories.length > 1) {
+        conditions.push(
+          sql`${skills.categories} && ARRAY[${sql.join(
+            categories.map((c) => sql`${c}`),
+            sql`, `,
+          )}]::text[]`,
+        );
+      }
+    }
+
+    if (platform) {
       conditions.push(
-        sql`${skills.categories} && ARRAY[${sql.join(
-          categories.map((c) => sql`${c}`),
-          sql`, `,
-        )}]::text[]`,
-      );
-    }
-  }
-
-  if (platform) {
-    conditions.push(
-      sql`${skills.id} IN (
+        sql`${skills.id} IN (
         SELECT ${skillPlatforms.skillId} FROM ${skillPlatforms}
         WHERE ${skillPlatforms.platform} = ${platform} OR ${skillPlatforms.platform} = '*'
       )`,
-    );
-  }
+      );
+    }
 
-  // Trust tier filtering: filter by owner's trust tier >= requested tier
-  if (trust) {
-    const tierIndex = TRUST_TIERS.indexOf(trust as (typeof TRUST_TIERS)[number]);
-    if (tierIndex >= 0) {
-      const allowedTiers = TRUST_TIERS.slice(tierIndex);
-      conditions.push(
-        sql`${skills.ownerId} IN (
+    // Trust tier filtering: filter by owner's trust tier >= requested tier
+    if (trust) {
+      const tierIndex = TRUST_TIERS.indexOf(trust as (typeof TRUST_TIERS)[number]);
+      if (tierIndex >= 0) {
+        const allowedTiers = TRUST_TIERS.slice(tierIndex);
+        conditions.push(
+          sql`${skills.ownerId} IN (
           SELECT ${users.id} FROM ${users}
           WHERE ${users.trustTier} IN (${sql.join(
             allowedTiers.map((t) => sql`${t}`),
             sql`, `,
           )})
         )`,
-      );
+        );
+      }
     }
-  }
 
-  if (tag) {
-    const tags = tag
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-    if (tags.length === 1) {
-      conditions.push(
-        sql`${skills.id} IN (
+    if (tag) {
+      const tags = tag
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
+      if (tags.length === 1) {
+        conditions.push(
+          sql`${skills.id} IN (
           SELECT ${skillTags.skillId} FROM ${skillTags}
           WHERE ${skillTags.tag} ILIKE ${'%' + tags[0] + '%'}
         )`,
-      );
-    } else if (tags.length > 1) {
-      conditions.push(
-        sql`${skills.id} IN (
+        );
+      } else if (tags.length > 1) {
+        conditions.push(
+          sql`${skills.id} IN (
           SELECT ${skillTags.skillId} FROM ${skillTags}
           WHERE ${skillTags.tag} ILIKE ANY(ARRAY[${sql.join(
             tags.map((t) => sql`${'%' + t + '%'}`),
             sql`, `,
           )}])
         )`,
+        );
+      }
+    }
+
+    if (signed === 'true') {
+      conditions.push(
+        sql`${skills.id} IN (
+        SELECT ${versions.skillId} FROM ${versions}
+        WHERE ${versions.sigstoreBundleKey} IS NOT NULL
+        AND ${versions.yanked} = false
+      )`,
+      );
+    } else if (signed === 'false') {
+      conditions.push(
+        sql`${skills.id} NOT IN (
+        SELECT ${versions.skillId} FROM ${versions}
+        WHERE ${versions.sigstoreBundleKey} IS NOT NULL
+        AND ${versions.yanked} = false
+      )`,
       );
     }
-  }
 
-  if (signed === 'true') {
-    conditions.push(
-      sql`${skills.id} IN (
-        SELECT ${versions.skillId} FROM ${versions}
-        WHERE ${versions.sigstoreBundleKey} IS NOT NULL
-        AND ${versions.yanked} = false
-      )`,
-    );
-  } else if (signed === 'false') {
-    conditions.push(
-      sql`${skills.id} NOT IN (
-        SELECT ${versions.skillId} FROM ${versions}
-        WHERE ${versions.sigstoreBundleKey} IS NOT NULL
-        AND ${versions.yanked} = false
-      )`,
-    );
-  }
+    if (security && security !== 'any') {
+      conditions.push(eq(skills.scanSecurityLevel, security));
+    }
 
-  if (security && security !== 'any') {
-    conditions.push(eq(skills.scanSecurityLevel, security));
-  }
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    // Count total
+    const [totalRow] = await db.select({ total: count() }).from(skills).where(whereClause);
+    const total = totalRow.total;
 
-  // Count total
-  const [totalRow] = await db.select({ total: count() }).from(skills).where(whereClause);
-  const total = totalRow.total;
-
-  // Sort
-  let orderBy;
-  switch (sort) {
-    case 'downloads':
-      orderBy = desc(
-        sql`(SELECT count(*) FROM ${downloads}
+    // Sort
+    let orderBy;
+    switch (sort) {
+      case 'downloads':
+        orderBy = desc(
+          sql`(SELECT count(*) FROM ${downloads}
              JOIN ${versions} ON ${versions.id} = ${downloads.versionId}
              WHERE ${versions.skillId} = ${skills.id})`,
-      );
-      break;
-    case 'rating':
-      orderBy = desc(skills.ratingAvg);
-      break;
-    case 'updated':
-      orderBy = desc(skills.updatedAt);
-      break;
-    case 'new':
-      orderBy = desc(skills.createdAt);
-      break;
-    case 'relevance':
-    default:
-      if (q) {
-        const rankExpr = buildRankExpression(q);
-        if (rankExpr) {
-          // Use ts_rank for proper relevance scoring, with name exact-match boost
-          orderBy = desc(
-            sql`(${rankExpr} + CASE WHEN ${skills.name} ILIKE ${`%${q}%`} THEN 1.0 ELSE 0 END)`,
-          );
-        } else {
-          orderBy = desc(sql`CASE WHEN ${skills.name} ILIKE ${`%${q}%`} THEN 1 ELSE 0 END`);
-        }
-      } else {
+        );
+        break;
+      case 'rating':
+        orderBy = desc(skills.ratingAvg);
+        break;
+      case 'updated':
         orderBy = desc(skills.updatedAt);
-      }
-      break;
-  }
+        break;
+      case 'new':
+        orderBy = desc(skills.createdAt);
+        break;
+      case 'relevance':
+      default:
+        if (q) {
+          const rankExpr = buildRankExpression(q);
+          if (rankExpr) {
+            // Use ts_rank for proper relevance scoring, with name exact-match boost
+            orderBy = desc(
+              sql`(${rankExpr} + CASE WHEN ${skills.name} ILIKE ${`%${q}%`} THEN 1.0 ELSE 0 END)`,
+            );
+          } else {
+            orderBy = desc(sql`CASE WHEN ${skills.name} ILIKE ${`%${q}%`} THEN 1 ELSE 0 END`);
+          }
+        } else {
+          orderBy = desc(skills.updatedAt);
+        }
+        break;
+    }
 
-  // Fetch results
-  const rows = await db
-    .select({
-      id: skills.id,
-      name: skills.name,
-      description: skills.description,
-      categories: skills.categories,
-      repository: skills.repository,
-      license: skills.license,
-      deprecated: skills.deprecated,
-      ratingAvg: skills.ratingAvg,
-      ratingCount: skills.ratingCount,
-      scanSecurityLevel: skills.scanSecurityLevel,
-      ownerId: skills.ownerId,
-      createdAt: skills.createdAt,
-      updatedAt: skills.updatedAt,
-    })
-    .from(skills)
-    .where(whereClause)
-    .orderBy(orderBy)
-    .limit(per_page)
-    .offset(offset);
+    // Fetch results
+    const rows = await db
+      .select({
+        id: skills.id,
+        name: skills.name,
+        description: skills.description,
+        categories: skills.categories,
+        repository: skills.repository,
+        license: skills.license,
+        deprecated: skills.deprecated,
+        ratingAvg: skills.ratingAvg,
+        ratingCount: skills.ratingCount,
+        scanSecurityLevel: skills.scanSecurityLevel,
+        ownerId: skills.ownerId,
+        createdAt: skills.createdAt,
+        updatedAt: skills.updatedAt,
+      })
+      .from(skills)
+      .where(whereClause)
+      .orderBy(orderBy)
+      .limit(per_page)
+      .offset(offset);
 
-  // Batch-enrich all results (avoids N+1 queries)
-  const skillIds = rows.map((r) => r.id);
-  const ownerIds = [...new Set(rows.map((r) => r.ownerId).filter(Boolean))] as string[];
+    // Batch-enrich all results (avoids N+1 queries)
+    const skillIds = rows.map((r) => r.id);
+    const ownerIds = [...new Set(rows.map((r) => r.ownerId).filter(Boolean))] as string[];
 
-  // Batch: latest version per skill (using DISTINCT ON)
-  const latestVersionRows =
-    skillIds.length > 0
-      ? await db
-          .select()
-          .from(versions)
-          .where(and(inArray(versions.skillId, skillIds), eq(versions.yanked, false)))
-          .orderBy(
-            versions.skillId,
-            desc(versions.versionMajor),
-            desc(versions.versionMinor),
-            desc(versions.versionPatch),
-          )
-      : [];
-  const latestVersionMap = new Map<string, (typeof latestVersionRows)[0]>();
-  for (const v of latestVersionRows) {
-    if (!latestVersionMap.has(v.skillId)) latestVersionMap.set(v.skillId, v);
-  }
+    // Batch: latest version per skill (using DISTINCT ON)
+    const latestVersionRows =
+      skillIds.length > 0
+        ? await db
+            .select()
+            .from(versions)
+            .where(and(inArray(versions.skillId, skillIds), eq(versions.yanked, false)))
+            .orderBy(
+              versions.skillId,
+              desc(versions.versionMajor),
+              desc(versions.versionMinor),
+              desc(versions.versionPatch),
+            )
+        : [];
+    const latestVersionMap = new Map<string, (typeof latestVersionRows)[0]>();
+    for (const v of latestVersionRows) {
+      if (!latestVersionMap.has(v.skillId)) latestVersionMap.set(v.skillId, v);
+    }
 
-  // Batch: tags
-  const allTags =
-    skillIds.length > 0
-      ? await db
-          .select({ skillId: skillTags.skillId, tag: skillTags.tag })
-          .from(skillTags)
-          .where(inArray(skillTags.skillId, skillIds))
-      : [];
-  const tagMap = new Map<string, string[]>();
-  for (const t of allTags) {
-    if (!tagMap.has(t.skillId)) tagMap.set(t.skillId, []);
-    tagMap.get(t.skillId)!.push(t.tag);
-  }
+    // Batch: tags
+    const allTags =
+      skillIds.length > 0
+        ? await db
+            .select({ skillId: skillTags.skillId, tag: skillTags.tag })
+            .from(skillTags)
+            .where(inArray(skillTags.skillId, skillIds))
+        : [];
+    const tagMap = new Map<string, string[]>();
+    for (const t of allTags) {
+      if (!tagMap.has(t.skillId)) tagMap.set(t.skillId, []);
+      tagMap.get(t.skillId)!.push(t.tag);
+    }
 
-  // Batch: platforms
-  const allPlatforms =
-    skillIds.length > 0
-      ? await db
-          .select({ skillId: skillPlatforms.skillId, platform: skillPlatforms.platform })
-          .from(skillPlatforms)
-          .where(inArray(skillPlatforms.skillId, skillIds))
-      : [];
-  const platformMap = new Map<string, string[]>();
-  for (const p of allPlatforms) {
-    if (!platformMap.has(p.skillId)) platformMap.set(p.skillId, []);
-    platformMap.get(p.skillId)!.push(p.platform);
-  }
+    // Batch: platforms
+    const allPlatforms =
+      skillIds.length > 0
+        ? await db
+            .select({ skillId: skillPlatforms.skillId, platform: skillPlatforms.platform })
+            .from(skillPlatforms)
+            .where(inArray(skillPlatforms.skillId, skillIds))
+        : [];
+    const platformMap = new Map<string, string[]>();
+    for (const p of allPlatforms) {
+      if (!platformMap.has(p.skillId)) platformMap.set(p.skillId, []);
+      platformMap.get(p.skillId)!.push(p.platform);
+    }
 
-  // Batch: authors
-  const authorRows =
-    ownerIds.length > 0
-      ? await db
-          .select({ id: users.id, username: users.username, trustTier: users.trustTier })
-          .from(users)
-          .where(inArray(users.id, ownerIds))
-      : [];
-  const authorMap = new Map<string, { username: string; trustTier: string }>();
-  for (const a of authorRows) {
-    authorMap.set(a.id, { username: a.username, trustTier: a.trustTier });
-  }
+    // Batch: authors
+    const authorRows =
+      ownerIds.length > 0
+        ? await db
+            .select({ id: users.id, username: users.username, trustTier: users.trustTier })
+            .from(users)
+            .where(inArray(users.id, ownerIds))
+        : [];
+    const authorMap = new Map<string, { username: string; trustTier: string }>();
+    for (const a of authorRows) {
+      authorMap.set(a.id, { username: a.username, trustTier: a.trustTier });
+    }
 
-  // Batch: download counts
-  const dlCounts =
-    skillIds.length > 0
-      ? await db
-          .select({
-            skillId: versions.skillId,
-            total: count(),
-          })
-          .from(downloads)
-          .innerJoin(versions, eq(versions.id, downloads.versionId))
-          .where(inArray(versions.skillId, skillIds))
-          .groupBy(versions.skillId)
-      : [];
-  const dlMap = new Map<string, number>();
-  for (const d of dlCounts) {
-    dlMap.set(d.skillId, d.total);
-  }
+    // Batch: download counts
+    const dlCounts =
+      skillIds.length > 0
+        ? await db
+            .select({
+              skillId: versions.skillId,
+              total: count(),
+            })
+            .from(downloads)
+            .innerJoin(versions, eq(versions.id, downloads.versionId))
+            .where(inArray(versions.skillId, skillIds))
+            .groupBy(versions.skillId)
+        : [];
+    const dlMap = new Map<string, number>();
+    for (const d of dlCounts) {
+      dlMap.set(d.skillId, d.total);
+    }
 
-  // Batch: weekly download counts
-  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const weeklyDlCounts =
-    skillIds.length > 0
-      ? await db
-          .select({
-            skillId: versions.skillId,
-            total: count(),
-          })
-          .from(downloads)
-          .innerJoin(versions, eq(versions.id, downloads.versionId))
-          .where(
-            and(
-              inArray(versions.skillId, skillIds),
-              sql`${downloads.downloadedAt} >= ${oneWeekAgo.toISOString()}`,
-            ),
-          )
-          .groupBy(versions.skillId)
-      : [];
-  const weeklyDlMap = new Map<string, number>();
-  for (const d of weeklyDlCounts) {
-    weeklyDlMap.set(d.skillId, d.total);
-  }
+    // Batch: weekly download counts
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const weeklyDlCounts =
+      skillIds.length > 0
+        ? await db
+            .select({
+              skillId: versions.skillId,
+              total: count(),
+            })
+            .from(downloads)
+            .innerJoin(versions, eq(versions.id, downloads.versionId))
+            .where(
+              and(
+                inArray(versions.skillId, skillIds),
+                sql`${downloads.downloadedAt} >= ${oneWeekAgo.toISOString()}`,
+              ),
+            )
+            .groupBy(versions.skillId)
+        : [];
+    const weeklyDlMap = new Map<string, number>();
+    for (const d of weeklyDlCounts) {
+      weeklyDlMap.set(d.skillId, d.total);
+    }
 
-  // Assemble results
-  const results = rows.map((row) => {
-    const latestVersion = latestVersionMap.get(row.id);
-    const author = row.ownerId ? authorMap.get(row.ownerId) : undefined;
+    // Assemble results
+    const results = rows.map((row) => {
+      const latestVersion = latestVersionMap.get(row.id);
+      const author = row.ownerId ? authorMap.get(row.ownerId) : undefined;
 
-    return {
-      name: row.name,
-      version: latestVersion?.version ?? null,
-      description: row.description,
-      author: {
-        username: author?.username ?? 'unknown',
-        trust_tier: author?.trustTier ?? 'registered',
-      },
-      categories: row.categories,
-      tags: tagMap.get(row.id) ?? [],
-      platforms: platformMap.get(row.id) ?? [],
-      downloads: dlMap.get(row.id) ?? 0,
-      weekly_downloads: weeklyDlMap.get(row.id) ?? 0,
-      rating_avg: row.ratingAvg,
-      rating_count: row.ratingCount,
-      signed: latestVersion?.sigstoreBundleKey != null,
-      scan_security_level: row.scanSecurityLevel,
-      license: row.license,
-      deprecated: row.deprecated,
-      published_at: latestVersion?.publishedAt?.toISOString() ?? null,
-      updated_at: row.updatedAt.toISOString(),
-    };
-  });
+      return {
+        name: row.name,
+        version: latestVersion?.version ?? null,
+        description: row.description,
+        author: {
+          username: author?.username ?? 'unknown',
+          trust_tier: author?.trustTier ?? 'registered',
+        },
+        categories: row.categories,
+        tags: tagMap.get(row.id) ?? [],
+        platforms: platformMap.get(row.id) ?? [],
+        downloads: dlMap.get(row.id) ?? 0,
+        weekly_downloads: weeklyDlMap.get(row.id) ?? 0,
+        rating_avg: row.ratingAvg,
+        rating_count: row.ratingCount,
+        signed: latestVersion?.sigstoreBundleKey != null,
+        scan_security_level: row.scanSecurityLevel,
+        license: row.license,
+        deprecated: row.deprecated,
+        published_at: latestVersion?.publishedAt?.toISOString() ?? null,
+        updated_at: row.updatedAt.toISOString(),
+      };
+    });
 
-  return c.json({
-    results,
-    total,
-    page,
-    per_page,
-    pages: Math.ceil(total / per_page),
-  });
+    return c.json({
+      results,
+      total,
+      page,
+      per_page,
+      pages: Math.ceil(total / per_page),
+    });
   });
 });
 
@@ -792,7 +792,32 @@ dualSkillRoute('get', '', async (c: Context<AppEnv>) => {
   const db = c.get('db');
   const name = extractSkillName(c);
 
-  const [skill] = await db.select().from(skills).where(eq(skills.name, name)).limit(1);
+  let [skill] = await db.select().from(skills).where(eq(skills.name, name)).limit(1);
+
+  if (!skill) {
+    // Auto-resolve bare names (no @scope/ prefix) by searching for scoped matches
+    const isBare = !name.startsWith('@');
+    if (isBare) {
+      const scopedMatches = await db
+        .select()
+        .from(skills)
+        .where(ilike(skills.name, `%/${name}`));
+
+      if (scopedMatches.length === 1) {
+        // Exactly one match — resolve to the scoped skill
+        skill = scopedMatches[0];
+      } else if (scopedMatches.length > 1) {
+        // Multiple matches — return 404 with suggestions
+        return c.json(
+          createApiError('SKILL_NOT_FOUND', {
+            message: `Multiple scoped skills match "${name}"`,
+            details: { suggestions: scopedMatches.map((s) => s.name) },
+          }),
+          ERROR_CODES.SKILL_NOT_FOUND.status,
+        );
+      }
+    }
+  }
 
   if (!skill) {
     // Did-you-mean suggestion

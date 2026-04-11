@@ -606,30 +606,62 @@ export const Search = () => {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       {/* Skill name */}
-                      <div className="skel-shimmer" style={{ width: 150 + i * 20, height: 18, borderRadius: 4 }} />
+                      <div
+                        className="skel-shimmer"
+                        style={{ width: 150 + i * 20, height: 18, borderRadius: 4 }}
+                      />
                       {/* Version */}
-                      <div className="skel-shimmer" style={{ width: 42, height: 14, borderRadius: 4 }} />
+                      <div
+                        className="skel-shimmer"
+                        style={{ width: 42, height: 14, borderRadius: 4 }}
+                      />
                       {/* Trust badge */}
-                      <div className="skel-shimmer" style={{ width: 60, height: 18, borderRadius: 10 }} />
+                      <div
+                        className="skel-shimmer"
+                        style={{ width: 60, height: 18, borderRadius: 10 }}
+                      />
                       {/* Security badge */}
-                      <div className="skel-shimmer" style={{ width: 20, height: 18, borderRadius: 4 }} />
+                      <div
+                        className="skel-shimmer"
+                        style={{ width: 20, height: 18, borderRadius: 4 }}
+                      />
                     </div>
                     <div style={{ display: 'flex', gap: 16 }}>
                       {/* Downloads */}
-                      <div className="skel-shimmer" style={{ width: 40, height: 14, borderRadius: 4 }} />
+                      <div
+                        className="skel-shimmer"
+                        style={{ width: 40, height: 14, borderRadius: 4 }}
+                      />
                       {/* Rating */}
-                      <div className="skel-shimmer" style={{ width: 32, height: 14, borderRadius: 4 }} />
+                      <div
+                        className="skel-shimmer"
+                        style={{ width: 32, height: 14, borderRadius: 4 }}
+                      />
                     </div>
                   </div>
                   {/* Row 2: description */}
                   <div style={{ marginBottom: 8, marginTop: 0 }}>
-                    <div className="skel-shimmer" style={{ width: `${85 - i * 6}%`, height: 13, borderRadius: 4, marginBottom: 4 }} />
-                    <div className="skel-shimmer" style={{ width: `${60 - i * 4}%`, height: 13, borderRadius: 4 }} />
+                    <div
+                      className="skel-shimmer"
+                      style={{
+                        width: `${85 - i * 6}%`,
+                        height: 13,
+                        borderRadius: 4,
+                        marginBottom: 4,
+                      }}
+                    />
+                    <div
+                      className="skel-shimmer"
+                      style={{ width: `${60 - i * 4}%`, height: 13, borderRadius: 4 }}
+                    />
                   </div>
                   {/* Row 3: author + tags */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     {/* Author */}
-                    <div className="skel-shimmer" style={{ width: 80, height: 12, borderRadius: 4 }} />
+                    <div
+                      className="skel-shimmer"
+                      style={{ width: 80, height: 12, borderRadius: 4 }}
+                    />
                     {/* Tags */}
                     <div style={{ display: 'flex', gap: 4 }}>
                       {[48, 56, 42].map((w, j) => (

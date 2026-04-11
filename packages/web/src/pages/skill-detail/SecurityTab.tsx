@@ -55,7 +55,11 @@ export const SecurityTab = ({ skill }: { skill: SkillFull }) => (
       </Text>
       {skill.security.signed ? (
         <Text variant="body-sm" font="mono" color="accent" as="div">
-          &#x2713; Signed{skill.security.signer && skill.security.signer !== 'unknown' ? ` by ${skill.security.signer}` : ''} (Sigstore OIDC)
+          &#x2713; Signed
+          {skill.security.signer && skill.security.signer !== 'unknown'
+            ? ` by ${skill.security.signer}`
+            : ''}{' '}
+          (Sigstore OIDC)
         </Text>
       ) : (
         <div>

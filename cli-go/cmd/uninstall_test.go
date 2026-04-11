@@ -22,7 +22,6 @@ func setupUninstallTestEnv(t *testing.T, skillName string) (spmHome string, cwd 
 
 	// Create directories
 	require.NoError(t, os.MkdirAll(filepath.Join(spmHome, "skills", skillName, "1.0.0"), 0o755))
-	require.NoError(t, os.MkdirAll(filepath.Join(spmHome, "cache", skillName), 0o755))
 	require.NoError(t, os.MkdirAll(cwd, 0o755))
 
 	// Write a skill file
@@ -68,7 +67,6 @@ func TestUninstallSuccess(t *testing.T) {
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
-	uninstallFlagKeepFiles = false
 
 	rootCmd.SetArgs([]string{"uninstall", "remove-me"})
 	err := rootCmd.Execute()
@@ -76,7 +74,7 @@ func TestUninstallSuccess(t *testing.T) {
 	require.NoError(t, err)
 	out := buf.String()
 	assert.Contains(t, out, "remove-me")
-	assert.Contains(t, out, "uninstalled")
+	assert.Contains(t, out, "removed")
 
 	// Verify removed from skills.json
 	sjData, err := os.ReadFile(filepath.Join(cwd, "skills.json"))
@@ -92,28 +90,11 @@ func TestUninstallSuccess(t *testing.T) {
 	assert.NoDirExists(t, filepath.Join(spmHome, "skills", "remove-me"))
 }
 
-func TestUninstallKeepFiles(t *testing.T) {
-	spmHome, _ := setupUninstallTestEnv(t, "keep-me")
-
-	var buf bytes.Buffer
-	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
-	uninstallFlagKeepFiles = true
-
-	rootCmd.SetArgs([]string{"uninstall", "keep-me", "--keep-files"})
-	err := rootCmd.Execute()
-
-	require.NoError(t, err)
-
-	// Verify skill files still exist
-	assert.DirExists(t, filepath.Join(spmHome, "skills", "keep-me"))
-}
-
 func TestUninstallJSONOutput(t *testing.T) {
 	setupUninstallTestEnv(t, "json-remove")
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeJSON, Writer: &buf, ErrW: &buf}
-	uninstallFlagKeepFiles = false
 
 	rootCmd.SetArgs([]string{"uninstall", "json-remove"})
 	err := rootCmd.Execute()
@@ -127,8 +108,8 @@ func TestUninstallJSONOutput(t *testing.T) {
 	assert.Equal(t, "success", result.Status)
 	require.Len(t, result.Skills, 1)
 	assert.Equal(t, "json-remove", result.Skills[0].Name)
-	assert.True(t, result.Skills[0].RemovedFromJSON)
-	assert.True(t, result.Skills[0].RemovedFromLock)
+	assert.Equal(t, "1.0.0", result.Skills[0].Version)
+	assert.True(t, result.Skills[0].CacheRemoved)
 }
 
 func TestUninstallMultiple(t *testing.T) {
@@ -162,7 +143,6 @@ func TestUninstallMultiple(t *testing.T) {
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
-	uninstallFlagKeepFiles = false
 
 	rootCmd.SetArgs([]string{"uninstall", "skill-a", "skill-b"})
 	err := rootCmd.Execute()
@@ -177,7 +157,36 @@ func TestUninstallMultiple(t *testing.T) {
 	assert.NoDirExists(t, filepath.Join(spmHome, "skills", "skill-b"))
 }
 
-func TestUninstallNotInstalled(t *testing.T) {
+func TestUninstallNotFound(t *testing.T) {
+	tmpDir := t.TempDir()
+	spmHome := filepath.Join(tmpDir, ".spm")
+	cwd := filepath.Join(tmpDir, "project")
+	require.NoError(t, os.MkdirAll(cwd, 0o755))
+	require.NoError(t, os.MkdirAll(spmHome, 0o755))
+
+	// Create skills.json with one skill, but try to remove a different one
+	sjContent, _ := json.MarshalIndent(map[string]any{
+		"skills": map[string]string{"other-skill": "^1.0.0"},
+	}, "", "  ")
+	require.NoError(t, os.WriteFile(filepath.Join(cwd, "skills.json"), sjContent, 0o644))
+
+	t.Setenv("SPM_HOME", spmHome)
+	origDir, _ := os.Getwd()
+	require.NoError(t, os.Chdir(cwd))
+	t.Cleanup(func() { _ = os.Chdir(origDir) })
+
+	var buf bytes.Buffer
+	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
+
+	rootCmd.SetArgs([]string{"uninstall", "ghost-skill"})
+	err := rootCmd.Execute()
+
+	// Should error because skill not in skills.json
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no skills were uninstalled")
+}
+
+func TestUninstallNoSkillsJSON(t *testing.T) {
 	tmpDir := t.TempDir()
 	spmHome := filepath.Join(tmpDir, ".spm")
 	cwd := filepath.Join(tmpDir, "project")
@@ -191,12 +200,39 @@ func TestUninstallNotInstalled(t *testing.T) {
 
 	var buf bytes.Buffer
 	Out = &output.Output{Mode: output.ModeHuman, Writer: &buf, ErrW: &buf}
-	uninstallFlagKeepFiles = false
 
-	rootCmd.SetArgs([]string{"uninstall", "ghost-skill"})
+	rootCmd.SetArgs([]string{"uninstall", "some-skill"})
 	err := rootCmd.Execute()
 
-	// Should succeed even if skill wasn't installed (idempotent)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no skills.json found")
+}
+
+func TestUninstallNoSkillsJSONJsonMode(t *testing.T) {
+	tmpDir := t.TempDir()
+	spmHome := filepath.Join(tmpDir, ".spm")
+	cwd := filepath.Join(tmpDir, "project")
+	require.NoError(t, os.MkdirAll(cwd, 0o755))
+	require.NoError(t, os.MkdirAll(spmHome, 0o755))
+
+	t.Setenv("SPM_HOME", spmHome)
+	origDir, _ := os.Getwd()
+	require.NoError(t, os.Chdir(cwd))
+	t.Cleanup(func() { _ = os.Chdir(origDir) })
+
+	var buf bytes.Buffer
+	Out = &output.Output{Mode: output.ModeJSON, Writer: &buf, ErrW: &buf}
+
+	rootCmd.SetArgs([]string{"uninstall", "some-skill"})
+	err := rootCmd.Execute()
+
+	// In JSON mode, we output JSON and return nil (no error propagation)
 	require.NoError(t, err)
-	assert.Contains(t, buf.String(), "ghost-skill")
+
+	var result uninstallJSONOutput
+	err = json.Unmarshal(buf.Bytes(), &result)
+	require.NoError(t, err)
+	assert.Equal(t, "error", result.Status)
+	assert.Len(t, result.Errors, 1)
+	assert.Contains(t, result.Errors[0], "no skills.json")
 }

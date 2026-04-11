@@ -193,7 +193,12 @@ describe('skills routes — GET /skills/:name (integration-like)', () => {
     mockWhere.mockReturnValueOnce({ limit: mockLimit });
     mockLimit.mockResolvedValueOnce([]); // no skill found
 
-    // Second query: all skills for did-you-mean
+    // Second query: bare name auto-resolve via ilike (no matches)
+    mockSelect.mockReturnValueOnce({ from: mockFrom });
+    mockFrom.mockReturnValueOnce({ where: mockWhere });
+    mockWhere.mockResolvedValueOnce([]); // no scoped matches
+
+    // Third query: all skills for did-you-mean
     mockSelect.mockReturnValueOnce({ from: mockFrom });
     mockFrom.mockResolvedValueOnce([]); // no skills at all
 
@@ -439,7 +444,12 @@ describe('skills routes — GET /skills/:name with did-you-mean', () => {
     mockWhere.mockReturnValueOnce({ limit: mockLimit });
     mockLimit.mockResolvedValueOnce([]); // no skill found
 
-    // Second query: all skills for did-you-mean
+    // Second query: bare name auto-resolve via ilike (no matches)
+    mockSelect.mockReturnValueOnce({ from: mockFrom });
+    mockFrom.mockReturnValueOnce({ where: mockWhere });
+    mockWhere.mockResolvedValueOnce([]); // no scoped matches
+
+    // Third query: all skills for did-you-mean
     mockSelect.mockReturnValueOnce({ from: mockFrom });
     mockFrom.mockResolvedValueOnce([{ name: 'pdf-generator' }, { name: 'csv-parser' }]);
 
