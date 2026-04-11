@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type SkillSummary } from '../data/constants';
 import { TrustBadge, SecurityBadge, Text } from '@spm/ui';
-import { skillPath } from '../lib/urls';
+import { skillPath, bareName, extractScope } from '../lib/urls';
 
 export const SkillRow = ({
   skill,
@@ -41,11 +41,16 @@ export const SkillRow = ({
             as="span"
             style={{ color: 'var(--color-cyan)' }}
           >
-            {skill.name}
+            {bareName(skill.name)}
           </Text>
           <Text variant="label" font="mono" color="faint" as="span" style={{ marginLeft: 6 }}>
             v{skill.version}
           </Text>
+          {extractScope(skill.name) && (
+            <Text variant="label" font="sans" color="muted" as="span" style={{ marginLeft: 8 }}>
+              {extractScope(skill.name)}
+            </Text>
+          )}
         </div>
         <Text
           variant="caption"

@@ -2,27 +2,7 @@ import { Link } from 'react-router-dom';
 import { CopyButton, TrustBadge, Text } from '@spm/ui';
 import { LegacyBadge as Badge } from '@spm/ui/shadcn';
 import { type SkillFull } from './types';
-import { skillPath } from '../../lib/urls';
-
-/** Extract a human-readable display name from a scoped skill name.
- *  "@github/write-coding-standards-from-file" → "Write Coding Standards From File"
- *  "my-skill" → "My Skill"
- */
-const displayName = (fullName: string): string => {
-  const bare = fullName.includes('/') ? fullName.split('/').pop()! : fullName;
-  return bare
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-};
-
-/** Extract the scope from a scoped name, or null. */
-const extractScope = (name: string): string | null => {
-  if (name.startsWith('@') && name.includes('/')) {
-    return name.slice(0, name.indexOf('/'));
-  }
-  return null;
-};
+import { skillPath, displayName, extractScope } from '../../lib/urls';
 
 export const SkillHero = ({ skill }: { skill: SkillFull }) => {
   const scope = extractScope(skill.name);

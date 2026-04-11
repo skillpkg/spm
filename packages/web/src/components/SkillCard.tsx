@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type SkillSummary } from '../data/constants';
 import { TrustBadge, SecurityBadge, Text } from '@spm/ui';
-import { skillPath } from '../lib/urls';
+import { skillPath, displayName, extractScope } from '../lib/urls';
 
 const ACCENT_COLORS = ['#10b981', '#3b82f6', '#a78bfa'];
 
 export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }) => {
   const [hovered, setHovered] = useState(false);
   const accent = ACCENT_COLORS[rank % 3];
+  const scope = extractScope(skill.name);
 
   return (
     <Link
@@ -56,10 +57,10 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
             as="div"
             style={{ color: 'var(--color-cyan)', marginBottom: 2, wordBreak: 'break-word' }}
           >
-            {skill.name}
+            {displayName(skill.name)}
           </Text>
           <Text variant="caption" font="sans" color="muted" as="div" style={{ marginBottom: 6 }}>
-            by @{skill.author}
+            {scope ? scope : `by @${skill.author}`}
           </Text>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <Text variant="caption" font="mono" color="faint" as="span">

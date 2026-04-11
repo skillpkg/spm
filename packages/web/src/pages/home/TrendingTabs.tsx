@@ -3,7 +3,7 @@ import { type SkillSummary } from '../../data/constants';
 import { SkillCard } from '../../components/SkillCard';
 import { SkillRow } from '../../components/SkillRow';
 import { TrustBadge, Text } from '@spm/ui';
-import { skillPath } from '../../lib/urls';
+import { skillPath, bareName, extractScope } from '../../lib/urls';
 
 type TrendingTab = 'featured' | 'rising' | 'most-installed' | 'new';
 
@@ -184,11 +184,16 @@ export const TrendingTabs = ({
                     as="span"
                     style={{ color: 'var(--color-cyan)', minWidth: 140 }}
                   >
-                    {s.name}
+                    {bareName(s.name)}
                   </Text>
                   <Text variant="label" font="mono" color="faint" as="span">
                     {s.version}
                   </Text>
+                  {extractScope(s.name) && (
+                    <Text variant="label" font="sans" color="muted" as="span">
+                      {extractScope(s.name)}
+                    </Text>
+                  )}
                   <div style={{ flex: 1 }} />
                   <TrustBadge tier={s.trust} showLabel={false} />
                   <Text
