@@ -191,11 +191,12 @@ func UpdateLockFile(dir string, resolved []ResolvedSkill) error {
 	if lock == nil {
 		lock = &SkillsLock{
 			LockfileVersion: LockVersion,
-			GeneratedAt:     time.Now().UTC().Format(time.RFC3339),
-			GeneratedBy:     GeneratedBy,
 			Skills:          make(map[string]LockEntry),
 		}
 	}
+	// Always update metadata on write
+	lock.GeneratedAt = time.Now().UTC().Format(time.RFC3339)
+	lock.GeneratedBy = GeneratedBy
 
 	for _, skill := range resolved {
 		entry := LockEntry{
