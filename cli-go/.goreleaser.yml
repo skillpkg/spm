@@ -56,7 +56,7 @@ changelog:
     - title: Others
       order: 999
 
-homebrew_casks:
+brews:
   - name: spm
     repository:
       owner: skillpkg
