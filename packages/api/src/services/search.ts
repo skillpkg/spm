@@ -61,6 +61,9 @@ export const buildSearchCondition = (q: string): SQL | null => {
   const sanitized = sanitizeTerm(q);
   const terms = sanitized.split(' ').filter((t) => t.length > 0);
 
+  // Use original query (trimmed) for ILIKE so @scope searches work
+  const rawQuery = q.trim();
+
   // Build ILIKE patterns for tag matching
   const tagConditions = terms.map(
     (term) => sql`EXISTS (
@@ -70,15 +73,19 @@ export const buildSearchCondition = (q: string): SQL | null => {
     )`,
   );
 
-  // Combine: full-text match on search_vector OR any tag matches
+  // Combine: full-text match on search_vector OR tag matches OR name ILIKE
   const ftsCondition = sql`search_vector @@ ${parsed.tsquery}`;
 
+  // ILIKE on the name column so "repo-init" matches "@almog27/repo-init"
+  // and "@almog27" matches all skills by that scope
+  const nameCondition = sql`skills.name ILIKE ${'%' + rawQuery.replace(/ /g, '%') + '%'}`;
+
   if (tagConditions.length === 1) {
-    return sql`(${ftsCondition} OR ${tagConditions[0]})`;
+    return sql`(${ftsCondition} OR ${tagConditions[0]} OR ${nameCondition})`;
   }
 
   // Any tag term matching is enough to include the result
   const anyTagMatch = tagConditions.reduce((acc, cond) => sql`${acc} OR ${cond}`);
 
-  return sql`(${ftsCondition} OR ${anyTagMatch})`;
+  return sql`(${ftsCondition} OR ${anyTagMatch} OR ${nameCondition})`;
 };
