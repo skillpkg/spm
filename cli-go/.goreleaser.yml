@@ -58,6 +58,7 @@ changelog:
 
 brews:
   - name: spm
+    directory: Formula
     repository:
       owner: skillpkg
       name: homebrew-tap

@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
-  "generated_at": "2026-04-11T13:57:39Z",
-  "generated_by": "spm@0.0.1",
+  "generated_at": "2026-04-11T14:12:28Z",
+  "generated_by": "spm@1.2.2",
   "skills": {
     "@almog27/ship": {
       "version": "1.0.2",
