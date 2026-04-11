@@ -23,6 +23,7 @@ import {
 import { validateSkillName, checkNameSimilarity } from '../services/names.js';
 import { uploadPackage, uploadBundle, getObject } from '../services/r2.js';
 import { buildSearchCondition, buildRankExpression } from '../services/search.js';
+import { cachedResponse, buildCacheKey, CACHE_TTLS } from '../services/cache.js';
 import { runSecurityPipeline } from '../services/scanner.js';
 import { extractTextFiles } from '../security/extract.js';
 import { extractSkillName } from './helpers.js';
@@ -433,6 +434,11 @@ const SearchQuerySchema = z.object({
 });
 
 skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) => {
+  // Build a cache key from the validated query params
+  const queryString = new URL(c.req.url).search.replace(/^\?/, '');
+  const cacheKey = buildCacheKey('skills', queryString);
+
+  return cachedResponse(c, cacheKey, CACHE_TTLS.search, async () => {
   const db = c.get('db');
   const params = c.req.valid('query');
   const { q, author, category, tag, signed, trust, platform, security, sort, page, per_page } =
@@ -776,6 +782,7 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
     page,
     per_page,
     pages: Math.ceil(total / per_page),
+  });
   });
 });
 
