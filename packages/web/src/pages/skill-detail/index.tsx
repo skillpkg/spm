@@ -11,8 +11,11 @@ import { SecurityTab } from './SecurityTab';
 import { SkillSidebar } from './SkillSidebar';
 
 export const SkillDetail = () => {
-  const { scope, name } = useParams<{ scope?: string; name: string }>();
-  const fullName = scope ? `@${scope}/${name}` : name!;
+  // Splat route `/skills/*` captures both unscoped (`foo`) and scoped
+  // (`@alice/foo`) names as a single param. React Router v7 does not match
+  // literal-prefix patterns like `@:scope/:name`, so the splat is required.
+  const params = useParams();
+  const fullName = decodeURIComponent(params['*'] ?? '');
   const [activeTab, setActiveTab] = useTabParam('tab', 'readme');
 
   const { data: apiData, isLoading } = useQuery(skillDetailQuery(fullName));

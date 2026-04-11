@@ -62,7 +62,7 @@ const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Home />} />
     <Route path="/search" element={<Search />} />
-    <Route path="/skills/:name" element={<SkillDetail />} />
+    <Route path="/skills/*" element={<SkillDetail />} />
     <Route path="/authors/:username" element={<AuthorProfile />} />
     <Route
       path="/dashboard"
