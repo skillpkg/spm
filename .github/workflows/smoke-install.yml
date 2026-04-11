@@ -77,6 +77,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # pnpm must be installed before setup-node because setup-node@v5
+      # auto-detects pnpm-lock.yaml at the repo root and tries to invoke
+      # pnpm for caching, even though this job only uses npm.
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v5
         with:
           node-version: 22
