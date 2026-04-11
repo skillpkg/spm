@@ -16,8 +16,15 @@ const (
 	SkillsJsonFile = "skills.json"
 	SkillsLockFile = "skills-lock.json"
 	LockVersion    = 1
-	GeneratedBy    = "spm@0.0.1"
 )
+
+// GeneratedBy is set at startup from cmd.Version via SetVersion.
+var GeneratedBy = "spm@dev"
+
+// SetVersion updates the GeneratedBy string used in lock files.
+func SetVersion(v string) {
+	GeneratedBy = "spm@" + v
+}
 
 // SkillsJson represents the skills.json file structure.
 type SkillsJson struct {

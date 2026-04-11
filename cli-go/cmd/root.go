@@ -5,6 +5,7 @@ import (
 
 	"github.com/skillpkg/spm/internal/config"
 	"github.com/skillpkg/spm/internal/output"
+	"github.com/skillpkg/spm/internal/skillsjson"
 	"github.com/spf13/cobra"
 )
 
@@ -75,4 +76,5 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&flagVerbose, "verbose", false, "Show verbose output")
 	rootCmd.PersistentFlags().BoolVar(&flagSilent, "silent", false, "Suppress all non-error output")
 	rootCmd.PersistentFlags().StringVar(&flagRegistry, "registry", "", "Override registry URL")
+	skillsjson.SetVersion(Version)
 }
