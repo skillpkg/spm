@@ -4,7 +4,30 @@ import { LegacyBadge as Badge } from '@spm/ui/shadcn';
 import { type SkillFull } from './types';
 import { skillPath } from '../../lib/urls';
 
-export const SkillHero = ({ skill }: { skill: SkillFull }) => (
+/** Extract a human-readable display name from a scoped skill name.
+ *  "@github/write-coding-standards-from-file" → "Write Coding Standards From File"
+ *  "my-skill" → "My Skill"
+ */
+const displayName = (fullName: string): string => {
+  const bare = fullName.includes('/') ? fullName.split('/').pop()! : fullName;
+  return bare
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+};
+
+/** Extract the scope from a scoped name, or null. */
+const extractScope = (name: string): string | null => {
+  if (name.startsWith('@') && name.includes('/')) {
+    return name.slice(0, name.indexOf('/'));
+  }
+  return null;
+};
+
+export const SkillHero = ({ skill }: { skill: SkillFull }) => {
+  const scope = extractScope(skill.name);
+
+  return (
   <div
     className="spm-skill-hero"
     style={{
@@ -31,21 +54,30 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
           wordBreak: 'break-word',
         }}
       >
-        {skill.name}
+        {displayName(skill.name)}
       </Text>
       <Text variant="body-sm" color="primary" as="div" style={{ marginBottom: 8 }}>
-        <span style={{ color: 'var(--color-text-faint)' }}>by </span>
-        {skill.authors.map((a, i) => (
-          <span key={a.username}>
-            {i > 0 && ', '}
-            <Link
-              to={`/authors/${a.username}`}
-              style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
-            >
-              @{a.username}
-            </Link>
-          </span>
-        ))}
+        {scope ? (
+          <Link
+            to={`/search?q=${encodeURIComponent(scope)}`}
+            style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+          >
+            {scope}
+          </Link>
+        ) : (
+          skill.authors.map((a, i) => (
+            <span key={a.username}>
+              {i > 0 && ', '}
+              <span style={{ color: 'var(--color-text-faint)' }}>by </span>
+              <Link
+                to={`/authors/${a.username}`}
+                style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+              >
+                @{a.username}
+              </Link>
+            </span>
+          ))
+        )}
       </Text>
       <div
         style={{
@@ -246,4 +278,5 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => (
       </div>
     </div>
   </div>
-);
+  );
+};

@@ -55,7 +55,7 @@ export const SkillDetail = () => {
   return (
     <div
       className="spm-page-wrap"
-      style={{ maxWidth: 1060, margin: '0 auto', padding: '0 32px 60px' }}
+      style={{ maxWidth: 1060, margin: '0 auto', padding: '24px 32px 60px' }}
     >
       <SkillHero skill={skill} />
 
