@@ -191,7 +191,7 @@ export const TrendingTabs = ({
                   </Text>
                   {extractScope(s.name) && (
                     <Text variant="label" font="sans" color="muted" as="span">
-                      {extractScope(s.name)}
+                      by {extractScope(s.name)}
                     </Text>
                   )}
                   <div style={{ flex: 1 }} />

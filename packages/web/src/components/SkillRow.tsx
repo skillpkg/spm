@@ -48,7 +48,7 @@ export const SkillRow = ({
           </Text>
           {extractScope(skill.name) && (
             <Text variant="label" font="sans" color="muted" as="span" style={{ marginLeft: 8 }}>
-              {extractScope(skill.name)}
+              by {extractScope(skill.name)}
             </Text>
           )}
         </div>

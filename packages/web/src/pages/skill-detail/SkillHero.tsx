@@ -38,12 +38,15 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => {
         </Text>
         <Text variant="body-sm" color="primary" as="div" style={{ marginBottom: 8 }}>
           {scope ? (
-            <Link
-              to={`/search?q=${encodeURIComponent(scope)}`}
-              style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
-            >
-              {scope}
-            </Link>
+            <>
+              <span style={{ color: 'var(--color-text-faint)' }}>by </span>
+              <Link
+                to={`/search?q=${encodeURIComponent(scope)}`}
+                style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+              >
+                {scope}
+              </Link>
+            </>
           ) : (
             skill.authors.map((a, i) => (
               <span key={a.username}>

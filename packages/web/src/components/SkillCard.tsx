@@ -60,7 +60,7 @@ export const SkillCard = ({ skill, rank }: { skill: SkillSummary; rank: number }
             {displayName(skill.name)}
           </Text>
           <Text variant="caption" font="sans" color="muted" as="div" style={{ marginBottom: 6 }}>
-            {scope ? scope : `by @${skill.author}`}
+            {scope ? `by ${scope}` : `by @${skill.author}`}
           </Text>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <Text variant="caption" font="mono" color="faint" as="span">
