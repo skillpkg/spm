@@ -23,10 +23,114 @@ export const SkillDetail = () => {
 
   if (isLoading) {
     return (
-      <div style={{ maxWidth: 1060, margin: '0 auto', padding: '64px 32px', textAlign: 'center' }}>
-        <Text variant="h4" font="sans" color="muted" as="div">
-          Loading skill...
-        </Text>
+      <div
+        className="spm-page-wrap"
+        style={{ maxWidth: 1060, margin: '0 auto', padding: '24px 32px 60px' }}
+      >
+        {/* Skeleton hero */}
+        <div style={{ marginBottom: 28 }}>
+          <div
+            style={{
+              width: 280,
+              height: 28,
+              borderRadius: 6,
+              background: 'var(--color-bg-card)',
+              marginBottom: 12,
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
+          />
+          <div
+            style={{
+              width: 180,
+              height: 16,
+              borderRadius: 4,
+              background: 'var(--color-bg-card)',
+              marginBottom: 20,
+              animation: 'pulse 1.5s ease-in-out infinite',
+              animationDelay: '0.15s',
+            }}
+          />
+          <div
+            style={{
+              width: '70%',
+              height: 14,
+              borderRadius: 4,
+              background: 'var(--color-bg-card)',
+              marginBottom: 8,
+              animation: 'pulse 1.5s ease-in-out infinite',
+              animationDelay: '0.3s',
+            }}
+          />
+          <div
+            style={{
+              width: '50%',
+              height: 14,
+              borderRadius: 4,
+              background: 'var(--color-bg-card)',
+              animation: 'pulse 1.5s ease-in-out infinite',
+              animationDelay: '0.45s',
+            }}
+          />
+        </div>
+        {/* Skeleton tabs + content */}
+        <div style={{ display: 'flex', gap: 24 }}>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: 16,
+                borderBottom: '1px solid var(--color-border-default)',
+                marginBottom: 20,
+                paddingBottom: 10,
+              }}
+            >
+              {[100, 80, 70].map((w, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: w,
+                    height: 14,
+                    borderRadius: 4,
+                    background: 'var(--color-bg-card)',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                    animationDelay: `${i * 0.1}s`,
+                  }}
+                />
+              ))}
+            </div>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                style={{
+                  width: `${90 - i * 10}%`,
+                  height: 14,
+                  borderRadius: 4,
+                  background: 'var(--color-bg-card)',
+                  marginBottom: 12,
+                  animation: 'pulse 1.5s ease-in-out infinite',
+                  animationDelay: `${i * 0.1}s`,
+                }}
+              />
+            ))}
+          </div>
+          <div style={{ width: 240, flexShrink: 0 }}>
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                style={{
+                  width: '100%',
+                  height: 40,
+                  borderRadius: 6,
+                  background: 'var(--color-bg-card)',
+                  marginBottom: 12,
+                  animation: 'pulse 1.5s ease-in-out infinite',
+                  animationDelay: `${i * 0.15}s`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }`}</style>
       </div>
     );
   }

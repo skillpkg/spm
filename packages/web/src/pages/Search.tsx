@@ -234,7 +234,7 @@ export const Search = () => {
   if (parsed.security && parsed.security !== 'any') params.security = parsed.security;
   if (sort !== 'relevance') params.sort = sort;
 
-  const { data: searchData } = useQuery(searchSkillsQuery(params));
+  const { data: searchData, isLoading } = useQuery(searchSkillsQuery(params));
 
   const filtered: DisplaySkill[] = searchData?.results.map(apiResultToDisplay) ?? [];
   const displayTotal = searchData?.total ?? filtered.length;
@@ -505,14 +505,22 @@ export const Search = () => {
           }}
         >
           <div>
-            <Text variant="body" font="sans" color="secondary" as="span">
-              {displayTotal} result{displayTotal !== 1 ? 's' : ''}
-            </Text>
-            {parsed.q && (
-              <Text variant="body" font="sans" color="dim" as="span">
-                {' '}
-                for &quot;{parsed.q}&quot;
+            {isLoading ? (
+              <Text variant="body" font="sans" color="muted" as="span">
+                Searching...
               </Text>
+            ) : (
+              <>
+                <Text variant="body" font="sans" color="secondary" as="span">
+                  {displayTotal} result{displayTotal !== 1 ? 's' : ''}
+                </Text>
+                {parsed.q && (
+                  <Text variant="body" font="sans" color="dim" as="span">
+                    {' '}
+                    for &quot;{parsed.q}&quot;
+                  </Text>
+                )}
+              </>
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -577,7 +585,81 @@ export const Search = () => {
             overflow: 'hidden',
           }}
         >
-          {filtered.length > 0 ? (
+          {isLoading ? (
+            <>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #1a1d2744',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div
+                        style={{
+                          width: 160 + i * 15,
+                          height: 18,
+                          borderRadius: 4,
+                          background: 'var(--color-bg-card)',
+                          animation: 'pulse 1.5s ease-in-out infinite',
+                          animationDelay: `${i * 0.08}s`,
+                        }}
+                      />
+                      <div
+                        style={{
+                          width: 44,
+                          height: 14,
+                          borderRadius: 4,
+                          background: 'var(--color-bg-card)',
+                          animation: 'pulse 1.5s ease-in-out infinite',
+                          animationDelay: `${i * 0.08 + 0.1}s`,
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        width: 80,
+                        height: 14,
+                        borderRadius: 4,
+                        background: 'var(--color-bg-card)',
+                        animation: 'pulse 1.5s ease-in-out infinite',
+                        animationDelay: `${i * 0.08 + 0.2}s`,
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: `${75 - i * 5}%`,
+                      height: 13,
+                      borderRadius: 4,
+                      background: 'var(--color-bg-card)',
+                      marginBottom: 10,
+                      animation: 'pulse 1.5s ease-in-out infinite',
+                      animationDelay: `${i * 0.08 + 0.15}s`,
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {[50, 40, 55].map((w, j) => (
+                      <div
+                        key={j}
+                        style={{
+                          width: w,
+                          height: 12,
+                          borderRadius: 4,
+                          background: 'var(--color-bg-card)',
+                          animation: 'pulse 1.5s ease-in-out infinite',
+                          animationDelay: `${i * 0.08 + j * 0.05 + 0.2}s`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }`}</style>
+            </>
+          ) : filtered.length > 0 ? (
             filtered.map((skill) => <SearchResultRow key={skill.name} skill={skill} />)
           ) : (
             <div style={{ padding: 48, textAlign: 'center' }}>
