@@ -42,16 +42,15 @@ func TestSkillPath_Unscoped(t *testing.T) {
 }
 
 func TestSkillPath_Scoped(t *testing.T) {
-	assert.Equal(t, "/@alice/data-viz", skillPath("@alice/data-viz"))
+	// Full name encoded as single segment — @ is valid in paths, / is encoded
+	assert.Equal(t, "/@alice%2Fdata-viz", skillPath("@alice/data-viz"))
 }
 
 func TestSkillPath_ScopedSpecialChars(t *testing.T) {
-	// Name part gets PathEscaped, scope does not (it's a path segment)
-	assert.Equal(t, "/@my-org/my-skill", skillPath("@my-org/my-skill"))
+	assert.Equal(t, "/@my-org%2Fmy-skill", skillPath("@my-org/my-skill"))
 }
 
 func TestSkillPath_AtWithoutSlash(t *testing.T) {
-	// Edge case: starts with @ but no slash — falls through to PathEscape (@ is valid in paths)
 	assert.Equal(t, "/@noslash", skillPath("@noslash"))
 }
 
@@ -59,7 +58,7 @@ func TestSkillPath_AtWithoutSlash(t *testing.T) {
 
 func TestInfo_Scoped(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/v1/skills/@alice/data-viz", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/skills/@alice%2Fdata-viz", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(SkillInfo{
@@ -78,7 +77,7 @@ func TestInfo_Scoped(t *testing.T) {
 
 func TestGetVersion_Scoped(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/v1/skills/@org/my-skill/1.0.0", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/skills/@org%2Fmy-skill/1.0.0", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(VersionInfo{
@@ -95,7 +94,7 @@ func TestGetVersion_Scoped(t *testing.T) {
 
 func TestDownloadURL_Scoped(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/v1/skills/@alice/data-viz/1.0.0/download", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/skills/@alice%2Fdata-viz/1.0.0/download", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://r2.example.com/scoped.skl", http.StatusFound)
 	})
 

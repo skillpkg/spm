@@ -272,12 +272,9 @@ type Collaborator struct {
 // "@scope/skill" → "/@scope/skill" (split into path segments)
 // "skill" → "/skill" (unscoped, backwards compat)
 func skillPath(name string) string {
-	if strings.HasPrefix(name, "@") {
-		parts := strings.SplitN(name[1:], "/", 2)
-		if len(parts) == 2 {
-			return "/@" + parts[0] + "/" + url.PathEscape(parts[1])
-		}
-	}
+	// Encode the full name as a single path segment.
+	// Hono auto-decodes it so the unscoped /skills/:name route handles both
+	// scoped (@scope/name) and unscoped names correctly.
 	return "/" + url.PathEscape(name)
 }
 
