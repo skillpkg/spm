@@ -9,7 +9,7 @@ import (
 )
 
 var rescanCmd = &cobra.Command{
-	Use:   "rescan <name@version>",
+	Use:   "rescan <@scope/name@version>",
 	Short: "Trigger a security rescan of a skill version (admin only)",
 	Long:  "Request the registry to re-run security scanning on a specific skill version. Requires admin privileges.",
 	Args:  cobra.ExactArgs(1),
@@ -71,6 +71,7 @@ func runRescan(_ *cobra.Command, args []string) error {
 			}
 			if apiErr.IsNotFound() {
 				Out.LogError("%s@%s does not exist in the registry.", name, version)
+				scopeHint(name)
 			} else if apiErr.IsUnauthorized() {
 				Out.LogError("Authentication failed. Run %s to re-authenticate.", output.Cyan("spm login"))
 			} else if apiErr.StatusCode == 403 {

@@ -14,7 +14,7 @@ var (
 )
 
 var deprecateCmd = &cobra.Command{
-	Use:   "deprecate <name>",
+	Use:   "deprecate <@scope/name>",
 	Short: "Deprecate a skill (or undo with --undo)",
 	Long:  "Mark a skill as deprecated with an optional message. Use --undo to remove deprecation.",
 	Args:  cobra.ExactArgs(1),
@@ -76,6 +76,7 @@ func runDeprecate(_ *cobra.Command, args []string) error {
 			}
 			if apiErr.IsNotFound() {
 				Out.LogError("Skill %s does not exist in the registry.", name)
+				scopeHint(name)
 			} else if apiErr.IsUnauthorized() {
 				Out.LogError("Authentication failed. Run %s to re-authenticate.", output.Cyan("spm login"))
 			} else {

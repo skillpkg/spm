@@ -12,7 +12,7 @@ import (
 var yankReason string
 
 var yankCmd = &cobra.Command{
-	Use:   "yank <name@version>",
+	Use:   "yank <@scope/name@version>",
 	Short: "Yank a specific version from the registry",
 	Long:  "Remove a specific skill version from the registry so it can no longer be installed. Existing installs are unaffected.",
 	Args:  cobra.ExactArgs(1),
@@ -91,6 +91,7 @@ func runYank(_ *cobra.Command, args []string) error {
 			}
 			if apiErr.IsNotFound() {
 				Out.LogError("%s@%s does not exist in the registry.", name, version)
+				scopeHint(name)
 			} else if apiErr.IsUnauthorized() {
 				Out.LogError("Authentication failed. Run %s to re-authenticate.", output.Cyan("spm login"))
 			} else {

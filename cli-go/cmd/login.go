@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/atotto/clipboard"
@@ -133,4 +134,18 @@ func isAPIError(err error, target **api.APIError) bool {
 		return true
 	}
 	return false
+}
+
+// isScopedName returns true if the name has the @scope/name format.
+func isScopedName(name string) bool {
+	return strings.HasPrefix(name, "@") && strings.Contains(name, "/")
+}
+
+// scopeHint prints a hint about scoped names when a user provides a bare name.
+func scopeHint(name string) {
+	if !isScopedName(name) {
+		Out.Log("  %s Skills use scoped names: %s", output.Icons["info"],
+			output.Cyan(fmt.Sprintf("@<scope>/%s", name)))
+		Out.Log("  Find the full name with: %s", output.Cyan(fmt.Sprintf("spm search %s", name)))
+	}
 }

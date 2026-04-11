@@ -14,7 +14,7 @@ var (
 )
 
 var reportCmd = &cobra.Command{
-	Use:   "report <name>",
+	Use:   "report <@scope/name>",
 	Short: "Report a skill for policy violations",
 	Long:  "Submit a report for a skill that violates registry policies.",
 	Args:  cobra.ExactArgs(1),
@@ -63,6 +63,7 @@ func runReport(_ *cobra.Command, args []string) error {
 			}
 			if apiErr.IsNotFound() {
 				Out.LogError("Skill %s does not exist in the registry.", name)
+				scopeHint(name)
 			} else if apiErr.IsUnauthorized() {
 				Out.LogError("Authentication failed. Run %s to re-authenticate.", output.Cyan("spm login"))
 			} else if apiErr.IsRateLimited() {

@@ -10,7 +10,7 @@ import (
 )
 
 var infoCmd = &cobra.Command{
-	Use:   "info <name[@version]>",
+	Use:   "info <@scope/name[@version]>",
 	Short: "Show detailed information about a skill",
 	Long:  "Display full metadata for a skill from the registry, including author, tags, versions, dependencies, and security info.",
 	Args:  cobra.ExactArgs(1),
@@ -173,10 +173,9 @@ func handleInfoError(err error, name string) error {
 			return fmt.Errorf("skill not found: %s", name)
 		}
 		Out.LogError("Skill not found: %s", name)
+		scopeHint(name)
 		if apiErr.Suggestion != "" {
 			Out.Log("  Did you mean: %s?", output.Cyan(apiErr.Suggestion))
-		} else {
-			Out.Log("  Search for skills: %s", output.Cyan("spm search <query>"))
 		}
 		return fmt.Errorf("skill not found: %s", name)
 	}

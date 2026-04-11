@@ -30,7 +30,7 @@ var (
 )
 
 var installCmd = &cobra.Command{
-	Use:     "install [name[@version]...]",
+	Use:     "install [@scope/name[@version]...]",
 	Aliases: []string{"i", "add"},
 	Short:   "Install one or more skills",
 	Long: `Install skills by name with optional version specifiers.
@@ -38,9 +38,9 @@ var installCmd = &cobra.Command{
 If no arguments are given, installs all skills listed in skills.json.
 
 Examples:
-  spm install my-skill
-  spm install my-skill@1.0.0
-  spm install skill-a skill-b@^2.0.0
+  spm install @scope/my-skill
+  spm install @scope/my-skill@1.0.0
+  spm install @alice/skill-a @bob/skill-b@^2.0.0
   spm install --agents "Claude Code,Cursor"`,
 	RunE: runInstall,
 }

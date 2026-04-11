@@ -16,21 +16,21 @@ var collaboratorsCmd = &cobra.Command{
 }
 
 var collabListCmd = &cobra.Command{
-	Use:   "list <skill-name>",
+	Use:   "list <@scope/name>",
 	Short: "List collaborators for a skill",
 	Args:  cobra.ExactArgs(1),
 	RunE:  runCollabList,
 }
 
 var collabAddCmd = &cobra.Command{
-	Use:   "add <skill-name> <username>",
+	Use:   "add <@scope/name> <username>",
 	Short: "Add a collaborator to a skill",
 	Args:  cobra.ExactArgs(2),
 	RunE:  runCollabAdd,
 }
 
 var collabRemoveCmd = &cobra.Command{
-	Use:   "remove <skill-name> <username>",
+	Use:   "remove <@scope/name> <username>",
 	Short: "Remove a collaborator from a skill",
 	Args:  cobra.ExactArgs(2),
 	RunE:  runCollabRemove,

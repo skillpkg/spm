@@ -17,7 +17,7 @@ var VerifierFactory = func() signing.Verifier {
 }
 
 var verifyCmd = &cobra.Command{
-	Use:   "verify <skill-name>",
+	Use:   "verify <@scope/name>",
 	Short: "Verify the Sigstore signature of an installed skill",
 	Long: `Verify the Sigstore signature of an installed skill package.
 
@@ -39,6 +39,7 @@ func runVerify(cmd *cobra.Command, args []string) error {
 	version, err := getInstalledVersion(name)
 	if err != nil || version == "" {
 		Out.LogError("skill not installed: %s", name)
+		scopeHint(name)
 		Out.Log("  Run %s first.", output.Cyan(fmt.Sprintf("spm install %s", name)))
 		if Out.Mode == output.ModeJSON {
 			return Out.LogJSON(map[string]any{
