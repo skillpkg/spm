@@ -55,7 +55,7 @@ const mockPdfSkill = {
 const renderSkillDetail = (name: string) =>
   renderWithProviders(
     <Routes>
-      <Route path="/skills/:name" element={<SkillDetail />} />
+      <Route path="/skills/*" element={<SkillDetail />} />
     </Routes>,
     { routerProps: { initialEntries: [`/skills/${name}`] } },
   );
