@@ -16,6 +16,12 @@ export {
   ResolveRequestSchema,
   SkillsJsonSchema,
   SkillsLockSchema,
+  OrgNameSchema,
+  OrgRoleSchema,
+  CreateOrgSchema,
+  UpdateOrgSchema,
+  AddMemberSchema,
+  UpdateMemberRoleSchema,
 } from './schemas.js';
 
 export type {
@@ -28,6 +34,11 @@ export type {
   ResolveRequest,
   SkillsJson,
   SkillsLock,
+  OrgRole,
+  CreateOrg,
+  UpdateOrg,
+  AddMember,
+  UpdateMemberRole,
 } from './schemas.js';
 
 // Categories

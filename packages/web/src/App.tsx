@@ -8,6 +8,7 @@ import { Home } from './pages/home';
 import { Search } from './pages/Search';
 import { SkillDetail } from './pages/skill-detail';
 import { AuthorProfile } from './pages/AuthorProfile';
+import { OrgProfile } from './pages/OrgProfile';
 import { Dashboard } from './pages/dashboard';
 import { SignIn } from './pages/SignIn';
 import { Docs } from './pages/Docs';
@@ -27,6 +28,7 @@ export const App = () => {
               <Route path="/search" element={<Search />} />
               <Route path="/skills/*" element={<SkillDetail />} />
               <Route path="/authors/:username" element={<AuthorProfile />} />
+              <Route path="/orgs/:name" element={<OrgProfile />} />
               <Route
                 path="/dashboard"
                 element={

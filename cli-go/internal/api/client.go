@@ -644,6 +644,71 @@ func (c *Client) Logout() error {
 	return c.doJSON(http.MethodPost, "/auth/logout", nil, nil)
 }
 
+// --- Organization methods ---
+
+// CreateOrg creates a new organization.
+func (c *Client) CreateOrg(name, displayName, description string) (*OrgInfo, error) {
+	payload := map[string]string{"name": name}
+	if displayName != "" {
+		payload["display_name"] = displayName
+	}
+	if description != "" {
+		payload["description"] = description
+	}
+	var resp OrgInfo
+	if err := c.doJSON(http.MethodPost, "/orgs", payload, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// GetOrg gets info about an organization.
+func (c *Client) GetOrg(name string) (*OrgInfo, error) {
+	var resp OrgInfo
+	if err := c.get("/orgs/"+url.PathEscape(name), &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// ListMyOrgs lists organizations for the given username.
+func (c *Client) ListMyOrgs(username string) ([]OrgSummary, error) {
+	var resp []OrgSummary
+	if err := c.get("/users/"+url.PathEscape(username)+"/orgs", &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// AddOrgMember adds a member to an organization.
+func (c *Client) AddOrgMember(org, username, role string) error {
+	path := "/orgs/" + url.PathEscape(org) + "/members"
+	payload := map[string]string{"username": username, "role": role}
+	return c.doJSON(http.MethodPost, path, payload, nil)
+}
+
+// RemoveOrgMember removes a member from an organization.
+func (c *Client) RemoveOrgMember(org, username string) error {
+	path := "/orgs/" + url.PathEscape(org) + "/members/" + url.PathEscape(username)
+	return c.doJSON(http.MethodDelete, path, nil, nil)
+}
+
+// ChangeOrgRole changes a member's role in an organization.
+func (c *Client) ChangeOrgRole(org, username, role string) error {
+	path := "/orgs/" + url.PathEscape(org) + "/members/" + url.PathEscape(username)
+	payload := map[string]string{"role": role}
+	return c.doJSON(http.MethodPatch, path, payload, nil)
+}
+
+// ListOrgMembers lists members of an organization.
+func (c *Client) ListOrgMembers(org string) ([]OrgMember, error) {
+	var resp []OrgMember
+	if err := c.get("/orgs/"+url.PathEscape(org)+"/members", &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 // --- Internal HTTP helpers ---
 
 func (c *Client) setAuthHeader(req *http.Request) {

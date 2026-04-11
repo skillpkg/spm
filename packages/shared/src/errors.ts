@@ -30,6 +30,30 @@ export const ERROR_CODES = {
     message: 'Name too similar to existing skill',
   },
 
+  // Organizations
+  ORG_NOT_FOUND: { code: 'org_not_found', status: 404, message: 'Organization not found' },
+  ORG_NAME_TAKEN: { code: 'org_name_taken', status: 409, message: 'Organization name already taken' },
+  ORG_MEMBER_EXISTS: {
+    code: 'org_member_exists',
+    status: 409,
+    message: 'User is already a member of this organization',
+  },
+  ORG_NOT_MEMBER: {
+    code: 'org_not_member',
+    status: 403,
+    message: 'You are not a member of this organization',
+  },
+  ORG_LAST_OWNER: {
+    code: 'org_last_owner',
+    status: 422,
+    message: 'Cannot remove or demote the last owner of an organization',
+  },
+  SCOPE_NOT_FOUND: {
+    code: 'scope_not_found',
+    status: 403,
+    message: 'Scope does not exist. Create it with: spm org create <name>',
+  },
+
   // Rate limiting
   RATE_LIMITED: { code: 'rate_limited', status: 429, message: 'Too many requests' },
 

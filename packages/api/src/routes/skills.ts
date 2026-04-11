@@ -19,6 +19,8 @@ import {
   downloads,
   skillCollaborators,
   scans,
+  organizations,
+  orgMembers,
 } from '../db/schema.js';
 import { validateSkillName, checkNameSimilarity } from '../services/names.js';
 import { uploadPackage, uploadBundle, getObject } from '../services/r2.js';
@@ -181,6 +183,47 @@ skillsRoutes.post('/skills', authed, async (c) => {
       }),
       ERROR_CODES.NAME_SIMILAR.status,
     );
+  }
+
+  // ── Scope authorization ──
+  const scopeMatch = name.match(/^@([a-z0-9-]+)\//);
+  if (scopeMatch && !publishAs) {
+    const scope = scopeMatch[1];
+
+    // Check if scope matches the user's own username
+    if (jwt.username !== scope) {
+      // Check if scope is an org the user belongs to
+      const [org] = await db
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.name, scope))
+        .limit(1);
+
+      if (!org) {
+        return c.json(
+          createApiError('SCOPE_NOT_FOUND', {
+            message: `Scope @${scope} does not exist. Create it with: spm org create ${scope}`,
+          }),
+          ERROR_CODES.SCOPE_NOT_FOUND.status,
+        );
+      }
+
+      const [membership] = await db
+        .select({ id: orgMembers.id })
+        .from(orgMembers)
+        .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, userId)))
+        .limit(1);
+
+      if (!membership) {
+        return c.json(
+          createApiError('ORG_NOT_MEMBER', {
+            message: `You are not a member of @${scope}`,
+          }),
+          ERROR_CODES.ORG_NOT_MEMBER.status,
+        );
+      }
+      // All roles (owner, admin, member) can publish
+    }
   }
 
   // ── Security scan ──

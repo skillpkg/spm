@@ -10,6 +10,7 @@ import {
   jsonb,
   timestamp,
   uniqueIndex,
+  unique,
   index,
   primaryKey,
 } from 'drizzle-orm/pg-core';
@@ -287,6 +288,48 @@ export const reports = pgTable('reports', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ── Organizations ──
+
+export const organizations = pgTable(
+  'organizations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: text('name').unique().notNull(),
+    displayName: text('display_name'),
+    description: text('description'),
+    avatarUrl: text('avatar_url'),
+    website: text('website'),
+    createdBy: uuid('created_by')
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('idx_org_name').on(table.name)],
+);
+
+// ── Org Members ──
+
+export const orgMembers = pgTable(
+  'org_members',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: text('role').notNull().default('member'),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('org_members_org_user_unique').on(table.orgId, table.userId),
+    index('idx_org_members_org').on(table.orgId),
+    index('idx_org_members_user').on(table.userId),
+  ],
+);
 
 // ── Bridge skills ──
 

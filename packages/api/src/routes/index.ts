@@ -12,6 +12,7 @@ import { authorsRoutes } from './authors.js';
 import { reportsRoutes } from './reports.js';
 import { tagsRoutes } from './tags.js';
 import { templateRoutes } from './template.js';
+import { orgsRoutes } from './orgs.js';
 import { adminRoutes } from './admin/index.js';
 
 export const createRouter = () => {
@@ -31,6 +32,9 @@ export const createRouter = () => {
   router.route('/', authorsRoutes);
   router.route('/', tagsRoutes);
   router.route('/', reportsRoutes);
+
+  // Organization routes
+  router.route('/', orgsRoutes);
 
   // Template route
   router.route('/', templateRoutes);

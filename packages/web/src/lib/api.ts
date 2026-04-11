@@ -250,6 +250,47 @@ export interface SkillDownloadsResponse {
 export const getSkillDownloads = (name: string): Promise<SkillDownloadsResponse> =>
   apiFetch(`${skillApiPath(name)}/downloads`);
 
+// -- Organizations --
+
+export interface OrgInfo {
+  id: string;
+  name: string;
+  display_name: string | null;
+  description: string | null;
+  avatar_url: string | null;
+  website: string | null;
+  member_count: number;
+  skill_count: number;
+  created_at: string;
+}
+
+export interface OrgMemberInfo {
+  username: string;
+  role: string;
+  joined_at: string;
+}
+
+export interface OrgDetailResponse extends OrgInfo {
+  members: OrgMemberInfo[];
+}
+
+export interface OrgSkillsResponse {
+  skills: Array<{
+    name: string;
+    version: string;
+    description: string;
+    downloads: number;
+    rating_avg: number | null;
+    categories: string[];
+  }>;
+}
+
+export const getOrg = (name: string): Promise<OrgDetailResponse> =>
+  apiFetch(`/orgs/${encodeURIComponent(name)}`);
+
+export const getOrgSkills = (name: string): Promise<OrgSkillsResponse> =>
+  apiFetch(`/orgs/${encodeURIComponent(name)}/skills`);
+
 // -- Author Stats (auth required) --
 
 export interface WeeklyTrend {

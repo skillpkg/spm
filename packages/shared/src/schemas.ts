@@ -235,3 +235,45 @@ export const SkillsLockSchema = z.object({
 });
 
 export type SkillsLock = z.infer<typeof SkillsLockSchema>;
+
+// -- Organization schemas --
+
+export const OrgNameSchema = z
+  .string()
+  .min(2)
+  .max(39)
+  .regex(/^[a-z0-9][a-z0-9-]*$/, 'Org name must be lowercase alphanumeric with hyphens');
+
+export const OrgRoleSchema = z.enum(['owner', 'admin', 'member']);
+
+export type OrgRole = z.infer<typeof OrgRoleSchema>;
+
+export const CreateOrgSchema = z.object({
+  name: OrgNameSchema,
+  display_name: z.string().max(100).optional(),
+  description: z.string().max(500).optional(),
+});
+
+export type CreateOrg = z.infer<typeof CreateOrgSchema>;
+
+export const UpdateOrgSchema = z.object({
+  display_name: z.string().max(100).optional(),
+  description: z.string().max(500).optional(),
+  avatar_url: z.string().url().optional(),
+  website: z.string().url().optional(),
+});
+
+export type UpdateOrg = z.infer<typeof UpdateOrgSchema>;
+
+export const AddMemberSchema = z.object({
+  username: z.string(),
+  role: OrgRoleSchema.default('member'),
+});
+
+export type AddMember = z.infer<typeof AddMemberSchema>;
+
+export const UpdateMemberRoleSchema = z.object({
+  role: OrgRoleSchema,
+});
+
+export type UpdateMemberRole = z.infer<typeof UpdateMemberRoleSchema>;
