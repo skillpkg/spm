@@ -1,0 +1,82 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches: [staging]
+    paths-ignore:
+      - '*.md'
+      - 'plan/**'
+      - 'LICENSE'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Pre-deploy
+    uses: ./.github/workflows/ci.yml
+
+  deploy-api-staging:
+    name: Deploy API (staging)
+    needs: [quality]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @spm/shared build
+      - run: pnpm --filter @spm/api build
+      - name: Deploy to Cloudflare Workers (staging)
+        run: pnpm --filter @spm/api run deploy:staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-web-staging:
+    name: Deploy Web (staging)
+    needs: [quality]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @spm/shared build
+      - run: pnpm --filter @spm/ui build
+      - run: pnpm --filter @spm/web build
+        env:
+          VITE_API_URL: https://staging-registry.skillpkg.dev/api/v1
+      - name: Deploy to Cloudflare Pages (staging)
+        run: npx wrangler pages deploy packages/web/dist --project-name=spm-web-staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-admin-staging:
+    name: Deploy Admin (staging)
+    needs: [quality]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @spm/shared build
+      - run: pnpm --filter @spm/ui build
+      - run: pnpm --filter @spm/admin build
+        env:
+          VITE_API_URL: https://staging-registry.skillpkg.dev/api/v1
+      - name: Deploy to Cloudflare Pages (staging)
+        run: npx wrangler pages deploy packages/admin/dist --project-name=spm-admin-staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

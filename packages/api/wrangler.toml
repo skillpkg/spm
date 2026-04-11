@@ -20,8 +20,17 @@ id = "134b73cb8a544ed8b32e2fd1a3ca0123"
 
 [env.staging]
 name = "spm-api-staging"
+routes = [
+  { pattern = "staging-registry.skillpkg.dev/*", zone_name = "skillpkg.dev" }
+]
 [env.staging.vars]
 ENVIRONMENT = "staging"
+[[env.staging.r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "spm-packages-staging"
+[[env.staging.kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "298532e1e8c3467088a06bd2194c15a1"
 
 [env.dev]
 name = "spm-api-dev"

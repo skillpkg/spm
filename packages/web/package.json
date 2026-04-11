@@ -12,6 +12,7 @@
     "lint": "eslint src/",
     "preview": "vite preview",
     "deploy": "npx wrangler pages deploy dist --project-name=spm-web",
+    "deploy:staging": "VITE_API_URL=https://staging-registry.skillpkg.dev/api/v1 vite build && npx wrangler pages deploy dist --project-name=spm-web-staging",
     "test:e2e": "playwright test"
   },
   "dependencies": {
