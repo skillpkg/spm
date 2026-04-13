@@ -10,7 +10,7 @@ import {
   UpdateMemberRoleSchema,
 } from '@spm/shared';
 import type { AppEnv } from '../types.js';
-import { authed } from '../middleware/auth.js';
+import { authed, optionalAuth } from '../middleware/auth.js';
 import { organizations, orgMembers, users, skills } from '../db/schema.js';
 import { isReservedName } from '../services/names.js';
 
@@ -250,10 +250,11 @@ orgsRoutes.delete('/orgs/:name', authed, async (c) => {
   return c.json({ message: 'Organization deleted' });
 });
 
-// ── GET /orgs/:name/members — list members ──
+// ── GET /orgs/:name/members — list members (org members only) ──
 
-orgsRoutes.get('/orgs/:name/members', async (c) => {
+orgsRoutes.get('/orgs/:name/members', authed, async (c) => {
   const db = c.get('db');
+  const jwt = c.get('jwtPayload');
   const name = c.req.param('name');
 
   const [org] = await db
@@ -264,6 +265,20 @@ orgsRoutes.get('/orgs/:name/members', async (c) => {
 
   if (!org) {
     return c.json(createApiError('ORG_NOT_FOUND'), ERROR_CODES.ORG_NOT_FOUND.status);
+  }
+
+  // Verify caller is a member of this org
+  const [callerMembership] = await db
+    .select({ role: orgMembers.role })
+    .from(orgMembers)
+    .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, jwt.sub)))
+    .limit(1);
+
+  if (!callerMembership) {
+    return c.json(
+      createApiError('ORG_NOT_MEMBER', { message: 'You must be a member of this organization to view members' }),
+      ERROR_CODES.ORG_NOT_MEMBER.status,
+    );
   }
 
   const members = await db
@@ -541,9 +556,12 @@ orgsRoutes.delete('/orgs/:name/members/:username', authed, async (c) => {
 });
 
 // ── GET /orgs/:name/skills — list org skills ──
+// Org members see all skills (public + private). Non-members see only public.
+// TODO: When private skills column is added, filter non-member results to public only.
 
-orgsRoutes.get('/orgs/:name/skills', async (c) => {
+orgsRoutes.get('/orgs/:name/skills', optionalAuth, async (c) => {
   const db = c.get('db');
+  const jwt = c.get('jwtPayload');
   const name = c.req.param('name');
 
   const [org] = await db
@@ -554,6 +572,17 @@ orgsRoutes.get('/orgs/:name/skills', async (c) => {
 
   if (!org) {
     return c.json(createApiError('ORG_NOT_FOUND'), ERROR_CODES.ORG_NOT_FOUND.status);
+  }
+
+  // Check if caller is an org member (for future private skills visibility)
+  let isMember = false;
+  if (jwt?.sub) {
+    const [membership] = await db
+      .select({ role: orgMembers.role })
+      .from(orgMembers)
+      .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, jwt.sub)))
+      .limit(1);
+    isMember = !!membership;
   }
 
   const orgSkills = await db
@@ -570,8 +599,13 @@ orgsRoutes.get('/orgs/:name/skills', async (c) => {
     .from(skills)
     .where(ilike(skills.name, `@${name}/%`));
 
+  // TODO: When private column exists, filter:
+  // const visibleSkills = isMember ? orgSkills : orgSkills.filter(s => !s.private);
+  const visibleSkills = orgSkills;
+  void isMember; // will be used when private skills are added
+
   return c.json({
-    skills: orgSkills.map((s) => ({
+    skills: visibleSkills.map((s) => ({
       name: s.name,
       description: s.description,
       categories: s.categories,
@@ -580,6 +614,59 @@ orgsRoutes.get('/orgs/:name/skills', async (c) => {
       created_at: s.createdAt.toISOString(),
       updated_at: s.updatedAt.toISOString(),
     })),
-    total: orgSkills.length,
+    total: visibleSkills.length,
   });
+});
+
+// ── GET /users/:username/orgs — list orgs a user belongs to ──
+
+orgsRoutes.get('/users/:username/orgs', authed, async (c) => {
+  const db = c.get('db');
+  const jwt = c.get('jwtPayload');
+  const username = c.req.param('username');
+
+  // Only allow users to list their own orgs
+  if (jwt.username !== username) {
+    return c.json(
+      createApiError('FORBIDDEN', { message: 'You can only list your own organizations' }),
+      ERROR_CODES.FORBIDDEN.status,
+    );
+  }
+
+  const rows = await db
+    .select({
+      name: organizations.name,
+      displayName: organizations.displayName,
+      role: orgMembers.role,
+    })
+    .from(orgMembers)
+    .innerJoin(organizations, eq(organizations.id, orgMembers.orgId))
+    .where(eq(orgMembers.userId, jwt.sub));
+
+  // Get member and skill counts for each org
+  const result = await Promise.all(
+    rows.map(async (row) => {
+      const [memberCount] = await db
+        .select({ total: count() })
+        .from(orgMembers)
+        .where(eq(orgMembers.orgId, (
+          await db.select({ id: organizations.id }).from(organizations).where(eq(organizations.name, row.name)).limit(1)
+        )[0].id));
+
+      const [skillCount] = await db
+        .select({ total: count() })
+        .from(skills)
+        .where(ilike(skills.name, `@${row.name}/%`));
+
+      return {
+        name: row.name,
+        display_name: row.displayName,
+        role: row.role,
+        member_count: memberCount.total,
+        skill_count: skillCount.total,
+      };
+    }),
+  );
+
+  return c.json(result);
 });

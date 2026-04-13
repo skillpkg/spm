@@ -270,9 +270,7 @@ export interface OrgMemberInfo {
   joined_at: string;
 }
 
-export interface OrgDetailResponse extends OrgInfo {
-  members: OrgMemberInfo[];
-}
+export type OrgDetailResponse = OrgInfo;
 
 export interface OrgSkillsResponse {
   skills: Array<{
@@ -290,6 +288,106 @@ export const getOrg = (name: string): Promise<OrgDetailResponse> =>
 
 export const getOrgSkills = (name: string): Promise<OrgSkillsResponse> =>
   apiFetch(`/orgs/${encodeURIComponent(name)}/skills`);
+
+export interface OrgMembersResponse {
+  members: OrgMemberInfo[];
+  total: number;
+}
+
+export const getOrgMembers = (name: string, token: string): Promise<OrgMembersResponse> =>
+  apiFetch(`/orgs/${encodeURIComponent(name)}/members`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+// -- Org mutations (authed) --
+
+export interface UserOrg {
+  name: string;
+  display_name: string | null;
+  role: string;
+  member_count: number;
+  skill_count: number;
+}
+
+export const getMyOrgs = (username: string, token: string): Promise<UserOrg[]> =>
+  apiFetch(`/users/${encodeURIComponent(username)}/orgs`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const createOrg = (
+  body: { name: string; display_name?: string; description?: string },
+  token: string,
+): Promise<{ id: string; name: string }> =>
+  apiFetch('/orgs', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+export const updateOrg = (
+  name: string,
+  body: { display_name?: string; description?: string; website?: string },
+  token: string,
+): Promise<{ message: string }> =>
+  apiFetch(`/orgs/${encodeURIComponent(name)}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+export const inviteOrgMember = (
+  orgName: string,
+  body: { username: string; role: string },
+  token: string,
+): Promise<{ message: string }> =>
+  apiFetch(`/orgs/${encodeURIComponent(orgName)}/members`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+export const changeOrgMemberRole = (
+  orgName: string,
+  username: string,
+  role: string,
+  token: string,
+): Promise<{ message: string }> =>
+  apiFetch(`/orgs/${encodeURIComponent(orgName)}/members/${encodeURIComponent(username)}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ role }),
+  });
+
+export const removeOrgMember = (
+  orgName: string,
+  username: string,
+  token: string,
+): Promise<{ message: string }> =>
+  apiFetch(`/orgs/${encodeURIComponent(orgName)}/members/${encodeURIComponent(username)}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
 // -- Author Stats (auth required) --
 
