@@ -7,7 +7,7 @@ import { skillPath, bareName } from '../lib/urls';
 
 export const OrgProfile = () => {
   const { name } = useParams<{ name: string }>();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const { data: org, isLoading } = useQuery(orgQuery(name ?? ''));
   const { data: skillsData } = useQuery(orgSkillsQuery(name ?? ''));
@@ -15,6 +15,7 @@ export const OrgProfile = () => {
 
   const skills = skillsData?.skills ?? [];
   const members = membersData?.members ?? [];
+  const isMember = members.some((m) => m.username === user?.username);
 
   if (isLoading) {
     return (
@@ -76,6 +77,7 @@ export const OrgProfile = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            flexShrink: 0,
           }}
         >
           {name?.[0]?.toUpperCase() ?? '?'}
@@ -127,6 +129,26 @@ export const OrgProfile = () => {
             )}
           </Text>
         </div>
+
+        {/* Manage button for org members */}
+        {isMember && (
+          <Link
+            to="/dashboard?tab=orgs"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 12,
+              color: 'var(--color-accent)',
+              textDecoration: 'none',
+              padding: '6px 14px',
+              border: '1px solid rgba(16,185,129,0.25)',
+              borderRadius: 6,
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            Manage
+          </Link>
+        )}
       </div>
 
       {/* Members — only visible to org members (API returns 403 for non-members) */}
@@ -191,11 +213,11 @@ export const OrgProfile = () => {
       )}
 
       {/* Skills */}
-      {skills.length > 0 && (
-        <div>
-          <Text variant="h4" font="sans" color="secondary" as="h2" style={{ marginBottom: 12 }}>
-            Published skills
-          </Text>
+      <div>
+        <Text variant="h4" font="sans" color="secondary" as="h2" style={{ marginBottom: 12 }}>
+          Published skills
+        </Text>
+        {skills.length > 0 ? (
           <div
             style={{
               border: '1px solid var(--color-border-default)',
@@ -212,8 +234,7 @@ export const OrgProfile = () => {
                 <div
                   style={{
                     padding: '16px 20px',
-                    borderBottom: '1px solid #1a1d2744',
-                    cursor: 'pointer',
+                    borderBottom: '1px solid var(--color-border-default)',
                   }}
                 >
                   <div
@@ -260,14 +281,27 @@ export const OrgProfile = () => {
               </Link>
             ))}
           </div>
-        </div>
-      )}
-
-      {skills.length === 0 && (
-        <Text variant="body-sm" font="sans" color="muted" as="div" style={{ textAlign: 'center' }}>
-          No skills published yet
-        </Text>
-      )}
+        ) : (
+          <div
+            style={{
+              padding: '40px 20px',
+              textAlign: 'center',
+              background: 'var(--color-bg-card)',
+              border: '1px solid var(--color-border-default)',
+              borderRadius: 10,
+            }}
+          >
+            <Text variant="body-sm" font="sans" color="muted" as="div" style={{ marginBottom: 8 }}>
+              No skills published yet
+            </Text>
+            {isMember && (
+              <Text variant="caption" font="mono" color="dim" as="div">
+                Publish with: spm publish (skill named @{name}/your-skill)
+              </Text>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
