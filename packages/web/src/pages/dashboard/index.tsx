@@ -14,6 +14,7 @@ import { OverviewTab } from './OverviewTab';
 import { SkillsTab } from './SkillsTab';
 import { PublishHistoryTab } from './PublishHistoryTab';
 import { AnalyticsTab } from './AnalyticsTab';
+import { OrganizationsTab } from './OrganizationsTab';
 import { authorStatsQuery, dashboardSkillsQuery } from './queries';
 
 const AGENT_COLORS: Record<string, string> = {
@@ -193,6 +194,7 @@ export const Dashboard = () => {
         tabs={[
           { id: 'overview', label: 'Overview' },
           { id: 'skills', label: `Skills (${skills.length})` },
+          { id: 'orgs', label: 'Organizations' },
           { id: 'publishes', label: 'Publish history' },
           { id: 'analytics', label: 'Analytics' },
         ]}
@@ -212,6 +214,7 @@ export const Dashboard = () => {
         />
       )}
       {tab === 'skills' && <SkillsTab skills={skills} />}
+      {tab === 'orgs' && <OrganizationsTab username={username} token={token ?? ''} />}
       {tab === 'publishes' && <PublishHistoryTab />}
       {tab === 'analytics' && (
         <AnalyticsTab

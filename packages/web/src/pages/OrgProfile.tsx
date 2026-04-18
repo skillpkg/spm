@@ -1,16 +1,20 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Text } from '@spm/ui';
-import { orgQuery, orgSkillsQuery } from './org/queries';
+import { useAuth } from '../context/AuthContext';
+import { orgQuery, orgSkillsQuery, orgMembersQuery } from './org/queries';
 import { skillPath, bareName } from '../lib/urls';
 
 export const OrgProfile = () => {
   const { name } = useParams<{ name: string }>();
+  const { token } = useAuth();
 
   const { data: org, isLoading } = useQuery(orgQuery(name ?? ''));
   const { data: skillsData } = useQuery(orgSkillsQuery(name ?? ''));
+  const { data: membersData } = useQuery(orgMembersQuery(name ?? '', token ?? ''));
 
   const skills = skillsData?.skills ?? [];
+  const members = membersData?.members ?? [];
 
   if (isLoading) {
     return (
@@ -125,8 +129,8 @@ export const OrgProfile = () => {
         </div>
       </div>
 
-      {/* Members */}
-      {org.members && org.members.length > 0 && (
+      {/* Members — only visible to org members (API returns 403 for non-members) */}
+      {members.length > 0 && (
         <div style={{ marginBottom: 32 }}>
           <Text variant="h4" font="sans" color="secondary" as="h2" style={{ marginBottom: 12 }}>
             Members
@@ -138,7 +142,7 @@ export const OrgProfile = () => {
               flexWrap: 'wrap',
             }}
           >
-            {org.members.map((m) => (
+            {members.map((m) => (
               <Link
                 key={m.username}
                 to={`/authors/${m.username}`}
@@ -230,9 +234,6 @@ export const OrgProfile = () => {
                       >
                         {bareName(skill.name)}
                       </Text>
-                      <Text variant="caption" font="mono" color="faint" as="span">
-                        v{skill.version}
-                      </Text>
                     </div>
                     <Text
                       variant="caption"
@@ -241,7 +242,6 @@ export const OrgProfile = () => {
                       as="div"
                       style={{ display: 'flex', gap: 16 }}
                     >
-                      <span>&#x2B07; {skill.downloads}</span>
                       <span style={{ color: 'var(--color-yellow)' }}>
                         &#x2605; {skill.rating_avg ?? '--'}
                       </span>
