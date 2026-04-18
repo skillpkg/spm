@@ -346,7 +346,7 @@ orgsRoutes.post(
 
     if (!targetUser) {
       return c.json(
-        createApiError('SKILL_NOT_FOUND', { message: `User "${body.username}" not found` }),
+        createApiError('SKILL_NOT_FOUND', { message: `User "${body.username}" not found. They must have an SPM account first.` }),
         404,
       );
     }

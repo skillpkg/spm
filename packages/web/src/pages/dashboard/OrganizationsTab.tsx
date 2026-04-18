@@ -437,7 +437,7 @@ const OrgManagePanel = ({
               style={{ ...inputStyle, flex: 1 }}
               value={inviteUsername}
               onChange={(e) => setInviteUsername(e.target.value)}
-              placeholder="username"
+              placeholder="SPM username (e.g. jane-doe)"
             />
             <select
               style={selectStyle}
