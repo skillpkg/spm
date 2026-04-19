@@ -72,6 +72,9 @@ export const SignIn = ({
       setSecondsLeft(data.expires_in);
       setState('waiting');
 
+      // Auto-copy code to clipboard
+      try { await navigator.clipboard.writeText(data.user_code); } catch { /* ignore */ }
+
       timerRef.current = setInterval(() => {
         setSecondsLeft((prev) => {
           if (prev <= 1) {
@@ -229,6 +232,7 @@ export const SignIn = ({
         </p>
         <div
           style={{
+            position: 'relative',
             fontFamily: 'var(--font-mono)',
             fontSize: 32,
             fontWeight: 700,
@@ -239,10 +243,28 @@ export const SignIn = ({
             borderRadius: 8,
             border: '1px solid rgba(16,185,129,0.15)',
             marginBottom: 20,
-            userSelect: 'all',
+            cursor: 'pointer',
+          }}
+          onClick={() => {
+            navigator.clipboard.writeText(deviceData.user_code);
+            const el = document.getElementById('spm-copy-hint');
+            if (el) { el.textContent = 'Copied!'; setTimeout(() => { el.textContent = 'Click to copy'; }, 1500); }
           }}
         >
           {deviceData.user_code}
+          <div
+            id="spm-copy-hint"
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 11,
+              fontWeight: 400,
+              letterSpacing: 'normal',
+              color: 'var(--color-text-muted)',
+              marginTop: 6,
+            }}
+          >
+            Click to copy
+          </div>
         </div>
         <a
           href={deviceData.verification_uri}

@@ -17,9 +17,7 @@ export const errorHandler = (err: Error, c: Context<AppEnv>) => {
   }
 
   const env = c.env.ENVIRONMENT;
-  if (env !== 'production') {
-    console.error('[spm-api] unhandled error:', err.message, err.stack);
-  }
+  console.error('[spm-api] unhandled error:', err.message, err.stack);
 
   const apiError = createApiError('INTERNAL_ERROR', {
     ...(env !== 'production' ? { details: { message: err.message } } : {}),
