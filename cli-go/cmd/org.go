@@ -402,4 +402,3 @@ func runOrgLeave(_ *cobra.Command, args []string) error {
 
 	return nil
 }
-

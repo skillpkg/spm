@@ -28,6 +28,7 @@ export interface Skill {
   published: string;
   updated: string;
   status: string;
+  visibility?: string;
 }
 
 export interface WeeklyData {

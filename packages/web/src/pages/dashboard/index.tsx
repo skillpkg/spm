@@ -103,6 +103,7 @@ export const Dashboard = () => {
       published: s.published_at?.split('T')[0] ?? '',
       updated: s.updated_at?.split('T')[0] ?? '',
       status: 'published',
+      visibility: s.visibility,
     })) ?? [];
 
   return (
@@ -191,7 +192,11 @@ export const Dashboard = () => {
           <Text variant="caption" font="sans" color="muted" as="div" style={{ marginBottom: 6 }}>
             Weekly trend
           </Text>
-          <MiniChart data={weeklyTrend.map((d) => ({ value: d.downloads }))} width={180} height={40} />
+          <MiniChart
+            data={weeklyTrend.map((d) => ({ value: d.downloads }))}
+            width={180}
+            height={40}
+          />
         </div>
       </div>
 

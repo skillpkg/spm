@@ -32,7 +32,11 @@ export const ERROR_CODES = {
 
   // Organizations
   ORG_NOT_FOUND: { code: 'org_not_found', status: 404, message: 'Organization not found' },
-  ORG_NAME_TAKEN: { code: 'org_name_taken', status: 409, message: 'Organization name already taken' },
+  ORG_NAME_TAKEN: {
+    code: 'org_name_taken',
+    status: 409,
+    message: 'Organization name already taken',
+  },
   ORG_MEMBER_EXISTS: {
     code: 'org_member_exists',
     status: 409,

@@ -8,7 +8,7 @@ import { ManifestSchema, ERROR_CODES, createApiError, TRUST_TIERS } from '@spm/s
 import type { Manifest } from '@spm/shared';
 import type { AppEnv } from '../types.js';
 import type { Database } from '../db/index.js';
-import { authed } from '../middleware/auth.js';
+import { authed, optionalAuth } from '../middleware/auth.js';
 import {
   skills,
   versions,
@@ -226,6 +226,21 @@ skillsRoutes.post('/skills', authed, async (c) => {
     }
   }
 
+  // ── Private skill validation ──
+  const visibility = manifest.private ? 'private' : 'public';
+  if (manifest.private) {
+    // Private skills must be org-scoped (not personal)
+    if (!scopeMatch || jwt.username === scopeMatch[1]) {
+      return c.json(
+        createApiError('VALIDATION_ERROR', {
+          message:
+            'Private skills must be published under an organization scope (e.g. @myorg/skill-name)',
+        }),
+        ERROR_CODES.VALIDATION_ERROR.status,
+      );
+    }
+  }
+
   // ── Security scan ──
   const packageDataForScan = await packageFile.arrayBuffer();
   let textFiles: Array<{ name: string; content: string }>;
@@ -296,6 +311,7 @@ skillsRoutes.post('/skills', authed, async (c) => {
         description,
         categories,
         ownerId: userId,
+        visibility,
         repository: manifest.urls?.repository ?? existingSkill.repository,
         license: manifest.license ?? existingSkill.license,
         updatedAt: new Date(),
@@ -312,6 +328,7 @@ skillsRoutes.post('/skills', authed, async (c) => {
         ownerId: userId,
         categories,
         description,
+        visibility,
         repository: manifest.urls?.repository,
         license: manifest.license,
         importedFrom,
@@ -476,13 +493,14 @@ const SearchQuerySchema = z.object({
   per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
 
-skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) => {
+skillsRoutes.get('/skills', optionalAuth, zValidator('query', SearchQuerySchema), async (c) => {
   // Build a cache key from the validated query params
   const queryString = new URL(c.req.url).search.replace(/^\?/, '');
   const cacheKey = buildCacheKey('skills', queryString);
 
   return cachedResponse(c, cacheKey, CACHE_TTLS.search, async () => {
     const db = c.get('db');
+    const jwt = c.get('jwtPayload');
     const params = c.req.valid('query');
     const { q, author, category, tag, signed, trust, platform, security, sort, page, per_page } =
       params;
@@ -490,6 +508,42 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
 
     // Build WHERE conditions — always exclude blocked skills from public search
     const conditions = [ne(skills.status, 'blocked')];
+
+    // Visibility filter: hide private skills unless user is a member of the owning org
+    if (jwt?.sub) {
+      // Authenticated: show public + private skills where user is an org member
+      const userOrgIds = await db
+        .select({ orgId: orgMembers.orgId })
+        .from(orgMembers)
+        .where(eq(orgMembers.userId, jwt.sub));
+      const orgIds = userOrgIds.map((o) => o.orgId);
+
+      if (orgIds.length > 0) {
+        // Get user IDs for orgs (org skills are owned by org creator but scoped to org name)
+        // We match by skill name scope against org names
+        const userOrgs = await db
+          .select({ name: organizations.name })
+          .from(organizations)
+          .where(inArray(organizations.id, orgIds));
+        const orgNames = userOrgs.map((o) => o.name);
+
+        if (orgNames.length > 0) {
+          const orgScopeConditions = orgNames.map((orgName) => ilike(skills.name, `@${orgName}/%`));
+          const visibilityFilter = or(
+            eq(skills.visibility, 'public'),
+            and(eq(skills.visibility, 'private'), or(...orgScopeConditions)),
+          );
+          if (visibilityFilter) conditions.push(visibilityFilter);
+        } else {
+          conditions.push(eq(skills.visibility, 'public'));
+        }
+      } else {
+        conditions.push(eq(skills.visibility, 'public'));
+      }
+    } else {
+      // Not authenticated: only show public skills
+      conditions.push(eq(skills.visibility, 'public'));
+    }
 
     if (author) {
       const authors = author
@@ -673,6 +727,7 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
         deprecated: skills.deprecated,
         ratingAvg: skills.ratingAvg,
         ratingCount: skills.ratingCount,
+        visibility: skills.visibility,
         scanSecurityLevel: skills.scanSecurityLevel,
         ownerId: skills.ownerId,
         createdAt: skills.createdAt,
@@ -811,6 +866,7 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
         rating_avg: row.ratingAvg,
         rating_count: row.ratingCount,
         signed: latestVersion?.sigstoreBundleKey != null,
+        visibility: row.visibility,
         scan_security_level: row.scanSecurityLevel,
         license: row.license,
         deprecated: row.deprecated,
@@ -831,8 +887,9 @@ skillsRoutes.get('/skills', zValidator('query', SearchQuerySchema), async (c) =>
 
 // ── GET /skills/:name — get skill detail ──
 
-dualSkillRoute('get', '', async (c: Context<AppEnv>) => {
+dualSkillRoute('get', '', optionalAuth, async (c: Context<AppEnv>) => {
   const db = c.get('db');
+  const jwt = c.get('jwtPayload');
   const name = extractSkillName(c);
 
   let [skill] = await db.select().from(skills).where(eq(skills.name, name)).limit(1);
@@ -879,6 +936,32 @@ dualSkillRoute('get', '', async (c: Context<AppEnv>) => {
       }),
       ERROR_CODES.SKILL_NOT_FOUND.status,
     );
+  }
+
+  // Private skill access check — return 404 for non-members (don't leak existence)
+  if (skill.visibility === 'private') {
+    let hasAccess = false;
+    if (jwt?.sub) {
+      const scopeMatch = skill.name.match(/^@([a-z0-9-]+)\//);
+      if (scopeMatch) {
+        const [org] = await db
+          .select({ id: organizations.id })
+          .from(organizations)
+          .where(eq(organizations.name, scopeMatch[1]))
+          .limit(1);
+        if (org) {
+          const [membership] = await db
+            .select({ id: orgMembers.id })
+            .from(orgMembers)
+            .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, jwt.sub)))
+            .limit(1);
+          hasAccess = !!membership;
+        }
+      }
+    }
+    if (!hasAccess) {
+      return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+    }
   }
 
   // Fetch related data
@@ -976,6 +1059,7 @@ dualSkillRoute('get', '', async (c: Context<AppEnv>) => {
   return c.json({
     name: skill.name,
     description: skill.description,
+    visibility: skill.visibility,
     categories: skill.categories,
     author: {
       username: author?.username ?? 'unknown',
@@ -1066,19 +1150,46 @@ dualSkillRoute('get', '/downloads', async (c: Context<AppEnv>) => {
 
 // ── GET /skills/:name/:version — get specific version ──
 
-dualSkillRoute('get', '/:version', async (c: Context<AppEnv>) => {
+dualSkillRoute('get', '/:version', optionalAuth, async (c: Context<AppEnv>) => {
   const db = c.get('db');
+  const jwt = c.get('jwtPayload');
   const name = extractSkillName(c);
   const version = c.req.param('version');
 
   const [skill] = await db
-    .select({ id: skills.id })
+    .select({ id: skills.id, visibility: skills.visibility })
     .from(skills)
     .where(eq(skills.name, name))
     .limit(1);
 
   if (!skill) {
     return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+  }
+
+  // Private skill access check
+  if (skill.visibility === 'private') {
+    let hasAccess = false;
+    if (jwt?.sub) {
+      const scopeMatch = name.match(/^@([a-z0-9-]+)\//);
+      if (scopeMatch) {
+        const [org] = await db
+          .select({ id: organizations.id })
+          .from(organizations)
+          .where(eq(organizations.name, scopeMatch[1]))
+          .limit(1);
+        if (org) {
+          const [membership] = await db
+            .select({ id: orgMembers.id })
+            .from(orgMembers)
+            .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, jwt.sub)))
+            .limit(1);
+          hasAccess = !!membership;
+        }
+      }
+    }
+    if (!hasAccess) {
+      return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+    }
   }
 
   const [ver] = await db

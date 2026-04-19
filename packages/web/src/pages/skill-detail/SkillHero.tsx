@@ -75,6 +75,22 @@ export const SkillHero = ({ skill }: { skill: SkillFull }) => {
             v{skill.version}
           </Text>
           <TrustBadge tier={skill.trust} size="lg" />
+          {skill.isPrivate && (
+            <span
+              style={{
+                fontSize: 12,
+                fontFamily: 'var(--font-mono)',
+                padding: '3px 10px',
+                borderRadius: 6,
+                background: 'rgba(234,179,8,0.12)',
+                color: 'var(--color-yellow)',
+                border: '1px solid rgba(234,179,8,0.2)',
+                fontWeight: 600,
+              }}
+            >
+              &#x1F512; Private
+            </span>
+          )}
           {skill.importedFrom && (
             <a
               href={skill.importedFrom}

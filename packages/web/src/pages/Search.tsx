@@ -38,6 +38,7 @@ interface DisplaySkill {
   downloads: string;
   rating: string;
   tags?: string[];
+  isPrivate: boolean;
 }
 
 const apiResultToDisplay = (s: SearchResultItem): DisplaySkill => ({
@@ -50,6 +51,7 @@ const apiResultToDisplay = (s: SearchResultItem): DisplaySkill => ({
   downloads: s.downloads >= 1000 ? `${(s.downloads / 1000).toFixed(1)}k` : String(s.downloads),
   rating: s.rating_avg != null ? String(s.rating_avg) : '--',
   tags: s.tags,
+  isPrivate: s.visibility === 'private',
 });
 
 const SearchResultRow = ({ skill }: { skill: DisplaySkill }) => {
@@ -83,6 +85,21 @@ const SearchResultRow = ({ skill }: { skill: DisplaySkill }) => {
             <Text variant="caption" font="mono" color="faint" as="span">
               {skill.version}
             </Text>
+            {skill.isPrivate && (
+              <span
+                style={{
+                  fontSize: 11,
+                  fontFamily: 'var(--font-mono)',
+                  padding: '2px 7px',
+                  borderRadius: 4,
+                  background: 'rgba(234,179,8,0.12)',
+                  color: 'var(--color-yellow)',
+                  border: '1px solid rgba(234,179,8,0.2)',
+                }}
+              >
+                &#x1F512; Private
+              </span>
+            )}
             <TrustBadge tier={skill.trust} />
             <SecurityBadge level={skill.securityLevel} showLabel={false} />
           </div>

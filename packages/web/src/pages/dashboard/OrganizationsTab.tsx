@@ -56,12 +56,7 @@ const roleBadge = (role: string): React.CSSProperties => ({
       : role === 'admin'
         ? 'rgba(59, 130, 246, 0.15)'
         : 'rgba(100, 116, 139, 0.15)',
-  color:
-    role === 'owner'
-      ? '#34d399'
-      : role === 'admin'
-        ? '#60a5fa'
-        : '#94a3b8',
+  color: role === 'owner' ? '#34d399' : role === 'admin' ? '#60a5fa' : '#94a3b8',
 });
 
 const btnPrimary: React.CSSProperties = {
@@ -102,7 +97,13 @@ export const OrganizationsTab = ({ username, token }: OrganizationsTabProps) => 
 
   if (isLoading) {
     return (
-      <Text variant="body-sm" font="sans" color="muted" as="div" style={{ padding: '32px 0', textAlign: 'center' }}>
+      <Text
+        variant="body-sm"
+        font="sans"
+        color="muted"
+        as="div"
+        style={{ padding: '32px 0', textAlign: 'center' }}
+      >
         Loading organizations...
       </Text>
     );
@@ -112,12 +113,22 @@ export const OrganizationsTab = ({ username, token }: OrganizationsTabProps) => 
     <div style={{ display: 'flex', gap: 20 }}>
       {/* Org list */}
       <div style={{ width: 300, flexShrink: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 12,
+          }}
+        >
           <Text variant="h4" font="sans" color="secondary" as="h2" style={{ margin: 0 }}>
             Your organizations
           </Text>
           <button
-            onClick={() => { setShowCreateForm(true); setSelectedOrg(null); }}
+            onClick={() => {
+              setShowCreateForm(true);
+              setSelectedOrg(null);
+            }}
             style={{
               ...btnGhost,
               color: 'var(--color-accent)',
@@ -133,7 +144,13 @@ export const OrganizationsTab = ({ username, token }: OrganizationsTabProps) => 
         <div style={cardStyle}>
           {(!orgs || orgs.length === 0) && !showCreateForm && (
             <div style={{ padding: 32, textAlign: 'center' }}>
-              <Text variant="body-sm" font="sans" color="muted" as="div" style={{ marginBottom: 12 }}>
+              <Text
+                variant="body-sm"
+                font="sans"
+                color="muted"
+                as="div"
+                style={{ marginBottom: 12 }}
+              >
                 No organizations yet
               </Text>
               <button
@@ -149,7 +166,10 @@ export const OrganizationsTab = ({ username, token }: OrganizationsTabProps) => 
               key={org.name}
               org={org}
               selected={selectedOrg === org.name}
-              onSelect={() => { setSelectedOrg(org.name); setShowCreateForm(false); }}
+              onSelect={() => {
+                setSelectedOrg(org.name);
+                setShowCreateForm(false);
+              }}
             />
           ))}
         </div>
@@ -236,11 +256,17 @@ const OrgListItem = ({
         {org.name[0]?.toUpperCase()}
       </div>
       <div>
-        <Text variant="body-sm" font="mono" as="div" style={{ color: 'var(--color-cyan)', marginBottom: 1 }}>
+        <Text
+          variant="body-sm"
+          font="mono"
+          as="div"
+          style={{ color: 'var(--color-cyan)', marginBottom: 1 }}
+        >
           @{org.name}
         </Text>
         <Text variant="caption" font="mono" color="muted" as="div">
-          {org.member_count} member{org.member_count !== 1 ? 's' : ''} · {org.skill_count} skill{org.skill_count !== 1 ? 's' : ''}
+          {org.member_count} member{org.member_count !== 1 ? 's' : ''} · {org.skill_count} skill
+          {org.skill_count !== 1 ? 's' : ''}
         </Text>
       </div>
     </div>
@@ -326,7 +352,12 @@ const CreateOrgForm = ({
           />
         </div>
         {error && (
-          <Text variant="body-sm" font="sans" as="div" style={{ color: 'var(--color-red)', marginBottom: 12 }}>
+          <Text
+            variant="body-sm"
+            font="sans"
+            as="div"
+            style={{ color: 'var(--color-red)', marginBottom: 12 }}
+          >
             {error}
           </Text>
         )}
@@ -344,7 +375,11 @@ const CreateOrgForm = ({
           >
             {submitting ? 'Creating...' : 'Create organization'}
           </button>
-          <button type="button" onClick={onCancel} style={{ ...btnGhost, fontSize: 13, padding: '8px 16px' }}>
+          <button
+            type="button"
+            onClick={onCancel}
+            style={{ ...btnGhost, fontSize: 13, padding: '8px 16px' }}
+          >
             Cancel
           </button>
         </div>
@@ -385,7 +420,11 @@ const OrgManagePanel = ({
     setInviteError('');
     setInviting(true);
     try {
-      await inviteOrgMember(orgName, { username: inviteUsername.replace(/^@/, ''), role: inviteRole }, token);
+      await inviteOrgMember(
+        orgName,
+        { username: inviteUsername.replace(/^@/, ''), role: inviteRole },
+        token,
+      );
       setInviteUsername('');
       queryClient.invalidateQueries({ queryKey: ['org', orgName, 'members'] });
       queryClient.invalidateQueries({ queryKey: ['myOrgs'] });
@@ -426,7 +465,8 @@ const OrgManagePanel = ({
         color: activeSection === id ? 'var(--color-accent)' : 'var(--color-text-dim)',
         background: 'none',
         border: 'none',
-        borderBottom: activeSection === id ? '2px solid var(--color-accent)' : '2px solid transparent',
+        borderBottom:
+          activeSection === id ? '2px solid var(--color-accent)' : '2px solid transparent',
         padding: '8px 16px',
         cursor: 'pointer',
       }}
@@ -438,7 +478,14 @@ const OrgManagePanel = ({
   return (
     <div>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 4,
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div
             style={{
@@ -462,7 +509,9 @@ const OrgManagePanel = ({
               @{orgName}
             </Text>
             {org?.display_name && (
-              <Text variant="caption" font="sans" color="dim" as="div">{org.display_name}</Text>
+              <Text variant="caption" font="sans" color="dim" as="div">
+                {org.display_name}
+              </Text>
             )}
           </div>
         </div>
@@ -481,7 +530,8 @@ const OrgManagePanel = ({
       {/* Stats row */}
       <div style={{ display: 'flex', gap: 16, margin: '12px 0 16px', paddingLeft: 46 }}>
         <Text variant="caption" font="mono" color="muted" as="span">
-          {org?.member_count ?? members.length} member{(org?.member_count ?? members.length) !== 1 ? 's' : ''}
+          {org?.member_count ?? members.length} member
+          {(org?.member_count ?? members.length) !== 1 ? 's' : ''}
         </Text>
         <Text variant="caption" font="mono" color="muted" as="span">
           {org?.skill_count ?? 0} skill{(org?.skill_count ?? 0) !== 1 ? 's' : ''}
@@ -501,10 +551,20 @@ const OrgManagePanel = ({
           {/* Invite form */}
           {canManage && (
             <div style={{ ...cardStyle, padding: 16, marginBottom: 16 }}>
-              <Text variant="body-sm" font="sans" color="secondary" weight={600} as="div" style={{ marginBottom: 10 }}>
+              <Text
+                variant="body-sm"
+                font="sans"
+                color="secondary"
+                weight={600}
+                as="div"
+                style={{ marginBottom: 10 }}
+              >
                 Invite member
               </Text>
-              <form onSubmit={handleInvite} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <form
+                onSubmit={handleInvite}
+                style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+              >
                 <input
                   style={{ ...inputStyle, flex: 1 }}
                   value={inviteUsername}
@@ -533,7 +593,12 @@ const OrgManagePanel = ({
                 </button>
               </form>
               {inviteError && (
-                <Text variant="caption" font="sans" as="div" style={{ color: 'var(--color-red)', marginTop: 6 }}>
+                <Text
+                  variant="caption"
+                  font="sans"
+                  as="div"
+                  style={{ color: 'var(--color-red)', marginTop: 6 }}
+                >
                   {inviteError}
                 </Text>
               )}
@@ -589,17 +654,34 @@ const MembersTable = ({
         borderBottom: '1px solid var(--color-border-default)',
       }}
     >
-      <Text variant="caption" font="sans" color="muted" weight={600} as="div">USERNAME</Text>
-      <Text variant="caption" font="sans" color="muted" weight={600} as="div">ROLE</Text>
+      <Text variant="caption" font="sans" color="muted" weight={600} as="div">
+        USERNAME
+      </Text>
+      <Text variant="caption" font="sans" color="muted" weight={600} as="div">
+        ROLE
+      </Text>
       {canManage && (
-        <Text variant="caption" font="sans" color="muted" weight={600} as="div" style={{ textAlign: 'right' }}>
+        <Text
+          variant="caption"
+          font="sans"
+          color="muted"
+          weight={600}
+          as="div"
+          style={{ textAlign: 'right' }}
+        >
           ACTIONS
         </Text>
       )}
     </div>
 
     {isLoading && (
-      <Text variant="body-sm" font="sans" color="muted" as="div" style={{ padding: 16, textAlign: 'center' }}>
+      <Text
+        variant="body-sm"
+        font="sans"
+        color="muted"
+        as="div"
+        style={{ padding: 16, textAlign: 'center' }}
+      >
         Loading members...
       </Text>
     )}
@@ -628,7 +710,9 @@ const MembersTable = ({
             @{m.username}
           </Link>
           {m.username === currentUsername && (
-            <Text variant="caption" font="sans" color="muted" as="span">(you)</Text>
+            <Text variant="caption" font="sans" color="muted" as="span">
+              (you)
+            </Text>
           )}
         </div>
 
@@ -672,7 +756,13 @@ const MembersTable = ({
     ))}
 
     {!isLoading && members.length === 0 && (
-      <Text variant="body-sm" font="sans" color="muted" as="div" style={{ padding: 16, textAlign: 'center' }}>
+      <Text
+        variant="body-sm"
+        font="sans"
+        color="muted"
+        as="div"
+        style={{ padding: 16, textAlign: 'center' }}
+      >
         No members found
       </Text>
     )}
@@ -759,7 +849,12 @@ const OrgSettingsForm = ({
           />
         </div>
         {error && (
-          <Text variant="body-sm" font="sans" as="div" style={{ color: 'var(--color-red)', marginBottom: 12 }}>
+          <Text
+            variant="body-sm"
+            font="sans"
+            as="div"
+            style={{ color: 'var(--color-red)', marginBottom: 12 }}
+          >
             {error}
           </Text>
         )}

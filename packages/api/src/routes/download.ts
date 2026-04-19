@@ -3,8 +3,9 @@ import type { Context } from 'hono';
 import { eq, and, sql } from 'drizzle-orm';
 import { ERROR_CODES, createApiError } from '@spm/shared';
 import type { AppEnv } from '../types.js';
-import { skills, versions, downloads } from '../db/schema.js';
+import { skills, versions, downloads, organizations, orgMembers } from '../db/schema.js';
 import { getObject } from '../services/r2.js';
+import { optionalAuth } from '../middleware/auth.js';
 import { extractSkillName } from './helpers.js';
 
 export const downloadRoutes = new Hono<AppEnv>();
@@ -18,13 +19,53 @@ const downloadHandler = async (c: Context<AppEnv>) => {
 
   // Resolve skill
   const [skill] = await db
-    .select({ id: skills.id })
+    .select({ id: skills.id, visibility: skills.visibility })
     .from(skills)
     .where(eq(skills.name, name))
     .limit(1);
 
   if (!skill) {
     return c.json(createApiError('SKILL_NOT_FOUND'), ERROR_CODES.SKILL_NOT_FOUND.status);
+  }
+
+  // Private skill access check
+  if (skill.visibility === 'private') {
+    const jwtForAccess = c.get('jwtPayload');
+    if (!jwtForAccess?.sub) {
+      return c.json(
+        createApiError('FORBIDDEN', {
+          message:
+            "You don't have access to this private skill. Sign in and ensure you're a member of the owning organization.",
+        }),
+        ERROR_CODES.FORBIDDEN.status,
+      );
+    }
+    const scopeMatch = name.match(/^@([a-z0-9-]+)\//);
+    let hasAccess = false;
+    if (scopeMatch) {
+      const [org] = await db
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.name, scopeMatch[1]))
+        .limit(1);
+      if (org) {
+        const [membership] = await db
+          .select({ id: orgMembers.id })
+          .from(orgMembers)
+          .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, jwtForAccess.sub)))
+          .limit(1);
+        hasAccess = !!membership;
+      }
+    }
+    if (!hasAccess) {
+      return c.json(
+        createApiError('FORBIDDEN', {
+          message:
+            "You don't have access to this private skill. Ask an admin of the owning organization for access.",
+        }),
+        ERROR_CODES.FORBIDDEN.status,
+      );
+    }
   }
 
   // Resolve version
@@ -115,5 +156,5 @@ const downloadHandler = async (c: Context<AppEnv>) => {
 };
 
 // Register scoped route first, then unscoped for backwards compatibility
-downloadRoutes.get('/skills/@:scope/:name/:version/download', downloadHandler);
-downloadRoutes.get('/skills/:name/:version/download', downloadHandler);
+downloadRoutes.get('/skills/@:scope/:name/:version/download', optionalAuth, downloadHandler);
+downloadRoutes.get('/skills/:name/:version/download', optionalAuth, downloadHandler);

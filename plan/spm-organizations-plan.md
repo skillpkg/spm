@@ -6,12 +6,12 @@ Add organization support to SPM so teams can share a namespace (`@mycompany/*`),
 
 **Four phases, each independently shippable:**
 
-| Phase | Feature | Value |
-|-------|---------|-------|
-| 1 | Organizations | Teams share a `@org` scope for publishing |
-| 2 | Private Skills | Org-only visibility, gated downloads |
-| 3 | Scoped Registries | Route `@org` to a custom registry URL |
-| 4 | Federation | Sync, mirrors, proxy mode |
+| Phase | Feature           | Value                                     |
+| ----- | ----------------- | ----------------------------------------- |
+| 1     | Organizations     | Teams share a `@org` scope for publishing |
+| 2     | Private Skills    | Org-only visibility, gated downloads      |
+| 3     | Scoped Registries | Route `@org` to a custom registry URL     |
+| 4     | Federation        | Sync, mirrors, proxy mode                 |
 
 ---
 
@@ -58,11 +58,11 @@ CREATE INDEX idx_org_members_user ON org_members(user_id);
 
 **Roles:**
 
-| Role | Publish | Invite/Remove | Settings | Delete Org |
-|------|---------|---------------|----------|------------|
-| owner | yes | yes | yes | yes |
-| admin | yes | yes | yes | no |
-| member | yes | no | no | no |
+| Role   | Publish | Invite/Remove | Settings | Delete Org |
+| ------ | ------- | ------------- | -------- | ---------- |
+| owner  | yes     | yes           | yes      | yes        |
+| admin  | yes     | yes           | yes      | no         |
+| member | yes     | no            | no       | no         |
 
 The creator automatically gets `owner` role.
 
@@ -72,26 +72,40 @@ The creator automatically gets `owner` role.
 // packages/api/src/db/schema.ts
 
 export const organizations = pgTable('organizations', {
-  id: text('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: text('id')
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   name: text('name').unique().notNull(),
   displayName: text('display_name'),
   description: text('description'),
   avatarUrl: text('avatar_url'),
   website: text('website'),
-  createdBy: text('created_by').notNull().references(() => users.id),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
-export const orgMembers = pgTable('org_members', {
-  id: text('id').primaryKey().default(sql`gen_random_uuid()`),
-  orgId: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  role: text('role').notNull().default('member'),
-  joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow(),
-}, (t) => ({
-  unique: unique().on(t.orgId, t.userId),
-}));
+export const orgMembers = pgTable(
+  'org_members',
+  {
+    id: text('id')
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    orgId: text('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: text('role').notNull().default('member'),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow(),
+  },
+  (t) => ({
+    unique: unique().on(t.orgId, t.userId),
+  }),
+);
 ```
 
 ### 1.3 API Endpoints
@@ -130,14 +144,13 @@ POST /orgs
   "name": "mycompany",
   "display_name": "My Company Inc.",
   "description": "Internal AI skills for our team",
-  "members": [
-    { "username": "almog27", "role": "owner", "joined_at": "..." }
-  ],
+  "members": [{ "username": "almog27", "role": "owner", "joined_at": "..." }],
   "created_at": "..."
 }
 ```
 
 **Org name validation:**
+
 - Same rules as usernames: `^[a-z0-9][a-z0-9-]*$`, 2-39 chars
 - Cannot conflict with existing usernames (scopes must be globally unique)
 - Reserved names: `admin`, `api`, `www`, `staging`, `registry`, `spm`, etc.
@@ -161,18 +174,17 @@ if (user.username === scope) {
 }
 // Check 2: Is it an org scope?
 else {
-  const org = await db.select().from(organizations)
-    .where(eq(organizations.name, scope)).limit(1);
+  const org = await db.select().from(organizations).where(eq(organizations.name, scope)).limit(1);
 
   if (!org[0]) {
     return error(403, `Scope @${scope} does not exist. Create it with: spm org create ${scope}`);
   }
 
-  const membership = await db.select().from(orgMembers)
-    .where(and(
-      eq(orgMembers.orgId, org[0].id),
-      eq(orgMembers.userId, user.id)
-    )).limit(1);
+  const membership = await db
+    .select()
+    .from(orgMembers)
+    .where(and(eq(orgMembers.orgId, org[0].id), eq(orgMembers.userId, user.id)))
+    .limit(1);
 
   if (!membership[0]) {
     return error(403, `You are not a member of @${scope}`);
@@ -303,12 +315,14 @@ No structural changes. Org skills look the same as personal skills:
 ### 1.8 Web App
 
 **Org profile page** (`/orgs/:name`):
+
 - Org name, display name, description, avatar, website
 - Member count, skill count
 - List of published skills (reuse SkillRow component)
 - Members list (avatar, username, role)
 
 **Links:**
+
 - "by @mycompany" in SkillCard/SkillRow links to `/orgs/mycompany`
 - Author vs org detection: check if scope is an org or a user
 
@@ -318,8 +332,10 @@ No structural changes. Org skills look the same as personal skills:
 // packages/shared/src/schemas.ts
 
 // New schemas
-export const OrgNameSchema = z.string()
-  .min(2).max(39)
+export const OrgNameSchema = z
+  .string()
+  .min(2)
+  .max(39)
   .regex(/^[a-z0-9][a-z0-9-]*$/, 'Org name must be lowercase alphanumeric with hyphens');
 
 export const OrgRoleSchema = z.enum(['owner', 'admin', 'member']);
@@ -436,6 +452,7 @@ The `private` field already exists in ManifestSchema (defaults to `false`). When
 ### 2.3 API Changes
 
 **Publish:** When `manifest.private === true`:
+
 - Require that the scope is an org (not a personal scope — personal private skills are not supported initially)
 - Set `skills.visibility = 'private'`
 
@@ -448,8 +465,8 @@ const visibilityFilter = user
       eq(skills.visibility, 'public'),
       and(
         eq(skills.visibility, 'private'),
-        inArray(skills.ownerId, userOrgSkillOwnerIds) // user's org skills
-      )
+        inArray(skills.ownerId, userOrgSkillOwnerIds), // user's org skills
+      ),
     )
   : eq(skills.visibility, 'public');
 ```
@@ -583,6 +600,7 @@ func RegistryForScope(name string) string {
 ```
 
 The CLI resolves each skill to its registry independently:
+
 - `@mycompany/internal-report` → `spm.mycompany.com`
 - `@almog27/ship` → `registry.skillpkg.dev`
 
@@ -644,10 +662,10 @@ federation:
   upstream: https://registry.skillpkg.dev/api/v1
   sync:
     mode: selective
-    schedule: "0 */6 * * *"
+    schedule: '0 */6 * * *'
     allowlist:
-      categories: ["data", "code"]
-      trust_levels: ["verified", "official"]
+      categories: ['data', 'code']
+      trust_levels: ['verified', 'official']
 ```
 
 ---
@@ -657,32 +675,19 @@ federation:
 ### Phase 1: Organizations (estimated scope)
 
 **Migration:**
+
 1. Write `migrations/003_organizations.sql`
 2. Add Drizzle schema for `organizations` + `orgMembers`
 
-**Shared:**
-3. Add `OrgNameSchema`, `OrgRoleSchema`, `CreateOrgSchema`, `AddMemberSchema` to shared schemas
-4. Add org-related error codes
+**Shared:** 3. Add `OrgNameSchema`, `OrgRoleSchema`, `CreateOrgSchema`, `AddMemberSchema` to shared schemas 4. Add org-related error codes
 
-**API:**
-5. Create `packages/api/src/routes/orgs.ts` with all CRUD endpoints
-6. Update publish handler in `skills.ts` to check org membership
-7. Add scope uniqueness validation (org name can't match existing username)
+**API:** 5. Create `packages/api/src/routes/orgs.ts` with all CRUD endpoints 6. Update publish handler in `skills.ts` to check org membership 7. Add scope uniqueness validation (org name can't match existing username)
 
-**CLI:**
-8. Create `cli-go/cmd/org.go` with all subcommands
-9. Add org API client methods to `cli-go/internal/api/client.go`
-10. Add org types to `cli-go/internal/api/types.go`
+**CLI:** 8. Create `cli-go/cmd/org.go` with all subcommands 9. Add org API client methods to `cli-go/internal/api/client.go` 10. Add org types to `cli-go/internal/api/types.go`
 
-**Web:**
-11. Create org profile page (`/orgs/:name`)
-12. Update "by @scope" links to route to org page when scope is an org
-13. Add org creation/management UI in dashboard
+**Web:** 11. Create org profile page (`/orgs/:name`) 12. Update "by @scope" links to route to org page when scope is an org 13. Add org creation/management UI in dashboard
 
-**Tests:**
-14. API tests for org CRUD, membership, publish authorization
-15. CLI tests for org commands
-16. Web tests for org profile page
+**Tests:** 14. API tests for org CRUD, membership, publish authorization 15. CLI tests for org commands 16. Web tests for org profile page
 
 ### Phase 2: Private Skills (estimated scope)
 

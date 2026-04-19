@@ -45,6 +45,21 @@ export const SkillRow = ({ skill }: SkillRowProps) => {
           <Text variant="label" font="mono" color="faint" as="span">
             {skill.version}
           </Text>
+          {skill.visibility === 'private' && (
+            <span
+              style={{
+                fontSize: 10,
+                fontFamily: 'var(--font-mono)',
+                padding: '1px 6px',
+                borderRadius: 3,
+                background: 'rgba(234,179,8,0.12)',
+                color: 'var(--color-yellow)',
+                border: '1px solid rgba(234,179,8,0.2)',
+              }}
+            >
+              Private
+            </span>
+          )}
         </div>
         <Text
           variant="caption"

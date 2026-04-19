@@ -179,7 +179,12 @@ export const OrgProfile = () => {
                   borderRadius: 8,
                 }}
               >
-                <Text variant="body-sm" font="mono" as="span" style={{ color: 'var(--color-cyan)' }}>
+                <Text
+                  variant="body-sm"
+                  font="mono"
+                  as="span"
+                  style={{ color: 'var(--color-cyan)' }}
+                >
                   @{m.username}
                 </Text>
                 <Text
@@ -197,11 +202,7 @@ export const OrgProfile = () => {
                           ? 'rgba(59, 130, 246, 0.15)'
                           : 'rgba(100, 116, 139, 0.15)',
                     color:
-                      m.role === 'owner'
-                        ? '#34d399'
-                        : m.role === 'admin'
-                          ? '#60a5fa'
-                          : '#94a3b8',
+                      m.role === 'owner' ? '#34d399' : m.role === 'admin' ? '#60a5fa' : '#94a3b8',
                   }}
                 >
                   {m.role}

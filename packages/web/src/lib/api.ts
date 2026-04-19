@@ -26,7 +26,7 @@ const apiFetch = async <T>(path: string, opts?: RequestInit): Promise<T> => {
   if (!res.ok) {
     let message = res.statusText;
     try {
-      const body = await res.json() as { message?: string };
+      const body = (await res.json()) as { message?: string };
       if (body.message) message = body.message;
     } catch {
       // ignore parse errors
@@ -73,6 +73,7 @@ export interface SearchResultItem {
   rating_avg: number | null;
   rating_count: number | null;
   signed: boolean;
+  visibility?: string;
   scan_security_level?: string;
   license?: string;
   published_at: string;
@@ -108,6 +109,7 @@ export interface SkillVersionInfo {
 export interface SkillDetailResponse {
   name: string;
   description: string;
+  visibility?: string;
   author: { username: string; github_login: string; trust_tier: string };
   authors?: Array<{ username: string; github_login: string; trust_tier: string; role: string }>;
   categories: string[];

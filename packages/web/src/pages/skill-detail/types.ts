@@ -47,6 +47,7 @@ export interface SkillFull {
   };
   repo: string;
   importedFrom?: string;
+  isPrivate: boolean;
 }
 
 const formatDownloads = (n: number): string => {
@@ -111,6 +112,7 @@ export const apiToSkillFull = (data: SkillDetailResponse): SkillFull => ({
   },
   repo: data.repository ?? '',
   importedFrom: data.imported_from,
+  isPrivate: data.visibility === 'private',
 });
 
 export const cardStyle: React.CSSProperties = {

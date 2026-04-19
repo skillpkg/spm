@@ -73,7 +73,11 @@ export const SignIn = ({
       setState('waiting');
 
       // Auto-copy code to clipboard
-      try { await navigator.clipboard.writeText(data.user_code); } catch { /* ignore */ }
+      try {
+        await navigator.clipboard.writeText(data.user_code);
+      } catch {
+        /* ignore */
+      }
 
       timerRef.current = setInterval(() => {
         setSecondsLeft((prev) => {
@@ -248,7 +252,12 @@ export const SignIn = ({
           onClick={() => {
             navigator.clipboard.writeText(deviceData.user_code);
             const el = document.getElementById('spm-copy-hint');
-            if (el) { el.textContent = 'Copied!'; setTimeout(() => { el.textContent = 'Click to copy'; }, 1500); }
+            if (el) {
+              el.textContent = 'Copied!';
+              setTimeout(() => {
+                el.textContent = 'Click to copy';
+              }, 1500);
+            }
           }}
         >
           {deviceData.user_code}

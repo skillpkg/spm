@@ -55,7 +55,9 @@ orgsRoutes.post('/orgs', authed, zValidator('json', CreateOrgSchema), async (c) 
 
   if (existingOrg) {
     return c.json(
-      createApiError('ORG_NAME_TAKEN', { message: `Organization name "${orgName}" is already taken` }),
+      createApiError('ORG_NAME_TAKEN', {
+        message: `Organization name "${orgName}" is already taken`,
+      }),
       ERROR_CODES.ORG_NAME_TAKEN.status,
     );
   }
@@ -119,11 +121,7 @@ orgsRoutes.get('/orgs/:name', async (c) => {
   const db = c.get('db');
   const name = c.req.param('name');
 
-  const [org] = await db
-    .select()
-    .from(organizations)
-    .where(eq(organizations.name, name))
-    .limit(1);
+  const [org] = await db.select().from(organizations).where(eq(organizations.name, name)).limit(1);
 
   if (!org) {
     return c.json(createApiError('ORG_NOT_FOUND'), ERROR_CODES.ORG_NOT_FOUND.status);
@@ -163,11 +161,7 @@ orgsRoutes.patch('/orgs/:name', authed, zValidator('json', UpdateOrgSchema), asy
   const name = c.req.param('name');
   const body = c.req.valid('json');
 
-  const [org] = await db
-    .select()
-    .from(organizations)
-    .where(eq(organizations.name, name))
-    .limit(1);
+  const [org] = await db.select().from(organizations).where(eq(organizations.name, name)).limit(1);
 
   if (!org) {
     return c.json(createApiError('ORG_NOT_FOUND'), ERROR_CODES.ORG_NOT_FOUND.status);
@@ -182,7 +176,9 @@ orgsRoutes.patch('/orgs/:name', authed, zValidator('json', UpdateOrgSchema), asy
 
   if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
     return c.json(
-      createApiError('FORBIDDEN', { message: 'Only owners and admins can update organization settings' }),
+      createApiError('FORBIDDEN', {
+        message: 'Only owners and admins can update organization settings',
+      }),
       ERROR_CODES.FORBIDDEN.status,
     );
   }
@@ -205,11 +201,7 @@ orgsRoutes.delete('/orgs/:name', authed, async (c) => {
   const jwt = c.get('jwtPayload');
   const name = c.req.param('name');
 
-  const [org] = await db
-    .select()
-    .from(organizations)
-    .where(eq(organizations.name, name))
-    .limit(1);
+  const [org] = await db.select().from(organizations).where(eq(organizations.name, name)).limit(1);
 
   if (!org) {
     return c.json(createApiError('ORG_NOT_FOUND'), ERROR_CODES.ORG_NOT_FOUND.status);
@@ -276,7 +268,9 @@ orgsRoutes.get('/orgs/:name/members', authed, async (c) => {
 
   if (!callerMembership) {
     return c.json(
-      createApiError('ORG_NOT_MEMBER', { message: 'You must be a member of this organization to view members' }),
+      createApiError('ORG_NOT_MEMBER', {
+        message: 'You must be a member of this organization to view members',
+      }),
       ERROR_CODES.ORG_NOT_MEMBER.status,
     );
   }
@@ -303,93 +297,10 @@ orgsRoutes.get('/orgs/:name/members', authed, async (c) => {
 
 // ── POST /orgs/:name/members — add member ──
 
-orgsRoutes.post(
-  '/orgs/:name/members',
-  authed,
-  zValidator('json', AddMemberSchema),
-  async (c) => {
-    const db = c.get('db');
-    const jwt = c.get('jwtPayload');
-    const name = c.req.param('name');
-    const body = c.req.valid('json');
-
-    const [org] = await db
-      .select({ id: organizations.id })
-      .from(organizations)
-      .where(eq(organizations.name, name))
-      .limit(1);
-
-    if (!org) {
-      return c.json(createApiError('ORG_NOT_FOUND'), ERROR_CODES.ORG_NOT_FOUND.status);
-    }
-
-    // Check caller is owner or admin
-    const [callerMembership] = await db
-      .select({ role: orgMembers.role })
-      .from(orgMembers)
-      .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, jwt.sub)))
-      .limit(1);
-
-    if (!callerMembership || (callerMembership.role !== 'owner' && callerMembership.role !== 'admin')) {
-      return c.json(
-        createApiError('FORBIDDEN', { message: 'Only owners and admins can add members' }),
-        ERROR_CODES.FORBIDDEN.status,
-      );
-    }
-
-    // Look up user by username
-    const [targetUser] = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.username, body.username))
-      .limit(1);
-
-    if (!targetUser) {
-      return c.json(
-        createApiError('SKILL_NOT_FOUND', { message: `User "${body.username}" not found. They must have an SPM account first.` }),
-        404,
-      );
-    }
-
-    // Check not already member
-    const [existingMembership] = await db
-      .select({ id: orgMembers.id })
-      .from(orgMembers)
-      .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, targetUser.id)))
-      .limit(1);
-
-    if (existingMembership) {
-      return c.json(createApiError('ORG_MEMBER_EXISTS'), ERROR_CODES.ORG_MEMBER_EXISTS.status);
-    }
-
-    // Only owners can add members with 'owner' role
-    if (body.role === 'owner' && callerMembership.role !== 'owner') {
-      return c.json(
-        createApiError('FORBIDDEN', { message: 'Only owners can grant the owner role' }),
-        ERROR_CODES.FORBIDDEN.status,
-      );
-    }
-
-    await db.insert(orgMembers).values({
-      orgId: org.id,
-      userId: targetUser.id,
-      role: body.role,
-    });
-
-    return c.json(
-      { message: `Added ${body.username} to ${name} as ${body.role}` },
-      201,
-    );
-  },
-);
-
-// ── PATCH /orgs/:name/members/:username — change role ──
-
-orgsRoutes.patch('/orgs/:name/members/:username', authed, zValidator('json', UpdateMemberRoleSchema), async (c) => {
+orgsRoutes.post('/orgs/:name/members', authed, zValidator('json', AddMemberSchema), async (c) => {
   const db = c.get('db');
   const jwt = c.get('jwtPayload');
   const name = c.req.param('name');
-  const username = c.req.param('username');
   const body = c.req.valid('json');
 
   const [org] = await db
@@ -409,14 +320,44 @@ orgsRoutes.patch('/orgs/:name/members/:username', authed, zValidator('json', Upd
     .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, jwt.sub)))
     .limit(1);
 
-  if (!callerMembership || (callerMembership.role !== 'owner' && callerMembership.role !== 'admin')) {
+  if (
+    !callerMembership ||
+    (callerMembership.role !== 'owner' && callerMembership.role !== 'admin')
+  ) {
     return c.json(
-      createApiError('FORBIDDEN', { message: 'Only owners and admins can change roles' }),
+      createApiError('FORBIDDEN', { message: 'Only owners and admins can add members' }),
       ERROR_CODES.FORBIDDEN.status,
     );
   }
 
-  // Only owners can set role to 'owner'
+  // Look up user by username
+  const [targetUser] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.username, body.username))
+    .limit(1);
+
+  if (!targetUser) {
+    return c.json(
+      createApiError('SKILL_NOT_FOUND', {
+        message: `User "${body.username}" not found. They must have an SPM account first.`,
+      }),
+      404,
+    );
+  }
+
+  // Check not already member
+  const [existingMembership] = await db
+    .select({ id: orgMembers.id })
+    .from(orgMembers)
+    .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, targetUser.id)))
+    .limit(1);
+
+  if (existingMembership) {
+    return c.json(createApiError('ORG_MEMBER_EXISTS'), ERROR_CODES.ORG_MEMBER_EXISTS.status);
+  }
+
+  // Only owners can add members with 'owner' role
   if (body.role === 'owner' && callerMembership.role !== 'owner') {
     return c.json(
       createApiError('FORBIDDEN', { message: 'Only owners can grant the owner role' }),
@@ -424,53 +365,111 @@ orgsRoutes.patch('/orgs/:name/members/:username', authed, zValidator('json', Upd
     );
   }
 
-  // Look up target user
-  const [targetUser] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.username, username))
-    .limit(1);
+  await db.insert(orgMembers).values({
+    orgId: org.id,
+    userId: targetUser.id,
+    role: body.role,
+  });
 
-  if (!targetUser) {
-    return c.json(
-      createApiError('SKILL_NOT_FOUND', { message: `User "${username}" not found` }),
-      404,
-    );
-  }
-
-  // Check target is a member
-  const [targetMembership] = await db
-    .select({ id: orgMembers.id, role: orgMembers.role })
-    .from(orgMembers)
-    .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, targetUser.id)))
-    .limit(1);
-
-  if (!targetMembership) {
-    return c.json(
-      createApiError('ORG_NOT_MEMBER', { message: `${username} is not a member of ${name}` }),
-      ERROR_CODES.ORG_NOT_MEMBER.status,
-    );
-  }
-
-  // Prevent demoting the last owner
-  if (targetMembership.role === 'owner' && body.role !== 'owner') {
-    const [ownerCount] = await db
-      .select({ total: count() })
-      .from(orgMembers)
-      .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.role, 'owner')));
-
-    if (ownerCount.total <= 1) {
-      return c.json(createApiError('ORG_LAST_OWNER'), ERROR_CODES.ORG_LAST_OWNER.status);
-    }
-  }
-
-  await db
-    .update(orgMembers)
-    .set({ role: body.role })
-    .where(eq(orgMembers.id, targetMembership.id));
-
-  return c.json({ message: `Changed ${username} role to ${body.role} in ${name}` });
+  return c.json({ message: `Added ${body.username} to ${name} as ${body.role}` }, 201);
 });
+
+// ── PATCH /orgs/:name/members/:username — change role ──
+
+orgsRoutes.patch(
+  '/orgs/:name/members/:username',
+  authed,
+  zValidator('json', UpdateMemberRoleSchema),
+  async (c) => {
+    const db = c.get('db');
+    const jwt = c.get('jwtPayload');
+    const name = c.req.param('name');
+    const username = c.req.param('username');
+    const body = c.req.valid('json');
+
+    const [org] = await db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(eq(organizations.name, name))
+      .limit(1);
+
+    if (!org) {
+      return c.json(createApiError('ORG_NOT_FOUND'), ERROR_CODES.ORG_NOT_FOUND.status);
+    }
+
+    // Check caller is owner or admin
+    const [callerMembership] = await db
+      .select({ role: orgMembers.role })
+      .from(orgMembers)
+      .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, jwt.sub)))
+      .limit(1);
+
+    if (
+      !callerMembership ||
+      (callerMembership.role !== 'owner' && callerMembership.role !== 'admin')
+    ) {
+      return c.json(
+        createApiError('FORBIDDEN', { message: 'Only owners and admins can change roles' }),
+        ERROR_CODES.FORBIDDEN.status,
+      );
+    }
+
+    // Only owners can set role to 'owner'
+    if (body.role === 'owner' && callerMembership.role !== 'owner') {
+      return c.json(
+        createApiError('FORBIDDEN', { message: 'Only owners can grant the owner role' }),
+        ERROR_CODES.FORBIDDEN.status,
+      );
+    }
+
+    // Look up target user
+    const [targetUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, username))
+      .limit(1);
+
+    if (!targetUser) {
+      return c.json(
+        createApiError('SKILL_NOT_FOUND', { message: `User "${username}" not found` }),
+        404,
+      );
+    }
+
+    // Check target is a member
+    const [targetMembership] = await db
+      .select({ id: orgMembers.id, role: orgMembers.role })
+      .from(orgMembers)
+      .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, targetUser.id)))
+      .limit(1);
+
+    if (!targetMembership) {
+      return c.json(
+        createApiError('ORG_NOT_MEMBER', { message: `${username} is not a member of ${name}` }),
+        ERROR_CODES.ORG_NOT_MEMBER.status,
+      );
+    }
+
+    // Prevent demoting the last owner
+    if (targetMembership.role === 'owner' && body.role !== 'owner') {
+      const [ownerCount] = await db
+        .select({ total: count() })
+        .from(orgMembers)
+        .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.role, 'owner')));
+
+      if (ownerCount.total <= 1) {
+        return c.json(createApiError('ORG_LAST_OWNER'), ERROR_CODES.ORG_LAST_OWNER.status);
+      }
+    }
+
+    await db
+      .update(orgMembers)
+      .set({ role: body.role })
+      .where(eq(orgMembers.id, targetMembership.id));
+
+    return c.json({ message: `Changed ${username} role to ${body.role} in ${name}` });
+  },
+);
 
 // ── DELETE /orgs/:name/members/:username — remove member ──
 
@@ -528,7 +527,10 @@ orgsRoutes.delete('/orgs/:name/members/:username', authed, async (c) => {
       .where(and(eq(orgMembers.orgId, org.id), eq(orgMembers.userId, jwt.sub)))
       .limit(1);
 
-    if (!callerMembership || (callerMembership.role !== 'owner' && callerMembership.role !== 'admin')) {
+    if (
+      !callerMembership ||
+      (callerMembership.role !== 'owner' && callerMembership.role !== 'admin')
+    ) {
       return c.json(
         createApiError('FORBIDDEN', { message: 'Only owners and admins can remove members' }),
         ERROR_CODES.FORBIDDEN.status,
@@ -649,9 +651,18 @@ orgsRoutes.get('/users/:username/orgs', authed, async (c) => {
       const [memberCount] = await db
         .select({ total: count() })
         .from(orgMembers)
-        .where(eq(orgMembers.orgId, (
-          await db.select({ id: organizations.id }).from(organizations).where(eq(organizations.name, row.name)).limit(1)
-        )[0].id));
+        .where(
+          eq(
+            orgMembers.orgId,
+            (
+              await db
+                .select({ id: organizations.id })
+                .from(organizations)
+                .where(eq(organizations.name, row.name))
+                .limit(1)
+            )[0].id,
+          ),
+        );
 
       const [skillCount] = await db
         .select({ total: count() })
