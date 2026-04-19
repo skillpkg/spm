@@ -17,6 +17,12 @@ import { AnalyticsTab } from './AnalyticsTab';
 import { OrganizationsTab } from './OrganizationsTab';
 import { authorStatsQuery, dashboardSkillsQuery } from './queries';
 
+const formatCount = (n: number): string => {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+};
+
 const AGENT_COLORS: Record<string, string> = {
   'claude-code': 'var(--color-accent)',
   cursor: 'var(--color-blue)',
@@ -162,7 +168,7 @@ export const Dashboard = () => {
       <div className="spm-stat-row" style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
         <StatBox
           label="Total downloads"
-          value={`${(authorStats.totalDownloads / 1000).toFixed(1)}k`}
+          value={formatCount(authorStats.totalDownloads)}
           sub={`\u2191 ${authorStats.weeklyDownloads.toLocaleString()} this week`}
         />
         <StatBox label="Skills published" value={skills.length} />
@@ -185,7 +191,7 @@ export const Dashboard = () => {
           <Text variant="caption" font="sans" color="muted" as="div" style={{ marginBottom: 6 }}>
             Weekly trend
           </Text>
-          <MiniChart data={weeklyTrend.map((d) => ({ value: d.downloads }))} />
+          <MiniChart data={weeklyTrend.map((d) => ({ value: d.downloads }))} width={180} height={40} />
         </div>
       </div>
 

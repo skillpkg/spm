@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { TRUST_CONFIG, Text } from '@spm/ui';
 import { type Skill } from './types';
 
+const formatCount = (n: number): string => {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+};
+
 interface SkillRowProps {
   skill: Skill;
 }
@@ -52,7 +58,7 @@ export const SkillRow = ({ skill }: SkillRowProps) => {
       </div>
       <div style={{ textAlign: 'right' }}>
         <Text variant="body-sm" font="mono" color="primary" as="div">
-          {(skill.downloads / 1000).toFixed(1)}k
+          {formatCount(skill.downloads)}
         </Text>
         <Text variant="label" font="mono" color="accent" as="div">
           {skill.weeklyGrowth}

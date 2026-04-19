@@ -2,6 +2,12 @@ import { Text } from '@spm/ui';
 import { type Author, type Skill, type WeeklyData, type AgentStat } from './types';
 import { cardStyle, sectionTitle } from './styles';
 
+const formatCount = (n: number): string => {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+};
+
 export interface AnalyticsTabProps {
   trend: WeeklyData[];
   skills: Skill[];
@@ -38,7 +44,7 @@ export const AnalyticsTab = ({
                 }}
               >
                 <Text variant="tiny" font="mono" color="muted" as="span">
-                  {(w.downloads / 1000).toFixed(1)}k
+                  {formatCount(w.downloads)}
                 </Text>
                 <div
                   style={{
@@ -78,7 +84,7 @@ export const AnalyticsTab = ({
                   {skill.name}
                 </Text>
                 <Text variant="caption" font="mono" color="secondary" as="span">
-                  {(skill.downloads / 1000).toFixed(1)}k ({pct}%)
+                  {formatCount(skill.downloads)} ({pct}%)
                 </Text>
               </div>
               <div
