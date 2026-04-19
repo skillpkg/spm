@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { TRUST_CONFIG, Text } from '@spm/ui';
+import { skillPath } from '../../lib/urls';
 import { type Skill } from './types';
 
 const formatCount = (n: number): string => {
@@ -17,7 +19,8 @@ export const SkillRow = ({ skill }: SkillRowProps) => {
   const trustCfg = TRUST_CONFIG[skill.trust];
 
   return (
-    <div
+    <Link
+      to={skillPath(skill.name)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -29,6 +32,8 @@ export const SkillRow = ({ skill }: SkillRowProps) => {
         cursor: 'pointer',
         transition: 'background 100ms',
         background: hovered ? 'var(--color-bg-hover)' : 'transparent',
+        textDecoration: 'none',
+        color: 'inherit',
       }}
     >
       <div>
@@ -95,6 +100,6 @@ export const SkillRow = ({ skill }: SkillRowProps) => {
       <Text variant="label" font="mono" color="muted" as="div" style={{ textAlign: 'right' }}>
         {skill.updated}
       </Text>
-    </div>
+    </Link>
   );
 };
