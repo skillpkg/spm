@@ -150,7 +150,7 @@ export const Dashboard = () => {
           </div>
         </div>
         <a
-          href="#"
+          href="/publish"
           style={{
             fontFamily: 'var(--font-mono)',
             fontSize: 13,
