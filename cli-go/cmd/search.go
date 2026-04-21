@@ -118,7 +118,12 @@ func runSearch(_ *cobra.Command, args []string) error {
 		dl := padRight(formatDownloads(skill.Downloads), 12)
 		trust := trustBadge(skill.Author.TrustTier)
 
-		Out.Log("  %s%s%s%s%s", output.Cyan(name), ver, desc, dl, trust)
+		nameDisplay := output.Cyan(name)
+		if skill.Visibility == "private" {
+			nameDisplay += output.Yellow(" (private)")
+		}
+
+		Out.Log("  %s%s%s%s%s", nameDisplay, ver, desc, dl, trust)
 	}
 
 	Out.Log("")

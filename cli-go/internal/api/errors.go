@@ -45,6 +45,11 @@ func (e *APIError) IsUnauthorized() bool {
 	return e.StatusCode == http.StatusUnauthorized
 }
 
+// IsForbidden returns true if the error is a 403 Forbidden.
+func (e *APIError) IsForbidden() bool {
+	return e.StatusCode == http.StatusForbidden
+}
+
 // IsNotFound returns true if the error is a 404 Not Found.
 func (e *APIError) IsNotFound() bool {
 	return e.StatusCode == http.StatusNotFound

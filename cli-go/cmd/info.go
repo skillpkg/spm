@@ -69,7 +69,11 @@ func runInfo(_ *cobra.Command, args []string) error {
 	}
 
 	Out.Log("")
-	Out.Log("  %s %s", output.Icons["package"], output.Bold(fmt.Sprintf("%s@%s", info.Name, info.LatestVersion)))
+	titleStr := fmt.Sprintf("%s@%s", info.Name, info.LatestVersion)
+	if info.Visibility == "private" {
+		titleStr += " " + output.Yellow(output.Icons["lock"]+" private")
+	}
+	Out.Log("  %s %s", output.Icons["package"], output.Bold(titleStr))
 	Out.Log("")
 	Out.Log("  %s", info.Description)
 	Out.Log("")
@@ -167,17 +171,35 @@ func formatPlatforms(platforms []string) string {
 
 func handleInfoError(err error, name string) error {
 	var apiErr *api.APIError
-	if isAPIError(err, &apiErr) && apiErr.IsNotFound() {
-		if Out.Mode == output.ModeJSON {
-			_ = Out.LogJSON(map[string]string{"error": "not_found", "name": name})
+	if isAPIError(err, &apiErr) {
+		if apiErr.IsForbidden() {
+			scope := extractScope(name)
+			Out.LogError("You don't have access to %s", name)
+			Out.Log("  This is a private skill. Ask an admin of @%s for access.", scope)
+			return fmt.Errorf("access denied: %s", name)
+		}
+		if apiErr.IsNotFound() {
+			if Out.Mode == output.ModeJSON {
+				_ = Out.LogJSON(map[string]string{"error": "not_found", "name": name})
+				return fmt.Errorf("skill not found: %s", name)
+			}
+			Out.LogError("Skill not found: %s", name)
+			scopeHint(name)
+			if apiErr.Suggestion != "" {
+				Out.Log("  Did you mean: %s?", output.Cyan(apiErr.Suggestion))
+			}
 			return fmt.Errorf("skill not found: %s", name)
 		}
-		Out.LogError("Skill not found: %s", name)
-		scopeHint(name)
-		if apiErr.Suggestion != "" {
-			Out.Log("  Did you mean: %s?", output.Cyan(apiErr.Suggestion))
-		}
-		return fmt.Errorf("skill not found: %s", name)
 	}
 	return fmt.Errorf("failed to fetch skill info: %w", err)
+}
+
+// extractScope returns the org scope from a scoped skill name, or the name itself.
+func extractScope(name string) string {
+	if strings.HasPrefix(name, "@") {
+		if idx := strings.Index(name, "/"); idx > 1 {
+			return name[1:idx]
+		}
+	}
+	return name
 }

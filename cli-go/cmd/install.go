@@ -206,9 +206,15 @@ func installNamed(cmd *cobra.Command, args []string, spmHome string) error {
 
 	// Report unresolved
 	for _, u := range resolveResp.Unresolved {
-		Out.LogError("Skill not found: %s - %s", u.Name, u.Error)
-		if u.Suggestion != "" {
-			Out.Log("  Did you mean: %s?", output.Cyan("spm install "+u.Suggestion))
+		if u.Error == "access_denied" {
+			scope := extractScope(u.Name)
+			Out.LogError("You don't have access to %s", u.Name)
+			Out.Log("  This is a private skill. Ask an admin of @%s for access.", scope)
+		} else {
+			Out.LogError("Skill not found: %s - %s", u.Name, u.Error)
+			if u.Suggestion != "" {
+				Out.Log("  Did you mean: %s?", output.Cyan("spm install "+u.Suggestion))
+			}
 		}
 	}
 
@@ -329,6 +335,11 @@ func downloadExtractLink(client *api.Client, skill api.ResolvedSkill, spmHome st
 		sp.Stop()
 	}
 	if err != nil {
+		var apiErr *api.APIError
+		if isAPIError(err, &apiErr) && apiErr.IsForbidden() {
+			scope := extractScope(skill.Name)
+			return res, fmt.Errorf("access denied — this is a private skill. Ask an admin of @%s for access", scope)
+		}
 		return res, fmt.Errorf("downloading: %w", err)
 	}
 

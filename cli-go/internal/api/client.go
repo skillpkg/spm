@@ -62,6 +62,7 @@ type SearchResult struct {
 	RatingAvg       float64  `json:"rating_avg"`
 	RatingCount     int      `json:"rating_count"`
 	Signed          bool     `json:"signed"`
+	Visibility      string   `json:"visibility,omitempty"`
 	License         string   `json:"license"`
 	PublishedAt     string   `json:"published_at"`
 	UpdatedAt       string   `json:"updated_at"`
@@ -120,6 +121,7 @@ type Dependencies struct {
 type SkillInfo struct {
 	Name            string           `json:"name"`
 	Description     string           `json:"description"`
+	Visibility      string           `json:"visibility,omitempty"`
 	Author          Author           `json:"author"`
 	Category        string           `json:"category"`
 	Tags            []string         `json:"tags"`
